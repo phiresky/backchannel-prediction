@@ -85,7 +85,6 @@ def main():
         if uttInfo['text'] in backChannelListOneWord:
             # print('has backchannel: ' + uttInfo['text'])
             length = toTime - fromTime
-
             cBCbegin = fromTime + BCbegin
             cBCend = fromTime + BCend
             cNBCbegin = fromTime + NBCbegin
@@ -142,8 +141,8 @@ def main():
                 lastTime = time.clock()
                 logging.info("Written elements: %d (%.3fs per element)", counter, took / 100)
         else:
-            pass
             # print('no backchannel: ' + uttInfo['text'])
+            pass
 
     uttDB.close()
     spkDB.close()
