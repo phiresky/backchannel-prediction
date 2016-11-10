@@ -9,8 +9,6 @@ base = '../ears2/earsData'
 
 
 class Step(AbstractStep):
-    WAVFILE = None
-
     def __init__(self, config):
         super().__init__(config)
         self.filtr = Filter(-2, [1, 2, 3, 2, 1])
@@ -21,24 +19,18 @@ class Step(AbstractStep):
         if not os.path.exists(adcfile):
             raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
 
-        curwavfile = "{convid} {from} {to}".format(**uttInfo)
-        if not self.WAVFILE or self.WAVFILE != curwavfile:
-            self.WAVFILE = curwavfile
+        res = self.readAudioFile(featExtractor._featureSet, adcfile)
+        [ADC0A, ADC0B] = res  # type: NumFeature
 
-            res = self.readAudioFile(featExtractor._featureSet, adcfile)
-            [ADC0A, ADC0B] = res  # type: NumFeature
+        adca = ADC0A[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
+        adcb = ADC0B[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
 
-            adca = ADC0A[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
-            adcb = ADC0B[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
-
-            return {
-                'adca': adca,
-                'adcb': adcb,
-                'powera': self.filterPower(adca.adc2pow("32ms")),
-                'powerb': self.filterPower(adcb.adc2pow("32ms"))
-            }
-        else:
-            raise Exception("Why happen?")
+        return {
+            'adca': adca,
+            'adcb': adcb,
+            'powera': self.filterPower(adca.adc2pow("32ms")),
+            'powerb': self.filterPower(adcb.adc2pow("32ms"))
+        }
 
     def filterPower(self, power: NumFeature) -> NumFeature:
         b = power.max() / 10 ** 4
