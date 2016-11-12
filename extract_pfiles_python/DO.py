@@ -3,7 +3,7 @@ import subprocess
 from pprint import pprint
 
 db = "../ears2/db/train/all240302"
-context = 40
+context = 10
 type = "train"
 convIdFile = "../data/conversations." + type
 

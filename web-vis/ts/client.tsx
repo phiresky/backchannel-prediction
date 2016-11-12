@@ -73,9 +73,9 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom}, {}>
             <div style={{display: "flex"}}>
                 <div style={{flexBasis: "content", width:globalConfig.leftBarSize+"px"}}>
                     {uiState.feature}
-                    <select value={this.range} onChange={this.changeRange.bind(this)} >
+                    {/*<select value={this.range} onChange={this.changeRange.bind(this)} >
                         {Object.keys(InfoVisualizer.ranges).map(k => <option key={k} value={k}>{k}</option>)}
-                    </select>
+                    </select>*/}
                 </div>
                 <div style={{flexGrow: 1}}>
                     <Visualizer config={uiState.visualizerConfig} zoom={zoom} feature={features.get(uiState.feature)!} />
@@ -100,7 +100,7 @@ const state = observable({
     }
 });
 
-const socket = new WebSocket("ws://localhost:8765");
+const socket = new WebSocket(`ws://${location.host.split(":")[0]}:8765`);
 
 socket.onopen = event => { };
 
@@ -119,6 +119,7 @@ class GUI extends React.Component<{}, {}> {
     @action
     onWheel(event: MouseWheelEvent) {
             if (!(event.target instanceof HTMLCanvasElement)) return;
+            event.preventDefault();
             const position = util.getPositionFromPixel(event.clientX, event.target.getBoundingClientRect().left, event.target.width, state.zoom)!;
             const scale = 1/(state.zoom.right - state.zoom.left);
             const scaleChange = event.deltaY > 0 ? globalConfig.zoomFactor : 1/globalConfig.zoomFactor;
@@ -147,7 +148,7 @@ class GUI extends React.Component<{}, {}> {
 
 
 const gui = ReactDOM.render(<GUI />, document.getElementById("root"));
-Object.assign(window, {gui, state, features});
+Object.assign(window, {gui, state, features, util, action});
 /*window.addEventListener("wheel", event => {
     if (event.deltaY > 0) canvas.width *= 1.1;
     else canvas.width *= 0.9;

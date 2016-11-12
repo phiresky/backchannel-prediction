@@ -54,15 +54,16 @@ vals = {
 'powB': adcB.adc2pow("32ms")
 'powLogA':
 }"""
-features = featureExtractor.eval(None, {'conv':'sw2001', 'from': 0, 'to': 60 * 5})  # type: Dict[str, NumFeature]
+features = featureExtractor.eval(None, {'conv':'sw2001', 'from': 0, 'to': 60 * 10})  # type: Dict[str, NumFeature]
 
 async def handler(websocket, path):
-    for (name, feat) in features.items():
+    for (name, feat) in sorted(features.items()):
         if name.startswith("feat"): continue
+        # if not name.startswith("adc"): continue
         await websocket.send(featureToJSON(name, feat, range="normalize"))
-    #await websocket.send(featureToJSON("adc", adcB, range=(-2 ** 15, 2 ** 15)))
-    #await websocket.send(featureToJSON("pow", powA, range="normalize"))
-    #await websocket.send(featureToJSON("pow2", powB, range="normalize"))
+    # await websocket.send(featureToJSON("adc", adcB, range=(-2 ** 15, 2 ** 15)))
+    # await websocket.send(featureToJSON("pow", powA, range="normalize"))
+    # await websocket.send(featureToJSON("pow2", powB, range="normalize"))
     # name = await websocket.recv()
     # print("< {}".format(name))
 
@@ -71,6 +72,6 @@ async def handler(websocket, path):
     # print("> {}".format(greeting))
 
 
-start_server = websockets.serve(handler, 'localhost', 8765)
+start_server = websockets.serve(handler, '0.0.0.0', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

@@ -8,17 +8,22 @@ canvas.width = 1000;
 canvas.height = 300;
 renderWaveform(canvas, data)*/
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        config: VisualizerConfig, data: number[]) {
-    if (config == "normalize") config = util.stats(data);
+        config: VisualizerConfig, data: number[], zoom: {left: number, right: number}) {
+    const start = Math.floor(zoom.left * data.length);
+    const end = Math.floor(zoom.right * data.length);
+    const length = end - start;
+    if (config == "normalize") config = util.stats(data, start, end);
     
     const mid = (h / 2) | 0;
 
     let lasth1 = NaN, lasth2 = NaN;
+    ctx.fillStyle = globalConfig.maxColor;
+    const rmsc = new Array<number>(2 * w);
     for (let x = 0; x < w; x++) {
         const from = x / w, to = (x + 1) / w;
-        const fromSample = Math.floor(data.length * from);
-        const toSample = Math.ceil(data.length * to);
-        const {min, max, rms} = util.stats(data.slice(fromSample, toSample));
+        const fromSample = start + Math.floor(length * from);
+        const toSample = start + Math.ceil(length * to);
+        const {min, max, rms2:rmsSq} = util.stats(data, fromSample, toSample);
         let h1 = Math.round(h * (1 - (max - config.min)/(config.max - config.min)));
         let h2 = Math.round(h * (1 - (min - config.min)/(config.max - config.min)));
         if (x > 0) {
@@ -28,15 +33,19 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         if(h1 >= h2) h2 = h1 + 1;
         lasth1 = h1;
         lasth2 = h2;
-        ctx.fillStyle = globalConfig.maxColor;
         ctx.fillRect(x, y + h1, 1, h2 - h1);
-        ctx.fillStyle = globalConfig.rmsColor;
+        const rms = Math.sqrt(rmsSq);
         let rms1 = Math.round((1 - rms / (config.max - config.min)) * (h2 + h1)/2);
         let rms2 = Math.round((1 + rms / (config.max - config.min)) * (h2 + h1)/2);
         if (rms1 < h1 + 1) rms1 = h1 + 1;
         if (rms2 > h2 - 1) rms2 = h2 - 1;
         if (rms1 > rms2) rms2 = rms1;
-        ctx.fillRect(x, y + rms1, 1, rms2 - rms1);
+        rmsc[2*x] = rms1;
+        rmsc[2*x+1] = rms2;
+    }
+    ctx.fillStyle = globalConfig.rmsColor;
+    for (let x = 0; x < w; x++) {
+        ctx.fillRect(x, y + rmsc[2*x], 1, rmsc[2*x + 1] - rmsc[2*x]);
     }
 }
 
@@ -59,13 +68,10 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
         if(props.feature.typ !== "FeatureType.SVector") throw Error("not svec");
         window.addEventListener("resize", event => this.forceUpdate());
         this.audio = new AudioContext();
-        this.audioBuffer = this.audio.createBuffer(1, props.feature.data.length, props.feature.samplingRate * 1000);
-        const arr = Float32Array.from(props.feature.data, v => v / 2 ** 15);
+        const data = this.props.feature.data;
+        this.audioBuffer = this.audio.createBuffer(1, data.length, props.feature.samplingRate * 1000);
+        const arr = Float32Array.from(data, v => v / 2 ** 15);
         this.audioBuffer.copyToChannel(arr, 0);
-    }
-
-    zoomData<T>(data: T[]) {
-        return data.slice(this.props.zoom.left * data.length, this.props.zoom.right * data.length);
     }
 
     renderWaveform() {
@@ -76,8 +82,8 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
         const w = target.width;
         const h = target.height - 1;
         const ctx = target.getContext("2d")!;
-        const data = this.zoomData(this.props.feature.data);
-        renderWaveform(ctx, 0, w, h, this.props.config, data);
+        const data = this.props.feature.data;
+        renderWaveform(ctx, 0, w, h, this.props.config, data, this.props.zoom);
     }
     updateBar = () => {
         if(!this.audioSource) return;
@@ -103,8 +109,14 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
             this.position = util.getPositionFromPixel(event.clientX, this.left, this.canvas.width, this.props.zoom)!;
             this.playerBar.style.left = event.clientX + "px";
         });
+        window.addEventListener("keydown", event => {
+            if(event.keyCode == 32) {
+                event.preventDefault();
+            }
+        });
         window.addEventListener("keyup", event => {
             if(event.keyCode == 32) {
+                event.preventDefault();
                 if(this.audioSource) {
                     this.stopPlayback();
                 } else {
@@ -136,14 +148,13 @@ export class MultiWaveform extends React.Component<VisualizerProps<NumFeatureFMa
     canvas: HTMLCanvasElement;
     playerBar: HTMLDivElement;
     disposers: (() => void)[] = [];
+    data: number[][];
     constructor(props: VisualizerProps<NumFeatureFMatrix>) {
         super(props);
         if(props.feature.typ !== "FeatureType.FMatrix") throw Error("not svec");
         window.addEventListener("resize", event => this.forceUpdate());
-    }
-
-    zoomData<T>(data: T[]) {
-        return data.slice(this.props.zoom.left * data.length, this.props.zoom.right * data.length);
+        const data = this.props.feature.data;
+        this.data = props.feature.data[0].map((_,i) => data.map(v => v[i]));
     }
 
     renderWaveform() {
@@ -154,10 +165,10 @@ export class MultiWaveform extends React.Component<VisualizerProps<NumFeatureFMa
         const w = target.width;
         const h = target.height - 1;
         const ctx = target.getContext("2d")!;
-        const data = this.zoomData(this.props.feature.data);
+        const data = this.props.feature.data;
         const dim = data[0].length;
         for(let y = 0; y < dim; y++) {
-            renderWaveform(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.config, data.map(d => d[y]));
+            renderWaveform(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.config, this.data[y], this.props.zoom);
         }
     }
 
