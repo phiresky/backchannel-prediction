@@ -5,8 +5,6 @@ import numpy as np
 import soundfile as sf
 import functools
 
-base = '../ears2/earsData'
-
 
 class Step(AbstractStep):
     def __init__(self, config):
@@ -15,7 +13,7 @@ class Step(AbstractStep):
 
     def eval(self, featExtractor: FeatureExtractor, spkInfo, uttInfo, feats):
         conv = uttInfo['conv']
-        adcfile = os.path.join(base, "swbLinks", conv + ".wav")
+        adcfile = os.path.join(featExtractor.config['base'], "swbLinks", conv + ".wav")
         if not os.path.exists(adcfile):
             raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
 
@@ -24,12 +22,15 @@ class Step(AbstractStep):
 
         adca = ADC0A[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
         adcb = ADC0B[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
-
+        powerrawa = adca.adc2pow("32ms")
+        powerrawb = adcb.adc2pow("32ms")
         return {
             'adca': adca,
             'adcb': adcb,
-            'powera': self.filterPower(adca.adc2pow("32ms")),
-            'powerb': self.filterPower(adcb.adc2pow("32ms"))
+            'powerrawa': powerrawa,
+            'powerrawb': powerrawb,
+            'powera': self.filterPower(powerrawa),
+            'powerb': self.filterPower(powerrawb)
         }
 
     def filterPower(self, power: NumFeature) -> NumFeature:

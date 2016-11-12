@@ -67,7 +67,7 @@ def main():
     fpBC = open(os.path.join(args.dataPath, args.pfilePrefix + "-BC.txt"), "w")
     fpNBC = open(os.path.join(args.dataPath, args.pfilePrefix + "-NBC.txt"), "w")
 
-    featureSetBC = jrtk.preprocessing.FeatureExtractor(config={'delta': args.delta})
+    featureSetBC = jrtk.preprocessing.FeatureExtractor(config={'delta': args.delta, 'base': '../ears2/earsData'})
     featureSetBC.appendStep('featAccess.py')
     featureSetBC.appendStep('featDescDelta.py')
     lastTime = time.clock()
