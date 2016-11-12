@@ -60,7 +60,7 @@ async def handler(websocket, path):
     for (name, feat) in sorted(features.items()):
         if name.startswith("feat"): continue
         # if not name.startswith("adc"): continue
-        await websocket.send(featureToJSON(name, feat, range="normalize"))
+        await websocket.send(featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else "normalize"))
     # await websocket.send(featureToJSON("adc", adcB, range=(-2 ** 15, 2 ** 15)))
     # await websocket.send(featureToJSON("pow", powA, range="normalize"))
     # await websocket.send(featureToJSON("pow2", powB, range="normalize"))

@@ -37,28 +37,31 @@ class BinaryCacheTree<T> {
     }
 }
 
-export function statsRaw(data: number[], start: number, end: number) {
+export function statsRaw(data: number[], start: number, end: number): Stats {
     let min = Infinity, max = -Infinity;
     let rms2 = 0;
+    let sum = 0;
     for (let i = start; i < end; i++) {
         const v = data[i];
         if (v < min) min = v;
         if (v > max) max = v;
         rms2 += v * v;
+        sum += v;
     }
     rms2 = rms2 / (end - start);
-    return {min, max, rms2, count: end - start};
+    return {min, max, rms2, sum, count: end - start};
 }
 
-type Stats = {min: number, max: number, rms2: number, count: number};
+type Stats = {min: number, max: number, rms2: number, sum: number, count: number};
 const cache = new Map<number[], ValueGetter<Stats>>();
 const statsCombinator = (stats1: Stats, stats2: Stats) => ({
     min: Math.min(stats1.min, stats2.min),
     max: Math.max(stats1.max, stats2.max),
     rms2: (stats1.count * stats1.rms2 + stats2.count * stats2.rms2) / (stats1.count + stats2.count),
-    count: stats1.count + stats2.count 
+    count: stats1.count + stats2.count,
+    sum: stats1.sum + stats2.sum
 });
-export function stats(data: number[], start: number, end: number) {
+export function stats(data: number[], start: number, end: number): Stats {
     if(!cache.has(data))
         cache.set(data, BinaryCacheTree.create(0, data.length, (start, end) => statsRaw(data, start, end), statsCombinator));
     return cache.get(data)!(start, end, (start, end) => statsRaw(data, start, end), statsCombinator);

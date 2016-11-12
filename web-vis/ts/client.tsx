@@ -85,7 +85,94 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom}, {}>
 
     }
 }
+@observer
+class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: Zoom}, {}> {
+    playerBar: HTMLDivElement;
+    disposers: (() => void)[] = [];
+    audio: AudioContext;
+    audioBuffers = new WeakMap<NumFeatureSVector, AudioBuffer>();
+    audioSources = [] as AudioBufferSourceNode[];
+    position = 0;
+    duration = 0;
+    playing: boolean;
+    startedAt: number;
+    div: HTMLDivElement;
+    get left() {
+        return this.div.getBoundingClientRect().left;
+    }
+    constructor(props: any) {
+        super(props);
+        this.audio = new AudioContext();
+    }
 
+    updateBar = () => {
+        if(this.audioSources.length === 0) return;
+        this.position = (this.audio.currentTime - this.startedAt) / this.duration;
+        this.playerBar.style.left = util.getPixelFromPosition(this.position, this.left, this.div.clientWidth, this.props.zoom) + "px";
+        if(this.playing) requestAnimationFrame(this.updateBar);
+    }
+    stopPlayback() {
+        while(this.audioSources.length > 0) {
+            this.audioSources.pop()!.stop();
+        }
+    }
+
+    componentDidMount() {
+        this.disposers.push(autorun(() => this.playerBar.style.left = util.getPixelFromPosition(this.position, this.left, this.div.clientWidth, this.props.zoom) + "px"));
+        window.addEventListener("click", event => {
+            this.stopPlayback();
+            this.position = util.getPositionFromPixel(event.clientX, this.left, this.div.clientWidth, this.props.zoom)!;
+            this.playerBar.style.left = event.clientX + "px";
+        });
+        window.addEventListener("keydown", event => {
+            if(event.keyCode == 32) {
+                event.preventDefault();
+            }
+        });
+        window.addEventListener("keyup", event => {
+            if(event.keyCode == 32) {
+                event.preventDefault();
+                if(this.audioSources.length > 0) {
+                    this.stopPlayback();
+                } else {
+                    for(const feature of this.props.features) {
+                        const buffer = this.audioBuffers.get(feature)!;
+                        const audioSource = this.audio.createBufferSource();
+                        audioSource.buffer = buffer;
+                        audioSource.connect(this.audio.destination);
+                        audioSource.start(0, this.position * buffer.duration);
+                        this.startedAt = this.audio.currentTime - this.position * buffer.duration;
+                        audioSource.addEventListener("ended", () => this.playing = false);
+                        this.audioSources.push(audioSource);
+                    }
+                    this.playing = true;
+                    requestAnimationFrame(this.updateBar);
+                }
+            }
+        });
+    }
+
+    render() {
+        for(const feature of this.props.features) {
+            if(this.audioBuffers.has(feature)) continue;
+            console.log("creating buffer for "+feature.name);
+            const audioBuffer = this.audio.createBuffer(1, feature.data.length, feature.samplingRate * 1000);
+            const arr = Float32Array.from(feature.data, v => v / 2 ** 15);
+            audioBuffer.copyToChannel(arr, 0);
+            this.duration = audioBuffer.duration;
+            this.audioBuffers.set(feature, audioBuffer);
+        }
+        return (
+            <div style={{display: "flex"}}>
+                <div style={{flexBasis: "content", width:globalConfig.leftBarSize+"px"}}>
+                </div>
+                <div style={{flexGrow: 1}} ref={e => this.div = e} >
+                    <div ref={p => this.playerBar = p} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:-10, backgroundColor:"gray"}} />
+                </div>
+            </div>
+        );
+    }
+}
 const features = new Map<string, NumFeature>();
 function getVisualizer(uiState: UIState): Visualizer<any> {
     const feat = features.get(uiState.feature)!;
@@ -138,8 +225,16 @@ class GUI extends React.Component<{}, {}> {
         window.addEventListener("wheel", this.onWheel);
     }
     render() {
+        const visibleFeatures = new Set(state.uis.map(ui => ui.feature));
+        const visibleAudioFeatures = [...visibleFeatures]
+            .map(f => features.get(f)!)
+            .filter(f => f.typ === "FeatureType.SVector") as NumFeatureSVector[];
+        let audioPlayer
+        if(visibleAudioFeatures.length > 0)
+            audioPlayer = <AudioPlayer features={visibleAudioFeatures} zoom={state.zoom} />;
         return (
             <div>
+                {audioPlayer}
                 {state.uis.map((p, i) => <InfoVisualizer key={i} uiState={p} zoom={state.zoom} />)}
             </div>
         );
