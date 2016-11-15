@@ -7,6 +7,48 @@
     <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="dist/bundle.css">-->
+    <style>
+      .utterance {
+        background-color: white;
+        padding: 3px;
+        position: absolute;
+        top: 0px;
+        height: 20px;
+        border: 1px solid black;
+        white-space: nowrap;
+        text-align: center;
+        display: inline-block; 
+      }
+      .tooltip span.content {
+         display: none;
+      }
+      .tooltip:hover span.content {
+        display: initial;
+        position: absolute;
+        background-color: white;
+        top: 105%;
+        padding: 5px;
+        border-radius: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 1px solid gray;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        z-index: 100;
+        min-width: 20vw;
+        max-width: 50vw;
+        white-space: initial;
+      }
+      .tooltip:hover span.content::after {
+        content: " ";
+        position: absolute;
+        bottom: 100%;  /* At the top of the tooltip */
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent black transparent;
+    }
+    </style>
   </head>
   <body>
     <div id="root"></div>
