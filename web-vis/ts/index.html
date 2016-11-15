@@ -17,12 +17,12 @@
         border: 1px solid black;
         white-space: nowrap;
         text-align: center;
-        display: inline-block; 
+        display: inline-block;
       }
       .tooltip span.content {
          display: none;
       }
-      .tooltip:hover span.content {
+      .tooltip:hover span.content, .tooltip.visible span.content {
         display: initial;
         position: absolute;
         background-color: white;
@@ -34,11 +34,11 @@
         border: 1px solid gray;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         z-index: 100;
-        min-width: 20vw;
+        min-width: 30vw;
         max-width: 50vw;
         white-space: initial;
       }
-      .tooltip:hover span.content::after {
+      .tooltip:hover span.content::after, .tooltip.visible span.content::after {
         content: " ";
         position: absolute;
         bottom: 100%;  /* At the top of the tooltip */
@@ -47,7 +47,28 @@
         border-width: 5px;
         border-style: solid;
         border-color: transparent transparent black transparent;
-    }
+      }
+      .leftcutoff::after {
+        content: " ";
+        position: absolute;
+        top: 50%;
+        right: 100%; /* To the left of the tooltip */
+        margin-top: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent black transparent transparent;
+      }
+      .rightcutoff::after {
+        content: " ";
+        position: absolute;
+        top: 50%;
+        left: 100%; /* To the right of the tooltip */
+        margin-top: -5px;
+        border-width: 5px;
+        margin-left: -5px;
+        border-style: solid;
+        border-color: transparent transparent transparent black;
+      }
     </style>
   </head>
   <body>

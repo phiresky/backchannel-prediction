@@ -85,7 +85,7 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
     }
     render() {
         return <div>
-            <canvas style={{width: "100%", border:"1px solid black"}} ref={c => this.canvas = c}/>
+            <canvas style={{width: "100%", height: globalConfig.visualizerHeight+"px", border:"1px solid black"}} ref={c => this.canvas = c}/>
         </div>;
     }
 }
@@ -130,7 +130,7 @@ export class MultiWaveform extends React.Component<VisualizerProps<NumFeatureFMa
     }
     render() {
         return <div>
-            <canvas style={{width: "100%", border:"1px solid black"}} ref={c => this.canvas = c}/>
+            <canvas style={{width: "100%", height: globalConfig.visualizerHeight+"px", border:"1px solid black"}} ref={c => this.canvas = c}/>
         </div>;
     }
 }
