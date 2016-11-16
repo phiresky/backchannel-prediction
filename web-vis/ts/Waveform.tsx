@@ -1,4 +1,4 @@
-import {state, NumFeature, NumFeatureFMatrix, NumFeatureSVector, Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
+import {NumFeature, NumFeatureFMatrix, NumFeatureSVector, Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
 import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed} from 'mobx';
@@ -67,8 +67,8 @@ export class HighlightsVisualizer extends React.Component<VisualizerProps<any>, 
     getElements() {
         const width = this.props.gui.width;
         return this.props.highlights.map((highlight,i) => {
-            let left = util.getPixelFromPosition(highlight.from / state.totalTimeSeconds, 0, width, this.props.zoom);
-            let right = util.getPixelFromPosition(highlight.to / state.totalTimeSeconds, 0, width, this.props.zoom);
+            let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
+            let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
             const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: globalConfig.visualizerHeight+"px"};
             let className = "highlight";
