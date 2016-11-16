@@ -5,6 +5,7 @@ useStrict(true);
 import { observer } from 'mobx-react';
 import * as Waveform from './Waveform';
 import * as util from './util';
+import DevTools from 'mobx-react-devtools';
 
 export const globalConfig = {
     maxColor: "#3232C8",
@@ -45,7 +46,10 @@ export type Utterances = {
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances;
-
+export type ClientMessage = {
+    type: "loadConversation",
+    name: string
+}
 
 export type VisualizerConfig  = {min: number, max: number} | "normalize";
 
@@ -94,38 +98,70 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui:
 }
 @observer
 class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
+    @observable
+    tooltip: number|null = null;
+    @computed get playbackTooltip() {
+        const data = this.props.feature.data;
+        const b = util.binarySearch(0, data.length, x => +data[x].from, this.props.gui.playbackPosition * state.totalTimeSeconds);
+        return b;
+    }
     // @computed currentlyVisibleTh
-    render() {
-        const width = this.props.gui.width - 5;
-        const pos = this.props.gui.playbackPosition;
-        return <div style={{position: "relative", height: "40px"/*, overflowX: "hidden"*/}}>
-        {this.props.feature.data.map(utt => {
+    getElements() {
+        const width = this.props.gui.width;
+        return this.props.feature.data.map((utt,i) => {
             const from = +utt.from / state.totalTimeSeconds, to = +utt.to / state.totalTimeSeconds;
             let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
             let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
             const style = {}
-            let className = "utterance tooltip";
+            let className = "utterance utterance-text";
             if(left < 0) {
                 left = 0;
                 Object.assign(style, {borderLeft: "none"});
-                className += " leftcutoff"; 
+                className += " leftcutoff";
             }
             if(right > width) {
-                console.log(right, width, utt.to);
                 right = width;
                 Object.assign(style, {borderRight: "none"});
                 className += " rightcutoff";
             }
-            if (pos > from && pos <= to)
-                className += " visible";
-            Object.assign(style, {left:left+"px", width: (right-left)+"px"});
-            return <div className={className} key={utt.id} style={style}>
+            Object.assign(style, {left:left+"px", width: (right-left - 6)+"px"});
+            return <div className={className} key={utt.id} style={style}
+                    onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
+                    onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
                 <span>{utt.text}</span>
-                <span className="content"><b/>{utt.text}</span>
             </div>;
-        })}
-        </div>
+        });
+    }
+    getTooltip(i: number) {
+        const width = this.props.gui.width;
+        const pos = this.props.gui.playbackPosition;
+        const utt = this.props.feature.data[i];
+        const from = +utt.from / state.totalTimeSeconds, to = +utt.to / state.totalTimeSeconds;
+        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
+        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
+        if ( right < 0 || left > this.props.gui.width) return null;
+        const style = {}
+        let className = "utterance tooltip visible";
+        Object.assign(style, {left:left+"px", width: (right-left - 6)+"px"});
+        return <div className={className} key={utt.id} style={style}>
+            <span className="content"><b/>{utt.text}</span>
+        </div>;
+    }
+    Tooltip = observer(props => {
+        return <div>
+            {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
+            {this.playbackTooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
+        </div>;
+    })
+    render() {
+        
+        return (
+            <div>
+                <div style={{overflow: "hidden", position: "relative", height: "40px", width:"100%"}}>{this.getElements()}</div>
+                <this.Tooltip />
+                {/*<div style={{position: "absolute", height: "40px", width:"100%"}}>{this.getElements(true)}</div>*/}
+            </div>);
     }
 }
 @observer
@@ -143,7 +179,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.audio = new AudioContext();
     }
 
-    updateBar = action(() => {
+    updateBar = action("updateBar", () => {
         if(this.audioSources.length === 0) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
         this.playerBar.style.left = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.zoom) + "px";
@@ -158,7 +194,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     componentDidMount() {
         const {gui, zoom} = this.props;
         this.disposers.push(autorun(() => this.playerBar.style.left = util.getPixelFromPosition(gui.playbackPosition, gui.left, gui.width, zoom) + "px"));
-        window.addEventListener("click", action((event: MouseEvent) => {
+        window.addEventListener("click", action("clickSetPlaybackPosition", (event: MouseEvent) => {
             this.stopPlayback();
             this.props.gui.playbackPosition = util.getPositionFromPixel(event.clientX, gui.left, gui.width, zoom)!;
             this.playerBar.style.left = event.clientX + "px";
@@ -227,7 +263,12 @@ const state = observable({
 
 const socket = new WebSocket(`ws://${location.host.split(":")[0]}:8765`);
 
-socket.onopen = event => { };
+function sendMessage(message: ClientMessage) {
+    socket.send(JSON.stringify(message));
+}
+socket.onopen = event => {
+    sendMessage({type: "loadConversation", name: "sw2807"});
+};
 
 function splitIn(count: number, data: Utterances) {
     const feats: Utterances[] = [];
@@ -237,7 +278,7 @@ function splitIn(count: number, data: Utterances) {
     data.data.forEach((utt, i) => feats[i%count].data.push(utt));
     return feats;
 }
-socket.onmessage = action((event: MessageEvent) => {
+socket.onmessage = action("onSocketMessage", (event: MessageEvent) => {
     const data: Feature = JSON.parse(event.data);
     console.log(data);
     features.set(data.name, data);
@@ -259,7 +300,6 @@ socket.onmessage = action((event: MessageEvent) => {
             totalTime = data.data.length * data.shift / 1000;
         }
         if (totalTime) {
-            console.log(totalTime);
             if(isNaN(state.totalTimeSeconds)) state.totalTimeSeconds = totalTime;
             else if(Math.abs((state.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                 console.error("Mismatching times, was ", state.totalTimeSeconds, "but", data.name, "has length", totalTime);
@@ -303,7 +343,7 @@ class GUI extends React.Component<{}, {}> {
     constructor() {
         super();
         window.addEventListener("wheel", e => this.onWheel(e));
-        window.addEventListener("resize", action((e: UIEvent) => this.windowWidth = window.innerWidth));
+        window.addEventListener("resize", action("windowResize", (e: UIEvent) => this.windowWidth = window.innerWidth));
     }
     render() {
         const visibleFeatures = new Set(state.uis.map(ui => ui.feature));
@@ -317,10 +357,11 @@ class GUI extends React.Component<{}, {}> {
             <div>
                 <div style={{display: "flex"}}>
                     <div style={{flex: "0 0 content", width:globalConfig.leftBarSize+"px"}}></div>
-                    <div style={{flexGrow: 1}} ref={action((e: any) => this.widthCalcDiv = e)} ></div>
+                    <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} ></div>
                 </div>
                 {audioPlayer}
                 {state.uis.map((p, i) => <InfoVisualizer key={p.feature} uiState={p} zoom={state.zoom} gui={this} />)}
+                <DevTools />
             </div>
         );
     }

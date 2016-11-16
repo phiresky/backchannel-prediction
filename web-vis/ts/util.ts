@@ -75,3 +75,12 @@ export function getPositionFromPixel(x: number, left: number, width: number, zoo
 export function getPixelFromPosition(x: number, left: number, width: number, zoom: {left: number, right: number}) {
     return (x - zoom.left) * width / (zoom.right - zoom.left) + left;
 }
+
+export function binarySearch<T>(min: number, max: number, extractor: (i: number) => number, searchValue: number): number|null {
+    if (max - min === 0) return null;
+    if(max - min === 1) return min;
+    const mid = ((max + min) / 2)|0;
+    const midVal = extractor(mid);
+    if(midVal < searchValue) return binarySearch(mid, max, extractor, searchValue);
+    else return binarySearch(min, mid, extractor, searchValue);
+}

@@ -9,15 +9,18 @@
     <link rel="stylesheet" href="dist/bundle.css">-->
     <style>
       .utterance {
-        background-color: white;
         padding: 3px;
         position: absolute;
         top: 0px;
         height: 20px;
-        border: 1px solid black;
+        
         white-space: nowrap;
         text-align: center;
         display: inline-block;
+      }
+      .utterance-text {
+        background-color: white;
+        border: 1px solid black;
       }
       .tooltip span.content {
          display: none;
@@ -26,7 +29,7 @@
         display: initial;
         position: absolute;
         background-color: white;
-        top: 105%;
+        margin-top: -10px;
         padding: 5px;
         border-radius: 2px;
         left: 50%;
@@ -43,7 +46,7 @@
         position: absolute;
         bottom: 100%;  /* At the top of the tooltip */
         left: 50%;
-        margin-left: -5px;
+        margin-left: -6px;
         border-width: 5px;
         border-style: solid;
         border-color: transparent transparent black transparent;

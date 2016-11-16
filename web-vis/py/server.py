@@ -50,19 +50,23 @@ featureExtractor = FeatureExtractor(config={'delta': 10, 'base': '../../ears2/ea
 featureExtractor.appendStep("../../extract_pfiles_python/featAccess.py")
 featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
-features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 10})  # type: Dict[str, NumFeature]
+async def sendConversation(conv: str, ws):
+    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 10})  # type: Dict[str, NumFeature]
 
-segsA = spkDB[conv + '-A']['segs'].strip().split(" ")
-segsB = spkDB[conv + '-B']['segs'].strip().split(" ")
-
-async def handler(websocket, path):
     for (name, feat) in sorted(features.items()):
         if name.startswith("feat"): continue
         if 'raw' in name: continue
         # if not name.startswith("adc"): continue
-        await websocket.send(featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else "normalize"))
-        if name == "adca": await websocket.send(segsToJSON(conv + '-A'))
-        if name == "adcb": await websocket.send(segsToJSON(conv + '-B'))
+        await ws.send(featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else "normalize"))
+        if name == "adca": await ws.send(segsToJSON(conv + '-A'))
+        if name == "adcb": await ws.send(segsToJSON(conv + '-B'))
+
+async def handler(websocket, path):
+    msg = json.loads(await websocket.recv())
+    if msg['type'] == "loadConversation":
+        await sendConversation(msg['name'], websocket)
+    else:
+        raise Exception("Unknown msg " + json.dumps(msg))
 
 
 start_server = websockets.serve(handler, '0.0.0.0', 8765)
