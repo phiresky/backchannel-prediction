@@ -8,25 +8,10 @@ import json
 import numpy as np
 
 import importlib.util
+
 readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfiles_python/readDB.py")
 readDB = importlib.util.module_from_spec(readDBspec)
 readDBspec.loader.exec_module(readDB)
-
-
-def readAudioFile(featureSet, filename: str, *, dtype='int16', **kwargs) -> Union[NumFeature, List[NumFeature]]:
-    """Thin wrapper around the soundfile.read() method. Arguments are passed through, data read is returned as NumFeature.
-
-    For a complete list of arguments and description see http://pysoundfile.readthedocs.org/en/0.8.1/#module-soundfile
-
-    Returns:
-        Single NumFeature if the audio file had only 1 channel, otherwise a list of NumFeatures.
-    """
-    data, samplingRate = sf.read(filename, dtype=dtype, **kwargs)
-
-    if data.ndim == 2:
-        # multi channel, each column is a channel
-        return [NumFeature(col, featureSet=featureSet, samplingRate=samplingRate / 1000, shift=0) for col in data.T]
-    return NumFeature(data, featureSet=featureSet, samplingRate=samplingRate / 1000, shift=0)
 
 
 def featureToJSON(name: str, feature: NumFeature, range: Union[Tuple[float, float], str]) -> Dict:
@@ -49,6 +34,7 @@ def segsToJSON(name: str) -> Dict:
                  for utt in spkDB[name]['segs'].strip().split(" ")]
     }
 
+
 db = "../../ears2/db/train/all240302"
 
 uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
@@ -60,7 +46,7 @@ featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
 
 async def sendConversation(conv: str, ws):
-    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})  # type: Dict[str, NumFeature]
+    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60*100})  # type: Dict[str, NumFeature]
 
     for (name, feat) in sorted(features.items()):
         if name.startswith("feat"): continue
@@ -72,6 +58,32 @@ async def sendConversation(conv: str, ws):
         }))
         if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
         if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
+    await ws.send(json.dumps({
+        "type": "getHighlights", "data": {"feature": "adca", "highlights": getHighlights(conv, "A")}
+    }))
+    await ws.send(json.dumps({
+        "type": "getHighlights", "data": {"feature": "adcb", "highlights": getHighlights(conv, "B")}
+    }))
+
+
+def getHighlights(conv: str, channel: str):
+    if channel == "A":
+        bcChannel = "B"
+    elif channel == "B":
+        bcChannel = "A"
+    else:
+        raise Exception("unknown channel " + channel)
+    bcs = [uttDB[utt]
+           for utt in spkDB[conv + "-" + bcChannel]['segs'].strip().split(" ")
+           if readDB.isBackchannel(uttDB[utt.strip()])
+           ]
+    highlights = []
+    for bc in bcs:
+        (a, b) = readDB.getBackchannelTrainingRange(bc)
+        highlights.append({'from': a, 'to': b, 'color': (0,255,0)})
+        (a, b) = readDB.getNonBackchannelTrainingRange(bc)
+        highlights.append({'from': a, 'to': b, 'color': (255,0,0)})
+    return highlights
 
 
 async def handler(websocket, path):

@@ -36,11 +36,20 @@ BCend = 0.0
 NBCbegin = -2.0
 NBCend = -1.6
 
-# Properties for writing pfiles
-feature = "FEAT"  # Feature to be used
 
 def isBackchannel(uttInfo):
     return uttInfo['text'] in backChannelListOneWord
+
+
+def getBackchannelTrainingRange(uttInfo):
+    fromTime = float(uttInfo['from'])
+    return fromTime + BCbegin, fromTime + BCend
+
+
+def getNonBackchannelTrainingRange(uttInfo):
+    fromTime = float(uttInfo['from'])
+    return fromTime + NBCbegin, fromTime + NBCend
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -73,18 +82,13 @@ def main():
         convID = uttInfo['convid']  # type: str
         if not dbaseUttFilter(convIDs, convID):
             continue
-        channel = convID[-1]  # type: str
-        audiofile = convID.split("-")[0]  # type: str
-        uttInfo['channel'] = channel
-        uttInfo['conv'] = audiofile
+        (audiofile, channel) = convID.split("-")  # type: str
         toTime = float(uttInfo['to'])
         fromTime = float(uttInfo['from'])
         if isBackchannel(uttInfo):
             # print('has backchannel: ' + uttInfo['text'])
-            cBCbegin = fromTime + BCbegin
-            cBCend = fromTime + BCend
-            cNBCbegin = fromTime + NBCbegin
-            cNBCend = fromTime + NBCend
+            cBCbegin, cBCend = getBackchannelTrainingRange(uttInfo)
+            cNBCbegin, cNBCend = getNonBackchannelTrainingRange(uttInfo)
             if cNBCbegin < 0:
                 logging.debug(
                     "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
@@ -98,17 +102,15 @@ def main():
             else:
                 raise Exception("Unknown channel " + channel)
 
-            cFeature = (feature + BCchannel).lower()
-
             fromTime = cNBCbegin
             toTime = cBCend
             features = featureSetBC.eval(None, {
                 'from': fromTime,
                 'to': toTime,
-                'conv': uttInfo['conv']
+                'conv': audiofile
             })
-            F = features[cFeature]
-            (frameN, coeffN) = features[cFeature].shape
+            F = features["feat"+BCchannel.lower()]
+            (frameN, coeffN) = F.shape
 
             if coeffN != dim:
                 raise Exception("coeff and dim don't match")

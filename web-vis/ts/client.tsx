@@ -21,7 +21,7 @@ export interface VisualizerProps<T> {
     config: VisualizerConfig;
     feature: T;
     zoom: Zoom;
-    highlights: Zoom[]
+    highlights: Highlight[]
 }
 export interface Visualizer<T> {
     new (props?: VisualizerProps<T>, context?: any): React.Component<VisualizerProps<T>, {}>;
@@ -49,6 +49,7 @@ export type Utterances = {
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances;
+export type Highlight = {from: number, to: number, color: Color};
 export type ClientMessage = {
     type: "loadConversation",
     name: string
@@ -61,6 +62,9 @@ export type ServerMessage = {
 } | {
     type: "getFeature",
     data: Feature
+} | {
+    type: "getHighlights",
+    data: {feature: string, highlights: Highlight[]}
 }
 export type VisualizerConfig  = {min: number, max: number} | "normalize";
 
@@ -68,7 +72,7 @@ interface UIState {
     visualizer: string;
     visualizerConfig: VisualizerConfig,
     feature: string;
-    highlights: Zoom[];
+    highlights: Highlight[];
 }
 interface Zoom {
     left: number; right: number;
@@ -138,7 +142,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
                 Object.assign(style, {borderRight: "none"});
                 className += " rightcutoff";
             }
-            Object.assign(style, {left:left+"px", width: (right-left - 6)+"px"});
+            const padding = 3;
+            Object.assign(style, {left:left+"px", width: (right-left - padding*2)+"px", padding: padding +"px"});
             return <div className={className} key={utt.id} style={style}
                     onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
                     onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
@@ -157,14 +162,14 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         let styleText;
         if(utt.color) styleText = {backgroundColor: `rgb(${utt.color})`}
         else styleText = {};
-        const style = {left:left+"px", width: (right-left - 6)+"px"};
+        const style = {left:left+"px", width: (right-left)+"px"};
         return <div className={className} key={utt.id} style={style}>
             <span className="content" style={styleText}><b/>{utt.text}</span>
         </div>;
     }
     Tooltip = observer(function Tooltip(this: TextVisualizer) {
         return <div>
-            {this.playbackTooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
+            {this.playbackTooltip !== null && this.props.gui.audioPlayer.playing && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
             {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
     }.bind(this))
@@ -185,6 +190,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     audioBuffers = new WeakMap<NumFeatureSVector, AudioBuffer>();
     audioSources = [] as AudioBufferSourceNode[];
     duration = 0;
+    @observable
     playing: boolean;
     startedAt: number;
     constructor(props: any) {
@@ -216,7 +222,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         }
     }
 
-    onKeyUp = (event: KeyboardEvent) => {
+    onKeyUp = action("onKeyUp", (event: KeyboardEvent) => {
         if(event.keyCode == 32) {
             event.preventDefault();
             if(this.audioSources.length > 0) {
@@ -229,14 +235,14 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
                     audioSource.connect(this.audio.destination);
                     audioSource.start(0, this.props.gui.playbackPosition * buffer.duration);
                     this.startedAt = this.audio.currentTime - this.props.gui.playbackPosition * buffer.duration;
-                    audioSource.addEventListener("ended", () => this.playing = false);
+                    audioSource.addEventListener("ended", action("audioEnded", () => this.playing = false));
                     this.audioSources.push(audioSource);
                 }
                 this.playing = true;
                 requestAnimationFrame(this.updatePlaybackPosition);
             }
         }
-    }
+    })
     onKeyDown = (event: KeyboardEvent) => {
         if(event.keyCode == 32) {
             event.preventDefault();
@@ -291,7 +297,7 @@ function getVisualizer(uiState: UIState): Visualizer<any> {
         return TextVisualizer;
     } else throw Error("Can't visualize " + (feat as any).typ);
 }
-const state = observable({
+export const state = observable({
     conversation: "sw2807",
     conversations: [] as string[],
     uis: [] as UIState[],
@@ -364,7 +370,11 @@ socket.onmessage = action("onSocketMessage", (event: MessageEvent) => {
             }
             break;
         }
-        default: throw Error("unknown message "+data)
+        case "getHighlights": {
+            state.uis.filter(ui => ui.feature === data.data.feature).forEach(ui => ui.highlights = data.data.highlights);
+            break;
+        }
+        default: throw Error("unknown message "+(data as any).type)
     }
 });
 @observer
@@ -385,6 +395,7 @@ class GUI extends React.Component<{}, {}> {
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
     @observable followPlayback = true;
+    audioPlayer: AudioPlayer; setAudioPlayer = action("setAudioPlayer", (a: AudioPlayer) => this.audioPlayer = a);
     uisDiv: HTMLDivElement;
     @computed
     get left() {
@@ -425,7 +436,7 @@ class GUI extends React.Component<{}, {}> {
             .filter(f => f.typ === "FeatureType.SVector") as NumFeatureSVector[];
         let audioPlayer
         if(visibleAudioFeatures.length > 0)
-            audioPlayer = <AudioPlayer features={visibleAudioFeatures} zoom={state.zoom} gui={this} />;
+            audioPlayer = <AudioPlayer features={visibleAudioFeatures} zoom={state.zoom} gui={this} ref={this.setAudioPlayer} />;
         return (
             <div>
                 <div style={{margin: "10px"}}>
