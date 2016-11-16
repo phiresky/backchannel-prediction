@@ -40,6 +40,9 @@ module.exports = {
     theme: path.join(__dirname, '../client/toolbox-theme.scss')                                                                                                                            
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('development')
+    }),
     new ExtractTextPlugin('bundle.css', { allChunks: true }),
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
@@ -49,8 +52,5 @@ module.exports = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development')
-    })
   ]
 };

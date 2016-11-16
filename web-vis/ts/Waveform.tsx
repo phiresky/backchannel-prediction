@@ -1,4 +1,4 @@
-import {NumFeatureFMatrix, NumFeatureSVector, Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
+import {NumFeature, NumFeatureFMatrix, NumFeatureSVector, Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
 import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed} from 'mobx';
@@ -52,10 +52,54 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 }
 
 @observer
+export class HighlightOverlayVisualizer extends React.Component<VisualizerProps<NumFeatureSVector>, {}> {
+    render() {
+        return (
+            <div style={{position: "relative", height:globalConfig.visualizerHeight+10 + "px", width: "100%"}}>
+                <div style={{position: "absolute", width:"100%", height:"100%"}}><AudioWaveform {...this.props} /></div>
+                <div style={{psoition: "absolute", width: "100%", height: "100%"}}><HighlightsVisualizer {...this.props} /></div>
+            </div>
+        )
+    }
+}
+@observer
+export class HighlightsVisualizer extends React.Component<VisualizerProps<any>, {}> {
+    getElements() {
+        const width = this.props.gui.width;
+        return this.props.highlights.map((range,i) => {
+            let left = util.getPixelFromPosition(range.left, 0, width, this.props.zoom);
+            let right = util.getPixelFromPosition(range.right, 0, width, this.props.zoom);
+            if ( right < 0 || left > this.props.gui.width) return null;
+            const style = {backgroundColor: "rgba(255,0,0,0.3)", height: globalConfig.visualizerHeight-5+"px"};
+            let className = "utterance highlight";
+            if(left < 0) {
+                left = 0;
+                Object.assign(style, {borderLeft: "none"});
+                className += " leftcutoff";
+            }
+            if(right > width) {
+                right = width;
+                Object.assign(style, {borderRight: "none"});
+                className += " rightcutoff";
+            }
+            Object.assign(style, {left:left+"px", width: (right-left - 6)+"px"});
+            return <div className={className} key={range.left} style={style}
+                    //onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
+                    //onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}
+                    >
+            </div>;
+        });
+    }
+    render() {
+        return (
+            <div>{this.getElements()}</div>
+        )
+    }
+}
+@observer
 export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVector>, {}> {
     canvas: HTMLCanvasElement;
     disposers: (() => void)[] = [];
-
     constructor(props: VisualizerProps<NumFeatureSVector>) {
         super(props);
         if(props.feature.typ !== "FeatureType.SVector") throw Error("not svec");
@@ -78,7 +122,7 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
         this.renderWaveform();
     }
     componentDidMount() {
-        this.disposers.push(autorun(() => this.renderWaveform()));
+        this.disposers.push(autorun("renderWaveform", () => this.renderWaveform()));
     }
     componentWillUnmount() {
         for(const disposer of this.disposers) disposer();
@@ -123,7 +167,7 @@ export class MultiWaveform extends React.Component<VisualizerProps<NumFeatureFMa
         this.renderWaveform();
     }
     componentDidMount() {
-        this.disposers.push(autorun(() => this.renderWaveform()));
+        this.disposers.push(autorun("renderMultiWaveform", () => this.renderWaveform()));
     }
     componentWillUnmount() {
         for(const disposer of this.disposers) disposer();

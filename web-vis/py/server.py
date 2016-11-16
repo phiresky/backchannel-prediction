@@ -40,10 +40,13 @@ def segsToJSON(name: str) -> Dict:
     return {
         'name': name,
         'typ': 'utterances',
-        'data': [{**uttDB[utt], 'id': utt} for utt in spkDB[name]['segs'].strip().split(" ")]
+        'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if uttDB[utt]['text'] in backChannelListOneWord else None}
+                 for utt in spkDB[name]['segs'].strip().split(" ")]
     }
 
-
+backChannelListOneWord = {
+    "UM-HUM", "UH-HUH", "YEAH", "RIGHT", "OH", "UM", "YES", "HUH", "OKAY", "HM", "HUM", "UH"
+}
 db = "../../ears2/db/train/all240302"
 
 uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
@@ -55,7 +58,7 @@ featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
 
 async def sendConversation(conv: str, ws):
-    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 10})  # type: Dict[str, NumFeature]
+    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})  # type: Dict[str, NumFeature]
 
     for (name, feat) in sorted(features.items()):
         if name.startswith("feat"): continue
@@ -71,13 +74,16 @@ async def sendConversation(conv: str, ws):
 
 async def handler(websocket, path):
     while True:
-        msg = json.loads(await websocket.recv())
-        if msg['type'] == "loadConversation":
-            await sendConversation(msg['name'], websocket)
-        elif msg['type'] == "getConversations":
-            await websocket.send(json.dumps({"type": "getConversations", "data": conversations}))
-        else:
-            raise Exception("Unknown msg " + json.dumps(msg))e
+        try:
+            msg = json.loads(await websocket.recv())
+            if msg['type'] == "loadConversation":
+                await sendConversation(msg['name'], websocket)
+            elif msg['type'] == "getConversations":
+                await websocket.send(json.dumps({"type": "getConversations", "data": conversations}))
+            else:
+                raise Exception("Unknown msg " + json.dumps(msg))
+        except websockets.exceptions.ConnectionClosed as e:
+            return
 
 
 start_server = websockets.serve(handler, '0.0.0.0', 8765)

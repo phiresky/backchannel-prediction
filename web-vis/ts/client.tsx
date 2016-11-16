@@ -7,13 +7,13 @@ import * as Waveform from './Waveform';
 import * as util from './util';
 import DevTools from 'mobx-react-devtools';
 
-export const globalConfig = {
+export const globalConfig = observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
     leftBarSize: 100,
     zoomFactor: 1.2,
-    visualizerHeight: 150,
-};
+    visualizerHeight: 100,
+});
 
 
 export interface VisualizerProps<T> {
@@ -21,6 +21,7 @@ export interface VisualizerProps<T> {
     config: VisualizerConfig;
     feature: T;
     zoom: Zoom;
+    highlights: Zoom[]
 }
 export interface Visualizer<T> {
     new (props?: VisualizerProps<T>, context?: any): React.Component<VisualizerProps<T>, {}>;
@@ -39,10 +40,12 @@ export type NumFeatureFMatrix = NumFeatureCommon & {
     typ: "FeatureType.FMatrix",
     data: number[][]
 };
+export type Color = [number, number, number];
+
 export type Utterances = {
     name: string,
     typ: "utterances",
-    data: {from: number | string, to: number | string, text: string, id: string}[]
+    data: {from: number | string, to: number | string, text: string, id: string, color: Color|null}[]
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances;
@@ -65,6 +68,7 @@ interface UIState {
     visualizer: string;
     visualizerConfig: VisualizerConfig,
     feature: string;
+    highlights: Zoom[];
 }
 interface Zoom {
     left: number; right: number;
@@ -97,7 +101,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui:
                     </select>*/}
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <Visualizer config={uiState.visualizerConfig} zoom={zoom} feature={features.get(uiState.feature)!} gui={gui} />
+                    <Visualizer config={uiState.visualizerConfig} zoom={zoom} feature={features.get(uiState.feature)!} gui={gui} highlights={uiState.highlights} />
                 </div>
             </div>
         );
@@ -121,7 +125,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
             let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
             let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
-            const style = {}
+            const style = {height: "20px"};
+            if(utt.color) Object.assign(style, {backgroundColor: `rgb(${utt.color})`});
             let className = "utterance utterance-text";
             if(left < 0) {
                 left = 0;
@@ -143,37 +148,38 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
     }
     getTooltip(i: number) {
         const width = this.props.gui.width;
-        const pos = this.props.gui.playbackPosition;
         const utt = this.props.feature.data[i];
         const from = +utt.from / state.totalTimeSeconds, to = +utt.to / state.totalTimeSeconds;
         let left = util.getPixelFromPosition(from, 0, width, this.props.zoom)|0;
         let right = util.getPixelFromPosition(to, 0, width, this.props.zoom)|0;
         if ( right < 0 || left > this.props.gui.width) return null;
-        const style = {}
         let className = "utterance tooltip visible";
-        Object.assign(style, {left:left+"px", width: (right-left - 6)+"px"});
+        let styleText;
+        if(utt.color) styleText = {backgroundColor: `rgb(${utt.color})`}
+        else styleText = {};
+        const style = {left:left+"px", width: (right-left - 6)+"px"};
         return <div className={className} key={utt.id} style={style}>
-            <span className="content"><b/>{utt.text}</span>
+            <span className="content" style={styleText}><b/>{utt.text}</span>
         </div>;
     }
-    Tooltip = observer(props => {
+    Tooltip = observer(function Tooltip(this: TextVisualizer) {
         return <div>
-            {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
             {this.playbackTooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
+            {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
-    })
+    }.bind(this))
     render() {
         return (
-            <div>
+            <div style={{height: "4em"}}>
                 <div style={{overflow: "hidden", position: "relative", height: "40px", width:"100%"}}>{this.getElements()}</div>
                 <this.Tooltip />
-                {/*<div style={{position: "absolute", height: "40px", width:"100%"}}>{this.getElements(true)}</div>*/}
-            </div>);
+            </div>
+        );
     }
 }
 @observer
 class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: Zoom, gui: GUI}, {}> {
-    playerBar: HTMLDivElement;
+    playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
     audio: AudioContext;
     audioBuffers = new WeakMap<NumFeatureSVector, AudioBuffer>();
@@ -186,9 +192,18 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.audio = new AudioContext();
     }
 
+    center() {
+        const w = state.zoom.right - state.zoom.left;
+        let pos = this.props.gui.playbackPosition;
+        if (pos - w/2 < 0) pos = w/2;
+        if (pos + w/2 > 1) pos = 1 - w/2;
+        state.zoom.left = pos - w/2; state.zoom.right = pos + w/2;
+    }
+
     updatePlaybackPosition = action("updatePlaybackPosition", () => {
         if(this.audioSources.length === 0) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
+        if(this.props.gui.followPlayback) this.center();
         if(this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     });
     updatePlayerBar = () => {
@@ -230,12 +245,13 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     onClick = action("clickSetPlaybackPosition", (event: MouseEvent) => {
         event.preventDefault();
         this.stopPlayback();
-        this.props.gui.playbackPosition = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
+        this.props.gui.playbackPosition = Math.max(x, 0);
     });
 
     componentDidMount() {
         const {gui, zoom} = this.props;
-        this.disposers.push(autorun(this.updatePlayerBar));
+        this.disposers.push(autorun("updatePlayerBar", this.updatePlayerBar));
         const uisDiv = this.props.gui.uisDiv;
         uisDiv.addEventListener("click", this.onClick);
         window.addEventListener("keydown", this.onKeyDown);
@@ -246,6 +262,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.disposers.push(() => this.stopPlayback());
     }
     componentWillUnmount() {
+        console.log("pp", "willunmonut");
         for(const disposer of this.disposers) disposer();
     }
     render() {
@@ -259,7 +276,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
             this.audioBuffers.set(feature, audioBuffer);
         }
         return (
-            <div ref={p => this.playerBar = p} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, backgroundColor:"gray"}} />
+            <div ref={this.setPlayerBar} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, backgroundColor:"gray"}} />
         );
     }
 }
@@ -267,7 +284,7 @@ const features = new Map<string, Feature>();
 function getVisualizer(uiState: UIState): Visualizer<any> {
     const feat = features.get(uiState.feature)!;
     if(feat.typ === "FeatureType.SVector") {
-        return Waveform.AudioWaveform;
+        return Waveform.HighlightOverlayVisualizer;
     } else if (feat.typ === "FeatureType.FMatrix") {
         return Waveform.MultiWaveform;
     } else if (feat.typ === "utterances") {
@@ -325,7 +342,7 @@ socket.onmessage = action("onSocketMessage", (event: MessageEvent) => {
                     features.set(feat.name, feat);
                     state.uis.push({ feature: feat.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
                 }*/
-                state.uis.push({ feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
+                state.uis.push({ feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalize", highlights: []});
             } else {
                 let visualizerConfig: VisualizerConfig;
                 if(feature.range instanceof Array) {
@@ -343,7 +360,7 @@ socket.onmessage = action("onSocketMessage", (event: MessageEvent) => {
                         console.error("Mismatching times, was ", state.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                     }
                 }
-                state.uis.push({ feature: feature.name, visualizer: "Waveform", visualizerConfig });
+                state.uis.push({ feature: feature.name, visualizer: "Waveform", visualizerConfig, highlights: [] });
             }
             break;
         }
@@ -367,6 +384,7 @@ class GUI extends React.Component<{}, {}> {
     @observable widthCalcDiv: HTMLDivElement;
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
+    @observable followPlayback = true;
     uisDiv: HTMLDivElement;
     @computed
     get left() {
@@ -412,6 +430,9 @@ class GUI extends React.Component<{}, {}> {
             <div>
                 <div style={{margin: "10px"}}>
                     <ConversationSelector />
+                    Follow playback:
+                    <input type="checkbox" checked={this.followPlayback}
+                        onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
                 </div>
                 <div ref={div => this.uisDiv = div}>
                     <div style={{display: "flex"}}>
@@ -430,7 +451,7 @@ class GUI extends React.Component<{}, {}> {
 
 
 const gui = ReactDOM.render(<GUI />, document.getElementById("root"));
-Object.assign(window, {gui, state, features, util, action});
+Object.assign(window, {gui, state, features, util, action, globalConfig});
 /*window.addEventListener("wheel", event => {
     if (event.deltaY > 0) canvas.width *= 1.1;
     else canvas.width *= 0.9;
