@@ -49,7 +49,6 @@ def main():
     parser.add_argument('convIdFile', type=str, help="file with allowed conv ids")
     parser.add_argument('-dataPath', type=str, help="Directory for pfiles")
     parser.add_argument('-delta', type=int, help="delta for input features")
-    # parser.add_argument('--test', type=float)
 
     jrtk.core.setupLogging(None, None, logging.DEBUG)
     args = parser.parse_args()
@@ -60,8 +59,6 @@ def main():
 
     dim = 2 * (args.delta * 2 + 1)
 
-    BCcounter = 0
-    NBCcounter = 0
     counter = 0
     mkpath(args.dataPath)
     fpBC = open(os.path.join(args.dataPath, args.pfilePrefix + "-BC.txt"), "w")
@@ -84,7 +81,6 @@ def main():
         fromTime = float(uttInfo['from'])
         if isBackchannel(uttInfo):
             # print('has backchannel: ' + uttInfo['text'])
-            length = toTime - fromTime
             cBCbegin = fromTime + BCbegin
             cBCend = fromTime + BCend
             cNBCbegin = fromTime + NBCbegin
@@ -92,7 +88,7 @@ def main():
             if cNBCbegin < 0:
                 logging.debug(
                     "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
-                                                                                     toTime))
+                                                                                      toTime))
                 continue
 
             if channel == "A":
@@ -106,9 +102,11 @@ def main():
 
             fromTime = cNBCbegin
             toTime = cBCend
-            uttInfo['from'] = fromTime
-            uttInfo['to'] = toTime
-            features = featureSetBC.eval(None, uttInfo)
+            features = featureSetBC.eval(None, {
+                'from': fromTime,
+                'to': toTime,
+                'conv': uttInfo['conv']
+            })
             F = features[cFeature]
             (frameN, coeffN) = features[cFeature].shape
 
@@ -126,15 +124,14 @@ def main():
             BCframeCount = int((cBCend - cBCbegin) * 100)
             frameCount = 0
             for frameX in range(0, NBCframeCount):
-                fpNBC.write("{} {}   {}  0\n".format(NBCcounter, frameCount, "  ".join(np.char.mod("%.6e", F[frameX]))))
+                fpNBC.write("{} {}   {}  0\n".format(counter, frameCount, "  ".join(np.char.mod("%.6e", F[frameX]))))
                 frameCount += 1
-            NBCcounter += 1
 
             frameCount = 0
             for frameX in range(frameN - BCframeCount, frameN):
-                fpBC.write("{} {}   {}  1\n".format(BCcounter, frameCount, "  ".join(np.char.mod("%.6e", F[frameX]))))
+                fpBC.write("{} {}   {}  1\n".format(counter, frameCount, "  ".join(np.char.mod("%.6e", F[frameX]))))
                 frameCount += 1
-            BCcounter += 1
+
             counter += 1
             if counter % 100 == 0:
                 took = time.clock() - lastTime
