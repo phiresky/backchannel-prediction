@@ -59,10 +59,10 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeatureSVe
     constructor(props: VisualizerProps<NumFeatureSVector>) {
         super(props);
         if(props.feature.typ !== "FeatureType.SVector") throw Error("not svec");
-        window.addEventListener("resize", event => this.forceUpdate());
     }
 
     renderWaveform() {
+        this.props.gui.windowWidth; // for mobx tracking
         const target = this.canvas;
         target.width = target.clientWidth;
         target.height = target.clientHeight;
@@ -99,13 +99,13 @@ export class MultiWaveform extends React.Component<VisualizerProps<NumFeatureFMa
     constructor(props: VisualizerProps<NumFeatureFMatrix>) {
         super(props);
         if(props.feature.typ !== "FeatureType.FMatrix") throw Error("not svec");
-        window.addEventListener("resize", event => this.forceUpdate());
         const data = this.props.feature.data;
         this.data = props.feature.data[0].map((_,i) => data.map(v => v[i]));
     }
 
     renderWaveform() {
         const target = this.canvas;
+        this.props.gui.windowWidth; // for mobx tracking
         target.width = target.clientWidth;
         target.height = target.clientHeight;
         

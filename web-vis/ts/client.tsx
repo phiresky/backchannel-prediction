@@ -186,12 +186,15 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.audio = new AudioContext();
     }
 
-    updateBar = action("updateBar", () => {
+    updatePlaybackPosition = action("updatePlaybackPosition", () => {
         if(this.audioSources.length === 0) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
-        this.playerBar.style.left = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.zoom) + "px";
-        if(this.playing) requestAnimationFrame(this.updateBar);
+        if(this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     });
+    updatePlayerBar = () => {
+        const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.zoom);
+        this.playerBar.style.transform = "translateX("+x+"px)";
+    }
     stopPlayback() {
         while(this.audioSources.length > 0) {
             this.audioSources.pop()!.stop();
@@ -215,7 +218,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
                     this.audioSources.push(audioSource);
                 }
                 this.playing = true;
-                requestAnimationFrame(this.updateBar);
+                requestAnimationFrame(this.updatePlaybackPosition);
             }
         }
     }
@@ -228,12 +231,11 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         event.preventDefault();
         this.stopPlayback();
         this.props.gui.playbackPosition = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
-        this.playerBar.style.left = event.clientX + "px";
     });
 
     componentDidMount() {
         const {gui, zoom} = this.props;
-        this.disposers.push(autorun(() => this.playerBar.style.left = util.getPixelFromPosition(gui.playbackPosition, gui.left, gui.width, zoom) + "px"));
+        this.disposers.push(autorun(this.updatePlayerBar));
         const uisDiv = this.props.gui.uisDiv;
         uisDiv.addEventListener("click", this.onClick);
         window.addEventListener("keydown", this.onKeyDown);
@@ -257,7 +259,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
             this.audioBuffers.set(feature, audioBuffer);
         }
         return (
-            <div ref={p => this.playerBar = p} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:-10, backgroundColor:"gray"}} />
+            <div ref={p => this.playerBar = p} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, backgroundColor:"gray"}} />
         );
     }
 }
