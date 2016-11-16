@@ -49,8 +49,16 @@ export type Feature = NumFeature | Utterances;
 export type ClientMessage = {
     type: "loadConversation",
     name: string
+} | {
+    type: "getConversations"
 }
-
+export type ServerMessage = {
+    type: "getConversations",
+    data: string[]
+} | {
+    type: "getFeature",
+    data: Feature
+}
 export type VisualizerConfig  = {min: number, max: number} | "normalize";
 
 interface UIState {
@@ -138,8 +146,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         const pos = this.props.gui.playbackPosition;
         const utt = this.props.feature.data[i];
         const from = +utt.from / state.totalTimeSeconds, to = +utt.to / state.totalTimeSeconds;
-        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
-        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
+        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom)|0;
+        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom)|0;
         if ( right < 0 || left > this.props.gui.width) return null;
         const style = {}
         let className = "utterance tooltip visible";
@@ -155,7 +163,6 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         </div>;
     })
     render() {
-        
         return (
             <div>
                 <div style={{overflow: "hidden", position: "relative", height: "40px", width:"100%"}}>{this.getElements()}</div>
@@ -191,42 +198,54 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         }
     }
 
+    onKeyUp = (event: KeyboardEvent) => {
+        if(event.keyCode == 32) {
+            event.preventDefault();
+            if(this.audioSources.length > 0) {
+                this.stopPlayback();
+            } else {
+                for(const feature of this.props.features) {
+                    const buffer = this.audioBuffers.get(feature)!;
+                    const audioSource = this.audio.createBufferSource();
+                    audioSource.buffer = buffer;
+                    audioSource.connect(this.audio.destination);
+                    audioSource.start(0, this.props.gui.playbackPosition * buffer.duration);
+                    this.startedAt = this.audio.currentTime - this.props.gui.playbackPosition * buffer.duration;
+                    audioSource.addEventListener("ended", () => this.playing = false);
+                    this.audioSources.push(audioSource);
+                }
+                this.playing = true;
+                requestAnimationFrame(this.updateBar);
+            }
+        }
+    }
+    onKeyDown = (event: KeyboardEvent) => {
+        if(event.keyCode == 32) {
+            event.preventDefault();
+        }
+    }
+    onClick = action("clickSetPlaybackPosition", (event: MouseEvent) => {
+        event.preventDefault();
+        this.stopPlayback();
+        this.props.gui.playbackPosition = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
+        this.playerBar.style.left = event.clientX + "px";
+    });
+
     componentDidMount() {
         const {gui, zoom} = this.props;
         this.disposers.push(autorun(() => this.playerBar.style.left = util.getPixelFromPosition(gui.playbackPosition, gui.left, gui.width, zoom) + "px"));
-        window.addEventListener("click", action("clickSetPlaybackPosition", (event: MouseEvent) => {
-            this.stopPlayback();
-            this.props.gui.playbackPosition = util.getPositionFromPixel(event.clientX, gui.left, gui.width, zoom)!;
-            this.playerBar.style.left = event.clientX + "px";
-        }));
-        window.addEventListener("keydown", event => {
-            if(event.keyCode == 32) {
-                event.preventDefault();
-            }
-        });
-        window.addEventListener("keyup", event => {
-            if(event.keyCode == 32) {
-                event.preventDefault();
-                if(this.audioSources.length > 0) {
-                    this.stopPlayback();
-                } else {
-                    for(const feature of this.props.features) {
-                        const buffer = this.audioBuffers.get(feature)!;
-                        const audioSource = this.audio.createBufferSource();
-                        audioSource.buffer = buffer;
-                        audioSource.connect(this.audio.destination);
-                        audioSource.start(0, this.props.gui.playbackPosition * buffer.duration);
-                        this.startedAt = this.audio.currentTime - this.props.gui.playbackPosition * buffer.duration;
-                        audioSource.addEventListener("ended", () => this.playing = false);
-                        this.audioSources.push(audioSource);
-                    }
-                    this.playing = true;
-                    requestAnimationFrame(this.updateBar);
-                }
-            }
-        });
+        const uisDiv = this.props.gui.uisDiv;
+        uisDiv.addEventListener("click", this.onClick);
+        window.addEventListener("keydown", this.onKeyDown);
+        window.addEventListener("keyup", this.onKeyUp);
+        this.disposers.push(() => uisDiv.removeEventListener("click", this.onClick));
+        this.disposers.push(() => window.removeEventListener("keydown", this.onKeyDown));
+        this.disposers.push(() => window.removeEventListener("keyup", this.onKeyUp));
+        this.disposers.push(() => this.stopPlayback());
     }
-
+    componentWillUnmount() {
+        for(const disposer of this.disposers) disposer();
+    }
     render() {
         for(const feature of this.props.features) {
             if(this.audioBuffers.has(feature)) continue;
@@ -254,6 +273,8 @@ function getVisualizer(uiState: UIState): Visualizer<any> {
     } else throw Error("Can't visualize " + (feat as any).typ);
 }
 const state = observable({
+    conversation: "sw2807",
+    conversations: [] as string[],
     uis: [] as UIState[],
     zoom: {
         left: 0, right: 1
@@ -264,12 +285,20 @@ const state = observable({
 const socket = new WebSocket(`ws://${location.host.split(":")[0]}:8765`);
 
 function sendMessage(message: ClientMessage) {
+    console.log("SENDING: ", message);
     socket.send(JSON.stringify(message));
 }
 socket.onopen = event => {
-    sendMessage({type: "loadConversation", name: "sw2807"});
+    sendMessage({type: "getConversations"});
+    loadConversation();
 };
 
+const loadConversation = action(function loadConversation() {
+    state.uis = [];
+    state.zoom.left = 0; state.zoom.right = 1;
+    state.totalTimeSeconds = NaN;
+    sendMessage({type: "loadConversation", name: state.conversation});
+});
 function splitIn(count: number, data: Utterances) {
     const feats: Utterances[] = [];
     for(let i = 0; i < count; i++) {
@@ -279,44 +308,68 @@ function splitIn(count: number, data: Utterances) {
     return feats;
 }
 socket.onmessage = action("onSocketMessage", (event: MessageEvent) => {
-    const data: Feature = JSON.parse(event.data);
-    console.log(data);
-    features.set(data.name, data);
-    if(data.typ === "utterances") {
-        /*for(const feat of splitIn(5, data)) {
-            features.set(feat.name, feat);
-            state.uis.push({ feature: feat.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
-        }*/
-        state.uis.push({ feature: data.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
-    } else {
-        let visualizerConfig: VisualizerConfig;
-        if(data.range instanceof Array) {
-            visualizerConfig = {min: data.range[0], max: data.range[1]};
-        } else visualizerConfig = data.range;
-        let totalTime;
-        if(data.typ === "FeatureType.SVector") {
-            totalTime = data.data.length / (data.samplingRate * 1000);
-        } else if(data.typ === "FeatureType.FMatrix") {
-            totalTime = data.data.length * data.shift / 1000;
+    const data: ServerMessage = JSON.parse(event.data);
+    console.log("RECEIVING", data);
+    switch (data.type) {
+        case "getConversations": {
+            state.conversations = data.data;
+            break;
         }
-        if (totalTime) {
-            if(isNaN(state.totalTimeSeconds)) state.totalTimeSeconds = totalTime;
-            else if(Math.abs((state.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
-                console.error("Mismatching times, was ", state.totalTimeSeconds, "but", data.name, "has length", totalTime);
+        case "getFeature": {
+            const feature = data.data;
+            features.set(feature.name, feature);
+            if(feature.typ === "utterances") {
+                /*for(const feat of splitIn(5, data)) {
+                    features.set(feat.name, feat);
+                    state.uis.push({ feature: feat.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
+                }*/
+                state.uis.push({ feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalize"});
+            } else {
+                let visualizerConfig: VisualizerConfig;
+                if(feature.range instanceof Array) {
+                    visualizerConfig = {min: feature.range[0], max: feature.range[1]};
+                } else visualizerConfig = feature.range;
+                let totalTime;
+                if(feature.typ === "FeatureType.SVector") {
+                    totalTime = feature.data.length / (feature.samplingRate * 1000);
+                } else if(feature.typ === "FeatureType.FMatrix") {
+                    totalTime = feature.data.length * feature.shift / 1000;
+                }
+                if (totalTime) {
+                    if(isNaN(state.totalTimeSeconds)) state.totalTimeSeconds = totalTime;
+                    else if(Math.abs((state.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
+                        console.error("Mismatching times, was ", state.totalTimeSeconds, "but", feature.name, "has length", totalTime);
+                    }
+                }
+                state.uis.push({ feature: feature.name, visualizer: "Waveform", visualizerConfig });
             }
+            break;
         }
-        state.uis.push({ feature: data.name, visualizer: "Waveform", visualizerConfig });
+        default: throw Error("unknown message "+data)
     }
 });
+@observer
+class ConversationSelector extends React.Component<{}, {}> {
+    render() {
+        return (<div>
+            <input list="conversations" value={state.conversation} onChange={action("editConversation", (e: React.SyntheticEvent<HTMLInputElement>) => state.conversation = e.currentTarget.value)} />
+            <datalist id="conversations">
+                {state.conversations.map(c => <option key={c} value={c}/>)}
+            </datalist>
+            <button onClick={c => loadConversation()}>Load</button>
+        </div>)
+    }
+}
 @observer
 class GUI extends React.Component<{}, {}> {
     @observable widthCalcDiv: HTMLDivElement;
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
+    uisDiv: HTMLDivElement;
     @computed
     get left() {
         this.windowWidth;
-        return this.widthCalcDiv.getBoundingClientRect().left;
+        return this.widthCalcDiv ? this.widthCalcDiv.getBoundingClientRect().left : 0;
     }
     @computed
     get width() {
@@ -355,12 +408,18 @@ class GUI extends React.Component<{}, {}> {
             audioPlayer = <AudioPlayer features={visibleAudioFeatures} zoom={state.zoom} gui={this} />;
         return (
             <div>
-                <div style={{display: "flex"}}>
-                    <div style={{flex: "0 0 content", width:globalConfig.leftBarSize+"px"}}></div>
-                    <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} ></div>
+                <div style={{margin: "10px"}}>
+                    <ConversationSelector />
+                </div>
+                <div ref={div => this.uisDiv = div}>
+                    <div style={{display: "flex"}}>
+                        <div style={{flex: "0 0 content", width:globalConfig.leftBarSize+"px"}}></div>
+                        <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} ></div>
+                    </div>
+                    
+                    {state.uis.map((p, i) => <InfoVisualizer key={p.feature} uiState={p} zoom={state.zoom} gui={this} />)}
                 </div>
                 {audioPlayer}
-                {state.uis.map((p, i) => <InfoVisualizer key={p.feature} uiState={p} zoom={state.zoom} gui={this} />)}
                 <DevTools />
             </div>
         );
