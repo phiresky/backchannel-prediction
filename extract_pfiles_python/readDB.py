@@ -9,8 +9,6 @@ import numpy as np
 import time
 
 logging.basicConfig(level=logging.DEBUG)
-logging.warning("test")
-
 
 def dbaseUttFilter(convIDs: Set[str], convid: str) -> bool:
     # uttInfo = dbase[utt] # type: dict
@@ -41,6 +39,8 @@ NBCend = -1.6
 # Properties for writing pfiles
 feature = "FEAT"  # Feature to be used
 
+def isBackchannel(uttInfo):
+    return uttInfo['text'] in backChannelListOneWord
 
 def main():
     parser = argparse.ArgumentParser()
@@ -82,16 +82,16 @@ def main():
         uttInfo['conv'] = audiofile
         toTime = float(uttInfo['to'])
         fromTime = float(uttInfo['from'])
-        if uttInfo['text'] in backChannelListOneWord:
+        if isBackchannel(uttInfo):
             # print('has backchannel: ' + uttInfo['text'])
             length = toTime - fromTime
             cBCbegin = fromTime + BCbegin
             cBCend = fromTime + BCend
             cNBCbegin = fromTime + NBCbegin
             cNBCend = fromTime + NBCend
-            if cBCbegin < 1.0 or cNBCbegin < 0:
+            if cNBCbegin < 0:
                 logging.debug(
-                    "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s".format(utt, uttInfo['text'], fromTime,
+                    "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
                                                                                      toTime))
                 continue
 

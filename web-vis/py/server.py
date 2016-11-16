@@ -7,6 +7,11 @@ from pprint import pprint
 import json
 import numpy as np
 
+import importlib.util
+readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfiles_python/readDB.py")
+readDB = importlib.util.module_from_spec(readDBspec)
+readDBspec.loader.exec_module(readDB)
+
 
 def readAudioFile(featureSet, filename: str, *, dtype='int16', **kwargs) -> Union[NumFeature, List[NumFeature]]:
     """Thin wrapper around the soundfile.read() method. Arguments are passed through, data read is returned as NumFeature.
@@ -40,13 +45,10 @@ def segsToJSON(name: str) -> Dict:
     return {
         'name': name,
         'typ': 'utterances',
-        'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if uttDB[utt]['text'] in backChannelListOneWord else None}
+        'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt]) else None}
                  for utt in spkDB[name]['segs'].strip().split(" ")]
     }
 
-backChannelListOneWord = {
-    "UM-HUM", "UH-HUH", "YEAH", "RIGHT", "OH", "UM", "YES", "HUH", "OKAY", "HM", "HUM", "UH"
-}
 db = "../../ears2/db/train/all240302"
 
 uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
