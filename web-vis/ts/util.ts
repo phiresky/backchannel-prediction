@@ -88,8 +88,14 @@ export function binarySearch<T>(min: number, max: number, extractor: (i: number)
 }
 
 export function getMinMax(givenRange: [number, number]|null, config: VisualizerConfig, data: number[], start: number, end: number): {min: number, max: number} {
-    if(config === "normalizeGlobal") return stats(data, 0, data.length);
-    else if(config === "normalizeLocal") return stats(data, start, end);
+    if(config === "normalizeGlobal") {
+        const {min, max} = stats(data, 0, data.length);
+        return {min, max};
+    }
+    else if(config === "normalizeLocal") {
+        const {min, max} = stats(data, start, end);
+        return {min, max};
+    }
     else if(config === "givenRange") return givenRange?{min: givenRange[0], max: givenRange[1]}:{min:0, max:1};
     else throw Error("unknown config "+config);
 }

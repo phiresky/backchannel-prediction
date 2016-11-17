@@ -75,7 +75,7 @@ export class HighlightsVisualizer extends React.Component<VisualizerProps<Highli
             let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
             let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
-            const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: globalConfig.visualizerHeight+"px"};
+            const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: globalConfig.visualizerHeight+"px", overflow: "hidden"};
             let className = "highlight";
             if(left < 0) {
                 left = 0;
@@ -92,13 +92,12 @@ export class HighlightsVisualizer extends React.Component<VisualizerProps<Highli
             return <div className={className} key={highlight.from} style={style}
                     //onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
                     //onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}
-                    >
-            </div>;
+                    >{highlight.text}</div>;
         });
     }
     render() {
         return (
-            <div>{this.getElements()}</div>
+            <div style={{fontSize:"smaller"}}>{this.getElements()}</div>
         )
     }
 }

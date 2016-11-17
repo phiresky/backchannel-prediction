@@ -83,9 +83,9 @@ def getHighlights(conv: str, channel: str):
     highlights = []
     for bc in bcs:
         (a, b) = readDB.getBackchannelTrainingRange(bc)
-        highlights.append({'from': a, 'to': b, 'color': (0,255,0)})
+        highlights.append({'from': a, 'to': b, 'color': (0,255,0), 'text': 'BC'})
         (a, b) = readDB.getNonBackchannelTrainingRange(bc)
-        highlights.append({'from': a, 'to': b, 'color': (255,0,0)})
+        highlights.append({'from': a, 'to': b, 'color': (255,0,0), 'text': 'NBC'})
     return highlights
 
 

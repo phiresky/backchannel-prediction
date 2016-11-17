@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { autorun, computed, observable, action, extendObservable, useStrict, isObservableArray, asMap } from 'mobx';
+import { autorun, computed, observable, action, extendObservable, useStrict, isObservableArray, asMap, toJS } from 'mobx';
 useStrict(true);
 import { observer } from 'mobx-react';
 import * as Waveform from './Waveform';
@@ -11,7 +11,7 @@ import {SocketManager} from './socket';
 export const globalConfig = observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
-    leftBarSize: 150,
+    leftBarSize: 200,
     zoomFactor: 1.2,
     visualizerHeight: 100,
     
@@ -59,7 +59,7 @@ export type Highlights = {
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances | Highlights;
-export type Highlight = {from: number, to: number, color: Color};
+export type Highlight = {from: number, to: number, color: Color, text?: string};
 
 export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
 
@@ -99,8 +99,8 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         const {uiState, gui} = this.props;
         if(uiState.currentRange) {
             minmax = [
-                <pre key="max" style={{position: "absolute", top:0, right:0}}>{util.round1(uiState.currentRange.max)}</pre>,
-                <pre key="min" style={{position: "absolute", bottom:0, right:0}}>{util.round1(uiState.currentRange.min)}</pre>,
+                <pre key="max" style={{position: "absolute", margin:0, top:0, right:0}}>{util.round1(uiState.currentRange.max)}</pre>,
+                <pre key="min" style={{position: "absolute", margin:0, bottom:0, right:0}}>{util.round1(uiState.currentRange.min)}</pre>,
                 <div key="sel" style={{position: "absolute", bottom:0, top:0, right:0, display:"flex", justifyContent:"center", flexDirection:"column"}}>
                     <select value={uiState.visualizerConfig} onChange={this.changeVisualizerConfig.bind(this)}>
                         {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
@@ -341,6 +341,10 @@ function splitIn(count: number, data: Utterances) {
     return feats;
 }
 
+const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
+    return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>
+});
+
 @observer
 class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     setConversation = action("setConversation", (e: React.SyntheticEvent<HTMLInputElement>) =>
@@ -411,7 +415,10 @@ export class GUI extends React.Component<{}, {}> {
         if(feature.typ === "utterances") {
             this.uis.push({ uuid: uuid++, feature: [feature.name], visualizer: "TextVisualizer", visualizerConfig: "normalizeLocal", currentRange: null});
         } else if (feature.typ === "highlights") {
-            
+            if(feature.name.includes(".")) {
+                const addTo = feature.name.split(".")[0];
+                this.uis.filter(ui => ui.feature[0] === addTo).forEach(ui => ui.feature.push(feature.name));
+            }
         } else {
             let visualizerConfig: VisualizerConfig;
             if(feature.range instanceof Array) {
@@ -454,6 +461,7 @@ export class GUI extends React.Component<{}, {}> {
                         <input type="checkbox" checked={this.followPlayback}
                             onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
                     </label>
+                    Playback position: <PlaybackPosition gui={this} />
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>
@@ -472,4 +480,4 @@ export class GUI extends React.Component<{}, {}> {
 
 
 const gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
-Object.assign(window, {gui, util, action, globalConfig});
+Object.assign(window, {gui, util, action, globalConfig, toJS});
