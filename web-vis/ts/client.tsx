@@ -11,18 +11,22 @@ import {SocketManager} from './socket';
 export const globalConfig = observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
-    leftBarSize: 100,
+    leftBarSize: 150,
     zoomFactor: 1.2,
     visualizerHeight: 100,
+    
 });
-
+export class styles {
+    @computed static get leftBarCSS() {
+        return {flexBasis: "content", flexGrow:0, flexShrink: 0, width:globalConfig.leftBarSize+"px", border:"1px solid", marginRight:"5px"}
+    }
+}
 
 export interface VisualizerProps<T> {
     gui: GUI;
-    config: VisualizerConfig;
+    uiState: UIState;
     feature: T;
     zoom: Zoom;
-    highlights: Highlight[]
 }
 export interface Visualizer<T> {
     new (props?: VisualizerProps<T>, context?: any): React.Component<VisualizerProps<T>, {}>;
@@ -31,7 +35,7 @@ export type NumFeatureCommon = {
     name: string,
     samplingRate: number, // in kHz
     shift: number,
-    range: [number, number] | "normalize"
+    range: [number, number] | null
 };
 export type NumFeatureSVector = NumFeatureCommon & {
     typ: "FeatureType.SVector",
@@ -52,46 +56,76 @@ export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances;
 export type Highlight = {from: number, to: number, color: Color};
 
-export type VisualizerConfig  = {min: number, max: number} | "normalize";
+export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
 
 interface UIState {
+    uuid: number,
     visualizer: string;
     visualizerConfig: VisualizerConfig,
     feature: string;
     highlights: Highlight[];
+    currentRange: {min: number, max: number} | null
 }
+let uuid = 0;
 interface Zoom {
     left: number; right: number;
 }
 
 @observer
-class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui: GUI}, {}> {
-    @observable range = "[-1:1]";
-    static ranges: {[name: string]: (f: NumFeature) => VisualizerConfig} = {
-        "[-1:1]": (f) => ({min: -1, max: 1}),
-        "[0:1]": (f) => ({min: 0, max: 1}),
-        "normalize": (f) => "normalize"
+class LeftBar extends React.Component<{uiState: UIState, feature: Feature, gui: GUI}, {}> {
+    static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"]
+    @action changeVisualizerConfig(e: React.SyntheticEvent<HTMLSelectElement>) {
+        this.props.uiState.visualizerConfig = e.currentTarget.value as any;
     }
-    /*@action
-    changeRange(evt: React.FormEvent<HTMLSelectElement>) {
-        this.range = evt.currentTarget.value;
-        console.log(this.range);
-        this.props.uiState.visualizerConfig = InfoVisualizer.ranges[this.range](features.get(this.props.uiState.feature)!);        
-    }*/
+    @action changeFeature(e: React.SyntheticEvent<HTMLSelectElement>) {
+        this.props.uiState.feature = e.currentTarget.value;
+    }
+    @action delete() {
+        const uis = this.props.gui.uis;
+        uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
+    }
+    render() {
+        let minmax;
+        const {feature, uiState, gui} = this.props;
+        if(uiState.currentRange && feature.typ.startsWith("FeatureType.")) {
+            minmax = [
+                <pre key="max" style={{position: "absolute", top:0, right:0}}>{util.round1(uiState.currentRange.max)}</pre>,
+                <pre key="min" style={{position: "absolute", bottom:0, right:0}}>{util.round1(uiState.currentRange.min)}</pre>,
+                <div key="sel" style={{position: "absolute", bottom:0, top:0, right:0, display:"flex", justifyContent:"center", flexDirection:"column"}}>
+                    <select value={uiState.visualizerConfig} onChange={this.changeVisualizerConfig.bind(this)}>
+                        {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
+                    </select>
+                </div>
+            ];
+        } else minmax = "";
+        return (
+            <div style={{position: "relative", width:"100%", height:"100%"}}>
+                <div style={{position: "absolute", top:0, left:0}}>
+                    <select value={uiState.feature} onChange={this.changeFeature.bind(this)}>
+                        {[...gui.socketManager.features.keys()].map(f => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                </div>
+                {minmax}
+                <div style={{position: "absolute", bottom:0, left:0}}><button onClick={this.delete.bind(this)}>×</button></div>
+            </div>
+        );
+    }
+}
+@observer
+class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui: GUI}, {}> {
     render() {
         const {uiState, zoom, gui} = this.props;
         const Visualizer = getVisualizer(uiState);
         if (!Visualizer) throw Error("Could not find visualizer " + uiState.visualizer);
+        const feature = this.props.gui.socketManager.features.get(uiState.feature)!;
+        
         return (
-            <div style={{display: "flex"}}>
-                <div style={{flexBasis: "content", flexGrow:0, flexShrink: 0, width:globalConfig.leftBarSize+"px"}}>
-                    {uiState.feature}
-                    {/*<select value={this.range} onChange={this.changeRange.bind(this)} >
-                        {Object.keys(InfoVisualizer.ranges).map(k => <option key={k} value={k}>{k}</option>)}
-                    </select>*/}
+            <div style={{display: "flex", marginBottom:"10px"}}>
+                <div style={styles.leftBarCSS}>
+                    <LeftBar gui={gui} uiState={uiState} feature={feature} />
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <Visualizer config={uiState.visualizerConfig} zoom={zoom} feature={this.props.gui.socketManager.features.get(uiState.feature)!} gui={gui} highlights={uiState.highlights} />
+                    <Visualizer uiState={uiState} zoom={zoom} feature={feature} gui={gui}/>
                 </div>
             </div>
         );
@@ -236,9 +270,10 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         }
     }
     onClick = action("clickSetPlaybackPosition", (event: MouseEvent) => {
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
+        if(x<0) return;
         event.preventDefault();
         this.stopPlayback();
-        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
         this.props.gui.playbackPosition = Math.max(x, 0);
     });
 
@@ -279,7 +314,7 @@ function getVisualizer(uiState: UIState): Visualizer<any> {
     if(feat.typ === "FeatureType.SVector") {
         return Waveform.HighlightOverlayVisualizer;
     } else if (feat.typ === "FeatureType.FMatrix") {
-        return Waveform.MultiWaveform;
+        return Waveform.HighlightOverlayVisualizer;
     } else if (feat.typ === "utterances") {
         return TextVisualizer;
     } else throw Error("Can't visualize " + (feat as any).typ);
@@ -300,7 +335,7 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     setConversation = action("setConversation", (e: React.SyntheticEvent<HTMLInputElement>) =>
         this.props.gui.conversation = e.currentTarget.value);
     render() {
-        return (<div>
+        return (<div style={{display:"inline-block"}}>
             <input list="conversations" value={this.props.gui.conversation} onChange={this.setConversation} />
             <datalist id="conversations">
                 {this.props.gui.socketManager.conversations.map(c => <option key={c} value={c}/>)}
@@ -363,12 +398,12 @@ export class GUI extends React.Component<{}, {}> {
     }
     onFeatureReceived(feature: Feature) {
         if(feature.typ === "utterances") {
-            this.uis.push({ feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalize", highlights: []});
+            this.uis.push({ uuid: uuid++, feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalizeLocal", highlights: [], currentRange: null});
         } else {
             let visualizerConfig: VisualizerConfig;
             if(feature.range instanceof Array) {
-                visualizerConfig = {min: feature.range[0], max: feature.range[1]};
-            } else visualizerConfig = feature.range;
+                visualizerConfig = "givenRange";
+            } else visualizerConfig = "normalizeLocal";
             let totalTime;
             if(feature.typ === "FeatureType.SVector") {
                 totalTime = feature.data.length / (feature.samplingRate * 1000);
@@ -381,7 +416,7 @@ export class GUI extends React.Component<{}, {}> {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
             }
-            this.uis.push({ feature: feature.name, visualizer: "Waveform", visualizerConfig, highlights: [] });
+            this.uis.push({ uuid: uuid++, feature: feature.name, visualizer: "Waveform", visualizerConfig, highlights: [], currentRange: null});
         }
     }
     constructor() {
@@ -402,17 +437,18 @@ export class GUI extends React.Component<{}, {}> {
             <div>
                 <div style={{margin: "10px"}}>
                     <ConversationSelector gui={this} />
-                    Follow playback:
-                    <input type="checkbox" checked={this.followPlayback}
-                        onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
+                    <label style={{marginLeft: "10px"}}>Follow playback:
+                        <input type="checkbox" checked={this.followPlayback}
+                            onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
+                    </label>
                 </div>
                 <div ref={this.setUisDiv}>
-                    <div style={{display: "flex"}}>
-                        <div style={{flex: "0 0 content", width:globalConfig.leftBarSize+"px"}}></div>
-                        <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} ></div>
+                    <div style={{display: "flex", visibility: "hidden"}}>
+                        <div style={styles.leftBarCSS} />
+                        <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} />
                     </div>
                     
-                    {this.uis.map((p, i) => <InfoVisualizer key={p.feature} uiState={p} zoom={this.zoom} gui={this} />)}
+                    {this.uis.map((p, i) => <InfoVisualizer key={p.uuid} uiState={p} zoom={this.zoom} gui={this} />)}
                 </div>
                 {audioPlayer}
                 <DevTools />

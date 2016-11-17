@@ -1,3 +1,5 @@
+import {VisualizerConfig} from './client';
+
 type ValueGetter<T> = (start: number, end: number, evaluator: (start: number, end: number) => T, combinator: (t1: T, t2: T) => T) => T;
 
 const limit = 32;
@@ -83,4 +85,15 @@ export function binarySearch<T>(min: number, max: number, extractor: (i: number)
     const midVal = extractor(mid);
     if(midVal < searchValue) return binarySearch(mid, max, extractor, searchValue);
     else return binarySearch(min, mid, extractor, searchValue);
+}
+
+export function getMinMax(givenRange: [number, number]|null, config: VisualizerConfig, data: number[], start: number, end: number): {min: number, max: number} {
+    if(config === "normalizeGlobal") return stats(data, 0, data.length);
+    else if(config === "normalizeLocal") return stats(data, start, end);
+    else if(config === "givenRange") return givenRange?{min: givenRange[0], max: givenRange[1]}:{min:0, max:1};
+    else throw Error("unknown config "+config);
+}
+export function round1(num: number) {
+    if(num === (num|0)) return num;
+    else return num.toPrecision(4);
 }

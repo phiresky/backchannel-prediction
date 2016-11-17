@@ -2,7 +2,7 @@ import websockets, asyncio
 import soundfile as sf
 import jrtk
 from jrtk.preprocessing import NumFeature, FeatureExtractor
-from typing import List, Union, Tuple, Dict
+from typing import List, Union, Tuple, Dict, Optional
 from pprint import pprint
 import json
 import numpy as np
@@ -13,8 +13,10 @@ readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfi
 readDB = importlib.util.module_from_spec(readDBspec)
 readDBspec.loader.exec_module(readDB)
 
+lbox = jrtk.hmm.Labelbox()
+lbox.load("../../ears2/earsData/2/sw2582-B.lbox.gz")
 
-def featureToJSON(name: str, feature: NumFeature, range: Union[Tuple[float, float], str]) -> Dict:
+def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]]) -> Dict:
     return {
         'name': name,
         'samplingRate': feature.samplingRate,
@@ -48,13 +50,14 @@ featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 async def sendConversation(conv: str, ws):
     features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60*100})  # type: Dict[str, NumFeature]
 
-    for (name, feat) in sorted(features.items()):
+    for name in "adca,pitcha,powera,adcb,pitchb,powerb".split(","):
+        feat = features[name]
         if name.startswith("feat"): continue
         if 'raw' in name: continue
         # if not name.startswith("adc"): continue
         await ws.send(json.dumps({
             "type": "getFeature",
-            "data": featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else "normalize")
+            "data": featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else None)
         }))
         if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
         if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
