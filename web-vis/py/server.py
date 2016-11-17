@@ -87,6 +87,7 @@ def getHighlights(conv: str, channel: str):
 
 
 async def handler(websocket, path):
+    print("new client connected.")
     while True:
         try:
             msg = json.loads(await websocket.recv())

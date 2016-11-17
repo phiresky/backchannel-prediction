@@ -1,3 +1,8 @@
+# originally ported from
+# /project/dialog/backchanneler/workspace/lars_context/extract_pfiles/featAccess
+# (sha1sum c284a64313b39c81171a3a8de06383171e5731e)
+# on 2016-11-06
+
 from jrtk.preprocessing import FeatureExtractor, AbstractStep, NumFeature
 from jrtk.features import Filter
 import os

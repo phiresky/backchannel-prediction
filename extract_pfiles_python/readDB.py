@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+# originally ported from
+# /project/dialog/backchanneler/workspace/lars_context/extract_pfiles/readDB.tcl
+# (sha1sum 0e05e903997432917d5ef5b2ef4d799e196f3ffc)
+# on 2016-11-06
+
 import jrtk
 import argparse
 from typing import Set

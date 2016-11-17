@@ -1,3 +1,8 @@
+# originally ported from
+# /project/dialog/backchanneler/workspace/lars_context/extract_pfiles/featDescDelta
+# (sha1sum 61e11d26f93f8a4792dffdaf49440e536fb70217)
+# on 2016-11-06
+
 from jrtk.features import PitchTracker
 from jrtk.preprocessing import AbstractStep, NumFeature, FeatureExtractor
 from typing import Dict
