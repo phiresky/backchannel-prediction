@@ -16,6 +16,7 @@ import time
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 def dbaseUttFilter(convIDs: Set[str], convid: str) -> bool:
     # uttInfo = dbase[utt] # type: dict
     # convid = uttInfo['convid'] # type: str

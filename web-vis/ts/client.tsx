@@ -141,8 +141,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         const width = this.props.gui.width;
         const utt = this.props.feature.data[i];
         const from = +utt.from / this.props.gui.totalTimeSeconds, to = +utt.to / this.props.gui.totalTimeSeconds;
-        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom)|0;
-        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom)|0;
+        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
+        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
         if ( right < 0 || left > this.props.gui.width) return null;
         let className = "utterance tooltip visible";
         let styleText;
