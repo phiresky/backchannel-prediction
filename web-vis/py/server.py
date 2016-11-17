@@ -62,10 +62,10 @@ async def sendConversation(conv: str, ws):
         if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
         if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
     await ws.send(json.dumps({
-        "type": "getHighlights", "data": {"feature": "adca", "highlights": getHighlights(conv, "A")}
+        "type": "getFeature", "data": {"name": "adca.bc", "typ": "highlights", "data": getHighlights(conv, "A")}
     }))
     await ws.send(json.dumps({
-        "type": "getHighlights", "data": {"feature": "adcb", "highlights": getHighlights(conv, "B")}
+        "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
     }))
 
 

@@ -13,9 +13,6 @@ export type ServerMessage = {
 } | {
     type: "getFeature",
     data: c.Feature
-} | {
-    type: "getHighlights",
-    data: {feature: string, highlights: c.Highlight[]}
 }
 
 export class SocketManager {
@@ -54,10 +51,6 @@ export class SocketManager {
                 const feature = data.data;
                 this.features.set(feature.name, feature);
                 this.gui.onFeatureReceived(feature);
-                break;
-            }
-            case "getHighlights": {
-                this.gui.uis.filter(ui => ui.feature === data.data.feature).forEach(ui => ui.highlights = data.data.highlights);
                 break;
             }
             default: throw Error("unknown message "+(data as any).type)

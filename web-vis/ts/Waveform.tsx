@@ -1,4 +1,5 @@
-import {NumFeature, NumFeatureFMatrix, NumFeatureSVector, Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
+import {GetVisualizer, Feature, NumFeature, NumFeatureFMatrix, NumFeatureSVector, Highlights, 
+        Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
 import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed, action} from 'mobx';
@@ -53,21 +54,24 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 }
 
 @observer
-export class HighlightOverlayVisualizer extends React.Component<VisualizerProps<NumFeatureSVector>, {}> {
+export class HighlightOverlayVisualizer extends React.Component<VisualizerProps<Feature[]>, {}> {
     render() {
         return (
             <div style={{position: "relative", height:globalConfig.visualizerHeight + "px", width: "100%"}}>
-                <div style={{position: "absolute", width:"100%", height:"100%"}}><AudioWaveform {...this.props} /></div>
-                <div style={{psoition: "absolute", width: "100%", height: "100%"}}><HighlightsVisualizer {...this.props} /></div>
+                {this.props.feature.map((feature, i) => 
+                    <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
+                        <GetVisualizer feature={feature} zoom={this.props.zoom} gui={this.props.gui} uiState={this.props.uiState}/>
+                    </div>
+                )}
             </div>
         )
     }
 }
 @observer
-export class HighlightsVisualizer extends React.Component<VisualizerProps<any>, {}> {
+export class HighlightsVisualizer extends React.Component<VisualizerProps<Highlights>, {}> {
     getElements() {
         const width = this.props.gui.width;
-        return this.props.uiState.highlights.map((highlight,i) => {
+        return this.props.feature.data.map((highlight,i) => {
             let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
             let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;

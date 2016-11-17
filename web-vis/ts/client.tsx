@@ -52,8 +52,13 @@ export type Utterances = {
     typ: "utterances",
     data: {from: number | string, to: number | string, text: string, id: string, color: Color|null}[]
 }
+export type Highlights = {
+    name: string,
+    typ: "highlights",
+    data: Highlight[];
+}
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
-export type Feature = NumFeature | Utterances;
+export type Feature = NumFeature | Utterances | Highlights;
 export type Highlight = {from: number, to: number, color: Color};
 
 export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
@@ -62,8 +67,7 @@ interface UIState {
     uuid: number,
     visualizer: string;
     visualizerConfig: VisualizerConfig,
-    feature: string;
-    highlights: Highlight[];
+    feature: string[];
     currentRange: {min: number, max: number} | null
 }
 let uuid = 0;
@@ -72,13 +76,19 @@ interface Zoom {
 }
 
 @observer
-class LeftBar extends React.Component<{uiState: UIState, feature: Feature, gui: GUI}, {}> {
+class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"]
     @action changeVisualizerConfig(e: React.SyntheticEvent<HTMLSelectElement>) {
         this.props.uiState.visualizerConfig = e.currentTarget.value as any;
     }
-    @action changeFeature(e: React.SyntheticEvent<HTMLSelectElement>) {
-        this.props.uiState.feature = e.currentTarget.value;
+    @action changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
+        this.props.uiState.feature[i] = e.currentTarget.value;
+    }
+    @action remove(i: number) {
+        this.props.uiState.feature.splice(i, 1);
+    }
+    @action add() {
+        this.props.uiState.feature.push(this.props.gui.socketManager.features.keys().next().value);
     }
     @action delete() {
         const uis = this.props.gui.uis;
@@ -86,8 +96,8 @@ class LeftBar extends React.Component<{uiState: UIState, feature: Feature, gui: 
     }
     render() {
         let minmax;
-        const {feature, uiState, gui} = this.props;
-        if(uiState.currentRange && feature.typ.startsWith("FeatureType.")) {
+        const {uiState, gui} = this.props;
+        if(uiState.currentRange) {
             minmax = [
                 <pre key="max" style={{position: "absolute", top:0, right:0}}>{util.round1(uiState.currentRange.max)}</pre>,
                 <pre key="min" style={{position: "absolute", bottom:0, right:0}}>{util.round1(uiState.currentRange.min)}</pre>,
@@ -100,10 +110,15 @@ class LeftBar extends React.Component<{uiState: UIState, feature: Feature, gui: 
         } else minmax = "";
         return (
             <div style={{position: "relative", width:"100%", height:"100%"}}>
-                <div style={{position: "absolute", top:0, left:0}}>
-                    <select value={uiState.feature} onChange={this.changeFeature.bind(this)}>
-                        {[...gui.socketManager.features.keys()].map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
+                <div style={{position: "absolute", top:0, left:0, zIndex: 1}}>
+                    {uiState.feature.map((feature, i) => 
+                        <div key={i} ><button onClick={e => this.remove(i)}>-</button>
+                            <select value={feature} onChange={e => this.changeFeature(e, i)}>
+                                {[...gui.socketManager.features.keys()].map(f => <option key={f} value={f}>{f}</option>)}
+                            </select>
+                        </div>
+                    )}
+                    <button onClick={e => this.add()}>+</button>
                 </div>
                 {minmax}
                 <div style={{position: "absolute", bottom:0, left:0}}><button onClick={this.delete.bind(this)}>×</button></div>
@@ -115,17 +130,14 @@ class LeftBar extends React.Component<{uiState: UIState, feature: Feature, gui: 
 class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui: GUI}, {}> {
     render() {
         const {uiState, zoom, gui} = this.props;
-        const Visualizer = getVisualizer(uiState);
-        if (!Visualizer) throw Error("Could not find visualizer " + uiState.visualizer);
-        const feature = this.props.gui.socketManager.features.get(uiState.feature)!;
         
         return (
             <div style={{display: "flex", marginBottom:"10px"}}>
                 <div style={styles.leftBarCSS}>
-                    <LeftBar gui={gui} uiState={uiState} feature={feature} />
+                    <LeftBar gui={gui} uiState={uiState} />
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <Visualizer uiState={uiState} zoom={zoom} feature={feature} gui={gui}/>
+                    <Waveform.HighlightOverlayVisualizer uiState={uiState} gui={gui} zoom={zoom} feature={uiState.feature.map(f => gui.socketManager.features.get(f)!)}/>
                 </div>
             </div>
         );
@@ -270,9 +282,9 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         }
     }
     onClick = action("clickSetPlaybackPosition", (event: MouseEvent) => {
-        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
-        if(x<0) return;
+        if(event.clientX < this.props.gui.left) return;
         event.preventDefault();
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
         this.stopPlayback();
         this.props.gui.playbackPosition = Math.max(x, 0);
     });
@@ -309,15 +321,14 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     }
 }
 
-function getVisualizer(uiState: UIState): Visualizer<any> {
-    const feat = gui.socketManager.features.get(uiState.feature)!;
-    if(feat.typ === "FeatureType.SVector") {
-        return Waveform.HighlightOverlayVisualizer;
-    } else if (feat.typ === "FeatureType.FMatrix") {
-        return Waveform.HighlightOverlayVisualizer;
-    } else if (feat.typ === "utterances") {
-        return TextVisualizer;
-    } else throw Error("Can't visualize " + (feat as any).typ);
+export function GetVisualizer(props: VisualizerProps<Feature>): JSX.Element {
+    if(props.feature.typ === "FeatureType.SVector" || props.feature.typ === "FeatureType.FMatrix") {
+        return <Waveform.AudioWaveform feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+    } else if (props.feature.typ === "utterances") {
+        return <TextVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+    } else if(props.feature.typ === "highlights") {
+        return <Waveform.HighlightsVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+    } else throw Error("Can't visualize " + (props.feature as any).typ);
 }
 
 
@@ -398,7 +409,9 @@ export class GUI extends React.Component<{}, {}> {
     }
     onFeatureReceived(feature: Feature) {
         if(feature.typ === "utterances") {
-            this.uis.push({ uuid: uuid++, feature: feature.name, visualizer: "TextVisualizer", visualizerConfig: "normalizeLocal", highlights: [], currentRange: null});
+            this.uis.push({ uuid: uuid++, feature: [feature.name], visualizer: "TextVisualizer", visualizerConfig: "normalizeLocal", currentRange: null});
+        } else if (feature.typ === "highlights") {
+            
         } else {
             let visualizerConfig: VisualizerConfig;
             if(feature.range instanceof Array) {
@@ -416,7 +429,7 @@ export class GUI extends React.Component<{}, {}> {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
             }
-            this.uis.push({ uuid: uuid++, feature: feature.name, visualizer: "Waveform", visualizerConfig, highlights: [], currentRange: null});
+            this.uis.push({ uuid: uuid++, feature: [feature.name], visualizer: "Waveform", visualizerConfig, currentRange: null});
         }
     }
     constructor() {
@@ -426,7 +439,7 @@ export class GUI extends React.Component<{}, {}> {
         window.addEventListener("resize", action("windowResize", (e: UIEvent) => this.windowWidth = window.innerWidth));
     }
     render(): JSX.Element {
-        const visibleFeatures = new Set(this.uis.map(ui => ui.feature));
+        const visibleFeatures = new Set(this.uis.map(ui => ui.feature).reduce((a,b) => (a.push(...b),a), []));
         const visibleAudioFeatures = [...visibleFeatures]
             .map(f => this.socketManager.features.get(f)!)
             .filter(f => f.typ === "FeatureType.SVector") as NumFeatureSVector[];
@@ -460,9 +473,3 @@ export class GUI extends React.Component<{}, {}> {
 
 const gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
 Object.assign(window, {gui, util, action, globalConfig});
-/*window.addEventListener("wheel", event => {
-    if (event.deltaY > 0) canvas.width *= 1.1;
-    else canvas.width *= 0.9;
-    renderWaveform(canvas, data);
-});*/
-
