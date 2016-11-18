@@ -1,10 +1,9 @@
 import websockets
 import asyncio
 import jrtk
-from jrtk.preprocessing import NumFeature, FeatureExtractor
+from jrtk.preprocessing import NumFeature, FeatureExtractor, FeatureType
 from typing import Tuple, Dict, Optional
 import json
-
 import importlib.util
 
 readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfiles_python/readDB.py")
@@ -12,14 +11,14 @@ readDB = importlib.util.module_from_spec(readDBspec)
 readDBspec.loader.exec_module(readDB)
 
 
-def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]]) -> Dict:
+def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
     return {
         'name': name,
         'samplingRate': feature.samplingRate,
         'dtype': str(feature.dtype),
         'typ': str(feature.typ),
         'shift': feature.shift,
-        'data': feature.tolist(),
+        'data': None if nodata else feature.tolist(),
         'range': range
     }
 
@@ -43,6 +42,17 @@ featureExtractor.appendStep("../../extract_pfiles_python/featAccess.py")
 featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
 
+async def sendFeature(ws, name, feat):
+    dataextra = feat.typ == FeatureType.SVector
+    await ws.send(json.dumps({
+        "type": "getFeature",
+        "data": featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else None,
+                              nodata=dataextra)
+    }))
+    if dataextra:
+        await ws.send(feat.tobytes())
+
+
 async def sendConversation(conv: str, ws):
     features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})  # type: Dict[str, NumFeature]
 
@@ -51,10 +61,7 @@ async def sendConversation(conv: str, ws):
         if name.startswith("feat"): continue
         if 'raw' in name: continue
         # if not name.startswith("adc"): continue
-        await ws.send(json.dumps({
-            "type": "getFeature",
-            "data": featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else None)
-        }))
+        await sendFeature(ws, name, feat)
         if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
         if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
     await ws.send(json.dumps({

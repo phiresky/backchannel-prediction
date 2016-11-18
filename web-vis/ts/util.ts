@@ -39,7 +39,7 @@ class BinaryCacheTree<T> {
     }
 }
 
-export function statsRaw(data: number[], start: number, end: number): Stats {
+export function statsRaw(data: ArrayLike<number>, start: number, end: number): Stats {
     let min = Infinity, max = -Infinity;
     let rms2 = 0;
     let sum = 0;
@@ -55,7 +55,7 @@ export function statsRaw(data: number[], start: number, end: number): Stats {
 }
 
 type Stats = {min: number, max: number, rms2: number, sum: number, count: number};
-const cache = new Map<number[], ValueGetter<Stats>>();
+const cache = new Map<ArrayLike<number>, ValueGetter<Stats>>();
 const statsCombinator = (stats1: Stats, stats2: Stats) => ({
     min: Math.min(stats1.min, stats2.min),
     max: Math.max(stats1.max, stats2.max),
@@ -63,7 +63,7 @@ const statsCombinator = (stats1: Stats, stats2: Stats) => ({
     count: stats1.count + stats2.count,
     sum: stats1.sum + stats2.sum
 });
-export function stats(data: number[], start: number, end: number): Stats {
+export function stats(data: ArrayLike<number>, start: number, end: number): Stats {
     if(!cache.has(data))
         cache.set(data, BinaryCacheTree.create(0, data.length, (start, end) => statsRaw(data, start, end), statsCombinator));
     return cache.get(data)!(start, end, (start, end) => statsRaw(data, start, end), statsCombinator);
@@ -87,7 +87,7 @@ export function binarySearch<T>(min: number, max: number, extractor: (i: number)
     else return binarySearch(min, mid, extractor, searchValue);
 }
 
-export function getMinMax(givenRange: [number, number]|null, config: VisualizerConfig, data: number[], start: number, end: number): {min: number, max: number} {
+export function getMinMax(givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, start: number, end: number): {min: number, max: number} {
     if(config === "normalizeGlobal") {
         const {min, max} = stats(data, 0, data.length);
         return {min, max};

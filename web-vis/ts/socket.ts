@@ -16,15 +16,25 @@ export type ServerMessage = {
 } | {
     type: "done"
 }
+type TypedArrayTypes = 'float32' | 'int16';
+function TypedArrayOf(type: TypedArrayTypes) {
+    switch(type) {
+        case 'float32': return Float32Array;
+        case 'int16': return Int16Array;
+        default: throw Error("unknown type");
+    }
+}
 
 export class SocketManager {
     socket: WebSocket;
     features = new Map<string, c.Feature>();
     @observable
     conversations = [] as string[];
+    nextBinaryFrameBelongsTo: any;
 
     constructor(private gui: c.GUI, server: string) {
         this.socket = new WebSocket(server);
+        this.socket.binaryType = "arraybuffer";
         this.socket.onmessage = this.onSocketMessage.bind(this);
         this.socket.onopen = this.onSocketOpen.bind(this);
     }
@@ -42,6 +52,15 @@ export class SocketManager {
     }
 
     @action onSocketMessage(event: MessageEvent) {
+        if(event.data instanceof ArrayBuffer) {
+            console.log("RECEIVING", event.data);
+            const feature = this.nextBinaryFrameBelongsTo;
+            if(!feature) throw Error("received unanticipated binary frame");
+            feature.data = new (TypedArrayOf(feature.dtype))(event.data);
+            this.features.set(feature.name, feature);
+            this.gui.onFeatureReceived(feature);
+            return;
+        }
         const data: ServerMessage = JSON.parse(event.data);
         console.log("RECEIVING", data);
         switch (data.type) {
@@ -51,8 +70,13 @@ export class SocketManager {
             }
             case "getFeature": {
                 const feature = data.data;
-                this.features.set(feature.name, feature);
-                this.gui.onFeatureReceived(feature);
+                
+                if(feature.data === null) {
+                    this.nextBinaryFrameBelongsTo = feature;
+                } else {
+                    this.features.set(feature.name, feature);
+                    this.gui.onFeatureReceived(feature);
+                }
                 break;
             }
             case "done": {

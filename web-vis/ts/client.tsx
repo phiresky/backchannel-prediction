@@ -40,8 +40,9 @@ export type NumFeatureCommon = {
 };
 export type NumFeatureSVector = NumFeatureCommon & {
     typ: "FeatureType.SVector",
-    data: number[]
+    data: ArrayLike<number>
 };
+
 export type NumFeatureFMatrix = NumFeatureCommon & {
     typ: "FeatureType.FMatrix",
     data: number[][]

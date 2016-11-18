@@ -6,7 +6,7 @@ import {observable, autorun, computed, action} from 'mobx';
 import * as util from './util';
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: VisualizerConfig, data: number[], zoom: {left: number, right: number}) {
+        givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
     const start = Math.floor(zoom.left * data.length);
     const end = Math.floor(zoom.right * data.length);
     const length = end - start;
@@ -54,7 +54,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, {}> {
     canvas: HTMLCanvasElement;
     disposers: (() => void)[] = [];
-    data: number[][];
+    data: ArrayLike<number>[];
     constructor(props: VisualizerProps<NumFeature>) {
         super(props);
         if(props.feature.typ === "FeatureType.SVector") this.data = [props.feature.data];
