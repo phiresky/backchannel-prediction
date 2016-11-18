@@ -5,13 +5,13 @@ import * as c from './client';
 import * as util from './util';
 
 @observer
-export class OverlayVisualizer extends React.Component<c.VisualizerProps<c.Feature[]>, {}> {
+export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiStates: c.SingleUIState[]}, {}> {
     render() {
         return (
             <div style={{position: "relative", height:c.globalConfig.visualizerHeight + "px", width: "100%"}}>
-                {this.props.feature.map((feature, i) => 
+                {this.props.uiStates.map((feature, i) => 
                     <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
-                        <c.GetVisualizer feature={feature} gui={this.props.gui} uiState={this.props.uiState}/>
+                        <c.ChosenVisualizer feature={this.props.gui.getFeature(feature.feature)} gui={this.props.gui} uiState={feature}/>
                     </div>
                 )}
             </div>
@@ -40,10 +40,7 @@ export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Hi
             }
             const padding = 0;
             Object.assign(style, {left:left+"px", width: right-left-padding*2+"px", padding: padding + "px"});
-            return <div className={className} key={highlight.from} style={style}
-                    //onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
-                    //onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}
-                    >{highlight.text}</div>;
+            return <div className={className} key={highlight.from} style={style}>{highlight.text}</div>;
         });
     }
     render() {

@@ -103,3 +103,6 @@ export function round1(num: number) {
     if(num === (num|0)) return num;
     else return num.toPrecision(4);
 }
+export function randomChoice<T>(data: T[]) {
+    return data[Math.floor(Math.random() * data.length)];
+}

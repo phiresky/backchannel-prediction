@@ -1,4 +1,4 @@
-import {GetVisualizer, Feature, NumFeature, NumFeatureFMatrix, NumFeatureSVector, Highlights, 
+import {Feature, NumFeature, NumFeatureFMatrix, NumFeatureSVector, Highlights, 
         Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
 import * as React from 'react';
 import {observer} from 'mobx-react';
@@ -10,9 +10,8 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     const start = Math.floor(zoom.left * data.length);
     const end = Math.floor(zoom.right * data.length);
     const length = end - start;
-    const display = util.getMinMax(givenRange, config, data, start, end);;
-    
-    const mid = (h / 2) | 0;
+    const display = util.getMinMax(givenRange, config, data, start, end);
+
     const displayMinMax = display.max - display.min;
     let lasth1 = NaN, lasth2 = NaN;
     ctx.fillStyle = globalConfig.maxColor;
@@ -50,18 +49,63 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     return display;
 }
 
-@observer
-export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, {}> {
+function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
+        givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
+    const start = Math.floor(zoom.left * data.length);
+    const end = Math.floor(zoom.right * data.length);
+    const length = end - start;
+    const display = util.getMinMax(givenRange, config, data, start, end);
+    for (let x = 0; x < w; x++) {
+        const from = x / w, to = (x + 1) / w;
+        const fromSample = start + Math.floor(length * from);
+        const toSample = start + Math.ceil(length * to);
+        const {min, max, rms2, sum, count} = util.stats(data, fromSample, toSample);
+        const avg = sum / count;
+        ctx.fillStyle = `rgba(0,0,0,${(avg - display.min)/(display.max - display.min)})`;
+        ctx.fillRect(x, y, 1, h);
+    }
+    return display;
+}
+
+abstract class CanvasRenderer<P> extends React.Component<VisualizerProps<P>, {}> {
     canvas: HTMLCanvasElement;
     disposers: (() => void)[] = [];
+
+    abstract renderCanvas(canvas: HTMLCanvasElement): void;
+
+    render() {
+        const border = 1;
+        return <div>
+            <canvas style={{width: "100%", height: globalConfig.visualizerHeight-(border*2)+"px", borderStyle:"solid", borderWidth:border+"px"}}
+                ref={c => this.canvas = c}/>
+        </div>;
+    }
+    componentDidUpdate() {
+        this.renderCanvas(this.canvas);
+    }
+    componentDidMount() {
+        this.disposers.push(autorun("renderCanvas", () => this.renderCanvas(this.canvas)));
+    }
+    componentWillUnmount() {
+        for(const disposer of this.disposers) disposer();
+    }
+}
+
+abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
     data: ArrayLike<number>[];
+
+    abstract singleRenderFunction: 
+        (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
+            givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number})
+            => {min: number, max: number};
+     
     constructor(props: VisualizerProps<NumFeature>) {
         super(props);
         if(props.feature.typ === "FeatureType.SVector") this.data = [props.feature.data];
-        if(props.feature.typ === "FeatureType.FMatrix") {
+        else if(props.feature.typ === "FeatureType.FMatrix") {
             const data = props.feature.data;
             this.data = props.feature.data[0].map((_,i) => data.map(v => v[i]));
-        }
+        } else throw Error("unknown type");
     }
 
     @action
@@ -69,7 +113,7 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, 
         this.props.uiState.currentRange = range;
     }
 
-    renderWaveform() {
+    renderCanvas(canvas: HTMLCanvasElement) {
         const target = this.canvas;
         this.props.gui.windowWidth; // for mobx tracking
         target.width = target.clientWidth;
@@ -78,28 +122,19 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, 
         const w = target.width;
         const h = target.height - 1;
         const ctx = target.getContext("2d")!;
-        const data = this.props.feature.data;
         const dim = this.data.length;
         let range;
         for(let y = 0; y < dim; y++) {
-            range = renderWaveform(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.feature.range, this.props.uiState.visualizerConfig, this.data[y], this.props.gui.zoom);
+            range = this.singleRenderFunction(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.feature.range, this.props.uiState.config, this.data[y], this.props.gui.zoom);
         }
         if(range) this.setCurrentRange(range);
     }
-
-    componentDidUpdate() {
-        this.renderWaveform();
-    }
-    componentDidMount() {
-        this.disposers.push(autorun("renderWaveform", () => this.renderWaveform()));
-    }
-    componentWillUnmount() {
-        for(const disposer of this.disposers) disposer();
-    }
-    render() {
-        const border = 1;
-        return <div>
-            <canvas style={{width: "100%", height: globalConfig.visualizerHeight-(border*2)+"px", borderStyle:"solid", borderWidth:border+"px"}} ref={c => this.canvas = c}/>
-        </div>;
-    }
+}
+@observer
+export class AudioWaveform extends MultiCanvasRenderer {
+    singleRenderFunction = renderWaveform;
+}
+@observer
+export class Darkness extends MultiCanvasRenderer {
+    singleRenderFunction = renderDarkness;
 }
