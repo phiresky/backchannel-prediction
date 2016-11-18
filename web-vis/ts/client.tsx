@@ -8,6 +8,7 @@ import * as util from './util';
 import DevTools from 'mobx-react-devtools';
 import {SocketManager} from './socket';
 import * as LZString from 'lz-string';
+import * as highlights from './Highlights';
 
 export const globalConfig = observable({
     maxColor: "#3232C8",
@@ -137,7 +138,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui:
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <Waveform.HighlightOverlayVisualizer uiState={uiState} gui={gui} feature={uiState.feature.map(f => gui.socketManager.features.get(f)!)}/>
+                    <highlights.OverlayVisualizer uiState={uiState} gui={gui} feature={uiState.feature.map(f => gui.socketManager.features.get(f)!)}/>
                 </div>
             </div>
         );
@@ -329,7 +330,7 @@ export function GetVisualizer(props: VisualizerProps<Feature>): JSX.Element {
     } else if (props.feature.typ === "utterances") {
         return <TextVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} />;
     } else if(props.feature.typ === "highlights") {
-        return <Waveform.HighlightsVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} />;
+        return <highlights.HighlightsVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} />;
     } else throw Error("Can't visualize " + (props.feature as any).typ);
 }
 

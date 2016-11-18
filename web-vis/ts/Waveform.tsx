@@ -4,10 +4,7 @@ import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed, action} from 'mobx';
 import * as util from './util';
-/*let canvas = document.createElement("canvas");
-canvas.width = 1000;
-canvas.height = 300;
-renderWaveform(canvas, data)*/
+
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
         givenRange: [number, number]|null, config: VisualizerConfig, data: number[], zoom: {left: number, right: number}) {
     const start = Math.floor(zoom.left * data.length);
@@ -53,54 +50,6 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     return display;
 }
 
-@observer
-export class HighlightOverlayVisualizer extends React.Component<VisualizerProps<Feature[]>, {}> {
-    render() {
-        return (
-            <div style={{position: "relative", height:globalConfig.visualizerHeight + "px", width: "100%"}}>
-                {this.props.feature.map((feature, i) => 
-                    <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
-                        <GetVisualizer feature={feature} gui={this.props.gui} uiState={this.props.uiState}/>
-                    </div>
-                )}
-            </div>
-        )
-    }
-}
-@observer
-export class HighlightsVisualizer extends React.Component<VisualizerProps<Highlights>, {}> {
-    getElements() {
-        const width = this.props.gui.width;
-        return this.props.feature.data.map((highlight,i) => {
-            let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
-            let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
-            if ( right < 0 || left > this.props.gui.width) return null;
-            const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: globalConfig.visualizerHeight+"px", overflow: "hidden"};
-            let className = "highlight";
-            if(left < 0) {
-                left = 0;
-                Object.assign(style, {borderLeft: "none"});
-                className += " leftcutoff";
-            }
-            if(right > width) {
-                right = width;
-                Object.assign(style, {borderRight: "none"});
-                className += " rightcutoff";
-            }
-            const padding = 0;
-            Object.assign(style, {left:left+"px", width: right-left-padding*2+"px", padding: padding + "px"});
-            return <div className={className} key={highlight.from} style={style}
-                    //onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
-                    //onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}
-                    >{highlight.text}</div>;
-        });
-    }
-    render() {
-        return (
-            <div style={{fontSize:"smaller"}}>{this.getElements()}</div>
-        )
-    }
-}
 @observer
 export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, {}> {
     canvas: HTMLCanvasElement;

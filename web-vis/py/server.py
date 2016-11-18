@@ -1,17 +1,16 @@
-import websockets, asyncio
-import soundfile as sf
+import websockets
+import asyncio
 import jrtk
 from jrtk.preprocessing import NumFeature, FeatureExtractor
-from typing import List, Union, Tuple, Dict, Optional
-from pprint import pprint
+from typing import Tuple, Dict, Optional
 import json
-import numpy as np
 
 import importlib.util
 
 readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfiles_python/readDB.py")
 readDB = importlib.util.module_from_spec(readDBspec)
 readDBspec.loader.exec_module(readDB)
+
 
 def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]]) -> Dict:
     return {
@@ -45,7 +44,7 @@ featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
 
 async def sendConversation(conv: str, ws):
-    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60*100})  # type: Dict[str, NumFeature]
+    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})  # type: Dict[str, NumFeature]
 
     for name in "adca,pitcha,powera,adcb,pitchb,powerb".split(","):
         feat = features[name]
@@ -64,7 +63,7 @@ async def sendConversation(conv: str, ws):
     await ws.send(json.dumps({
         "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
     }))
-    await ws.send(json.dumps({"type":"done"}))
+    await ws.send(json.dumps({"type": "done"}))
 
 
 def getHighlights(conv: str, channel: str):
@@ -81,9 +80,9 @@ def getHighlights(conv: str, channel: str):
     highlights = []
     for bc in bcs:
         (a, b) = readDB.getBackchannelTrainingRange(bc)
-        highlights.append({'from': a, 'to': b, 'color': (0,255,0), 'text': 'BC'})
+        highlights.append({'from': a, 'to': b, 'color': (0, 255, 0), 'text': 'BC'})
         (a, b) = readDB.getNonBackchannelTrainingRange(bc)
-        highlights.append({'from': a, 'to': b, 'color': (255,0,0), 'text': 'NBC'})
+        highlights.append({'from': a, 'to': b, 'color': (255, 0, 0), 'text': 'NBC'})
     return highlights
 
 
