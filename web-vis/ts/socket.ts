@@ -13,6 +13,8 @@ export type ServerMessage = {
 } | {
     type: "getFeature",
     data: c.Feature
+} | {
+    type: "done"
 }
 
 export class SocketManager {
@@ -34,9 +36,9 @@ export class SocketManager {
         this.socket.send(JSON.stringify(message));
     }
 
-    onSocketOpen(event: MessageEvent) {
+    onSocketOpen(event: Event) {
         this.sendMessage({type: "getConversations"});
-        this.loadConversation(this.gui.conversation);
+        this.gui.onSocketOpen();
     }
 
     @action onSocketMessage(event: MessageEvent) {
@@ -51,6 +53,10 @@ export class SocketManager {
                 const feature = data.data;
                 this.features.set(feature.name, feature);
                 this.gui.onFeatureReceived(feature);
+                break;
+            }
+            case "done": {
+                if(this.gui.onFeatureReceiveDone) this.gui.onFeatureReceiveDone();
                 break;
             }
             default: throw Error("unknown message "+(data as any).type)

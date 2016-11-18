@@ -60,7 +60,7 @@ export class HighlightOverlayVisualizer extends React.Component<VisualizerProps<
             <div style={{position: "relative", height:globalConfig.visualizerHeight + "px", width: "100%"}}>
                 {this.props.feature.map((feature, i) => 
                     <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
-                        <GetVisualizer feature={feature} zoom={this.props.zoom} gui={this.props.gui} uiState={this.props.uiState}/>
+                        <GetVisualizer feature={feature} gui={this.props.gui} uiState={this.props.uiState}/>
                     </div>
                 )}
             </div>
@@ -72,8 +72,8 @@ export class HighlightsVisualizer extends React.Component<VisualizerProps<Highli
     getElements() {
         const width = this.props.gui.width;
         return this.props.feature.data.map((highlight,i) => {
-            let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
-            let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.zoom);
+            let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
+            let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
             const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: globalConfig.visualizerHeight+"px", overflow: "hidden"};
             let className = "highlight";
@@ -133,7 +133,7 @@ export class AudioWaveform extends React.Component<VisualizerProps<NumFeature>, 
         const dim = this.data.length;
         let range;
         for(let y = 0; y < dim; y++) {
-            range = renderWaveform(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.feature.range, this.props.uiState.visualizerConfig, this.data[y], this.props.zoom);
+            range = renderWaveform(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.feature.range, this.props.uiState.visualizerConfig, this.data[y], this.props.gui.zoom);
         }
         if(range) this.setCurrentRange(range);
     }

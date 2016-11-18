@@ -7,6 +7,7 @@ import * as Waveform from './Waveform';
 import * as util from './util';
 import DevTools from 'mobx-react-devtools';
 import {SocketManager} from './socket';
+import * as LZString from 'lz-string';
 
 export const globalConfig = observable({
     maxColor: "#3232C8",
@@ -14,7 +15,7 @@ export const globalConfig = observable({
     leftBarSize: 200,
     zoomFactor: 1.2,
     visualizerHeight: 100,
-    
+    defaultConversation: "sw2807"
 });
 export class styles {
     @computed static get leftBarCSS() {
@@ -26,7 +27,6 @@ export interface VisualizerProps<T> {
     gui: GUI;
     uiState: UIState;
     feature: T;
-    zoom: Zoom;
 }
 export interface Visualizer<T> {
     new (props?: VisualizerProps<T>, context?: any): React.Component<VisualizerProps<T>, {}>;
@@ -137,7 +137,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui:
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <Waveform.HighlightOverlayVisualizer uiState={uiState} gui={gui} zoom={zoom} feature={uiState.feature.map(f => gui.socketManager.features.get(f)!)}/>
+                    <Waveform.HighlightOverlayVisualizer uiState={uiState} gui={gui} feature={uiState.feature.map(f => gui.socketManager.features.get(f)!)}/>
                 </div>
             </div>
         );
@@ -158,8 +158,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         const width = this.props.gui.width;
         return this.props.feature.data.map((utt,i) => {
             const from = +utt.from / this.props.gui.totalTimeSeconds, to = +utt.to / this.props.gui.totalTimeSeconds;
-            let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
-            let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
+            let left = util.getPixelFromPosition(from, 0, width, this.props.gui.zoom);
+            let right = util.getPixelFromPosition(to, 0, width, this.props.gui.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
             const style = {height: "20px"};
             if(utt.color) Object.assign(style, {backgroundColor: `rgb(${utt.color})`});
@@ -187,8 +187,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
         const width = this.props.gui.width;
         const utt = this.props.feature.data[i];
         const from = +utt.from / this.props.gui.totalTimeSeconds, to = +utt.to / this.props.gui.totalTimeSeconds;
-        let left = util.getPixelFromPosition(from, 0, width, this.props.zoom);
-        let right = util.getPixelFromPosition(to, 0, width, this.props.zoom);
+        let left = util.getPixelFromPosition(from, 0, width, this.props.gui.zoom);
+        let right = util.getPixelFromPosition(to, 0, width, this.props.gui.zoom);
         if ( right < 0 || left > this.props.gui.width) return null;
         let className = "utterance tooltip visible";
         let styleText;
@@ -201,7 +201,7 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
     }
     Tooltip = observer(function Tooltip(this: TextVisualizer) {
         return <div>
-            {this.playbackTooltip !== null && this.props.gui.audioPlayer.playing && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
+            {this.playbackTooltip !== null && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
             {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
     }.bind(this))
@@ -228,6 +228,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     constructor(props: any) {
         super(props);
         this.audio = new AudioContext();
+        this.disposers.push(() => (this.audio as any).close());
     }
 
     center() {
@@ -322,12 +323,13 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
 }
 
 export function GetVisualizer(props: VisualizerProps<Feature>): JSX.Element {
+    if(!props.feature) return <div>Feature not found</div>;
     if(props.feature.typ === "FeatureType.SVector" || props.feature.typ === "FeatureType.FMatrix") {
-        return <Waveform.AudioWaveform feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+        return <Waveform.AudioWaveform feature={props.feature} uiState={props.uiState} gui={props.gui} />;
     } else if (props.feature.typ === "utterances") {
-        return <TextVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+        return <TextVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} />;
     } else if(props.feature.typ === "highlights") {
-        return <Waveform.HighlightsVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} zoom={props.zoom} />;
+        return <Waveform.HighlightsVisualizer feature={props.feature} uiState={props.uiState} gui={props.gui} />;
     } else throw Error("Can't visualize " + (props.feature as any).typ);
 }
 
@@ -355,9 +357,18 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
             <datalist id="conversations">
                 {this.props.gui.socketManager.conversations.map(c => <option key={c} value={c}/>)}
             </datalist>
-            <button onClick={c => gui.loadConversation()}>Load</button>
+            <button onClick={c => this.props.gui.loadConversation(this.props.gui.conversation)}>Load</button>
         </div>)
     }
+}
+
+const badExamples: {[name: string]: string} = {
+    "too early": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgHYqA2AJgE4yyAOAZkcYBZb2BWWgBoQAM3QQI6AO6po8JMlKioETAFMRiIgDd1AJ0xR8RUiEzT6rMlRAiArtkykA2qHuOAJqQCMwserG9vrqriBQnohQduGRUBRwiCAAuiI6Tvaq2ABeBmYA6lB64voAtjHpmJkQOQYAwkSi2ADmZs3YeoQASlCEzaFawSGEuD19oSSgpdjEJAC07PR0rCKlUAAepIvLAL47Qu5evlQiooG4wRMu5pbWVHMAgilpGVm5+mYAKurruABqrxq7wqgNq+gahCarRIIEI6DKb3UABl0FEIDFEEN1CMxv1SIR7JJ9odsN4SD4VgEgiEwmA8IgABbREQRKIJJKpECVapggpFdQlcovKqI8GNFpmOEIoHI1GqDFYnG9PGTEDTWb0fxrTYkRhUPYHEAeUm+Rinc6XWkyAzM2JsxLPLmg4EwwrFeFCp0imViyESmFStYylFohX6YajZUTKYzUhzShkLiMWgUxOsHycOhMVYbUiUdjsVjceiCdgMRg+fhkTgGklk+hkc3Uq52uAxVlwdmO7mivnusog71giFQtodbG4gYgTHh7GR8akGOzBZLWiU7VbVesWtGo4keg+JsXGkka4WKw2OYAIW7zryMO+vwBQ+Bwp57xH-thHsRIflg1nJUFxIAkiUNY163oI9LVPcB6QZNsWUiTsHU5HsfT7AUPUHd96nFaFv2lWo-3RACI0nRc1VjEgBBzHUOB3CDSHodhoJPa4wGtfRENbLs0LvD5XX5QUcNFT8CMDX85VI6dFXnFUlzjBMUyobhWH4HxGH4TgOHYGw6LzChuG4LhuHYbhtJsAQyD8PZOWydB0HKVUIAFXBDJoXgqDIfh6As2huCoEtuBEfQWgZdzyGoVhmBMwKbIrHwWNofYQFwdBcFUT5sFKdQAGV1G0QhPGcEhaBYCgM20qh+B2IA",
+    "very delayed": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgBYqyBWAdgDYAmMgZgA4BOKpsluwA0IAGboIEdAHdU0eEmSlRUCJgCmIxEQBu6gE6Yo+IqRCZpLTmQYgRAV2yZSAbVD3HAE1IBGJiNF1Y3t9dVcQKE9EKDsIqKgKOEQQAF0RHSd7VWwALwMzAHUoPXF9AFtYjMwsiFyDAGEiUWwAczNCdHLsvIAZdGiIWMQQ0MJcACUoQhawklAy7GISAFomHxYqETKoAA9SJm5BAF8joXcvXwYAoNwQ2ZdzS2sGZYBBVPTM7vySEAAVdQ7XAANS+tTy+kqYLq+kahGabV+HS64PUfQGQxG6jGk2ms0I9kkp3O2G8JB8nGuwVC4TAeEQAAsYiJItFEsk0iAqjUYYViupShVPtVvrCmq12p1tqj0apMfpRhMpjNSPNFqR2CwtrtfGQfCcziAPKTfNwqbcaSQHmAZAZmXE2UkPlzoRC+SUpVCRaixfCJUipd9ZYMtFiccrZmqlstKGRuNxOIw49x2HQqCwmAx1tq9uQKCxuExOFQGNw40WeFRCwaSWS2Oa7uFWXBYs32c7uaL3QLPcKeRC4QjJSi6sH5YrcSq5iAFtG6HHhDOdSRmAma0aLiQWD4G5aHhYrDZlgAhDuun7-QEg8+Qvuiwf+kDI6Wj-py0MK7FKvGkAlEw3GnWWpiDcjZWuA9IMi2LJRHA7acp2PrdoKXr9g04qIk+gYym+IYgMMn7hj+06zhqlJLrmnAMOugGkIIu73OAtr6NBDpwU6CE3shvYut6MIPphz5Brh45fpOkYzuqKyxqwLAMAw7BUOw6xUD4dDrIu2y5pQNB0JqFJWOsBw2KmJycjk6DoBU04QAKuCkDpXBkGQVZkEWLlxi5Ij6K0DL2XmVDznQxYCGwfh0EwEWnCAuDoLgqh-NgZTqAAyuo2iEJ4zgkPwlA+Km7AMHQRxAA",
+    "double, only when silence before": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgBYAOGqgZgDYqqBOAdiYEYmBWAEzcANCABm6CBHQB3VNHhJkpMVAiYApqMREAbhoBOmKPiKkQmGQJpkOIUQFdsmUgG1QDpwBNSvUWI0TBwMNNxAoL0Qoe3DIqAo4RBAAXVFdZwc1bAAvQ3MAdSh9CQMAWxj0zEyIHMMAYSIxbABzc2bsfUIAJShCZtDtYJDCXB6+0JJQUuxiEgBaBgEuGlFSqAAPUkXlgF8d4Q9vXw5-QNxgidcLKxsOOYBBFLSMrNyDcwAVDXXcADUXmpvCoA2oGBqEJqtEggQjoMqvDQAGXQUQgMUQQw0IzG-VIhAcUn2h2wPhI3BW4jOFzCYDwiAAFtFRBEogkkqkQJVqqCCkUNCVys8qgiwY0WuZYfDAUiUWp0Zjsb1cZMQNNZotVhtfGQyHsDiBPCTfGxTkEQjTZIYmbFWYknpyQUDoYVinDBQ7hdLRRDxdDJWtpcjUfKDMNRkqJlMZqQ5pQyGw2DQmNYaNwdbQ0wwGJrNuQKMxuHx2EwOEWWEwGGRuHriaSBGRTedzSQriy4DE22z7VyRbzXWVgZ7QeDIW0OlicQMQBjQ1jw+NSFHZgslkwKWtc9s1zWDUcSEJG9SW9drLY5gAhbuOvLQr4-f5DoFC7lvEe+mFuhFBuWDWeKhckPihL6oadYCIezZXLSuAMu2zKRHAXYcj2Xp9vybqDi+9RilCH5SrU35or+YaTouqrRiQyY5qQbB8DuoGkAI2aUmalzgJaBhwTaiF2sh17vM6fICphIpvrh-pfrKRHTgq87KkuMZxjwa5MLRvAlrYZAMCaqpanmzCsHwXC2AIqnWBw1Y7By2ToOg5QqhA-K4KQlC0MmthUEsRnaRZtGiAYLT0s5ebsDQHBJkWSxJqwFn7CAuDoLgagfNgpQaAAyhoOiEF4LiUTqFDcAwfAMKWOxAA",
+}
+enum LoadingState {
+    NotConnected, Connected, Loading, Complete
 }
 @observer
 export class GUI extends React.Component<{}, {}> {
@@ -366,7 +377,7 @@ export class GUI extends React.Component<{}, {}> {
     @observable playbackPosition = 0;
     @observable followPlayback = true;
 
-    @observable conversation = "sw2807";
+    @observable conversation = "";
     @observable uis = [] as UIState[];
     @observable zoom = {
         left: 0, right: 1
@@ -376,7 +387,35 @@ export class GUI extends React.Component<{}, {}> {
     audioPlayer: AudioPlayer; setAudioPlayer = action("setAudioPlayer", (a: AudioPlayer) => this.audioPlayer = a);
     uisDiv: HTMLDivElement; setUisDiv = action("setUisDiv", (e: HTMLDivElement) => this.uisDiv = e);
     socketManager: SocketManager;
+    stateAfterLoading = null as any | null;
 
+    loadingState = LoadingState.NotConnected;
+
+    serialize() {
+        return LZString.compressToEncodedURIComponent(JSON.stringify(toJS({
+            playbackPosition: this.playbackPosition,
+            followPlayback: this.followPlayback,
+            conversation: this.conversation,
+            uis: this.uis, //TODO: fix uuids
+            zoom: this.zoom,
+            totalTimeSeconds: this.totalTimeSeconds
+        })));
+    }
+    @action
+    deserialize(data: string) {
+        if(this.audioPlayer) this.audioPlayer.stopPlayback();
+        if(this.loadingState === LoadingState.Loading) {
+            console.error("can't load while loading");
+            return;
+        }
+        const obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
+        if(this.conversation !== obj.conversation) {
+            this.stateAfterLoading = obj;
+            this.loadConversation(obj.conversation);
+        } else {
+            Object.assign(this, obj);
+        }
+    }
     @computed
     get left() {
         this.windowWidth;
@@ -388,11 +427,16 @@ export class GUI extends React.Component<{}, {}> {
         return this.widthCalcDiv ? this.widthCalcDiv.clientWidth : 100;
     }
     @action
-    loadConversation() {
+    loadConversation(conversation: string) {
+        this.conversation = conversation;
         this.uis = [];
         this.zoom.left = 0; this.zoom.right = 1;
         this.totalTimeSeconds = NaN;
         this.socketManager.loadConversation(this.conversation);
+    }
+    @action onFeatureReceiveDone() {
+        if(this.stateAfterLoading) Object.assign(this, this.stateAfterLoading);
+        this.stateAfterLoading = null;
     }
     @action
     onWheel(event: MouseWheelEvent) {
@@ -417,7 +461,7 @@ export class GUI extends React.Component<{}, {}> {
         } else if (feature.typ === "highlights") {
             if(feature.name.includes(".")) {
                 const addTo = feature.name.split(".")[0];
-                this.uis.filter(ui => ui.feature[0] === addTo).forEach(ui => ui.feature.push(feature.name));
+                this.uis.filter(ui => ui.feature[0].slice(-1) === addTo.slice(-1)).forEach(ui => ui.feature.push(feature.name));
             }
         } else {
             let visualizerConfig: VisualizerConfig;
@@ -439,29 +483,41 @@ export class GUI extends React.Component<{}, {}> {
             this.uis.push({ uuid: uuid++, feature: [feature.name], visualizer: "Waveform", visualizerConfig, currentRange: null});
         }
     }
+    onSocketOpen() {
+        this.loadingState = LoadingState.Connected;
+        if(location.hash.length > 1) {
+            this.deserialize(location.hash.substr(1));
+        } else {
+            this.loadConversation(globalConfig.defaultConversation);
+        }
+    }
     constructor() {
         super();
         this.socketManager = new SocketManager(this, `ws://${location.host.split(":")[0]}:8765`);
         window.addEventListener("wheel", e => this.onWheel(e));
         window.addEventListener("resize", action("windowResize", (e: UIEvent) => this.windowWidth = window.innerWidth));
+        window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
     }
     render(): JSX.Element {
         const visibleFeatures = new Set(this.uis.map(ui => ui.feature).reduce((a,b) => (a.push(...b),a), []));
         const visibleAudioFeatures = [...visibleFeatures]
-            .map(f => this.socketManager.features.get(f)!)
-            .filter(f => f.typ === "FeatureType.SVector") as NumFeatureSVector[];
+            .map(f => this.socketManager.features.get(f))
+            .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
         let audioPlayer
         if(visibleAudioFeatures.length > 0)
             audioPlayer = <AudioPlayer features={visibleAudioFeatures} zoom={this.zoom} gui={this} ref={this.setAudioPlayer} />;
         return (
             <div>
-                <div style={{margin: "10px"}}>
+                <div style={{margin: "10px"}} className="headerBar">
                     <ConversationSelector gui={this} />
-                    <label style={{marginLeft: "10px"}}>Follow playback:
+                    <label>Follow playback:
                         <input type="checkbox" checked={this.followPlayback}
                             onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
                     </label>
-                    Playback position: <PlaybackPosition gui={this} />
+                    <span>Playback position: <PlaybackPosition gui={this} /></span>
+                    <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
+                    Examples: {Object.keys(badExamples).map(txt => <a key={txt} href={badExamples[txt]}
+                        onClick={e => {this.deserialize(badExamples[txt].substr(1))}}>{txt}</a>)}
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>

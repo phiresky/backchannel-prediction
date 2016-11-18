@@ -13,9 +13,6 @@ readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfi
 readDB = importlib.util.module_from_spec(readDBspec)
 readDBspec.loader.exec_module(readDB)
 
-lbox = jrtk.hmm.Labelbox()
-lbox.load("../../ears2/earsData/2/sw2582-B.lbox.gz")
-
 def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]]) -> Dict:
     return {
         'name': name,
@@ -67,6 +64,7 @@ async def sendConversation(conv: str, ws):
     await ws.send(json.dumps({
         "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
     }))
+    await ws.send(json.dumps({"type":"done"}))
 
 
 def getHighlights(conv: str, channel: str):
