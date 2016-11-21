@@ -32,12 +32,12 @@ def segsToJSON(name: str) -> Dict:
     }
 
 
-db = "../../ears2/db/train/all240302"
+db = "../../data/db/all240302"
 
 uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
 spkDB = jrtk.base.DBase(baseFilename=db + "-spk", mode="r")
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
-featureExtractor = FeatureExtractor(config={'delta': 10, 'base': '../../ears2/earsData'})
+featureExtractor = FeatureExtractor(config={'context': 10, 'adcPath': '../../data/adc'})
 featureExtractor.appendStep("../../extract_pfiles_python/featAccess.py")
 featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
 
@@ -105,6 +105,27 @@ async def handler(websocket, path):
             return
 
 
-start_server = websockets.serve(handler, '0.0.0.0', 8765)
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+def start_server():
+    start_server = websockets.serve(handler, '0.0.0.0', 8765)
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
+
+
+def sanity():
+    """check if spkDB and uttDB have the same utterances"""
+    utts = list()
+    for spk in spkDB:
+        x = spkDB[spk]
+        utts += x['segs'].strip().split(" ")
+
+    utts2 = list()
+    x = list(uttDB)
+    for utt in uttDB:
+        x = uttDB[utt]
+        utts2.append(utt)
+
+    print(utts == utts2)
+
+
+if __name__ == '__main__':
+    start_server()

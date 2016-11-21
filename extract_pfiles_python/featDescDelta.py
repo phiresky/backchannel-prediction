@@ -20,8 +20,8 @@ class Step(AbstractStep):
         tmpfeata = pitcha.merge(feats['powera'])  # type: NumFeature
         tmpfeatb = pitchb.merge(feats['powerb'])  # type: NumFeature
 
-        feata = tmpfeata.adjacent(featExtractor.config['delta'])
-        featb = tmpfeatb.adjacent(featExtractor.config['delta'])
+        feata = tmpfeata.adjacent(featExtractor.config['context'])
+        featb = tmpfeatb.adjacent(featExtractor.config['context'])
         return {
             'pitcha': pitcha,
             'pitchb': pitchb,

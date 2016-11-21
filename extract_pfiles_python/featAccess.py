@@ -18,7 +18,7 @@ class Step(AbstractStep):
 
     def eval(self, featExtractor: FeatureExtractor, spkInfo, uttInfo, feats):
         conv = uttInfo['conv']
-        adcfile = os.path.join(featExtractor.config['base'], "swbLinks", conv + ".wav")
+        adcfile = os.path.join(featExtractor.config['adcPath'], conv + ".wav")
         if not os.path.exists(adcfile):
             raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
 
@@ -40,7 +40,11 @@ class Step(AbstractStep):
 
     def filterPower(self, power: NumFeature) -> NumFeature:
         b = power.max() / 10 ** 4
-        power = np.log10(power + b)
+        val = power + b
+        for i in range(0, len(val)):
+            if val[i] <= 0:
+                    val[i] = 1
+        power = np.log10(val)
         power = power.applyFilter(self.filtr)
         power = power.applyFilter(self.filtr)
         power = power.normalize(min=-0.1, max=0.5)
