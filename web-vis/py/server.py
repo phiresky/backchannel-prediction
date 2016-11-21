@@ -58,9 +58,6 @@ async def sendConversation(conv: str, ws):
 
     for name in "adca,pitcha,powera,adcb,pitchb,powerb".split(","):
         feat = features[name]
-        if name.startswith("feat"): continue
-        if 'raw' in name: continue
-        # if not name.startswith("adc"): continue
         await sendFeature(ws, name, feat)
         if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
         if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
