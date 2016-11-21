@@ -14,7 +14,9 @@ import numpy as np
 import time
 import sys
 import json
+import subprocess
 from collections import OrderedDict
+
 
 def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     shortID = speaker.split("-")[0]
@@ -76,7 +78,7 @@ def getNonBackchannelTrainingRange(uttInfo):
 config = None
 counter = 0
 lastTime = time.clock()
-dim = None
+input_dim = None
 
 
 def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase,
@@ -117,7 +119,7 @@ def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DB
         F = features["feat" + BCchannel.lower()]
         (frameN, coeffN) = F.shape
 
-        if coeffN != dim:
+        if coeffN != input_dim:
             raise Exception("coeff and dim don't match")
 
         expectedNumOfFrames = (toTime - fromTime) * 100
@@ -156,15 +158,18 @@ def parseConversationSet(spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase, setname
 
 def main():
     np.seterr(all='raise')
-    global config, dim
+    global config, input_dim
     with open(sys.argv[1]) as config_file:
         config = json.load(config_file, object_pairs_hook=OrderedDict)
 
     context = config['context']
-    outputDir = os.path.join(config['outputDirectory'], "context" + str(context))
+    version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
+    outputDir = os.path.join(config['outputDirectory'],
+                             "{}-context{}".format(version, context))
     if os.path.isdir(outputDir):
         print("Output directory {} already exists, aborting".format(outputDir))
         sys.exit(1)
+    logging.debug("outputting to " + outputDir)
     mkpath(outputDir)
 
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
@@ -176,11 +181,12 @@ def main():
     featureSet.appendStep('featAccess.py')
     featureSet.appendStep('featDescDelta.py')
 
-    dim = 2 * (config['context'] * 2 + 1)
+    input_dim = 2 * (config['context'] * 2 + 1)
+    output_dim = 1
 
     nnConfig = {
-        'input_dim': dim,
-        'output_dim': 1,
+        'input_dim': input_dim,
+        'output_dim': output_dim,
         'num_labels': 2,
         'files': {}
     }
@@ -188,7 +194,7 @@ def main():
         with open(path) as f:
             convIDs = set([line.strip() for line in f.readlines()])
         data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
-                        dtype="float32", shape=(-1, dim + 2))
+                        dtype="float32", shape=(-1, input_dim + output_dim))
         fname = os.path.join(outputDir, setname + ".npz")
         np.savez_compressed(fname, data=data)
         nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
