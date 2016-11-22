@@ -8,25 +8,31 @@ from functools import partial
 import theano.tensor
 import os.path
 import time
+import subprocess
+from distutils.dir_util import mkpath
 
 BATCH_SIZE = 256
 NUM_EPOCHS = 10000
-out_dir = "out"
 
-stamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-LOGFILE = "{}-{}.log".format("train01", stamp)
+version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
+
+out_dir = os.path.join("out", version)
+if os.path.isdir(out_dir):
+    print("Output directory {} already exists, aborting".format(out_dir))
+    sys.exit(1)
+mkpath(out_dir)
+LOGFILE = os.path.join(out_dir, "train.log")
 
 misc_func.MyLogger.logfile = open(LOGFILE, 'a')
 
 
 def iterate_minibatches(batchsize, data, input_dim):
     frames, dim = data.shape
-    unused = frames % batchsize
-    if unused != 0:
-        misc_func.myPrint("ignoring last {} training samples".format(unused))
     assert dim == input_dim + 1
+    indices = numpy.arange(len(data))
+    numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
-        slice = data[i * batchsize:(i + 1) * batchsize]
+        slice = data[indices[i * batchsize:(i + 1) * batchsize]]
         yield slice[:, :input_dim], slice[:, input_dim].astype("int32")
 
 
@@ -37,6 +43,7 @@ def load_numpy_file(fname, input_dim):
 
 
 config_path = sys.argv[1]
+misc_func.myPrint("loading config from " + config_path)
 with open(config_path) as config_file:
     config = json.load(config_file)
 
@@ -63,8 +70,9 @@ train_func.train_network(
     input_var=input_layer.input_var,
     target_var=theano.tensor.ivector('targets'),
     scheduling_method="fuzzy_newbob",
+    scheduling_params=0.5,
     update_method="adadelta",
     iterate_minibatches_train=load_numpy_file(os.path.join(dir, config['files']['train']), input_dim),
     iterate_minibatches_validate=load_numpy_file(os.path.join(dir, config['files']['validate']), input_dim),
-    output_prefix="out"
+    output_prefix=os.path.join(out_dir, "epoch")
 )
