@@ -70,7 +70,7 @@ train_func.train_network(
     input_var=input_layer.input_var,
     target_var=theano.tensor.ivector('targets'),
     scheduling_method="fuzzy_newbob",
-    scheduling_params=0.5,
+    scheduling_params=(0.5, 0.00000001),
     update_method="adadelta",
     iterate_minibatches_train=load_numpy_file(os.path.join(dir, config['files']['train']), input_dim),
     iterate_minibatches_validate=load_numpy_file(os.path.join(dir, config['files']['validate']), input_dim),
