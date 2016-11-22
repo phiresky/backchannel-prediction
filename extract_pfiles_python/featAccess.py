@@ -47,7 +47,7 @@ class Step(AbstractStep):
         power = np.log10(val)
         power = power.applyFilter(self.filtr)
         power = power.applyFilter(self.filtr)
-        power = power.normalize(min=-0.1, max=0.5)
+        power = power.normalize(min=0, max=1)
         return power
 
     @functools.lru_cache(maxsize=10)
