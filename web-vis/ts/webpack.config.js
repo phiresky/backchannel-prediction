@@ -7,7 +7,6 @@ module.exports = {
   context: __dirname,
   devtool: 'eval',
   entry: [
-    'webpack-dev-server/client?http://localhost:3000',
     './client'
   ],
   output: {
@@ -36,20 +35,12 @@ module.exports = {
     data: '@import "theme/_config.scss";',
     includePaths: [path.resolve(__dirname, './src')]
   },
-  toolbox: {                                                                                                                                                                               
-    theme: path.join(__dirname, '../client/toolbox-theme.scss')                                                                                                                            
-  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development')
     }),
     new ExtractTextPlugin('bundle.css', { allChunks: true }),
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      filename: 'vendor.bundle.js',
-      minChunks: Infinity
-    }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
   ]
