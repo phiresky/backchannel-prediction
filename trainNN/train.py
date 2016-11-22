@@ -30,9 +30,10 @@ def iterate_minibatches(batchsize, data, input_dim):
     frames, dim = data.shape
     assert dim == input_dim + 1
     indices = numpy.arange(len(data))
-    numpy.random.shuffle(indices)
+    # numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
-        slice = data[indices[i * batchsize:(i + 1) * batchsize]]
+        elements = indices[i * batchsize:(i + 1) * batchsize]
+        slice = data[elements]
         yield slice[:, :input_dim], slice[:, input_dim].astype("int32")
 
 
