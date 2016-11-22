@@ -30,7 +30,7 @@ def iterate_minibatches(batchsize, data, input_dim):
     frames, dim = data.shape
     assert dim == input_dim + 1
     indices = numpy.arange(len(data))
-    # numpy.random.shuffle(indices)
+    numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
         elements = indices[i * batchsize:(i + 1) * batchsize]
         slice = data[elements]
@@ -44,7 +44,7 @@ def load_numpy_file(fname, input_dim):
 
 
 config_path = sys.argv[1]
-misc_func.myPrint("loading config from " + config_path)
+misc_func.myPrint("loading config file " + config_path)
 with open(config_path) as config_file:
     config = json.load(config_file)
 
