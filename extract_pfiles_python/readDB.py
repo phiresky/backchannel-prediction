@@ -159,6 +159,7 @@ def parseConversationSet(spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase, setname
 def main():
     np.seterr(all='raise')
     global config, input_dim
+    logging.debug("loading config file {}".format(sys.argv[1]))
     with open(sys.argv[1]) as config_file:
         config = json.load(config_file, object_pairs_hook=OrderedDict)
 
