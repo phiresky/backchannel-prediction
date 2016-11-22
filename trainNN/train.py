@@ -69,9 +69,10 @@ train_func.train_network(
     network=output_layer,
     input_var=input_layer.input_var,
     target_var=theano.tensor.ivector('targets'),
-    scheduling_method="fuzzy_newbob",
-    scheduling_params=(0.5, 0.00000001),
-    update_method="adadelta",
+    # scheduling_method="fuzzy_newbob",
+    # scheduling_params=(0.5, 0.00000001),
+    update_method="nesterov",
+    learning_rate=0.01,
     iterate_minibatches_train=load_numpy_file(os.path.join(dir, config['files']['train']), input_dim),
     iterate_minibatches_validate=load_numpy_file(os.path.join(dir, config['files']['validate']), input_dim),
     output_prefix=os.path.join(out_dir, "epoch")
