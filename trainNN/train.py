@@ -1,6 +1,8 @@
+assert __package__, "run as python3 -m trainNN.train"
+
 import lasagne
 from lasagne.layers import InputLayer, DenseLayer
-from markuslasagne import train_func, misc_func
+from .markuslasagne import train_func, misc_func
 import json
 import sys
 import numpy

@@ -1,14 +1,29 @@
 import websockets
 import asyncio
 import jrtk
-from jrtk.preprocessing import NumFeature, FeatureExtractor, FeatureType
+from jrtk.preprocessing import NumFeature, FeatureExtractor
+from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional
 import json
 import importlib.util
 
-readDBspec = importlib.util.spec_from_file_location("readDB", "../../extract_pfiles_python/readDB.py")
-readDB = importlib.util.module_from_spec(readDBspec)
-readDBspec.loader.exec_module(readDB)
+from trainNN.evaluate import get_network_outputter
+from extract_pfiles_python import readDB
+
+
+def loadModuleFromPath(path: str):
+    spec = importlib.util.spec_from_file_location("trainNN", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+current_net = get_network_outputter("extract_pfiles_python/out/v08-pitchnormalization3-context40/train-config.json",
+                                    "trainNN/out/v08-pitchnormalization3-1-g03a8cbe-dirty/epoch-003.pkl")
+
+
+def evaluateNetwork(input: NumFeature) -> NumFeature:
+    return NumFeature(current_net(input))
 
 
 def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
@@ -32,14 +47,14 @@ def segsToJSON(name: str) -> Dict:
     }
 
 
-db = "../../data/db/all240302"
+db = "data/db/all240302"
 
 uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
 spkDB = jrtk.base.DBase(baseFilename=db + "-spk", mode="r")
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
-featureExtractor = FeatureExtractor(config={'context': 10, 'adcPath': '../../data/adc'})
-featureExtractor.appendStep("../../extract_pfiles_python/featAccess.py")
-featureExtractor.appendStep("../../extract_pfiles_python/featDescDelta.py")
+featureExtractor = FeatureExtractor(config={'context': 10, 'adcPath': 'data/adc'})
+featureExtractor.appendStep("extract_pfiles_python/featAccess.py")
+featureExtractor.appendStep("extract_pfiles_python/featDescDelta.py")
 
 
 async def sendFeature(ws, name, feat):
@@ -67,6 +82,8 @@ async def sendConversation(conv: str, ws):
     await ws.send(json.dumps({
         "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
     }))
+    await sendFeature(ws, "NETA", evaluateNetwork(features['feata']))
+
     await ws.send(json.dumps({"type": "done"}))
 
 
