@@ -1,13 +1,14 @@
 import websockets
 import asyncio
-import jrtk
+import sys
 from jrtk.preprocessing import NumFeature, FeatureExtractor
 from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional
 import json
 import importlib.util
-
-from trainNN.evaluate import get_network_outputter
+import functools
+import signal
+from trainNN.evaluate import get_best_network_outputter
 from extract_pfiles_python import readDB
 
 
@@ -16,10 +17,6 @@ def loadModuleFromPath(path: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-current_net = get_network_outputter("extract_pfiles_python/out/v08-pitchnormalization3-context40/train-config.json",
-                                    "trainNN/out/v08-pitchnormalization3-1-g03a8cbe-dirty/epoch-003.pkl")
 
 
 def evaluateNetwork(input: NumFeature) -> NumFeature:
@@ -47,11 +44,12 @@ def segsToJSON(name: str) -> Dict:
     }
 
 
-config = readDB.load_config("extract_pfiles_python/config.json")
+config = readDB.load_config(sys.argv[1])
 
 spkDB, uttDB = readDB.load_db(config['paths'])
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
-featureExtractor = readDB.load_feature_extractor(config['extract_config']['featureExtractionSteps'])
+featureExtractor = readDB.load_feature_extractor(config)
+current_net = get_best_network_outputter(config)
 
 
 async def sendFeature(ws, name, feat):
@@ -71,15 +69,18 @@ async def sendConversation(conv: str, ws):
     for name in "adca,pitcha,powera,adcb,pitchb,powerb".split(","):
         feat = features[name]
         await sendFeature(ws, name, feat)
-        if name == "adca": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
-        if name == "adcb": await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
+        if name == "adca":
+            await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
+            await sendFeature(ws, "NETA", evaluateNetwork(features['feata']))
+        if name == "adcb":
+            await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
+            await sendFeature(ws, "NETB", evaluateNetwork(features['featb']))
     await ws.send(json.dumps({
         "type": "getFeature", "data": {"name": "adca.bc", "typ": "highlights", "data": getHighlights(conv, "A")}
     }))
     await ws.send(json.dumps({
         "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
     }))
-    await sendFeature(ws, "NETA", evaluateNetwork(features['feata']))
 
     await ws.send(json.dumps({"type": "done"}))
 
@@ -121,8 +122,10 @@ async def handler(websocket, path):
 
 def start_server():
     start_server = websockets.serve(handler, '0.0.0.0', 8765)
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_forever()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_server)
+
+    loop.run_forever()
 
 
 def sanity():

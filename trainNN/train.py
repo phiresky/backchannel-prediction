@@ -1,5 +1,3 @@
-assert __package__, "run as python3 -m trainNN.train"
-
 import lasagne
 from lasagne.layers import InputLayer, DenseLayer
 from .markuslasagne import train_func, misc_func
@@ -11,6 +9,7 @@ import theano.tensor
 import os.path
 import subprocess
 from distutils.dir_util import mkpath
+import contextlib
 
 BATCH_SIZE = 256
 NUM_EPOCHS = 10000
@@ -60,7 +59,7 @@ def load_config(config_path: str):
 def train():
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
 
-    out_dir = os.path.join("out", version)
+    out_dir = os.path.join("trainNN", "out", version)
     if os.path.isdir(out_dir):
         print("Output directory {} already exists, aborting".format(out_dir))
         sys.exit(1)
@@ -70,10 +69,11 @@ def train():
     misc_func.MyLogger.logfile = open(LOGFILE, 'a')
     config_path = sys.argv[1]
     config = load_config(config_path)
+    train_config = config['train_config']
 
     dir = os.path.dirname(config_path)
-    model = feedforward_model(config)
-    train_func.train_network(
+    model = feedforward_model(train_config)
+    stats = train_func.train_network(
         network=model['output_layer'],
         input_var=model['input_layer'].input_var,
         target_var=theano.tensor.ivector('targets'),
@@ -81,11 +81,23 @@ def train():
         scheduling_params=(0.5, 0.00000001),
         update_method="adadelta",
         # learning_rate=0.01,
-        iterate_minibatches_train=load_numpy_file(os.path.join(dir, config['files']['train']), config['input_dim']),
-        iterate_minibatches_validate=load_numpy_file(os.path.join(dir, config['files']['validate']),
-                                                     config['input_dim']),
+        iterate_minibatches_train=load_numpy_file(os.path.join(dir, train_config['files']['train']),
+                                                  train_config['input_dim']),
+        iterate_minibatches_validate=load_numpy_file(os.path.join(dir, train_config['files']['validate']),
+                                                     train_config['input_dim']),
         output_prefix=os.path.join(out_dir, "epoch")
     )
+    config_out = os.path.join(out_dir, "config.json")
+    with open(config_out, "w") as f:
+        json.dump({**config, 'train_output': {
+            'stats': stats,
+            'source': config_path,
+        }}, f, indent='\t')
+    misc_func.myPrint("Wrote output to " + config_out)
+    latest_path = os.path.join("trainNN", "out", "latest")
+    with contextlib.suppress(FileNotFoundError):
+        os.remove(latest_path)
+    os.symlink(version, latest_path)
 
 
 if __name__ == "__main__":

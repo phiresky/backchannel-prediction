@@ -161,9 +161,9 @@ def load_config(path):
         return json.load(config_file, object_pairs_hook=OrderedDict)
 
 
-def load_feature_extractor(steps):
+def load_feature_extractor(config):
     featureSet = jrtk.preprocessing.FeatureExtractor(config=config)
-    for step in steps:
+    for step in config['extract_config']['featureExtractionSteps']:
         featureSet.appendStep(step)
     return featureSet
 
@@ -195,7 +195,7 @@ def main():
 
     spkDB, uttDB = load_db(config['paths'])
 
-    featureSet = load_feature_extractor(extract_config['featureExtractionSteps'])
+    featureSet = load_feature_extractor(config)
 
     input_dim = 2 * (context * 2 + 1)
     output_dim = 1

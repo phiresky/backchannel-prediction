@@ -4,8 +4,8 @@ import theano
 import lasagne.layers
 import numpy
 
-def get_network_outputter(config_file: str, weights_file: str):
-    config = load_config(config_file)
+
+def get_network_outputter(config, weights_file: str):
     model = feedforward_model(config)
 
     out_layer = model['output_layer']
@@ -15,8 +15,12 @@ def get_network_outputter(config_file: str, weights_file: str):
     f = theano.function([layers[0].input_var], y)
     return f
 
+def get_best_network_outputter(config):
+    stats = config['train_output']['stats']
+    best = min(stats.values(), key=lambda item: item['validation_error'])
+    return get_network_outputter(config['train_config'], best['weights'])
 
 if __name__ == "__main__":
-    f = get_network_outputter("../extract_pfiles_python/out/v08-pitchnormalization3-context40/train-config.json",
-                          "out/v08-pitchnormalization3-1-g03a8cbe-dirty/epoch-003.pkl")
+    config = load_config("trainNN/out/latest/config.json")
+    f = get_best_network_outputter(config)
     print("{}".format(f([numpy.repeat([1.], 162)])))
