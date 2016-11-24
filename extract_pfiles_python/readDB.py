@@ -156,12 +156,16 @@ def parseConversationSet(spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase, setname
         yield from parseConversations(speaker, spkDB, uttDB, featureSet)
 
 
+def load_config(path):
+    with open(path) as config_file:
+        return json.load(config_file, object_pairs_hook=OrderedDict)
+
+
 def main():
     np.seterr(all='raise')
     global config, input_dim
     logging.debug("loading config file {}".format(sys.argv[1]))
-    with open(sys.argv[1]) as config_file:
-        config = json.load(config_file, object_pairs_hook=OrderedDict)
+    config = load_config(sys.argv[1])
 
     context = config['context']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()

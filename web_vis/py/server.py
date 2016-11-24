@@ -23,7 +23,7 @@ current_net = get_network_outputter("extract_pfiles_python/out/v08-pitchnormaliz
 
 
 def evaluateNetwork(input: NumFeature) -> NumFeature:
-    return NumFeature(current_net(input))
+    return NumFeature(current_net(input)[:, [1]])
 
 
 def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
@@ -47,12 +47,12 @@ def segsToJSON(name: str) -> Dict:
     }
 
 
-db = "data/db/all240302"
+config = readDB.load_config("extract_pfiles_python/config.json")
 
-uttDB = jrtk.base.DBase(baseFilename=db + "-utt", mode="r")
-spkDB = jrtk.base.DBase(baseFilename=db + "-spk", mode="r")
+uttDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-utt", mode="r")
+spkDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-spk", mode="r")
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
-featureExtractor = FeatureExtractor(config={'context': 10, 'adcPath': 'data/adc'})
+featureExtractor = FeatureExtractor(config=config)
 featureExtractor.appendStep("extract_pfiles_python/featAccess.py")
 featureExtractor.appendStep("extract_pfiles_python/featDescDelta.py")
 
