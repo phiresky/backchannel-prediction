@@ -1,10 +1,18 @@
 {
-  "databasePrefix": "data/db/all240302",
-  "adcPath": "data/adc",
-  "conversations": {
-    "validate": "data/conversations.valid",
-    "train": "data/conversations.train"
+  "paths": {
+    "databasePrefix": "data/db/all240302",
+    "adc": "data/adc",
+    "conversations": {
+      "validate": "data/conversations.valid",
+      "train": "data/conversations.train"
+    }
   },
-  "context": 40,
-  "outputDirectory": "out"
+  "extract_config": {
+    "context": 40,
+    "outputDirectory": "extract_pfiles_python/out",
+    "featureExtractionSteps": [
+      "extract_pfiles_python/featAccess.py",
+      "extract_pfiles_python_featDescDelta.py"
+    ]
+  }
 }

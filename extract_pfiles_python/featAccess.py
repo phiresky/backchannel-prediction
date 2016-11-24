@@ -18,7 +18,7 @@ class Step(AbstractStep):
 
     def eval(self, featExtractor: FeatureExtractor, spkInfo, uttInfo, feats):
         conv = uttInfo['conv']
-        adcfile = os.path.join(featExtractor.config['adcPath'], conv + ".wav")
+        adcfile = os.path.join(featExtractor.config['paths']['adc'], conv + ".wav")
         if not os.path.exists(adcfile):
             raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
 

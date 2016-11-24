@@ -49,12 +49,9 @@ def segsToJSON(name: str) -> Dict:
 
 config = readDB.load_config("extract_pfiles_python/config.json")
 
-uttDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-utt", mode="r")
-spkDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-spk", mode="r")
+spkDB, uttDB = readDB.load_db(config['paths'])
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
-featureExtractor = FeatureExtractor(config=config)
-featureExtractor.appendStep("extract_pfiles_python/featAccess.py")
-featureExtractor.appendStep("extract_pfiles_python/featDescDelta.py")
+featureExtractor = readDB.load_feature_extractor(config['extract_config']['featureExtractionSteps'])
 
 
 async def sendFeature(ws, name, feat):

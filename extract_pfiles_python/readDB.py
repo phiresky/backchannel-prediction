@@ -161,15 +161,29 @@ def load_config(path):
         return json.load(config_file, object_pairs_hook=OrderedDict)
 
 
+def load_feature_extractor(steps):
+    featureSet = jrtk.preprocessing.FeatureExtractor(config=config)
+    for step in steps:
+        featureSet.appendStep(step)
+    return featureSet
+
+
+def load_db(paths_config):
+    uttDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-utt", mode="r")
+    spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
+    return spkDB, uttDB
+
+
 def main():
     np.seterr(all='raise')
     global config, input_dim
     logging.debug("loading config file {}".format(sys.argv[1]))
     config = load_config(sys.argv[1])
 
-    context = config['context']
+    extract_config = config['extract_config']
+    context = extract_config['context']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
-    outputDir = os.path.join(config['outputDirectory'],
+    outputDir = os.path.join(extract_config['outputDirectory'],
                              "{}-context{}".format(version, context))
     if os.path.isdir(outputDir):
         print("Output directory {} already exists, aborting".format(outputDir))
@@ -179,14 +193,11 @@ def main():
 
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
-    uttDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-utt", mode="r")
-    spkDB = jrtk.base.DBase(baseFilename=config['databasePrefix'] + "-spk", mode="r")
+    spkDB, uttDB = load_db(config['paths'])
 
-    featureSet = jrtk.preprocessing.FeatureExtractor(config=config)
-    featureSet.appendStep('featAccess.py')
-    featureSet.appendStep('featDescDelta.py')
+    featureSet = load_feature_extractor(extract_config['featureExtractionSteps'])
 
-    input_dim = 2 * (config['context'] * 2 + 1)
+    input_dim = 2 * (context * 2 + 1)
     output_dim = 1
 
     nnConfig = {
@@ -195,7 +206,7 @@ def main():
         'num_labels': 2,
         'files': {}
     }
-    for setname, path in config['conversations'].items():
+    for setname, path in config['paths']['conversations'].items():
         with open(path) as f:
             convIDs = set([line.strip() for line in f.readlines()])
         data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
@@ -204,9 +215,9 @@ def main():
         np.savez_compressed(fname, data=data)
         nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
 
-    jsonPath = os.path.join(outputDir, "train-config.json")
+    jsonPath = os.path.join(outputDir, "config.json")
     with open(jsonPath, "w") as f:
-        json.dump(nnConfig, f, indent='\t')
+        json.dump({**config, 'train_config': nnConfig}, f, indent='\t')
     logging.info("Wrote training config to " + os.path.abspath(jsonPath))
     uttDB.close()
     spkDB.close()
