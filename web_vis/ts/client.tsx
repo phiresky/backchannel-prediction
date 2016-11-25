@@ -95,7 +95,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         info.visualizer = value as VisualizerChoice;
     }
     async changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
-        const state = this.props.gui.getDefaultUIState(await this.props.gui.getFeature(e.currentTarget.value).toPromise())
+        const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise)
         runInAction("changeFeature"+i, () => this.props.uiState.features[i] = state);
     }
     @action remove(i: number) {
@@ -107,7 +107,8 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
     @action async add() {
         const gui = this.props.gui;
-        const state = gui.getDefaultUIState(await gui.getFeature((await gui.getFeatures().toPromise()).defaults[0]).toPromise());
+        const feat = (await gui.getFeatures().promise).defaults[0][0];
+        const state = gui.getDefaultSingleUIState(await gui.getFeature(feat).promise);
         runInAction(() => this.props.uiState.features.push(state));
     }
 
@@ -489,20 +490,19 @@ export class GUI extends React.Component<{}, {}> {
             this.zoom.left = 0; this.zoom.right = 1;
             this.totalTimeSeconds = NaN;
         });
-        const features = await this.socketManager.getFeatures(convID).toPromise();
-        for(const featureID of features.defaults) this.onFeatureReceived(await this.getFeature(featureID).toPromise());
+        const features = await this.socketManager.getFeatures(convID).promise;
+        for(const featureIDs of features.defaults) {
+            const feats = await Promise.all(featureIDs.map(id => this.getFeature(id).promise));
+            runInAction("addDefaultUI", () => this.uis.push(this.getDefaultUIState(feats)));
+        }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
-        const convos = await this.socketManager.getConversations().toPromise();
+        const convos = await this.socketManager.getConversations().promise;
         if(convos.indexOf(id as any) >= 0) return id as any;
         throw Error("unknown conversation " + id);
     }
     async loadRandomConversation() {
-        this.loadConversation(util.randomChoice(await this.getConversations().toPromise()) as any);
-    }
-    @action onFeatureReceiveDone() {
-        if(this.stateAfterLoading) Object.assign(this, this.stateAfterLoading);
-        this.stateAfterLoading = null;
+        this.loadConversation(util.randomChoice(await this.getConversations().promise) as any);
     }
     @action
     onWheel(event: MouseWheelEvent) {
@@ -521,7 +521,7 @@ export class GUI extends React.Component<{}, {}> {
             this.zoom.right = Math.min(this.zoom.right, 1);
             this.zoom.left = Math.max(this.zoom.left, 0);
     }
-    getDefaultUIState(feature: Feature): SingleUIState {
+    getDefaultSingleUIState(feature: Feature): SingleUIState {
         let visualizerConfig: VisualizerConfig;
         if(isNumFeature(feature) && feature.range instanceof Array) {
             visualizerConfig = "givenRange";
@@ -533,16 +533,15 @@ export class GUI extends React.Component<{}, {}> {
             currentRange: null,
         }
     }
+    getDefaultUIState(features: Feature[]): UIState {
+        return {
+            uuid: uuid++,
+            features: features.map(f => this.getDefaultSingleUIState(f))
+        }
+    }
     @action
     onFeatureReceived(feature: Feature) {
-        if(feature.typ === "utterances") {
-            this.uis.push({ uuid: uuid++, features: [{feature: feature.name, visualizer: "Text", config: "normalizeLocal", currentRange: null}]});
-        } else if (feature.typ === "highlights") {
-            if(feature.name.includes(".")) {
-                const addTo = feature.name.split(".")[0];
-                this.uis.filter(ui => ui.features[0].feature.slice(-1) === addTo.slice(-1)).forEach(ui => ui.features.push(this.getDefaultUIState(feature)));
-            }
-        } else {
+        if(isNumFeature(feature))  {
             let totalTime;
             if(feature.typ === "FeatureType.SVector") {
                 totalTime = feature.data.length / (feature.samplingRate * 1000);
@@ -555,7 +554,6 @@ export class GUI extends React.Component<{}, {}> {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
             }
-            this.uis.push({ uuid: uuid++, features: [this.getDefaultUIState(feature)]});
         }
     }
     onSocketOpen() {
@@ -575,7 +573,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
-        if(!f) throw Error("unknown feature "+ name);
+        if(!f.data) f.promise.then(f => this.onFeatureReceived(f));
         return f;
     }
     getFeatures() {

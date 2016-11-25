@@ -16,7 +16,7 @@ type GetConversationsResponse = ConversationID[];
 type GetFeatureResponse = c.Feature;
 type GetFeaturesResponse = {
     categories:{[category: string]: FeatureID[]};
-    defaults: FeatureID[];
+    defaults: FeatureID[][];
 }
 type TypedArrayTypes = 'float32' | 'int16';
 function TypedArrayOf(type: TypedArrayTypes) {
@@ -28,13 +28,9 @@ function TypedArrayOf(type: TypedArrayTypes) {
 }
 
 class LulPromise<T> {
-    @observable data: T|null;
-    constructor(data: T|null) {
-        this.data = asReference(data);
-    }
-    toPromise(): Promise<T> {
-        if(this.data !== null) return Promise.resolve(this.data);
-        else return new Promise(resolve => reaction<T>("toPromise", () => this.data!, resolve));
+    @observable data: T|null = asReference(null);
+    constructor(public promise: Promise<T>) {
+        promise.then(action("fromPromise", (result: T) => this.data = result));
     }
 }
 
@@ -44,14 +40,13 @@ export interface ConversationID extends String {
 export interface FeatureID extends String {
     __typeBrand: "FeatureID"
 }
-export interface ServerMessage {
-    id: number;
-    data: any;
-}
+export type ServerMessage = {id: number, error: undefined, data: any};
+export type ServerError = {id: number, error: string};
+
 export class SocketManager {
     socket: WebSocket;
     nextMessageID = 1;
-    listeners = new Map<number, (msg: ServerMessage) => void>();
+    listeners = new Map<number, {resolve: (msg: ServerMessage) => void, reject: (reason: any) => void}>();
     nextBinaryFrameListener: null | ((frame: ArrayBuffer) => void);
     constructor(private server: string) {
         
@@ -72,11 +67,12 @@ export class SocketManager {
             this.nextBinaryFrameListener(event.data);
             this.nextBinaryFrameListener = null;
         } else {
-            const msg: ServerMessage = JSON.parse(event.data);
+            const msg: ServerMessage | ServerError = JSON.parse(event.data);
             console.log("RECEIVING", msg);
             const listener = this.listeners.get(msg.id);
             if(!listener) throw Error("unexpected message: " + msg.id);
-            listener(msg);
+            if(msg.error !== undefined) listener.reject(msg.error);
+            else listener.resolve(msg as ServerMessage);
         }
     }
     waitForBinaryFrame() {
@@ -90,7 +86,7 @@ export class SocketManager {
         console.log(`SENDING [${id}]: `, message);
         this.socket.send(JSON.stringify(message));
         return new Promise<ServerMessage>((resolve, reject) => {
-            this.listeners.set(id, resolve);
+            this.listeners.set(id, {resolve, reject});
         });
     }
     
@@ -128,9 +124,8 @@ const cache = new Map<string, LulPromise<any>>();
 function lulCache<T>(name: string, _this: any, fn: (...args: any[]) => Promise<T>, args: any[]) {
     const key = JSON.stringify(util.toDeterministic([...args, name]));
     if(!cache.has(key)) {
-        const lul = new LulPromise<T>(null);
+        const lul = new LulPromise(fn.apply(_this, args) as Promise<T>);
         cache.set(key, lul);
-        (fn.apply(_this, args) as Promise<T>).then(action("received"+name, (result:T) => lul.data = result));
     }
     return cache.get(key)!;
 }

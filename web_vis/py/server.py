@@ -38,7 +38,7 @@ def segsToJSON(spkr: str, name: str) -> Dict:
 
 def findAllNets():
     import os, glob
-    from os.path import join, isdir, isfile, basename
+    from os.path import join, isdir, isfile
     folder = join("trainNN", "out")
     for netversion in sorted(os.listdir(folder)):
         path = join(folder, netversion)
@@ -81,9 +81,10 @@ cache = {} # type: Dict[str, Dict[str, NumFeature]]
 
 def getFeatures(conv: str):
     return {
-        "input": "adca,texta,adcb,textb".split(","),
-        "extracted":"pitcha,powera,pitchb,powerb".split(","),
-        "NN outputs": list(nets.keys())
+        "input": "adca,texta,bca,adcb,textb,bcb".split(","),
+        "extracted":"pitcha,powera,pitchb,powerb,feata,featb".split(","),
+        "NN outputs A": list(map(lambda x: "a:"+x, nets.keys())),
+        "NN outputs B": list(map(lambda x: "b:"+x, nets.keys())),
     }
 
 def getExtractedFeature(conv: str, feat: str):
@@ -92,22 +93,19 @@ def getExtractedFeature(conv: str, feat: str):
     return cache[conv][feat]
 
 async def sendFeature(ws, id: str, conv: str, feat: str):
-    if feat == "adca.bc":
-        await sendOtherFeature(ws, id, {"name": "adca.bc", "typ": "highlights", "data": getHighlights(conv, "A")})
-    elif feat == "adcb.bc":
-        await sendOtherFeature(ws, id, {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")})
-    elif feat == "NETA":
-        await sendNumFeature(ws, id, feat, evaluateNetwork(getExtractedFeature(conv, 'feata')))
-    elif feat == "NETB":
-        await sendNumFeature(ws, id, feat, evaluateNetwork(getExtractedFeature(conv, 'featb')))
+    if feat == "bca":
+        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(conv, "A")})
+    elif feat == "bcb":
+        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(conv, "B")})
     elif feat == "texta":
         await sendOtherFeature(ws, id, segsToJSON(conv+"-A", feat))
     elif feat == "textb":
         await sendOtherFeature(ws, id, segsToJSON(conv + "-B", feat))
-    elif feat in nets:
-        config_path, wid = nets[feat]
+    elif feat[2:] in nets:
+        channel, key = feat.split(":")
+        config_path, wid = nets[key]
         net = get_network_outputter(config_path, wid)
-        await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feata')))
+        await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feat'+channel)))
     else:
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
@@ -138,17 +136,24 @@ async def handler(websocket, path):
         try:
             msg = json.loads(await websocket.recv())
             id = msg['id']
-            if msg['type'] == "getFeatures":
-                await websocket.send(json.dumps({"id": id, "data": {
-                    'categories': getFeatures(msg['conversation']),
-                    'defaults': "adca,texta,pitcha,powera,adcb,textb,pitchb,powerb".split(",")
-                }}))
-            elif msg['type'] == "getConversations":
-                await websocket.send(json.dumps({"id": id, "data": conversations}))
-            elif msg['type'] == "getFeature":
-                await sendFeature(websocket, id, msg['conversation'], msg['feature'])
-            else:
-                raise Exception("Unknown msg " + json.dumps(msg))
+            try:
+                if msg['type'] == "getFeatures":
+                    await websocket.send(json.dumps({"id": id, "data": {
+                        'categories': getFeatures(msg['conversation']),
+                        'defaults': [s.split("&") for s in "adca&bca,texta,pitcha,powera,adcb&bcb,textb,pitchb,powerb".split(",")]
+                    }}))
+                elif msg['type'] == "getConversations":
+                    await websocket.send(json.dumps({"id": id, "data": conversations}))
+                elif msg['type'] == "getFeature":
+                    await sendFeature(websocket, id, msg['conversation'], msg['feature'])
+                else:
+                    raise Exception("Unknown msg " + json.dumps(msg))
+            except Exception as e:
+                if isinstance(e, websockets.exceptions.ConnectionClosed): raise e
+                import traceback
+                await websocket.send(json.dumps({"id": id, "error": traceback.format_exc()}))
+                print(traceback.format_exc())
+
         except websockets.exceptions.ConnectionClosed as e:
             return
 
