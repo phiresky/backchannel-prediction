@@ -12,7 +12,7 @@ from .network_model import create_network
 import inspect
 import shutil
 
-BATCH_SIZE = 1024
+BATCH_SIZE = 256
 NUM_EPOCHS = 10000
 
 
@@ -66,7 +66,7 @@ def train():
         target_var=theano.tensor.ivector('targets'),
         scheduling_method="fuzzy_newbob",
         scheduling_params=(0.5, 0.000001),
-        update_method="adadelta",
+        update_method="adam",
         # learning_rate=0.01,
         iterate_minibatches_train=load_numpy_file(os.path.join(dir, train_config['files']['train']),
                                                   train_config['input_dim']),
