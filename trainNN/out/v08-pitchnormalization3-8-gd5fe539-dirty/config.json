@@ -1,0 +1,45 @@
+{
+	"train_config": {
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"input_dim": 162,
+		"num_labels": 2,
+		"output_dim": 1
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.047845534336419804,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.04718846450617287,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.04603407118055558,
+				"weights": "epoch-002.pkl"
+			}
+		},
+		"model": "network_model.py",
+		"source": "extract_pfiles_python/out/v08-pitchnormalization3-5-g1e35656-dirty-context40/config.json"
+	},
+	"extract_config": {
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"outputDirectory": "extract_pfiles_python/out",
+		"context": 40
+	},
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		}
+	}
+}

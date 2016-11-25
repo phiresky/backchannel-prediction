@@ -1,0 +1,165 @@
+{
+	"train_output": {
+		"model": "network_model.py",
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.34132366415895066
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.0713312596450617
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.10399486400462965
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.06596920814043206
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.08818299093364201
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.062406563464506126
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.06818757233796291
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.06051974826388884
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.11801034432870372
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.07571976273148151
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.07802854938271608
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.05779200424382713
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.057858314043209846
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.054835190007716084
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.0651433497299383
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.05421428915895066
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.0534848813657407
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.05285795235339508
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.055082344714506126
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.05583586516203709
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.053617500964506126
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.0598325376157407
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.05410879629629628
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.053270881558642014
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.05490752797067899
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.05412989486882713
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.054449387538580196
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.053949049961419804
+			},
+			"28": {
+				"weights": "epoch-028.pkl",
+				"validation_error": 0.05400933159722221
+			},
+			"29": {
+				"weights": "epoch-029.pkl",
+				"validation_error": 0.05377724729938271
+			},
+			"30": {
+				"weights": "epoch-030.pkl",
+				"validation_error": 0.05601671006944442
+			},
+			"31": {
+				"weights": "epoch-031.pkl",
+				"validation_error": 0.05516071084104934
+			},
+			"32": {
+				"weights": "epoch-032.pkl",
+				"validation_error": 0.054102768132716084
+			}
+		},
+		"source": "extract_pfiles_python/out/v09-pitchnormalization4-context40/config.json"
+	},
+	"paths": {
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		}
+	},
+	"extract_config": {
+		"outputDirectory": "extract_pfiles_python/out",
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40
+	},
+	"train_config": {
+		"num_labels": 2,
+		"input_dim": 162,
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"output_dim": 1
+	}
+}
