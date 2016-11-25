@@ -106,3 +106,9 @@ export function round1(num: number) {
 export function randomChoice<T>(data: T[]) {
     return data[Math.floor(Math.random() * data.length)];
 }
+
+export function toDeterministic(obj: any): any {
+    if(obj instanceof Array) return obj.map(x => toDeterministic(x));
+    if(typeof obj === "object") return Object.keys(obj).sort().map(k => [k, toDeterministic(obj[k])])
+    return obj;
+}

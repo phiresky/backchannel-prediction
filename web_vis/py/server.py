@@ -1,26 +1,19 @@
+import os
+
 import websockets
 import asyncio
 import sys
-from jrtk.preprocessing import NumFeature, FeatureExtractor
+from jrtk.preprocessing import NumFeature
 from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional
 import json
-import importlib.util
-import functools
-import signal
-from trainNN.evaluate import get_best_network_outputter
+from collections import OrderedDict
+from trainNN.evaluate import get_network_outputter
 from extract_pfiles_python import readDB
 
 
-def loadModuleFromPath(path: str):
-    spec = importlib.util.spec_from_file_location("trainNN", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def evaluateNetwork(input: NumFeature) -> NumFeature:
-    return NumFeature(current_net(input)[:, [1]])
+def evaluateNetwork(net, input: NumFeature) -> NumFeature:
+    return NumFeature(net(input)[:, [1]])
 
 
 def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
@@ -35,13 +28,30 @@ def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, f
     }
 
 
-def segsToJSON(name: str) -> Dict:
+def segsToJSON(spkr: str, name: str) -> Dict:
     return {
         'name': name,
         'typ': 'utterances',
         'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt]) else None}
-                 for utt in spkDB[name]['segs'].strip().split(" ")]
+                 for utt in spkDB[spkr]['segs'].strip().split(" ")]
     }
+
+def findAllNets():
+    import os, glob
+    from os.path import join, isdir, isfile, basename
+    folder = join("trainNN", "out")
+    for netversion in sorted(os.listdir(folder)):
+        path = join(folder, netversion)
+        if not isdir(path) or not isfile(join(path, "train.log")):
+            continue
+        net_conf_path = join(path, "config.json")
+        if isfile(net_conf_path):
+            net_conf = readDB.load_config(net_conf_path)
+            stats = net_conf['train_output']['stats']
+            best = min(stats.values(), key=lambda item: item['validation_error'])
+            yield join(netversion, "best"), best['weights']
+            for file in sorted(glob.glob(join(path, "epoch*.pkl"))):
+                yield join(netversion, basename(file)), file
 
 
 config = readDB.load_config(sys.argv[1])
@@ -49,40 +59,57 @@ config = readDB.load_config(sys.argv[1])
 spkDB, uttDB = readDB.load_db(config['paths'])
 conversations = sorted({spk.split("-")[0] for spk in spkDB})
 featureExtractor = readDB.load_feature_extractor(config)
-current_net = get_best_network_outputter(config)
+nets = OrderedDict(findAllNets())
 
 
-async def sendFeature(ws, name, feat):
+async def sendNumFeature(ws, id, name, feat):
     dataextra = feat.typ == FeatureType.SVector
     await ws.send(json.dumps({
-        "type": "getFeature",
+        "id": id,
         "data": featureToJSON(name, feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else None,
                               nodata=dataextra)
     }))
     if dataextra:
         await ws.send(feat.tobytes())
-
-
-async def sendConversation(conv: str, ws):
-    features = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})  # type: Dict[str, NumFeature]
-
-    for name in "adca,pitcha,powera,adcb,pitchb,powerb".split(","):
-        feat = features[name]
-        await sendFeature(ws, name, feat)
-        if name == "adca":
-            await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-A')}))
-            await sendFeature(ws, "NETA", evaluateNetwork(features['feata']))
-        if name == "adcb":
-            await ws.send(json.dumps({"type": "getFeature", "data": segsToJSON(conv + '-B')}))
-            await sendFeature(ws, "NETB", evaluateNetwork(features['featb']))
+async def sendOtherFeature(ws, id, feat):
     await ws.send(json.dumps({
-        "type": "getFeature", "data": {"name": "adca.bc", "typ": "highlights", "data": getHighlights(conv, "A")}
-    }))
-    await ws.send(json.dumps({
-        "type": "getFeature", "data": {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")}
+        "id": id,
+        "data": feat
     }))
 
-    await ws.send(json.dumps({"type": "done"}))
+cache = {} # type: Dict[str, Dict[str, NumFeature]]
+
+def getFeatures(conv: str):
+    return {
+        "defaults":"adca,texta,pitcha,powera,adcb,textb,pitchb,powerb".split(","),
+        "optional": list(nets.keys())
+    }
+
+def getExtractedFeature(conv: str, feat: str):
+    if conv not in cache:
+        cache[conv] = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
+    return cache[conv][feat]
+
+async def sendFeature(ws, id: str, conv: str, feat: str):
+    if feat == "adca.bc":
+        await sendOtherFeature(ws, id, {"name": "adca.bc", "typ": "highlights", "data": getHighlights(conv, "A")})
+    elif feat == "adcb.bc":
+        await sendOtherFeature(ws, id, {"name": "adcb.bc", "typ": "highlights", "data": getHighlights(conv, "B")})
+    elif feat == "NETA":
+        await sendNumFeature(ws, id, feat, evaluateNetwork(getExtractedFeature(conv, 'feata')))
+    elif feat == "NETB":
+        await sendNumFeature(ws, id, feat, evaluateNetwork(getExtractedFeature(conv, 'featb')))
+    elif feat == "texta":
+        await sendOtherFeature(ws, id, segsToJSON(conv+"-A", feat))
+    elif feat == "textb":
+        await sendOtherFeature(ws, id, segsToJSON(conv + "-B", feat))
+    elif feat in nets:
+        weights = nets[feat]
+        config = readDB.load_config(os.path.join(os.path.dirname(weights), "config.json"))
+        net = get_network_outputter(config['train_config'], weights)
+        await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feata')))
+    else:
+        await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
 
 def getHighlights(conv: str, channel: str):
@@ -110,10 +137,13 @@ async def handler(websocket, path):
     while True:
         try:
             msg = json.loads(await websocket.recv())
-            if msg['type'] == "loadConversation":
-                await sendConversation(msg['name'], websocket)
+            id = msg['id']
+            if msg['type'] == "getFeatures":
+                await websocket.send(json.dumps({"id": id, "data": getFeatures(msg['conversation'])}))
             elif msg['type'] == "getConversations":
-                await websocket.send(json.dumps({"type": "getConversations", "data": conversations}))
+                await websocket.send(json.dumps({"id": id, "data": conversations}))
+            elif msg['type'] == "getFeature":
+                await sendFeature(websocket, id, msg['conversation'], msg['feature'])
             else:
                 raise Exception("Unknown msg " + json.dumps(msg))
         except websockets.exceptions.ConnectionClosed as e:

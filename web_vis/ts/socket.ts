@@ -1,20 +1,22 @@
 import {action, observable} from 'mobx';
 import * as c from './client';
+import * as util from './util';
 
 export type ClientMessage = {
-    type: "loadConversation",
-    name: string
-} | {
     type: "getConversations"
-}
-export type ServerMessage = {
-    type: "getConversations",
-    data: string[]
+} | {
+    type: "getFeatures",
+    conversation: ConversationID
 } | {
     type: "getFeature",
-    data: c.Feature
-} | {
-    type: "done"
+    conversation: ConversationID,
+    feature: FeatureID
+}
+type GetConversationsResponse = ConversationID[];
+type GetFeatureResponse = c.Feature;
+type GetFeaturesResponse = {
+    defaults: FeatureID[],
+    optional: FeatureID[]
 }
 type TypedArrayTypes = 'float32' | 'int16';
 function TypedArrayOf(type: TypedArrayTypes) {
@@ -25,65 +27,93 @@ function TypedArrayOf(type: TypedArrayTypes) {
     }
 }
 
+export interface ConversationID extends String {
+    __typeBrand: "ConversationID"
+}
+export interface FeatureID extends String {
+    __typeBrand: "FeatureID"
+}
+export interface ServerMessage {
+    id: number;
+    data: any;
+}
 export class SocketManager {
     socket: WebSocket;
-    features = new Map<string, c.Feature>();
-    @observable
-    conversations = [] as string[];
-    nextBinaryFrameBelongsTo: any;
-
-    constructor(private gui: c.GUI, server: string) {
-        this.socket = new WebSocket(server);
-        this.socket.binaryType = "arraybuffer";
-        this.socket.onmessage = this.onSocketMessage.bind(this);
-        this.socket.onopen = this.onSocketOpen.bind(this);
+    nextMessageID = 1;
+    listeners = new Map<number, (msg: ServerMessage) => void>();
+    nextBinaryFrameListener: null | ((frame: ArrayBuffer) => void);
+    constructor(private server: string) {
+        
     }
-    loadConversation(conversation: string) {
-        this.sendMessage({type: "loadConversation", name: conversation});
+    async socketOpen() {
+        if(!this.socket || this.socket.readyState === this.socket.CLOSED) {
+            this.socket = new WebSocket(this.server);
+            this.socket.binaryType = "arraybuffer";
+            this.socket.onmessage = this.onSocketMessage.bind(this);
+        }
+        if(this.socket.readyState === this.socket.OPEN) return;
+        await new Promise(resolve => this.socket.addEventListener("open", e => resolve()));
     }
-    sendMessage(message: ClientMessage) {
-        console.log("SENDING: ", message);
-        this.socket.send(JSON.stringify(message));
-    }
-
-    onSocketOpen(event: Event) {
-        this.sendMessage({type: "getConversations"});
-        this.gui.onSocketOpen();
-    }
-
-    @action onSocketMessage(event: MessageEvent) {
+    onSocketMessage(event: MessageEvent) {
         if(event.data instanceof ArrayBuffer) {
             console.log("RECEIVING", event.data);
-            const feature = this.nextBinaryFrameBelongsTo;
-            if(!feature) throw Error("received unanticipated binary frame");
-            feature.data = new (TypedArrayOf(feature.dtype))(event.data);
-            this.features.set(feature.name, feature);
-            this.gui.onFeatureReceived(feature);
-            return;
+            if(!this.nextBinaryFrameListener) throw Error("got unexpected binary frame");
+            this.nextBinaryFrameListener(event.data);
+            this.nextBinaryFrameListener = null;
+        } else {
+            const msg: ServerMessage = JSON.parse(event.data);
+            console.log("RECEIVING", msg);
+            const listener = this.listeners.get(msg.id);
+            if(!listener) throw Error("unexpected message: " + msg.id);
+            listener(msg);
         }
-        const data: ServerMessage = JSON.parse(event.data);
-        console.log("RECEIVING", data);
-        switch (data.type) {
-            case "getConversations": {
-                this.conversations = data.data;
-                break;
-            }
-            case "getFeature": {
-                const feature = data.data;
-                
-                if(feature.data === null) {
-                    this.nextBinaryFrameBelongsTo = feature;
-                } else {
-                    this.features.set(feature.name, feature);
-                    this.gui.onFeatureReceived(feature);
-                }
-                break;
-            }
-            case "done": {
-                if(this.gui.onFeatureReceiveDone) this.gui.onFeatureReceiveDone();
-                break;
-            }
-            default: throw Error("unknown message "+(data as any).type)
+    }
+    waitForBinaryFrame() {
+        if(this.nextBinaryFrameListener) throw Error("tried to receive two binary frames at the same time");
+        return new Promise<ArrayBuffer>(resolve => this.nextBinaryFrameListener = resolve);
+    }
+    async sendMessage(message: ClientMessage): Promise<ServerMessage> {
+        await this.socketOpen();
+        const id = this.nextMessageID++;
+        (message as any).id = id;
+        console.log(`SENDING [${id}]: `, message);
+        this.socket.send(JSON.stringify(message));
+        return new Promise<ServerMessage>((resolve, reject) => {
+            this.listeners.set(id, resolve);
+        });
+    }
+    @cached
+    async getConversations(): Promise<GetConversationsResponse> {
+        const response = await this.sendMessage({type: "getConversations"});
+        return response.data as GetConversationsResponse;
+    }
+
+    @cached
+    async getFeatures(conversation: ConversationID): Promise<GetFeaturesResponse> {
+        const response = await this.sendMessage({type: "getFeatures", conversation});
+        return response.data as GetFeaturesResponse;
+    }
+    @cached
+    async getFeature(conversation: ConversationID, featureID: FeatureID): Promise<GetFeatureResponse> {
+        const response = await this.sendMessage({type: "getFeature", conversation, feature: featureID});
+        const feature = response.data as GetFeatureResponse;
+        if(feature.data === null) {
+            if(!c.isNumFeature(feature)) throw Error("wat");
+            const buffer = await this.waitForBinaryFrame();
+            feature.data = new (TypedArrayOf(feature.dtype))(buffer);
         }
+        return feature;
+    }
+}
+
+function cached<T>(prototype: any, fnName: string, descriptor: TypedPropertyDescriptor<(...args:any[]) => T>) {
+    const realFn = descriptor.value!;
+    const cache = new Map<string, T>();
+    descriptor.value = function(this: any) {
+        const key = JSON.stringify(util.toDeterministic(Array.from(arguments)));
+        if(!cache.has(key)) {
+            cache.set(key, realFn.apply(this, arguments));
+        }
+        return cache.get(key)!;
     }
 }

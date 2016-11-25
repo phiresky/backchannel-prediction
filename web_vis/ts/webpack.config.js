@@ -11,6 +11,7 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'dist'),
+    publicPath: '/dist',
     filename: 'bundle.js',
   },
   resolve: {
@@ -41,7 +42,7 @@ module.exports = {
     }),
     new ExtractTextPlugin('bundle.css', { allChunks: true }),
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
   ]
 };

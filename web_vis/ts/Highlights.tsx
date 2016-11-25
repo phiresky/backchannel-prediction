@@ -9,9 +9,11 @@ export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiStates: c.
     render() {
         return (
             <div style={{position: "relative", height:c.globalConfig.visualizerHeight + "px", width: "100%"}}>
-                {this.props.uiStates.map((feature, i) => 
+                {this.props.uiStates.map((state, i) => 
                     <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
-                        <c.ChosenVisualizer feature={this.props.gui.getFeature(feature.feature)} gui={this.props.gui} uiState={feature}/>
+                        <c.Async promise={this.props.gui.getFeature(state.feature).then(feature => 
+                            <c.ChosenVisualizer feature={feature} gui={this.props.gui} uiState={state}/>
+                        )} placeholder={c.loadingSpan} />
                     </div>
                 )}
             </div>

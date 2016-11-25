@@ -105,7 +105,7 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
         else if(props.feature.typ === "FeatureType.FMatrix") {
             const data = props.feature.data;
             this.data = props.feature.data[0].map((_,i) => data.map(v => v[i]));
-        } else throw Error("unknown type");
+        } else throw Error("unknown type "+(props.feature as any).typ);
     }
 
     @action
