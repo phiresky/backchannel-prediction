@@ -65,7 +65,7 @@ def train():
         input_var=model['input_layer'].input_var,
         target_var=theano.tensor.ivector('targets'),
         scheduling_method="fuzzy_newbob",
-        scheduling_params=(0.5, 0.00000001),
+        scheduling_params=(0.5, 0.000001),
         update_method="adadelta",
         # learning_rate=0.01,
         iterate_minibatches_train=load_numpy_file(os.path.join(dir, train_config['files']['train']),
