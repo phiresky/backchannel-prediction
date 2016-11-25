@@ -12,7 +12,7 @@ from .network_model import create_network
 import inspect
 import shutil
 
-BATCH_SIZE = 64
+BATCH_SIZE = 1024
 NUM_EPOCHS = 10000
 
 
