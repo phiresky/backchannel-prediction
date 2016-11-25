@@ -81,8 +81,9 @@ cache = {} # type: Dict[str, Dict[str, NumFeature]]
 
 def getFeatures(conv: str):
     return {
-        "defaults":"adca,texta,pitcha,powera,adcb,textb,pitchb,powerb".split(","),
-        "optional": list(nets.keys())
+        "input": "adca,texta,adcb,textb".split(","),
+        "extracted":"pitcha,powera,pitchb,powerb".split(","),
+        "NN outputs": list(nets.keys())
     }
 
 def getExtractedFeature(conv: str, feat: str):
@@ -138,7 +139,10 @@ async def handler(websocket, path):
             msg = json.loads(await websocket.recv())
             id = msg['id']
             if msg['type'] == "getFeatures":
-                await websocket.send(json.dumps({"id": id, "data": getFeatures(msg['conversation'])}))
+                await websocket.send(json.dumps({"id": id, "data": {
+                    'categories': getFeatures(msg['conversation']),
+                    'defaults': "adca,texta,pitcha,powera,adcb,textb,pitchb,powerb".split(",")
+                }}))
             elif msg['type'] == "getConversations":
                 await websocket.send(json.dumps({"id": id, "data": conversations}))
             elif msg['type'] == "getFeature":

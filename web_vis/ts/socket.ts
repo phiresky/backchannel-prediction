@@ -15,8 +15,8 @@ export type ClientMessage = {
 type GetConversationsResponse = ConversationID[];
 type GetFeatureResponse = c.Feature;
 type GetFeaturesResponse = {
-    defaults: FeatureID[],
-    optional: FeatureID[]
+    categories:{[category: string]: FeatureID[]};
+    defaults: FeatureID[];
 }
 type TypedArrayTypes = 'float32' | 'int16';
 function TypedArrayOf(type: TypedArrayTypes) {

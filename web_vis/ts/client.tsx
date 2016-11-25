@@ -136,13 +136,14 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                 <div style={{position: "absolute", top:0, bottom:0, left:0, zIndex: 1, display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
                     {uiState.features.map((info, i) => 
                         <div key={i}><button onClick={e => this.remove(i)}>-</button>
-                            {features && <select value={info.feature} onChange={e => this.changeFeature(e, i)}>
-                                        <optgroup>{features.defaults.map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
-                                        <optgroup>{features.optional.map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
+                            {features && <select style={{maxWidth:"7.5em"}} value={info.feature} onChange={e => this.changeFeature(e, i)}>
+                                        {Object.keys(features.categories).map(category => 
+                                            <optgroup key={category} label={category}>{features.categories[category].map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
+                                        )}
                                     </select>
                             }
                             {info.currentRange&&
-                                <select value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
+                                <select style={{maxWidth:"7.5em"}} value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
                                     {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
                                 </select>
                             }
@@ -334,7 +335,6 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.disposers.push(() => this.stopPlayback());
     }
     componentWillUnmount() {
-        console.log("pp", "willunmonut");
         for(const disposer of this.disposers) disposer();
     }
     render() {
@@ -414,10 +414,18 @@ const badExamples: {[name: string]: string} = {
 enum LoadingState {
     NotConnected, Connected, Loading, Complete
 }
-
+let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
+    const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
+    const visibleAudioFeatures = [...visibleFeatures]
+        .map(f => gui.getFeature(f.feature).data)
+        .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
+    if(visibleAudioFeatures.length > 0)
+        return <AudioPlayer features={visibleAudioFeatures} zoom={gui.zoom} gui={gui} ref={gui.setAudioPlayer} />;
+    else return <span/>;
+});
 @observer
 export class GUI extends React.Component<{}, {}> {
-    @observable widthCalcDiv: HTMLDivElement;
+    
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
     @observable followPlayback = true;
@@ -429,8 +437,9 @@ export class GUI extends React.Component<{}, {}> {
     };
     @observable totalTimeSeconds = NaN;
 
-    audioPlayer: AudioPlayer; setAudioPlayer = action("setAudioPlayer", (a: AudioPlayer) => this.audioPlayer = a);
-    uisDiv: HTMLDivElement; setUisDiv = action("setUisDiv", (e: HTMLDivElement) => this.uisDiv = e);
+    audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
+    uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
+    @observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = action("setWidthCalcDiv", (e:HTMLDivElement) => this.widthCalcDiv = e);
     private socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
 
@@ -576,15 +585,6 @@ export class GUI extends React.Component<{}, {}> {
         return this.socketManager.getConversations();
     }
     render(): JSX.Element {
-        const MaybeAudioPlayer = observer(() => {
-            const visibleFeatures = new Set(this.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
-            const visibleAudioFeatures = [...visibleFeatures]
-                .map(f => this.getFeature(f.feature).data)
-                .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
-            if(visibleAudioFeatures.length > 0)
-                return <AudioPlayer features={visibleAudioFeatures} zoom={this.zoom} gui={this} ref={this.setAudioPlayer} />;
-            else return <span/>;
-        });
         return (
             <div>
                 <div style={{margin: "10px"}} className="headerBar">
@@ -601,12 +601,12 @@ export class GUI extends React.Component<{}, {}> {
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>
                         <div style={styles.leftBarCSS} />
-                        <div style={{flexGrow: 1}} ref={action("setWidthCalcDiv", (e: any) => this.widthCalcDiv = e)} />
+                        <div style={{flexGrow: 1}} ref={this.setWidthCalcDiv} />
                     </div>
                     
                     {this.uis.map((p, i) => <InfoVisualizer key={p.uuid} uiState={p} zoom={this.zoom} gui={this} />)}
                 </div>
-                <MaybeAudioPlayer />
+                <MaybeAudioPlayer gui={this} />
                 <DevTools />
             </div>
         );

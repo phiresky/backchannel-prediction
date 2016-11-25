@@ -16,8 +16,8 @@ class Step(AbstractStep):
         tracker = PitchTracker()
         [pitcha, pitchb] = [feats[which].applyPitchTracker(tracker, window='32ms')
                             for which in ('adca', 'adcb')]  # type: NumFeature
-        pitcha = pitcha / 200
-        pitchb = pitchb / 200
+        pitcha = pitcha / 1.1
+        pitchb = pitchb / 1.1
         tmpfeata = pitcha.merge(feats['powera'])  # type: NumFeature
         tmpfeatb = pitchb.merge(feats['powerb'])  # type: NumFeature
 
