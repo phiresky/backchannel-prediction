@@ -1,0 +1,49 @@
+{
+	"extract_config": {
+		"outputDirectory": "extract_pfiles_python/out",
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.37161071096654275,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3668244656133829,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.36080680762081785,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.3580651719330855,
+				"weights": "epoch-003.pkl"
+			}
+		},
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json",
+		"model": "network_model.py"
+	},
+	"train_config": {
+		"output_dim": 1,
+		"num_labels": 2,
+		"input_dim": 162,
+		"files": {
+			"train": "train.npz",
+			"validate": "validate.npz"
+		}
+	},
+	"paths": {
+		"conversations": {
+			"train": "data/conversations.train",
+			"validate": "data/conversations.valid"
+		},
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302"
+	}
+}

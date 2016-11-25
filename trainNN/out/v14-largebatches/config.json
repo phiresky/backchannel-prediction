@@ -1,0 +1,173 @@
+{
+	"train_output": {
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json",
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.3993094308035714
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.38754999069940477
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.38198997860863093
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.37838890438988093
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.3763776506696429
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.3720005580357143
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.36850120907738093
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.36881510416666663
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.36639985584077384
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.36501348586309523
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.3636736188616071
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.36490013485863093
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.36366199311755953
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.3642229352678571
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.36202276320684523
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.36186581566220233
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.36215064639136907
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.36248779296875
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.36231050037202384
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.36187744140625
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.3619297572544643
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.3620169503348214
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.3619471958705357
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.3617640904017857
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.36188906715029767
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.3618948800223214
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.36189197358630953
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.36181059337797616
+			},
+			"28": {
+				"weights": "epoch-028.pkl",
+				"validation_error": 0.36183965773809523
+			},
+			"29": {
+				"weights": "epoch-029.pkl",
+				"validation_error": 0.36179315476190477
+			},
+			"30": {
+				"weights": "epoch-030.pkl",
+				"validation_error": 0.36174955822172616
+			},
+			"31": {
+				"weights": "epoch-031.pkl",
+				"validation_error": 0.36180478050595233
+			},
+			"32": {
+				"weights": "epoch-032.pkl",
+				"validation_error": 0.36177862258184523
+			},
+			"33": {
+				"weights": "epoch-033.pkl",
+				"validation_error": 0.3617815290178571
+			},
+			"34": {
+				"weights": "epoch-034.pkl",
+				"validation_error": 0.3617902483258929
+			}
+		},
+		"model": "network_model.py"
+	},
+	"extract_config": {
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"paths": {
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		},
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302"
+	},
+	"train_config": {
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"num_labels": 2,
+		"input_dim": 162,
+		"output_dim": 1
+	}
+}

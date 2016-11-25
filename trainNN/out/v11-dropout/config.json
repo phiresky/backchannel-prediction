@@ -1,0 +1,181 @@
+{
+	"train_output": {
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.39990706319702607
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.3918041356877323
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.38877788104089217
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.38665485594795534
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.38460734200743496
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.38344563197026027
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.3822519749070632
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.38098861524163574
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.3800679600371747
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.38077950743494426
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.3781859897769517
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.37814532992565053
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.37696328996282524
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.3771956319702602
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.37727695167286246
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.3773147072490707
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.37733503717472117
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.3773640799256506
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.3774715381040892
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.3774483039033457
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.3772740473977695
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.37707074814126396
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.37710850371747207
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.37708236524163574
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.3770388011152417
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.37697781133829
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.3770068540892193
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.3769458643122676
+			},
+			"28": {
+				"weights": "epoch-028.pkl",
+				"validation_error": 0.37699233271375465
+			},
+			"29": {
+				"weights": "epoch-029.pkl",
+				"validation_error": 0.3769690985130112
+			},
+			"30": {
+				"weights": "epoch-030.pkl",
+				"validation_error": 0.37698361988847584
+			},
+			"31": {
+				"weights": "epoch-031.pkl",
+				"validation_error": 0.37697781133829
+			},
+			"32": {
+				"weights": "epoch-032.pkl",
+				"validation_error": 0.3769981412639405
+			},
+			"33": {
+				"weights": "epoch-033.pkl",
+				"validation_error": 0.3769690985130112
+			},
+			"34": {
+				"weights": "epoch-034.pkl",
+				"validation_error": 0.37697490706319703
+			},
+			"35": {
+				"weights": "epoch-035.pkl",
+				"validation_error": 0.37698361988847584
+			},
+			"36": {
+				"weights": "epoch-036.pkl",
+				"validation_error": 0.3769487685873606
+			}
+		},
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json",
+		"model": "network_model.py"
+	},
+	"extract_config": {
+		"outputDirectory": "extract_pfiles_python/out",
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40
+	},
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		}
+	},
+	"train_config": {
+		"output_dim": 1,
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"input_dim": 162,
+		"num_labels": 2
+	}
+}

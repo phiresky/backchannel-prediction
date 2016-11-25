@@ -1,0 +1,177 @@
+{
+	"extract_config": {
+		"context": 40,
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_output": {
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json",
+		"model": "network_model.py",
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.3913539730483271
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.3802654507434944
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.3752468633828996
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.3719388940520446
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.3678554832713755
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.3640886384758364
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.36071677509293676
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.35987163104089215
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.35715613382899625
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.35821038568773234
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.35659560873605944
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.3585676115241636
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.35561977230483266
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.3548588522304833
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.35624128717472114
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.35460908457249074
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.3553787174721189
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.35473396840148697
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.3544377323420075
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.354504530669145
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.3541908689591078
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.35445225371747213
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.35446967936802976
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.35440288104089224
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.3542809014869889
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.35424605018587363
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.3541502091078067
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.3542170074349442
+			},
+			"28": {
+				"weights": "epoch-028.pkl",
+				"validation_error": 0.35419667750929373
+			},
+			"29": {
+				"weights": "epoch-029.pkl",
+				"validation_error": 0.3541879646840149
+			},
+			"30": {
+				"weights": "epoch-030.pkl",
+				"validation_error": 0.3541792518587361
+			},
+			"31": {
+				"weights": "epoch-031.pkl",
+				"validation_error": 0.3541879646840149
+			},
+			"32": {
+				"weights": "epoch-032.pkl",
+				"validation_error": 0.3541908689591078
+			},
+			"33": {
+				"weights": "epoch-033.pkl",
+				"validation_error": 0.3541676347583643
+			},
+			"34": {
+				"weights": "epoch-034.pkl",
+				"validation_error": 0.35417344330855016
+			},
+			"35": {
+				"weights": "epoch-035.pkl",
+				"validation_error": 0.35419377323420076
+			}
+		}
+	},
+	"train_config": {
+		"num_labels": 2,
+		"input_dim": 162,
+		"files": {
+			"train": "train.npz",
+			"validate": "validate.npz"
+		},
+		"output_dim": 1
+	},
+	"paths": {
+		"conversations": {
+			"train": "data/conversations.train",
+			"validate": "data/conversations.valid"
+		},
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302"
+	}
+}

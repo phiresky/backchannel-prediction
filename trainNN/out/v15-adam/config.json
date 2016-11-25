@@ -1,0 +1,129 @@
+{
+	"train_output": {
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json",
+		"model": "network_model.py",
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.37370759758364314
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.3640595957249071
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.3615415892193309
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.35953763940520445
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.3577689358736059
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.3586053671003717
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.35583759293680295
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.356159967472119
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.35481528810408924
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.3548501394052045
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.3539033457249071
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.3534822258364312
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.35346480018587356
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.3530988615241636
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.3538249302973978
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.35313952137546467
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.3529681691449814
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.3530204460966543
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.3530291589219331
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.35293622211895914
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.35271840148698885
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.3528926579925651
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.35282876394052043
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.35277648698884756
+			}
+		}
+	},
+	"extract_config": {
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"num_labels": 2,
+		"output_dim": 1,
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"input_dim": 162
+	},
+	"paths": {
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		}
+	}
+}
