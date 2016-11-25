@@ -1,0 +1,201 @@
+{
+	"extract_config": {
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.4147595260223048,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.4181255808550186,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.41480599442379185,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.4144081087360595,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.41437035315985127,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.4141031598513011,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.4140508828996282,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.41440230018587365,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.4138737221189591,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.41373141263940516,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.4129821096654275,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.4136123373605948,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.41404797862453535,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.4135803903345725,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.4134845492565056,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.4133335269516729,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.4135019749070632,
+				"weights": "epoch-016.pkl"
+			},
+			"17": {
+				"validation_error": 0.4133625697026022,
+				"weights": "epoch-017.pkl"
+			},
+			"18": {
+				"validation_error": 0.4134409851301115,
+				"weights": "epoch-018.pkl"
+			},
+			"19": {
+				"validation_error": 0.4131766960966543,
+				"weights": "epoch-019.pkl"
+			},
+			"20": {
+				"validation_error": 0.41312441914498144,
+				"weights": "epoch-020.pkl"
+			},
+			"21": {
+				"validation_error": 0.41311280204460965,
+				"weights": "epoch-021.pkl"
+			},
+			"22": {
+				"validation_error": 0.41303438661710035,
+				"weights": "epoch-022.pkl"
+			},
+			"23": {
+				"validation_error": 0.41299663104089224,
+				"weights": "epoch-023.pkl"
+			},
+			"24": {
+				"validation_error": 0.41304309944237916,
+				"weights": "epoch-024.pkl"
+			},
+			"25": {
+				"validation_error": 0.4129792053903346,
+				"weights": "epoch-025.pkl"
+			},
+			"26": {
+				"validation_error": 0.4130169609665427,
+				"weights": "epoch-026.pkl"
+			},
+			"27": {
+				"validation_error": 0.41298501394052045,
+				"weights": "epoch-027.pkl"
+			},
+			"28": {
+				"validation_error": 0.41296758828996283,
+				"weights": "epoch-028.pkl"
+			},
+			"29": {
+				"validation_error": 0.41299663104089224,
+				"weights": "epoch-029.pkl"
+			},
+			"30": {
+				"validation_error": 0.4129792053903346,
+				"weights": "epoch-030.pkl"
+			},
+			"31": {
+				"validation_error": 0.41297339684014867,
+				"weights": "epoch-031.pkl"
+			},
+			"32": {
+				"validation_error": 0.4129530669144982,
+				"weights": "epoch-032.pkl"
+			},
+			"33": {
+				"validation_error": 0.4129501626394052,
+				"weights": "epoch-033.pkl"
+			},
+			"34": {
+				"validation_error": 0.4129530669144982,
+				"weights": "epoch-034.pkl"
+			},
+			"35": {
+				"validation_error": 0.4129501626394052,
+				"weights": "epoch-035.pkl"
+			},
+			"36": {
+				"validation_error": 0.4129501626394052,
+				"weights": "epoch-036.pkl"
+			},
+			"37": {
+				"validation_error": 0.412958875464684,
+				"weights": "epoch-037.pkl"
+			},
+			"38": {
+				"validation_error": 0.4129704925650558,
+				"weights": "epoch-038.pkl"
+			},
+			"39": {
+				"validation_error": 0.412958875464684,
+				"weights": "epoch-039.pkl"
+			},
+			"40": {
+				"validation_error": 0.41294725836431223,
+				"weights": "epoch-040.pkl"
+			},
+			"41": {
+				"validation_error": 0.41297630111524164,
+				"weights": "epoch-041.pkl"
+			}
+		},
+		"model": "network_model.py",
+		"source": "extract_pfiles_python/out/v09-without-frame-limiting-context40/config.json"
+	},
+	"paths": {
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train"
+		},
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc"
+	},
+	"train_config": {
+		"num_labels": 2,
+		"files": {
+			"validate": "validate.npz",
+			"train": "train.npz"
+		},
+		"output_dim": 1,
+		"input_dim": 162
+	}
+}
