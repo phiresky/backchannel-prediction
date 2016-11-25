@@ -109,8 +109,8 @@ def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DB
         else:
             raise Exception("Unknown channel " + channel)
 
-        fromTime = cNBCbegin
-        toTime = cBCend
+        fromTime = max(cNBCbegin - 1, 0)
+        toTime = cBCend + 1
         features = featureSet.eval(None, {
             'from': fromTime,
             'to': toTime,
@@ -129,15 +129,17 @@ def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DB
             logging.warning("Frame deviation too big!")
             continue
 
-        NBCframeCount = int((cNBCend - cNBCbegin) * 100)
-        BCframeCount = int((cBCend - cBCbegin) * 100)
+        NBCframeStart = int((cNBCbegin - fromTime) * 100)
+        NBCframeEnd = int((cNBCend - fromTime) * 100)
+        BCframeStart = int((cBCbegin - fromTime) * 100)
+        BCframeEnd = int((cBCend - fromTime) * 100)
         frameCount = 0
-        for frameX in range(0, NBCframeCount):
+        for frameX in range(NBCframeStart, NBCframeEnd + 1):
             yield np.append(F[frameX], [0], axis=0)
             frameCount += 1
 
         frameCount = 0
-        for frameX in range(frameN - BCframeCount, frameN):
+        for frameX in range(BCframeStart, BCframeEnd + 1):
             yield np.append(F[frameX], [1], axis=0)
             frameCount += 1
 
