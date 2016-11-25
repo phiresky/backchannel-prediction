@@ -19,18 +19,17 @@ NUM_EPOCHS = 10000
 def iterate_minibatches(batchsize, data, input_dim):
     frames, dim = data.shape
     assert dim == input_dim + 1
-    indices = numpy.arange(len(data))
+    indices = numpy.arange(len(data), dtype='int32')
     numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
         elements = indices[i * batchsize:(i + 1) * batchsize]
-        slice = data[elements]
-        yield slice[:, :input_dim], slice[:, input_dim].astype("int32")
+        yield elements
 
 
-def load_numpy_file(fname, input_dim):
+def load_numpy_file(fname):
     misc_func.myPrint("loading numpy file " + fname)
     data = numpy.load(fname)['data']
-    return partial(iterate_minibatches, BATCH_SIZE, data, input_dim)
+    return data
 
 
 def load_config(config_path: str):
@@ -60,18 +59,20 @@ def train():
 
     dir = os.path.dirname(config_path)
     model = create_network(train_config, BATCH_SIZE)
+    input_dim = train_config['input_dim']
+    train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
+    validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
     stats = train_func.train_network(
         network=model['output_layer'],
-        input_var=model['input_layer'].input_var,
-        target_var=theano.tensor.ivector('targets'),
+        input_dim=input_dim,
         scheduling_method="fuzzy_newbob",
         scheduling_params=(0.5, 0.000001),
         update_method="adam",
         # learning_rate=0.01,
-        iterate_minibatches_train=load_numpy_file(os.path.join(dir, train_config['files']['train']),
-                                                  train_config['input_dim']),
-        iterate_minibatches_validate=load_numpy_file(os.path.join(dir, train_config['files']['validate']),
-                                                     train_config['input_dim']),
+        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data, input_dim),
+        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data, input_dim),
+        train_data=train_data,
+        validate_data=validate_data,
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")
