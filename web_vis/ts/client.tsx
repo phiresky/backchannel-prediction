@@ -9,6 +9,7 @@ import DevTools from 'mobx-react-devtools';
 import * as s from './socket';
 import * as LZString from 'lz-string';
 import * as highlights from './Highlights';
+import {autobind} from 'core-decorators';
 
 export const globalConfig = observable({
     maxColor: "#3232C8",
@@ -160,12 +161,12 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
 }
 @observer
-class InfoVisualizer extends React.Component<{uiState: UIState, zoom: Zoom, gui: GUI}, {}> {
+class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     render() {
-        const {uiState, zoom, gui} = this.props;
+        const {uiState, gui} = this.props;
         
         return (
-            <div style={{display: "flex", marginBottom:"10px"}}>
+            <div style={{display: "flex"}}>
                 <div style={styles.leftBarCSS}>
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
@@ -582,6 +583,16 @@ export class GUI extends React.Component<{}, {}> {
     getConversations() {
         return this.socketManager.getConversations();
     }
+    @action
+    addUI(afterUuid: number) {
+        this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, {uuid: uuid++, features:[]});
+    }
+    *getVisualizers() {
+        for(const ui of this.uis) {
+            yield <InfoVisualizer key={ui.uuid} uiState={ui} gui={this} />;
+            yield <button key={ui.uuid+"+"} onClick={() => this.addUI(ui.uuid)}>+</button>;
+        }
+    }
     render(): JSX.Element {
         return (
             <div>
@@ -601,8 +612,7 @@ export class GUI extends React.Component<{}, {}> {
                         <div style={styles.leftBarCSS} />
                         <div style={{flexGrow: 1}} ref={this.setWidthCalcDiv} />
                     </div>
-                    
-                    {this.uis.map((p, i) => <InfoVisualizer key={p.uuid} uiState={p} zoom={this.zoom} gui={this} />)}
+                    {[...this.getVisualizers()]}
                 </div>
                 <MaybeAudioPlayer gui={this} />
                 <DevTools />
@@ -613,5 +623,5 @@ export class GUI extends React.Component<{}, {}> {
 
 
 
-const gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
-Object.assign(window, {gui, util, action, globalConfig, toJS});
+const _gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
+Object.assign(window, {gui:_gui, util, action, globalConfig, toJS});
