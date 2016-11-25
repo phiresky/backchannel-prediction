@@ -1,4 +1,4 @@
-import {action, observable} from 'mobx';
+import {action, observable, reaction, asReference} from 'mobx';
 import * as c from './client';
 import * as util from './util';
 
@@ -24,6 +24,17 @@ function TypedArrayOf(type: TypedArrayTypes) {
         case 'float32': return Float32Array;
         case 'int16': return Int16Array;
         default: throw Error("unknown type");
+    }
+}
+
+class LulPromise<T> {
+    @observable data: T|null;
+    constructor(data: T|null) {
+        this.data = asReference(data);
+    }
+    toPromise(): Promise<T> {
+        if(this.data !== null) return Promise.resolve(this.data);
+        else return new Promise(resolve => reaction<T>("toPromise", () => this.data!, resolve));
     }
 }
 
@@ -82,19 +93,23 @@ export class SocketManager {
             this.listeners.set(id, resolve);
         });
     }
-    @cached
-    async getConversations(): Promise<GetConversationsResponse> {
+    
+    async getConversationsRemote(): Promise<GetConversationsResponse> {
         const response = await this.sendMessage({type: "getConversations"});
         return response.data as GetConversationsResponse;
     }
+    getConversations(): LulPromise<GetConversationsResponse> {
+        return lulCache("getConversations", this, this.getConversationsRemote, Array.from(arguments));
+    }
 
-    @cached
-    async getFeatures(conversation: ConversationID): Promise<GetFeaturesResponse> {
+    async getFeaturesRemote(conversation: ConversationID): Promise<GetFeaturesResponse> {
         const response = await this.sendMessage({type: "getFeatures", conversation});
         return response.data as GetFeaturesResponse;
     }
-    @cached
-    async getFeature(conversation: ConversationID, featureID: FeatureID): Promise<GetFeatureResponse> {
+    getFeatures(conversation: ConversationID): LulPromise<GetFeaturesResponse> {
+        return lulCache("getFeatures", this, this.getFeaturesRemote, Array.from(arguments));
+    }
+    async getFeatureRemote(conversation: ConversationID, featureID: FeatureID): Promise<GetFeatureResponse> {
         const response = await this.sendMessage({type: "getFeature", conversation, feature: featureID});
         const feature = response.data as GetFeatureResponse;
         if(feature.data === null) {
@@ -104,16 +119,18 @@ export class SocketManager {
         }
         return feature;
     }
+    getFeature(conversation: ConversationID, featureID: FeatureID): LulPromise<GetFeatureResponse> {
+        return lulCache("getFeature", this, this.getFeatureRemote, Array.from(arguments));
+    }
 }
 
-function cached<T>(prototype: any, fnName: string, descriptor: TypedPropertyDescriptor<(...args:any[]) => T>) {
-    const realFn = descriptor.value!;
-    const cache = new Map<string, T>();
-    descriptor.value = function(this: any) {
-        const key = JSON.stringify(util.toDeterministic(Array.from(arguments)));
-        if(!cache.has(key)) {
-            cache.set(key, realFn.apply(this, arguments));
-        }
-        return cache.get(key)!;
+const cache = new Map<string, LulPromise<any>>();
+function lulCache<T>(name: string, _this: any, fn: (...args: any[]) => Promise<T>, args: any[]) {
+    const key = JSON.stringify(util.toDeterministic([...args, name]));
+    if(!cache.has(key)) {
+        const lul = new LulPromise<T>(null);
+        cache.set(key, lul);
+        (fn.apply(_this, args) as Promise<T>).then(action("received"+name, (result:T) => lul.data = result));
     }
+    return cache.get(key)!;
 }

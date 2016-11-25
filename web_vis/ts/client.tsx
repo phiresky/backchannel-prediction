@@ -95,7 +95,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         info.visualizer = value as VisualizerChoice;
     }
     async changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
-        const state = this.props.gui.getDefaultUIState(await this.props.gui.getFeature(e.currentTarget.value))
+        const state = this.props.gui.getDefaultUIState(await this.props.gui.getFeature(e.currentTarget.value).toPromise())
         runInAction("changeFeature"+i, () => this.props.uiState.features[i] = state);
     }
     @action remove(i: number) {
@@ -107,7 +107,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
     @action async add() {
         const gui = this.props.gui;
-        const state = gui.getDefaultUIState(await gui.getFeature((await gui.getFeatures())[0]));
+        const state = gui.getDefaultUIState(await gui.getFeature((await gui.getFeatures().toPromise()).defaults[0]).toPromise());
         runInAction(() => this.props.uiState.features.push(state));
     }
 
@@ -121,30 +121,32 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                 <pre key="min" style={{position: "absolute", margin:0, bottom:0, right:0}}>{util.round1(firstWithRange.currentRange.min)}</pre>,
             ];
         } else minmax = "";
-        const VisualizerChoices = async (props:{info: SingleUIState}) => {
-            const c = getVisualizerChoices(await gui.getFeature(props.info.feature));
+        const VisualizerChoices = (props:{info: SingleUIState}) => {
+            const feature = gui.getFeature(props.info.feature).data;
+            if(!feature) return <span/>;
+            const c = getVisualizerChoices(feature);
             if(c.length > 1) return <select value={props.info.visualizer} onChange={e => this.changeVisualizer(props.info, e.currentTarget.value)}>
                 {c.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             else return <span/>;
         }
+        const features = gui.getFeatures().data;
         return (
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
                 <div style={{position: "absolute", top:0, bottom:0, left:0, zIndex: 1, display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
                     {uiState.features.map((info, i) => 
                         <div key={i}><button onClick={e => this.remove(i)}>-</button>
-                            <Async placeholder={loadingSpan} promise={
-                                gui.getFeatures().then(x =>
-                                    <select value={info.feature} onChange={e => this.changeFeature(e, i)}>
-                                        {x.map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}
+                            {features && <select value={info.feature} onChange={e => this.changeFeature(e, i)}>
+                                        <optgroup>{features.defaults.map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
+                                        <optgroup>{features.optional.map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
                                     </select>
-                                )} />
+                            }
                             {info.currentRange&&
                                 <select value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
                                     {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
                                 </select>
                             }
-                            <Async placeholder={loadingSpan} promise={VisualizerChoices({info})} />
+                            <VisualizerChoices info={info} />
                         </div>
                         
                     )}
@@ -390,32 +392,14 @@ const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
     return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>
 });
 
-type AsyncProps = {placeholder?: JSX.Element, promise: Promise<JSX.Element>};
-@observer
-export class Async extends React.Component<AsyncProps, {}> {
-    @observable
-    data?: JSX.Element;
-    constructor(props: AsyncProps) {
-        super(props);
-        this.data = props.placeholder;
-        this.props.promise.then(action("receivedData", (data: JSX.Element) => this.data = data));
-    }
-    componentWillUpdate(nextProps: AsyncProps) {
-        nextProps.promise.then(action("receivedData", (data: JSX.Element) => this.data = data));
-    }
-    render() {
-        return this.data || null;
-    }
-}
 @observer
 class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     conversation = "sw2001";
     render() {
+        const convos = this.props.gui.getConversations().data;
         return (<div style={{display:"inline-block"}}>
             <input list="conversations" value={this.conversation} onChange={e => this.conversation = e.currentTarget.value} />
-            <Async placeholder={loadingSpan} promise={this.props.gui.getConversations().then(x => 
-                <datalist id="conversations">{x.map(c => <option key={c as any} value={c as any}/>)}</datalist>
-            )}/>
+            {convos && <datalist id="conversations">{convos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
             <button onClick={c => this.props.gui.loadConversation(this.conversation)}>Load</button>
             <button onClick={c => this.props.gui.loadRandomConversation()}>RND</button>
         </div>)
@@ -430,6 +414,7 @@ const badExamples: {[name: string]: string} = {
 enum LoadingState {
     NotConnected, Connected, Loading, Complete
 }
+
 @observer
 export class GUI extends React.Component<{}, {}> {
     @observable widthCalcDiv: HTMLDivElement;
@@ -495,16 +480,16 @@ export class GUI extends React.Component<{}, {}> {
             this.zoom.left = 0; this.zoom.right = 1;
             this.totalTimeSeconds = NaN;
         });
-        const features = await this.socketManager.getFeatures(convID);
-        for(const featureID of features.defaults) this.onFeatureReceived(await this.getFeature(featureID));
+        const features = await this.socketManager.getFeatures(convID).toPromise();
+        for(const featureID of features.defaults) this.onFeatureReceived(await this.getFeature(featureID).toPromise());
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
-        const convos = await this.socketManager.getConversations();
+        const convos = await this.socketManager.getConversations().toPromise();
         if(convos.indexOf(id as any) >= 0) return id as any;
         throw Error("unknown conversation " + id);
     }
     async loadRandomConversation() {
-        this.loadConversation(util.randomChoice(await this.socketManager.getConversations()) as any);
+        this.loadConversation(util.randomChoice(await this.getConversations().toPromise()) as any);
     }
     @action onFeatureReceiveDone() {
         if(this.stateAfterLoading) Object.assign(this, this.stateAfterLoading);
@@ -579,28 +564,27 @@ export class GUI extends React.Component<{}, {}> {
         window.addEventListener("resize", action("windowResize", (e: UIEvent) => this.windowWidth = window.innerWidth));
         window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
     }
-    async getFeature(id: string|s.FeatureID) {
+    getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
         if(!f) throw Error("unknown feature "+ name);
         return f;
     }
-    async getFeatures() {
-        const features = await this.socketManager.getFeatures(this.conversation);
-        return [...features.defaults, ...features.optional];
+    getFeatures() {
+        return this.socketManager.getFeatures(this.conversation);
     }
-    async getConversations() {
-        return await this.socketManager.getConversations();
+    getConversations() {
+        return this.socketManager.getConversations();
     }
     render(): JSX.Element {
-        const visibleFeatures = new Set(this.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
-        const audioPlayer = async () => {
-            const visibleAudioFeatures = (await Promise.all([...visibleFeatures]
-                .map(f => this.getFeature(f.feature))))
+        const MaybeAudioPlayer = observer(() => {
+            const visibleFeatures = new Set(this.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
+            const visibleAudioFeatures = [...visibleFeatures]
+                .map(f => this.getFeature(f.feature).data)
                 .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
             if(visibleAudioFeatures.length > 0)
                 return <AudioPlayer features={visibleAudioFeatures} zoom={this.zoom} gui={this} ref={this.setAudioPlayer} />;
-            else return "";
-        };
+            else return <span/>;
+        });
         return (
             <div>
                 <div style={{margin: "10px"}} className="headerBar">
@@ -622,7 +606,7 @@ export class GUI extends React.Component<{}, {}> {
                     
                     {this.uis.map((p, i) => <InfoVisualizer key={p.uuid} uiState={p} zoom={this.zoom} gui={this} />)}
                 </div>
-                <Async promise={audioPlayer()} />
+                <MaybeAudioPlayer />
                 <DevTools />
             </div>
         );

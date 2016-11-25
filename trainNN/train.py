@@ -1,5 +1,3 @@
-import lasagne
-from lasagne.layers import InputLayer, DenseLayer
 from .markuslasagne import train_func, misc_func
 import json
 import sys
@@ -10,6 +8,9 @@ import os.path
 import subprocess
 from distutils.dir_util import mkpath
 import contextlib
+from .network_model import create_network
+import inspect
+import shutil
 
 BATCH_SIZE = 256
 NUM_EPOCHS = 10000
@@ -32,24 +33,6 @@ def load_numpy_file(fname, input_dim):
     return partial(iterate_minibatches, BATCH_SIZE, data, input_dim)
 
 
-def feedforward_model(config):
-    input_dim = config['input_dim']
-    num_labels = config['num_labels']
-    input_layer = InputLayer(shape=(BATCH_SIZE, input_dim))
-    hidden_layer_1 = DenseLayer(input_layer,
-                                num_units=100,
-                                nonlinearity=lasagne.nonlinearities.sigmoid,
-                                W=lasagne.init.Constant(0))
-    hidden_layer_2 = DenseLayer(hidden_layer_1,
-                                num_units=50,
-                                nonlinearity=lasagne.nonlinearities.sigmoid,
-                                W=lasagne.init.Constant(0))
-    output_layer = DenseLayer(hidden_layer_2,
-                              num_units=num_labels,
-                              nonlinearity=lasagne.nonlinearities.softmax)
-    return locals()
-
-
 def load_config(config_path: str):
     misc_func.myPrint("loading config file " + config_path)
     with open(config_path) as config_file:
@@ -66,13 +49,17 @@ def train():
     mkpath(out_dir)
     LOGFILE = os.path.join(out_dir, "train.log")
 
+    model_file = os.path.join(out_dir, "network_model.py")
+    shutil.copyfile(inspect.getsourcefile(create_network), model_file)
+
     misc_func.MyLogger.logfile = open(LOGFILE, 'a')
+    misc_func.myPrint("version={}".format(version))
     config_path = sys.argv[1]
     config = load_config(config_path)
     train_config = config['train_config']
 
     dir = os.path.dirname(config_path)
-    model = feedforward_model(train_config)
+    model = create_network(train_config, BATCH_SIZE)
     stats = train_func.train_network(
         network=model['output_layer'],
         input_var=model['input_layer'].input_var,
@@ -88,10 +75,13 @@ def train():
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")
+    for k, v in stats.items():
+        v['weights'] = os.path.basename(v['weights'])
     with open(config_out, "w") as f:
         json.dump({**config, 'train_output': {
             'stats': stats,
             'source': config_path,
+            'model': os.path.basename(model_file)
         }}, f, indent='\t')
     misc_func.myPrint("Wrote output to " + config_out)
     latest_path = os.path.join("trainNN", "out", "latest")

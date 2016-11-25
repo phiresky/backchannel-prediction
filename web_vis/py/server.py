@@ -48,10 +48,10 @@ def findAllNets():
         if isfile(net_conf_path):
             net_conf = readDB.load_config(net_conf_path)
             stats = net_conf['train_output']['stats']
-            best = min(stats.values(), key=lambda item: item['validation_error'])
-            yield join(netversion, "best"), best['weights']
-            for file in sorted(glob.glob(join(path, "epoch*.pkl"))):
-                yield join(netversion, basename(file)), file
+            bestid = min(stats.keys(), key=lambda k: stats[k]['validation_error'])
+            yield join(netversion, "best"), (net_conf_path, bestid)
+            for id, info in stats.items():
+                yield join(netversion, info['weights']), (net_conf_path, id)
 
 
 config = readDB.load_config(sys.argv[1])
@@ -104,9 +104,8 @@ async def sendFeature(ws, id: str, conv: str, feat: str):
     elif feat == "textb":
         await sendOtherFeature(ws, id, segsToJSON(conv + "-B", feat))
     elif feat in nets:
-        weights = nets[feat]
-        config = readDB.load_config(os.path.join(os.path.dirname(weights), "config.json"))
-        net = get_network_outputter(config['train_config'], weights)
+        config_path, wid = nets[feat]
+        net = get_network_outputter(config_path, wid)
         await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feata')))
     else:
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))

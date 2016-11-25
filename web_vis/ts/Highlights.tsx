@@ -7,15 +7,17 @@ import * as util from './util';
 @observer
 export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiStates: c.SingleUIState[]}, {}> {
     render() {
+        const SingleOverlay = ({state}:{state: c.SingleUIState}) => {
+            const feature = this.props.gui.getFeature(state.feature).data;
+            return (
+                <div style={{position: "absolute", width: "100%", height:"100%"}}>
+                    {feature && <c.ChosenVisualizer feature={feature} gui={this.props.gui} uiState={state}/>}
+                </div>
+            );
+        };
         return (
             <div style={{position: "relative", height:c.globalConfig.visualizerHeight + "px", width: "100%"}}>
-                {this.props.uiStates.map((state, i) => 
-                    <div key={i} style={{position: "absolute", width: "100%", height:"100%"}}>
-                        <c.Async promise={this.props.gui.getFeature(state.feature).then(feature => 
-                            <c.ChosenVisualizer feature={feature} gui={this.props.gui} uiState={state}/>
-                        )} placeholder={c.loadingSpan} />
-                    </div>
-                )}
+                {this.props.uiStates.map((state, i) => <SingleOverlay key={i} state={state} />)}
             </div>
         )
     }
