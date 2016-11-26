@@ -3,7 +3,7 @@ import asyncio
 import sys
 from jrtk.preprocessing import NumFeature
 from jrtk.features import FeatureType
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, List
 import json
 from collections import OrderedDict
 from trainNN.evaluate import get_network_outputter
@@ -28,11 +28,12 @@ def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, f
 
 
 def segsToJSON(spkr: str, name: str) -> Dict:
+    utts = getUtterances(spkr)
     return {
         'name': name,
         'typ': 'utterances',
-        'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt]) else None}
-                 for utt in spkDB[spkr]['segs'].strip().split(" ")]
+        'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt], index, utts, uttDB) else None}
+                 for index, utt in enumerate(utts)]
     }
 
 
@@ -118,6 +119,14 @@ async def sendFeature(ws, id: str, conv: str, feat: str):
     else:
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
+def getUtterances(spkr: str):
+    return spkDB[spkr]['segs'].strip().split(" ")
+
+def getBackchannels(utts: List[str]):
+    return [uttDB[utt]
+            for index, utt in enumerate(utts)
+            if readDB.isBackchannel(uttDB[utt], index, utts, uttDB)
+            ]
 
 def getHighlights(conv: str, channel: str):
     if channel == "A":
@@ -126,10 +135,8 @@ def getHighlights(conv: str, channel: str):
         bcChannel = "A"
     else:
         raise Exception("unknown channel " + channel)
-    bcs = [uttDB[utt]
-           for utt in spkDB[conv + "-" + bcChannel]['segs'].strip().split(" ")
-           if readDB.isBackchannel(uttDB[utt.strip()])
-           ]
+    utts = getUtterances(conv + "-" + bcChannel)
+    bcs = getBackchannels(utts)
     highlights = []
     for bc in bcs:
         (a, b) = readDB.getBackchannelTrainingRange(bc)

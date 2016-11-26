@@ -396,11 +396,14 @@ const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
 
 @observer
 class ConversationSelector extends React.Component<{gui: GUI}, {}> {
+    @observable
     conversation = "sw2001";
+    @autobind @action
+    setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.conversation = e.currentTarget.value; }
     render() {
         const convos = this.props.gui.getConversations().data;
         return (<div style={{display:"inline-block"}}>
-            <input list="conversations" value={this.conversation} onChange={e => this.conversation = e.currentTarget.value} />
+            <input list="conversations" value={this.conversation} onChange={this.setConversation} />
             {convos && <datalist id="conversations">{convos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
             <button onClick={c => this.props.gui.loadConversation(this.conversation)}>Load</button>
             <button onClick={c => this.props.gui.loadRandomConversation()}>RND</button>

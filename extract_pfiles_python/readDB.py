@@ -6,7 +6,7 @@
 # on 2016-11-06
 
 import jrtk
-from typing import Set, Dict
+from typing import Set, Dict, List
 import logging
 import os
 from distutils.dir_util import mkpath
@@ -26,6 +26,8 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
 backChannelListOneWord = {
     "UM-HUM", "UH-HUH", "YEAH", "RIGHT", "OH", "UM", "YES", "HUH", "OKAY", "HM", "HUM", "UH"
 }
+
+DBase = Dict[str, Dict[str, str]]
 
 # BC area
 BCbegin = -0.4
@@ -61,7 +63,7 @@ def fromiter(iterator, dtype, shape):
                        [("_", dtype, res_shape)], shape[0])["_"]
 
 
-def isBackchannel(uttInfo):
+def isBackchannel(uttInfo: dict, index: int, utts: List[str], uttDB: DBase):
     return uttInfo['text'] in backChannelListOneWord
 
 
@@ -81,17 +83,16 @@ lastTime = time.clock()
 input_dim = None
 
 
-def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase,
-                       featureSet: jrtk.preprocessing.FeatureExtractor):
+def parseConversations(speaker: str, spkDB: DBase, uttDB: DBase, featureSet: jrtk.preprocessing.FeatureExtractor):
     global counter, lastTime
     utts = spkDB[speaker]['segs'].strip().split(" ")
-    for utt in utts:
-        uttInfo = uttDB[utt]  # type: dict
-        convID = uttInfo['convid']  # type: str
-        (audiofile, channel) = convID.split("-")  # type: str
+    for index, utt in enumerate(utts):
+        uttInfo = uttDB[utt]
+        convID = uttInfo['convid']
+        (audiofile, channel) = convID.split("-")
         toTime = float(uttInfo['to'])
         fromTime = float(uttInfo['from'])
-        if not isBackchannel(uttInfo):
+        if not isBackchannel(uttInfo, index, utts, uttDB):
             continue
         # print('has backchannel: ' + uttInfo['text'])
         cBCbegin, cBCend = getBackchannelTrainingRange(uttInfo)
@@ -150,7 +151,7 @@ def parseConversations(speaker: str, spkDB: jrtk.base.DBase, uttDB: jrtk.base.DB
             logging.info("Written elements: %d (%.3fs per element)", counter, took / 100)
 
 
-def parseConversationSet(spkDB: jrtk.base.DBase, uttDB: jrtk.base.DBase, setname: str, convIDs: Set[str], featureSet):
+def parseConversationSet(spkDB: DBase, uttDB: DBase, setname: str, convIDs: Set[str], featureSet):
     logging.debug("parseConversationSet(" + setname + ")")
     speakers = list(speaker for speaker in spkDB if speakerFilter(convIDs, speaker))
     for (i, speaker) in enumerate(speakers):
