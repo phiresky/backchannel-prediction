@@ -1,5 +1,3 @@
-import os
-
 import websockets
 import asyncio
 import sys
@@ -10,6 +8,7 @@ import json
 from collections import OrderedDict
 from trainNN.evaluate import get_network_outputter
 from extract_pfiles_python import readDB
+import functools
 
 
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
@@ -35,6 +34,7 @@ def segsToJSON(spkr: str, name: str) -> Dict:
         'data': [{**uttDB[utt], 'id': utt, 'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt]) else None}
                  for utt in spkDB[spkr]['segs'].strip().split(" ")]
     }
+
 
 def findAllNets():
     import os, glob
@@ -71,26 +71,35 @@ async def sendNumFeature(ws, id, name, feat):
     }))
     if dataextra:
         await ws.send(feat.tobytes())
+
+
 async def sendOtherFeature(ws, id, feat):
     await ws.send(json.dumps({
         "id": id,
         "data": feat
     }))
 
-cache = {} # type: Dict[str, Dict[str, NumFeature]]
+
+cache = {}  # type: Dict[str, Dict[str, NumFeature]]
+
 
 def getFeatures(conv: str):
     return {
         "input": "adca,texta,bca,adcb,textb,bcb".split(","),
-        "extracted":"pitcha,powera,pitchb,powerb,feata,featb".split(","),
-        "NN outputs A": list(map(lambda x: "a:"+x, nets.keys())),
-        "NN outputs B": list(map(lambda x: "b:"+x, nets.keys())),
+        "extracted": "pitcha,powera,pitchb,powerb,feata,featb".split(","),
+        "NN outputs A": list(map(lambda x: "a:" + x, nets.keys())),
+        "NN outputs B": list(map(lambda x: "b:" + x, nets.keys())),
     }
 
+
+@functools.lru_cache(maxsize=1)
+def extractFeatures(conv: str):
+    return featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
+
+
 def getExtractedFeature(conv: str, feat: str):
-    if conv not in cache:
-        cache[conv] = featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
-    return cache[conv][feat]
+    return extractFeatures(conv)[feat]
+
 
 async def sendFeature(ws, id: str, conv: str, feat: str):
     if feat == "bca":
@@ -98,14 +107,14 @@ async def sendFeature(ws, id: str, conv: str, feat: str):
     elif feat == "bcb":
         await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(conv, "B")})
     elif feat == "texta":
-        await sendOtherFeature(ws, id, segsToJSON(conv+"-A", feat))
+        await sendOtherFeature(ws, id, segsToJSON(conv + "-A", feat))
     elif feat == "textb":
         await sendOtherFeature(ws, id, segsToJSON(conv + "-B", feat))
     elif feat[2:] in nets:
         channel, key = feat.split(":")
         config_path, wid = nets[key]
         net = get_network_outputter(config_path, wid)
-        await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feat'+channel)))
+        await sendNumFeature(ws, id, feat, evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
     else:
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
@@ -140,7 +149,8 @@ async def handler(websocket, path):
                 if msg['type'] == "getFeatures":
                     await websocket.send(json.dumps({"id": id, "data": {
                         'categories': getFeatures(msg['conversation']),
-                        'defaults': [s.split("&") for s in "adca&bca,texta,pitcha,powera,adcb&bcb,textb,pitchb,powerb".split(",")]
+                        'defaults': [s.split("&") for s in
+                                     "adca&bca,texta,pitcha,powera,adcb&bcb,textb,pitchb,powerb".split(",")]
                     }}))
                 elif msg['type'] == "getConversations":
                     await websocket.send(json.dumps({"id": id, "data": conversations}))

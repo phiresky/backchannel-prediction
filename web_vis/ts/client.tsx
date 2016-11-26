@@ -541,7 +541,7 @@ export class GUI extends React.Component<{}, {}> {
         }
     }
     @action
-    onFeatureReceived(feature: Feature) {
+    checkTotalTime(feature: Feature) {
         if(isNumFeature(feature))  {
             let totalTime;
             if(feature.typ === "FeatureType.SVector") {
@@ -574,7 +574,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
-        if(!f.data) f.promise.then(f => this.onFeatureReceived(f));
+        f.promise.then(f => this.checkTotalTime(f));
         return f;
     }
     getFeatures() {

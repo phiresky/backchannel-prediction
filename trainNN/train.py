@@ -16,14 +16,13 @@ BATCH_SIZE = 256
 NUM_EPOCHS = 10000
 
 
-def iterate_minibatches(batchsize, data, input_dim):
-    frames, dim = data.shape
-    assert dim == input_dim + 1
-    indices = numpy.arange(len(data), dtype='int32')
+def iterate_minibatches(batchsize, inputs, outputs):
+    frames, dim = inputs.shape
+    indices = numpy.arange(len(inputs))
     numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
         elements = indices[i * batchsize:(i + 1) * batchsize]
-        yield elements
+        yield inputs[elements], outputs[elements]
 
 
 def load_numpy_file(fname):
@@ -64,15 +63,12 @@ def train():
     validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
     stats = train_func.train_network(
         network=model['output_layer'],
-        input_dim=input_dim,
         scheduling_method="fuzzy_newbob",
-        scheduling_params=(0.5, 0.000001),
+        scheduling_params=(0.8, 0.000001),
         update_method="adam",
         # learning_rate=0.01,
-        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data, input_dim),
-        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data, input_dim),
-        train_data=train_data,
-        validate_data=validate_data,
+        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data[:, :input_dim], train_data[:, input_dim].astype("int32")),
+        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")),
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")
