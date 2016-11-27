@@ -23,8 +23,12 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     return shortID in convIDs
 
 
+# these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
+# (counted with checkBackchannels.count_utterances)
 backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh',
-                          'right right'}  # these do not appear in the switchboard dialog act corpus
+                          'right right', 'right yeah', "yeah that's true", 'uh-huh yeah', 'um-hum yeah',
+                          'yeah right', 'yeah uh-huh', 'yeah well', 'yes yes', 'absolutely', 'right uh-huh',
+                          }
 backchannels = None
 DBase = Dict[str, Dict[str, str]]
 

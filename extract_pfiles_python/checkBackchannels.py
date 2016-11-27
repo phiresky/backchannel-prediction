@@ -24,11 +24,10 @@ def levenshtein(s1, s2):
 
 
 config = readDB.load_config("extract_pfiles_python/config.json")
+readDB.load_backchannels(config['paths']['backchannels'])
 
 
 def check_transcript_differences():
-    readDB.load_backchannels(config['paths']['backchannels'])
-
     config['extract_config']['useOriginalDB'] = False
     spkDB1, uttDB1 = readDB.load_db(config)
 
@@ -62,7 +61,7 @@ def check_transcript_differences():
     print("with orig db: " + str(len(list2)))
 
 
-def count_utterances():
+def count_utterances(exclude_backchannels=False):
     spkDB, uttDB = readDB.load_db(config)
     utts = {}
     spkrcount = 0
@@ -82,15 +81,19 @@ def count_utterances():
     perc = 0
     total = sum(utts.values())
     count = 0
-    print("aggregated\tself\tcount\ttext")
+    print("bc\taggregated\tself\tcount\ttext")
 
     for k in sorted(utts, key=lambda x: -utts[x]):
         if utts[k] < 10:
             break
         count += utts[k]
-        if k.lower() in readDB.backchannels:
-            continue;
-        print("\n".join(["{:.2f}%\t{:.2f}%\t{}\t{}".format((float(count) / total) * 100, float(utts[k]) / total * 100,
-                                                           utts[k], k)]))
+        is_backchannel = readDB.noise_filter(k.lower()) in readDB.backchannels
+        if exclude_backchannels and is_backchannel:
+            continue
+        print("\n".join(["[{}BC]\t{:.2f}%\t{:.2f}%\t{}\t{}".format(" " if is_backchannel else "N",
+                                                                   (float(count) / total) * 100,
+                                                                   float(utts[k]) / total * 100,
+                                                                   utts[k], k)]))
+
 
 count_utterances()
