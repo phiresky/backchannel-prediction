@@ -6,7 +6,7 @@
 # on 2016-11-06
 
 import jrtk
-from typing import Set, Dict, List
+from typing import Set, Dict, List, Iterable
 import logging
 import os
 from distutils.dir_util import mkpath
@@ -23,7 +23,8 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     return shortID in convIDs
 
 
-backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh', 'right right'}  # these do not appear in the switchboard dialog act corpus
+backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh',
+                          'right right'}  # these do not appear in the switchboard dialog act corpus
 backchannels = None
 DBase = Dict[str, Dict[str, str]]
 
@@ -34,6 +35,31 @@ BCend = 0.0
 # Non BC area
 NBCbegin = -2.0
 NBCend = -1.6
+
+noise_filter = None
+noise_isl = ['<SIL>', '<NOISE>', 'LAUGHTER']
+noise_orig = ['[silence]', '[laughter]', '[noise]', '[vocalized-noise]']
+
+
+def isl_noise_filter(text):
+    words = []
+    for word in text.split(" "):
+        if word.startswith("LAUGHTER-"):
+            word = word[len("LAUGHTER-"):]
+        if word not in noise_isl:
+            words.append(word)
+
+    return " ".join(words)
+
+
+def orig_noise_filter(text):
+    words = []
+    for word in text.split(" "):
+        if word.startswith("[laughter-"):
+            word = word[len("[laughter-"):-1]
+        if word not in noise_orig:
+            words.append(word)
+    return " ".join(words)
 
 
 def fromiter(iterator, dtype, shape):
@@ -69,9 +95,13 @@ def load_backchannels(path):
 
 
 def is_backchannel(uttInfo: dict, index: int, utts: List[str], uttDB: DBase):
-    return (uttInfo['text'].lower() in backchannels
-            and index > 0
-            and uttDB[utts[index - 1]]['text'] == '<SIL>'
+    uttText = uttInfo['text']
+    uttText = noise_filter(uttText)
+    lastUttText = uttDB[utts[index - 1]]['text']
+    lastUttText = noise_filter(lastUttText)
+    return (uttText.lower() in backchannels and
+            index > 0 and
+            len(lastUttText) == 0
             )
 
 
@@ -92,7 +122,7 @@ input_dim = None
 
 def parseConversations(speaker: str, spkDB: DBase, uttDB: DBase, featureSet: jrtk.preprocessing.FeatureExtractor):
     global counter, lastTime
-    utts = getUtterances(spkDB, speaker)
+    utts = get_utterance_ids(spkDB, speaker)
     for index, utt in enumerate(utts):
         uttInfo = uttDB[utt]
         convID = uttInfo['convid']
@@ -178,18 +208,78 @@ def load_feature_extractor(config):
     return featureSet
 
 
-def load_db(paths_config) -> (DBase, DBase):
-    uttDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-utt", mode="r")
-    spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
-    return spkDB, uttDB
+import os.path, re
+import functools
 
 
-def getUtterances(spkDB, spkr: str) -> List[str]:
-    return spkDB[spkr]['segs'].strip().split(" ")
+class FakeUttDB():
+    def __init__(self, paths_config):
+        self.root = paths_config['originalSwbTranscriptions']
+        self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
+        self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
+
+    def makeSpkDB(self):
+        class FakeSpkDB():
+            uttDB = self
+
+            def __iter__(self2):
+                yield from self.spkDB
+
+            def close(self):
+                pass
+
+        return FakeSpkDB()
+
+    @functools.lru_cache(maxsize=5)
+    def get_utterances(self, track: str, speaker: str):
+        utts = OrderedDict()
+        convid = 'sw{}-{}'.format(track, speaker)
+        with open(os.path.join(self.root, track[:2], track, "sw{}{}-ms98-a-trans.text".format(track, speaker))) as file:
+            for line in file:
+                id, _from, to, text = line.split(" ", 3)
+                utts[id] = {
+                    'from': _from, 'to': to, 'text': text.strip(), 'convid': convid
+                }
+        return utts
+
+    def get_speakers(self):
+        yield from self.spkDB
+
+    def get_utterance_ids(self, id: str):
+        return list(self.get_utterances(id[2:6], id[-1]).keys())
+
+    def __getitem__(self, id):
+        track, speaker, uttid = self.extractname.fullmatch(id).groups()
+        utts = self.get_utterances(track, speaker)
+        return utts[id]
+
+    def close(self):
+        self.spkDB.close()
 
 
-def getBackchannels(uttDB, utts: List[str]):
-    return [uttDB[utt]
+def load_db(config) -> (DBase, DBase):
+    global noise_filter
+    paths_config = config['paths']
+    if config['extract_config']['useOriginalDB']:
+        uttDB = FakeUttDB(paths_config)
+        noise_filter = orig_noise_filter
+        return uttDB.makeSpkDB(), uttDB
+    else:
+        noise_filter = isl_noise_filter
+        uttDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-utt", mode="r")
+        spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
+        return spkDB, uttDB
+
+
+def get_utterance_ids(spkDB, spkr: str) -> Iterable[str]:
+    if not isinstance(spkDB, jrtk.base.DBase):
+        return spkDB.uttDB.get_utterance_ids(spkr)
+    else:
+        return spkDB[spkr]['segs'].strip().split(" ")
+
+
+def getBackchannelIDs(uttDB, utts: List[str]):
+    return [utt
             for index, utt in enumerate(utts)
             if is_backchannel(uttDB[utt], index, utts, uttDB)
             ]
@@ -197,7 +287,7 @@ def getBackchannels(uttDB, utts: List[str]):
 
 def count_total(uttDB, spkDB, convIDs):
     l = list(bc for spkr in spkDB if speakerFilter(convIDs, spkr) for bc in
-             getBackchannels(uttDB, getUtterances(spkDB, spkr)))
+             getBackchannelIDs(uttDB, list(get_utterance_ids(spkDB, spkr))))
     return len(l)
 
 
@@ -220,7 +310,7 @@ def main():
 
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
-    spkDB, uttDB = load_db(config['paths'])
+    spkDB, uttDB = load_db(config)
     load_backchannels(config['paths']['backchannels'])
 
     featureSet = load_feature_extractor(config)

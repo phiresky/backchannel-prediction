@@ -7,10 +7,12 @@
       "train": "data/conversations.train",
       "test": "data/conversations.test"
     },
-    "backchannels": "data/backchannels-top200.txt"
+    "backchannels": "data/backchannels-top200.txt",
+    "originalSwbTranscriptions": "data/swb_ms98_transcriptions"
   },
   "extract_config": {
     "context": 40,
+    "useOriginalDB": true,
     "outputDirectory": "extract_pfiles_python/out",
     "featureExtractionSteps": [
       "extract_pfiles_python/featAccess.py",
