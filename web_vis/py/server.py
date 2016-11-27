@@ -27,19 +27,19 @@ def featureToJSON(name: str, feature: NumFeature, range: Optional[Tuple[float, f
     }
 
 
-def segsToJSON(spkr: str, name: str) -> Dict:
-    utts = getUtterances(spkr)
+def segsToJSON(reader: readDB.DBReader, spkr: str, name: str) -> Dict:
+    utts = list(reader.get_utterances(spkr))
     return {
         'name': name,
         'typ': 'utterances',
-        'data': [{**uttDB[utt], 'id': utt,
-                  'color': (0, 255, 0) if readDB.isBackchannel(uttDB[utt], index, utts, uttDB) else None}
-                 for index, utt in enumerate(utts)]
+        'data': [{**uttInfo, 'id': utt,
+                  'color': (0, 255, 0) if reader.is_backchannel(uttInfo, index, utts) else None}
+                 for index, (utt, uttInfo) in enumerate(utts)]
     }
 
 
 def findAllNets():
-    import os, glob
+    import os
     from os.path import join, isdir, isfile
     folder = join("trainNN", "out")
     for netversion in sorted(os.listdir(folder)):
@@ -58,8 +58,8 @@ def findAllNets():
 
 config = readDB.load_config(sys.argv[1])
 
-spkDB, uttDB = readDB.load_db(config['paths'])
-conversations = sorted({spk.split("-")[0] for spk in spkDB})
+origReader = readDB.DBReader(config)
+conversations = sorted({spk.split("-")[0] for spk in origReader.spkDB})
 featureExtractor = readDB.load_feature_extractor(config)
 nets = OrderedDict(findAllNets())
 
@@ -83,12 +83,13 @@ async def sendOtherFeature(ws, id, feat):
 
 
 def getFeatures(conv: str):
-    return {
-        "input": "adca,texta,bca,adcb,textb,bcb".split(","),
-        "extracted": "pitcha,powera,pitchb,powerb,feata,featb".split(","),
-        "NN outputs A": list(map(lambda x: "a:" + x, nets.keys())),
-        "NN outputs B": list(map(lambda x: "b:" + x, nets.keys())),
-    }
+    return OrderedDict([
+        ("input", "adca,texta,bca,adcb,textb,bcb".split(",")),
+        ("extracted", "pitcha,powera,pitchb,powerb,feata,featb".split(",")),
+        ("other", ["islTranscriptA", "islTranscriptB"]),
+        ("NN outputs A", ["a:" + x for x in nets]),
+        ("NN outputs B", ["b:" + x for x in nets]),
+    ])
 
 
 @functools.lru_cache(maxsize=1)
@@ -102,13 +103,13 @@ def getExtractedFeature(conv: str, feat: str):
 
 async def sendFeature(ws, id: str, conv: str, feat: str):
     if feat == "bca":
-        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(conv, "A")})
+        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "A")})
     elif feat == "bcb":
-        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(conv, "B")})
+        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "B")})
     elif feat == "texta":
-        await sendOtherFeature(ws, id, segsToJSON(conv + "-A", feat))
+        await sendOtherFeature(ws, id, segsToJSON(origReader, conv + "-A", feat))
     elif feat == "textb":
-        await sendOtherFeature(ws, id, segsToJSON(conv + "-B", feat))
+        await sendOtherFeature(ws, id, segsToJSON(origReader, conv + "-B", feat))
     elif feat[2:] in nets:
         channel, key = feat.split(":")
         config_path, wid = nets[key]
@@ -118,20 +119,20 @@ async def sendFeature(ws, id: str, conv: str, feat: str):
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
 
-def getHighlights(conv: str, channel: str):
+def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
     if channel == "A":
         bcChannel = "B"
     elif channel == "B":
         bcChannel = "A"
     else:
         raise Exception("unknown channel " + channel)
-    utts = readDB.getUtterances(spkDB, conv + "-" + bcChannel)
-    bcs = readDB.getBackchannels(uttDB, utts)
+    utts = list(reader.get_utterances(conv + "-" + bcChannel))
+    bcs = reader.get_backchannels(utts)
     highlights = []
-    for bc in bcs:
-        (a, b) = readDB.getBackchannelTrainingRange(bc)
+    for bc, bcInfo in bcs:
+        (a, b) = reader.getBackchannelTrainingRange(bcInfo)
         highlights.append({'from': a, 'to': b, 'color': (0, 255, 0), 'text': 'BC'})
-        (a, b) = readDB.getNonBackchannelTrainingRange(bc)
+        (a, b) = reader.getNonBackchannelTrainingRange(bcInfo)
         highlights.append({'from': a, 'to': b, 'color': (255, 0, 0), 'text': 'NBC'})
     return highlights
 
@@ -171,22 +172,6 @@ def start_server():
     loop.run_until_complete(start_server)
 
     loop.run_forever()
-
-
-def sanity():
-    """check if spkDB and uttDB have the same utterances"""
-    utts = list()
-    for spk in spkDB:
-        x = spkDB[spk]
-        utts += x['segs'].strip().split(" ")
-
-    utts2 = list()
-    x = list(uttDB)
-    for utt in uttDB:
-        x = uttDB[utt]
-        utts2.append(utt)
-
-    print(utts == utts2)
 
 
 if __name__ == '__main__':

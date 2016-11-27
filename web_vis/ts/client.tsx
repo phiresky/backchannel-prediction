@@ -55,17 +55,16 @@ export type Color = [number, number, number];
 export type Utterances = {
     name: string,
     typ: "utterances",
-    data: {from: number | string, to: number | string, text: string, id: string, color: Color|null}[]
+    data: Utterance[]
 }
 export type Highlights = {
     name: string,
     typ: "highlights",
-    data: Highlight[];
+    data: Utterance[]
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances | Highlights;
-export type Highlight = {from: number, to: number, color: Color, text?: string};
-
+export type Utterance = {from: number | string, to: number | string, text?: string, id?: string, color?: Color};
 export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
 
 export interface SingleUIState {

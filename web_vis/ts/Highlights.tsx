@@ -27,10 +27,11 @@ export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Hi
     getElements() {
         const width = this.props.gui.width;
         return this.props.feature.data.map((highlight,i) => {
-            let left = util.getPixelFromPosition(highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
-            let right = util.getPixelFromPosition(highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
+            let left = util.getPixelFromPosition(+highlight.from / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
+            let right = util.getPixelFromPosition(+highlight.to / this.props.gui.totalTimeSeconds, 0, width, this.props.gui.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
-            const style = {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`, height: c.globalConfig.visualizerHeight+"px", overflow: "hidden"};
+            const style = {height: c.globalConfig.visualizerHeight+"px", overflow: "hidden"};
+            if(highlight.color) Object.assign(style, {backgroundColor: `rgba(${highlight.color.join(",")},0.3)`}); 
             let className = "highlight";
             if(left < 0) {
                 left = 0;
