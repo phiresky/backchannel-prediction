@@ -23,7 +23,7 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     return shortID in convIDs
 
 
-backchannels_hardcoded = {'hum', 'um-hum', 'hm'}  # these do not appear in the switchboard dialog act corpus
+backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh', 'right right'}  # these do not appear in the switchboard dialog act corpus
 backchannels = None
 DBase = Dict[str, Dict[str, str]]
 
@@ -61,9 +61,9 @@ def fromiter(iterator, dtype, shape):
                        [("_", dtype, res_shape)], shape[0])["_"]
 
 
-def load_backchannels(config):
+def load_backchannels(path):
     global backchannels
-    with open(config['paths']['backchannels']) as f:
+    with open(path) as f:
         bcs = set([line.strip() for line in f.readlines()])
     backchannels = backchannels_hardcoded | bcs
 
@@ -178,13 +178,13 @@ def load_feature_extractor(config):
     return featureSet
 
 
-def load_db(paths_config):
+def load_db(paths_config) -> (DBase, DBase):
     uttDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-utt", mode="r")
     spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
     return spkDB, uttDB
 
 
-def getUtterances(spkDB, spkr: str):
+def getUtterances(spkDB, spkr: str) -> List[str]:
     return spkDB[spkr]['segs'].strip().split(" ")
 
 
@@ -221,7 +221,7 @@ def main():
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
     spkDB, uttDB = load_db(config['paths'])
-    load_backchannels(config)
+    load_backchannels(config['paths']['backchannels'])
 
     featureSet = load_feature_extractor(config)
 
@@ -237,12 +237,12 @@ def main():
     for setname, path in config['paths']['conversations'].items():
         with open(path) as f:
             convIDs = set([line.strip() for line in f.readlines()])
-            print("bc counts for {}: {}".format(setname, count_total(uttDB, spkDB, convIDs)))
-            # data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
-            #                dtype="float32", shape=(-1, input_dim + output_dim))
-            # fname = os.path.join(outputDir, setname + ".npz")
-            # np.savez_compressed(fname, data=data)
-            # nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
+        # print("bc counts for {}: {}".format(setname, count_total(uttDB, spkDB, convIDs)))
+        data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
+                        dtype="float32", shape=(-1, input_dim + output_dim))
+        fname = os.path.join(outputDir, setname + ".npz")
+        np.savez_compressed(fname, data=data)
+        nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
 
     jsonPath = os.path.join(outputDir, "config.json")
     with open(jsonPath, "w") as f:
