@@ -103,9 +103,11 @@ def getExtractedFeature(conv: str, feat: str):
 
 async def sendFeature(ws, id: str, conv: str, feat: str):
     if feat == "bca":
-        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "A")})
+        await sendOtherFeature(ws, id,
+                               {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "A")})
     elif feat == "bcb":
-        await sendOtherFeature(ws, id, {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "B")})
+        await sendOtherFeature(ws, id,
+                               {"name": feat, "typ": "highlights", "data": getHighlights(origReader, conv, "B")})
     elif feat == "texta":
         await sendOtherFeature(ws, id, segsToJSON(origReader, conv + "-A", feat))
     elif feat == "textb":
