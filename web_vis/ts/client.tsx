@@ -123,10 +123,13 @@ class CategoryTree extends React.Component<{gui: GUI, features: s.GetFeaturesRes
     @autobind @action
     handleNodeCollapse(n: B.ITreeNode) {n.isExpanded = false;this.forceUpdate();}
     render() {
-        return <B.Tree contents={this.currentTree}
-                onNodeCollapse={this.handleNodeCollapse}
-                onNodeClick={this.handleNodeClick}
-                onNodeExpand={this.handleNodeExpand} />
+        return <div>
+            <B.Tree contents={this.currentTree}
+                    onNodeCollapse={this.handleNodeCollapse}
+                    onNodeClick={this.handleNodeClick}
+                    onNodeExpand={this.handleNodeExpand} />
+            <button className="pt-button pt-popover-dismiss">Cancel</button>
+        </div>;
     }
 }
 @observer
@@ -171,33 +174,47 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
             const feature = gui.getFeature(props.info.feature).data;
             if(!feature) return <span/>;
             const c = getVisualizerChoices(feature);
-            if(c.length > 1) return <select value={props.info.visualizer} onChange={e => this.changeVisualizer(props.info, e.currentTarget.value)}>
-                {c.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            if(c.length > 1) return (
+                <label className="pt-label pt-inline">Visualizer
+                    <div className="pt-select">
+                        <select value={props.info.visualizer} onChange={e => this.changeVisualizer(props.info, e.currentTarget.value)}>
+                            {c.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                </label>
+            );
             else return <span/>;
         });
         const features = gui.getFeatures().data;
         return (
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
-                <div style={{position: "absolute", top:0, bottom:0, left:0, zIndex: 1, display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
+                <div style={{position: "absolute", top:0, bottom:0, left:0, paddingLeft:"5px", display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
                     {uiState.features.map((info, i) => 
-                        <div key={i}>
-                            {info.feature}
-                            <button onClick={e => this.remove(i)}>-</button>
-                            {info.currentRange&&
-                                <select style={{maxWidth:"7.5em"}} value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
-                                    {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
-                                </select>
-                            }
-                            <VisualizerChoices info={info} />
-                        </div>
+                        <B.Popover interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
+                            content={<div key={i}>
+                                    <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(i)}>Remove</button></label>
+                                    {info.currentRange&&
+                                        <label className="pt-label pt-inline">Range
+                                            <div className="pt-select">
+                                                <select value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
+                                                    {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
+                                                </select>
+                                            </div>
+                                        </label>
+                                    }
+                                <VisualizerChoices info={info} />
+                                </div>
+                            }><div className="pt-tooltip-indicator" style={{ marginBottom:"5px"}}>{info.feature}</div></B.Popover>
                         
                     )}
+                </div>
+                <div style={{position:"absolute", bottom:0, left:0, margin:"5px"}}>
                     <B.Popover content={features ? <CategoryTree gui={gui} features={features} onClick={e => this.add(e)} />: "not loaded" }
-                        interactionKind={B.PopoverInteractionKind.CLICK}
-                        position={B.Position.RIGHT}
-                        useSmartPositioning={true} ref={p => this.addPopover = p}>
-                        <button>+</button>
+                            interactionKind={B.PopoverInteractionKind.CLICK}
+                            position={B.Position.RIGHT}
+                            popoverClassName="add-visualizer"
+                            useSmartPositioning={true} ref={p => this.addPopover = p}>
+                            <button>Add feature</button>
                     </B.Popover>
                 </div>
                 {minmax}
@@ -211,7 +228,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         const {uiState, gui} = this.props;
         
         return (
-            <div style={{display: "flex"}}>
+            <div style={{display: "flex", boxShadow: "-9px 10px 35px -10px rgba(0,0,0,0.29)",zIndex: 1}}>
                 <div style={styles.leftBarCSS}>
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
@@ -641,7 +658,7 @@ export class GUI extends React.Component<{}, {}> {
     *getVisualizers() {
         for(const ui of this.uis) {
             yield <InfoVisualizer key={ui.uuid} uiState={ui} gui={this} />;
-            yield <button key={ui.uuid+"+"} onClick={() => this.addUI(ui.uuid)}>+</button>;
+            yield <button key={ui.uuid+"+"} onClick={() => this.addUI(ui.uuid)}>Add Visualizer</button>;
         }
     }
     render(): JSX.Element {
