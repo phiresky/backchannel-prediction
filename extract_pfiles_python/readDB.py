@@ -23,10 +23,8 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     return shortID in convIDs
 
 
-backChannelListOneWord = {
-    "UM-HUM", "UH-HUH", "YEAH", "RIGHT", "OH", "UM", "YES", "HUH", "OKAY", "HM", "HUM", "UH"
-}
-
+backchannels_hardcoded = {'hum', 'um-hum', 'hm'}  # these do not appear in the switchboard dialog act corpus
+backchannels = None
 DBase = Dict[str, Dict[str, str]]
 
 # BC area
@@ -63,8 +61,15 @@ def fromiter(iterator, dtype, shape):
                        [("_", dtype, res_shape)], shape[0])["_"]
 
 
-def isBackchannel(uttInfo: dict, index: int, utts: List[str], uttDB: DBase):
-    return uttInfo['text'] in backChannelListOneWord
+def load_backchannels(config):
+    global backchannels
+    with open(config['paths']['backchannels']) as f:
+        bcs = set([line.strip() for line in f.readlines()])
+    backchannels = backchannels_hardcoded | bcs
+
+
+def is_backchannel(uttInfo: dict, index: int, utts: List[str], uttDB: DBase):
+    return uttInfo['text'].lower() in backchannels
 
 
 def getBackchannelTrainingRange(uttInfo):
@@ -77,7 +82,6 @@ def getNonBackchannelTrainingRange(uttInfo):
     return fromTime + NBCbegin, fromTime + NBCend
 
 
-config = None
 counter = 0
 lastTime = time.clock()
 input_dim = None
@@ -85,14 +89,14 @@ input_dim = None
 
 def parseConversations(speaker: str, spkDB: DBase, uttDB: DBase, featureSet: jrtk.preprocessing.FeatureExtractor):
     global counter, lastTime
-    utts = spkDB[speaker]['segs'].strip().split(" ")
+    utts = getUtterances(spkDB, speaker)
     for index, utt in enumerate(utts):
         uttInfo = uttDB[utt]
         convID = uttInfo['convid']
         (audiofile, channel) = convID.split("-")
         toTime = float(uttInfo['to'])
         fromTime = float(uttInfo['from'])
-        if not isBackchannel(uttInfo, index, utts, uttDB):
+        if not is_backchannel(uttInfo, index, utts, uttDB):
             continue
         # print('has backchannel: ' + uttInfo['text'])
         cBCbegin, cBCend = getBackchannelTrainingRange(uttInfo)
@@ -177,6 +181,23 @@ def load_db(paths_config):
     return spkDB, uttDB
 
 
+def getUtterances(spkDB, spkr: str):
+    return spkDB[spkr]['segs'].strip().split(" ")
+
+
+def getBackchannels(uttDB, utts: List[str]):
+    return [uttDB[utt]
+            for index, utt in enumerate(utts)
+            if is_backchannel(uttDB[utt], index, utts, uttDB)
+            ]
+
+
+def count_total(uttDB, spkDB, convIDs):
+    l = list(bc for spkr in spkDB if speakerFilter(convIDs, spkr) for bc in
+             getBackchannels(uttDB, getUtterances(spkDB, spkr)))
+    return len(l)
+
+
 def main():
     np.seterr(all='raise')
     global config, input_dim
@@ -197,6 +218,7 @@ def main():
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
     spkDB, uttDB = load_db(config['paths'])
+    load_backchannels(config)
 
     featureSet = load_feature_extractor(config)
 
@@ -212,11 +234,12 @@ def main():
     for setname, path in config['paths']['conversations'].items():
         with open(path) as f:
             convIDs = set([line.strip() for line in f.readlines()])
-        data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
-                        dtype="float32", shape=(-1, input_dim + output_dim))
-        fname = os.path.join(outputDir, setname + ".npz")
-        np.savez_compressed(fname, data=data)
-        nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
+            print("bc counts for {}: {}".format(setname, count_total(uttDB, spkDB, convIDs)))
+            # data = fromiter(parseConversationSet(spkDB, uttDB, setname, convIDs, featureSet),
+            #                dtype="float32", shape=(-1, input_dim + output_dim))
+            # fname = os.path.join(outputDir, setname + ".npz")
+            # np.savez_compressed(fname, data=data)
+            # nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
 
     jsonPath = os.path.join(outputDir, "config.json")
     with open(jsonPath, "w") as f:

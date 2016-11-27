@@ -118,17 +118,6 @@ async def sendFeature(ws, id: str, conv: str, feat: str):
         await sendNumFeature(ws, id, feat, getExtractedFeature(conv, feat))
 
 
-def getUtterances(spkr: str):
-    return spkDB[spkr]['segs'].strip().split(" ")
-
-
-def getBackchannels(utts: List[str]):
-    return [uttDB[utt]
-            for index, utt in enumerate(utts)
-            if readDB.isBackchannel(uttDB[utt], index, utts, uttDB)
-            ]
-
-
 def getHighlights(conv: str, channel: str):
     if channel == "A":
         bcChannel = "B"
@@ -136,8 +125,8 @@ def getHighlights(conv: str, channel: str):
         bcChannel = "A"
     else:
         raise Exception("unknown channel " + channel)
-    utts = getUtterances(conv + "-" + bcChannel)
-    bcs = getBackchannels(utts)
+    utts = readDB.getUtterances(spkDB, conv + "-" + bcChannel)
+    bcs = readDB.getBackchannels(uttDB, utts)
     highlights = []
     for bc in bcs:
         (a, b) = readDB.getBackchannelTrainingRange(bc)
