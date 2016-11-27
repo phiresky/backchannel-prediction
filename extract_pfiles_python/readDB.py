@@ -69,7 +69,10 @@ def load_backchannels(config):
 
 
 def is_backchannel(uttInfo: dict, index: int, utts: List[str], uttDB: DBase):
-    return uttInfo['text'].lower() in backchannels
+    return (uttInfo['text'].lower() in backchannels
+            and index > 0
+            and uttDB[utts[index - 1]]['text'] == '<SIL>'
+            )
 
 
 def getBackchannelTrainingRange(uttInfo):
