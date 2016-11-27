@@ -14,8 +14,9 @@ export type ClientMessage = {
 }
 type GetConversationsResponse = ConversationID[];
 type GetFeatureResponse = c.Feature;
-type GetFeaturesResponse = {
-    categories:{[category: string]: FeatureID[]};
+export type CategoryTreeElement = {name: string, children: CategoryTreeElement[]}|FeatureID;
+export type GetFeaturesResponse = {
+    categories: CategoryTreeElement[];
     defaults: FeatureID[][];
 }
 type TypedArrayTypes = 'float32' | 'int16';
@@ -39,6 +40,9 @@ export interface ConversationID extends String {
 }
 export interface FeatureID extends String {
     __typeBrand: "FeatureID"
+}
+export function isFeatureID(f: any): f is FeatureID {
+    return typeof f === "string";
 }
 export type ServerMessage = {id: number, error: undefined, data: any};
 export type ServerError = {id: number, error: string};
@@ -108,6 +112,7 @@ export class SocketManager {
     async getFeatureRemote(conversation: ConversationID, featureID: FeatureID): Promise<GetFeatureResponse> {
         const response = await this.sendMessage({type: "getFeature", conversation, feature: featureID});
         const feature = response.data as GetFeatureResponse;
+        feature.name = featureID as any as string;
         if(feature.data === null) {
             if(!c.isNumFeature(feature)) throw Error("wat");
             const buffer = await this.waitForBinaryFrame();

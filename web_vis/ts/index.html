@@ -7,6 +7,7 @@
     <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="dist/bundle.css">-->
+    <link href="node_modules/@blueprintjs/core/dist/blueprint.css" rel="stylesheet" />
     <style>
       .headerBar > * {
         margin-right: 2em;
@@ -17,8 +18,13 @@
         text-align: center;
         display: inline-block;
       }
+      .pt-popover-content {
+        max-height: 60vh;
+        overflow-y: auto;
+      }
       .highlight {
         position: absolute;
+        border-right: 1px solid gray;
       }
       .utterance-text {
         background-color: white;

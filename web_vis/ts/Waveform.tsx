@@ -76,7 +76,7 @@ abstract class CanvasRenderer<P> extends React.Component<VisualizerProps<P>, {}>
     render() {
         const border = 1;
         return <div>
-            <canvas style={{width: "100%", height: globalConfig.visualizerHeight-(border*2)+"px", borderStyle:"solid", borderWidth:border+"px"}}
+            <canvas style={{width: "100%", height: globalConfig.visualizerHeight+"px", borderStyle:"solid", borderWidth:border+"px"}}
                 ref={c => this.canvas = c}/>
         </div>;
     }

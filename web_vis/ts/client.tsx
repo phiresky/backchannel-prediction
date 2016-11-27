@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { autorun, computed, observable, action, extendObservable, useStrict, isObservableArray, asMap, toJS, runInAction } from 'mobx';
-useStrict(true);
+import { autorun, computed, observable, action, extendObservable, isObservableArray, asMap, toJS, runInAction, asStructure } from 'mobx';
+import * as mobx from 'mobx';
+mobx.useStrict(true);
 import { observer } from 'mobx-react';
 import * as Waveform from './Waveform';
 import * as util from './util';
@@ -10,6 +11,7 @@ import * as s from './socket';
 import * as LZString from 'lz-string';
 import * as highlights from './Highlights';
 import {autobind} from 'core-decorators';
+import * as B from '@blueprintjs/core';
 
 export const globalConfig = observable({
     maxColor: "#3232C8",
@@ -85,6 +87,48 @@ export function isNumFeature(f: Feature): f is NumFeature {
     return f.typ === "FeatureType.SVector" || f.typ === "FeatureType.FMatrix";
 }
 export const loadingSpan = <span>Loading...</span>;
+
+@observer
+class CategoryTree extends React.Component<{gui: GUI, features: s.GetFeaturesResponse, onClick:(feat: string) => void}, {}> {
+    constructor(props: any) {
+        super(props);
+        this.currentTree = this.props.features.categories.map(c => this.getFeaturesTree("", c));
+    }
+    getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
+        if(!category) return {id: "unused", label: "unused", childNodes: []};
+
+        if(s.isFeatureID(category)) {
+            const name = category as any as string;
+            return {
+                id: parentPath + "/" + name, label: name
+            }
+        }
+        const path = parentPath + "/" + category.name;
+        const node: B.ITreeNode = {
+            id: path,
+            label: category.name,
+            childNodes: [],
+            isExpanded: false
+        }
+        for(const child of category.children) {
+            node.childNodes!.push(this.getFeaturesTree(path, child));
+        }
+        return node;
+    }
+    currentTree: B.ITreeNode[];
+    @autobind @action
+    handleNodeClick(n: B.ITreeNode) {this.props.onClick(""+n.id); }
+    @autobind @action
+    handleNodeExpand(n: B.ITreeNode) {n.isExpanded = true;this.forceUpdate();}
+    @autobind @action
+    handleNodeCollapse(n: B.ITreeNode) {n.isExpanded = false;this.forceUpdate();}
+    render() {
+        return <B.Tree contents={this.currentTree}
+                onNodeCollapse={this.handleNodeCollapse}
+                onNodeClick={this.handleNodeClick}
+                onNodeExpand={this.handleNodeExpand} />
+    }
+}
 @observer
 class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"]
@@ -105,24 +149,25 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
             uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
         }
     }
-    @action async add() {
+    @action async add(feat: string) {
+        this.addPopover.setState({isOpen: false});
         const gui = this.props.gui;
-        const feat = (await gui.getFeatures().promise).defaults[0][0];
         const state = gui.getDefaultSingleUIState(await gui.getFeature(feat).promise);
         runInAction(() => this.props.uiState.features.push(state));
     }
-
+    addPopover: B.Popover;
     render() {
+        
         let minmax;
         const {uiState, gui} = this.props;
         const firstWithRange = uiState.features.find(props => props.currentRange !== null);
         if(firstWithRange && firstWithRange.currentRange) {
             minmax = [
-                <pre key="max" style={{position: "absolute", margin:0, top:0, right:0}}>{util.round1(firstWithRange.currentRange.max)}</pre>,
-                <pre key="min" style={{position: "absolute", margin:0, bottom:0, right:0}}>{util.round1(firstWithRange.currentRange.min)}</pre>,
+                <div key="max" style={{position: "absolute", margin:0, top:0, right:0}}>{util.round1(firstWithRange.currentRange.max)}</div>,
+                <div key="min" style={{position: "absolute", margin:0, bottom:0, right:0}}>{util.round1(firstWithRange.currentRange.min)}</div>,
             ];
         } else minmax = "";
-        const VisualizerChoices = (props:{info: SingleUIState}) => {
+        const VisualizerChoices = observer((props:{info: SingleUIState}) => {
             const feature = gui.getFeature(props.info.feature).data;
             if(!feature) return <span/>;
             const c = getVisualizerChoices(feature);
@@ -130,19 +175,15 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                 {c.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             else return <span/>;
-        }
+        });
         const features = gui.getFeatures().data;
         return (
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
                 <div style={{position: "absolute", top:0, bottom:0, left:0, zIndex: 1, display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
                     {uiState.features.map((info, i) => 
-                        <div key={i}><button onClick={e => this.remove(i)}>-</button>
-                            {features && <select style={{maxWidth:"7.5em"}} value={info.feature} onChange={e => this.changeFeature(e, i)}>
-                                        {Object.keys(features.categories).map(category => 
-                                            <optgroup key={category} label={category}>{features.categories[category].map(f => <option key={f.toString()} value={f.toString()}>{f}</option>)}</optgroup>
-                                        )}
-                                    </select>
-                            }
+                        <div key={i}>
+                            {info.feature}
+                            <button onClick={e => this.remove(i)}>-</button>
                             {info.currentRange&&
                                 <select style={{maxWidth:"7.5em"}} value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
                                     {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
@@ -152,7 +193,12 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                         </div>
                         
                     )}
-                    <button onClick={e => this.add()}>+</button>
+                    <B.Popover content={features ? <CategoryTree gui={gui} features={features} onClick={e => this.add(e)} />: "not loaded" }
+                        interactionKind={B.PopoverInteractionKind.CLICK}
+                        position={B.Position.RIGHT}
+                        useSmartPositioning={true} ref={p => this.addPopover = p}>
+                        <button>+</button>
+                    </B.Popover>
                 </div>
                 {minmax}
             </div>
@@ -194,7 +240,7 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
             let left = util.getPixelFromPosition(from, 0, width, this.props.gui.zoom);
             let right = util.getPixelFromPosition(to, 0, width, this.props.gui.zoom);
             if ( right < 0 || left > this.props.gui.width) return null;
-            const style = {height: "20px"};
+            const style = {};
             if(utt.color) Object.assign(style, {backgroundColor: `rgb(${utt.color})`});
             let className = "utterance utterance-text";
             if(left < 0) {
@@ -208,8 +254,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
                 className += " rightcutoff";
             }
             const padding = 3;
-            Object.assign(style, {left:left+"px", width: (right-left - padding*2)+"px", padding: padding +"px"});
-            return <div className={className} key={utt.id} style={style}
+            Object.assign(style, {left:left+"px", width: (right-left)+"px", padding: padding +"px"});
+            return <div className={className} key={utt.id !== undefined ? utt.id : i} style={style}
                     onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
                     onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
                 <span>{utt.text}</span>
@@ -234,7 +280,8 @@ class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
     }
     Tooltip = observer(function Tooltip(this: TextVisualizer) {
         return <div>
-            {this.playbackTooltip !== null && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
+            {this.playbackTooltip !== null && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing &&
+                <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
             {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
     }.bind(this))
@@ -360,10 +407,10 @@ export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
     if(feature.typ === "FeatureType.SVector" || feature.typ === "FeatureType.FMatrix") {
         return ["Waveform", "Darkness"];
     } else if (feature.typ === "utterances") {
-        return ["Text"];
-    } else if(feature.typ === "highlights") {
-        return ["Highlights"];
-    } else throw Error("Can't visualize " + (feature as any).typ);
+        return ["Text", "Highlights"];
+    } else if (feature.typ === "highlights") {
+        return ["Highlights", "Text"];
+    }else throw Error("Can't visualize " + (feature as any).typ);
 }
 
 @observer
@@ -448,7 +495,7 @@ export class GUI extends React.Component<{}, {}> {
     stateAfterLoading = null as any | null;
 
     loadingState = LoadingState.NotConnected;
-
+    loadedFeatures = new Set<NumFeature>();
     serialize() {
         return LZString.compressToEncodedURIComponent(JSON.stringify(toJS({
             playbackPosition: this.playbackPosition,
@@ -492,6 +539,7 @@ export class GUI extends React.Component<{}, {}> {
             this.uis = [];
             this.zoom.left = 0; this.zoom.right = 1;
             this.totalTimeSeconds = NaN;
+            this.loadedFeatures.clear();
         });
         const features = await this.socketManager.getFeatures(convID).promise;
         for(const featureIDs of features.defaults) {
@@ -533,7 +581,7 @@ export class GUI extends React.Component<{}, {}> {
             feature: feature.name,
             visualizer: getVisualizerChoices(feature)[0],
             config: visualizerConfig,
-            currentRange: null,
+            currentRange: asStructure(null),
         }
     }
     getDefaultUIState(features: Feature[]): UIState {
@@ -542,17 +590,17 @@ export class GUI extends React.Component<{}, {}> {
             features: features.map(f => this.getDefaultSingleUIState(f))
         }
     }
-    @action
     checkTotalTime(feature: Feature) {
         if(isNumFeature(feature))  {
-            let totalTime;
+            if(this.loadedFeatures.has(feature)) return;
+            let totalTime: number = NaN;
             if(feature.typ === "FeatureType.SVector") {
                 totalTime = feature.data.length / (feature.samplingRate * 1000);
             } else if(feature.typ === "FeatureType.FMatrix") {
                 totalTime = feature.data.length * feature.shift / 1000;
             }
-            if (totalTime) {
-                if(isNaN(this.totalTimeSeconds)) this.totalTimeSeconds = totalTime;
+            if (!isNaN(totalTime)) {
+                if(isNaN(this.totalTimeSeconds)) runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
                 else if(Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
@@ -576,7 +624,8 @@ export class GUI extends React.Component<{}, {}> {
     }
     getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
-        f.promise.then(f => this.checkTotalTime(f));
+        if(f.data) this.checkTotalTime(f.data);
+        else f.promise.then(f => this.checkTotalTime(f));
         return f;
     }
     getFeatures() {
@@ -626,4 +675,4 @@ export class GUI extends React.Component<{}, {}> {
 
 
 const _gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
-Object.assign(window, {gui:_gui, util, action, globalConfig, toJS});
+Object.assign(window, {gui:_gui, util, globalConfig, mobx});
