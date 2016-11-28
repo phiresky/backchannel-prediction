@@ -189,7 +189,9 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
         # print('has backchannel: ' + uttInfo['text'])
         cBCbegin, cBCend = reader.getBackchannelTrainingRange(uttInfo)
         cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(uttInfo)
-        if cNBCbegin < 0:
+        fromTime = cNBCbegin - 0.05  # max(cNBCbegin - 1, 0)
+        toTime = cBCend + 0.05  # + 1
+        if fromTime < 0:
             logging.debug(
                 "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
                                                                                   toTime))
@@ -202,8 +204,7 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
         else:
             raise Exception("Unknown channel " + channel)
 
-        fromTime = max(cNBCbegin - 1, 0)
-        toTime = cBCend + 1
+
         features = featureSet.eval(None, {
             'from': fromTime,
             'to': toTime,
@@ -227,12 +228,12 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
         BCframeStart = int((cBCbegin - fromTime) * 100)
         BCframeEnd = int((cBCend - fromTime) * 100)
         frameCount = 0
-        for frameX in range(NBCframeStart, NBCframeEnd + 1):
+        for frameX in range(NBCframeStart, NBCframeEnd):
             yield np.append(F[frameX], [0], axis=0)
             frameCount += 1
 
         frameCount = 0
-        for frameX in range(BCframeStart, BCframeEnd + 1):
+        for frameX in range(BCframeStart, BCframeEnd):
             yield np.append(F[frameX], [1], axis=0)
             frameCount += 1
 
