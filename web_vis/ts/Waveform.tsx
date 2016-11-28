@@ -1,12 +1,11 @@
-import {Feature, NumFeature, NumFeatureFMatrix, NumFeatureSVector, Highlights, 
-        Visualizer, VisualizerProps, VisualizerConfig, globalConfig} from './client';
+import * as c from './client';
 import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed, action} from 'mobx';
 import * as util from './util';
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
+        givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
     const start = Math.floor(zoom.left * data.length);
     const end = Math.floor(zoom.right * data.length);
     const length = end - start;
@@ -14,7 +13,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 
     const displayMinMax = display.max - display.min;
     let lasth1 = NaN, lasth2 = NaN;
-    ctx.fillStyle = globalConfig.maxColor;
+    ctx.fillStyle = c.globalConfig.maxColor;
     const rmsc = new Array<number>(2 * w);
     for (let x = 0; x < w; x++) {
         const from = x / w, to = (x + 1) / w;
@@ -42,7 +41,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         rmsc[2*x] = rms1;
         rmsc[2*x+1] = rms2;
     }
-    ctx.fillStyle = globalConfig.rmsColor;
+    ctx.fillStyle = c.globalConfig.rmsColor;
     for (let x = 0; x < w; x++) {
         ctx.fillRect(x, y + rmsc[2*x], 1, rmsc[2*x + 1] - rmsc[2*x]);
     }
@@ -50,7 +49,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 }
 
 function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
+        givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
     const start = Math.floor(zoom.left * data.length);
     const end = Math.floor(zoom.right * data.length);
     const length = end - start;
@@ -67,16 +66,16 @@ function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     return display;
 }
 
-abstract class CanvasRenderer<P> extends React.Component<VisualizerProps<P>, {}> {
+abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {}> {
     canvas: HTMLCanvasElement;
     disposers: (() => void)[] = [];
-
+    abstract preferredHeight: number;
     abstract renderCanvas(canvas: HTMLCanvasElement): void;
-
+    filter?: string;
     render() {
         const border = 1;
-        return <div>
-            <canvas style={{width: "100%", height: globalConfig.visualizerHeight+"px", borderStyle:"solid", borderWidth:border+"px"}}
+        return <div style={{height:"100%"}}>
+            <canvas style={{display:"block", filter: this.filter, width: "100%", height: "100%", borderStyle:"solid", borderWidth:border+"px"}}
                 ref={c => this.canvas = c}/>
         </div>;
     }
@@ -91,15 +90,15 @@ abstract class CanvasRenderer<P> extends React.Component<VisualizerProps<P>, {}>
     }
 }
 
-abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
+abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
     data: ArrayLike<number>[];
 
     abstract singleRenderFunction: 
         (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-            givenRange: [number, number]|null, config: VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number})
+            givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number})
             => {min: number, max: number};
      
-    constructor(props: VisualizerProps<NumFeature>) {
+    constructor(props: c.VisualizerProps<c.NumFeature>) {
         super(props);
         if(props.feature.typ === "FeatureType.SVector") this.data = [props.feature.data];
         else if(props.feature.typ === "FeatureType.FMatrix") {
@@ -120,7 +119,7 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
         target.height = target.clientHeight;
         
         const w = target.width;
-        const h = target.height - 1;
+        const h = target.height;
         const ctx = target.getContext("2d")!;
         const dim = this.data.length;
         let range;
@@ -132,9 +131,12 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
 }
 @observer
 export class AudioWaveform extends MultiCanvasRenderer {
+    preferredHeight = 100;
+    filter = "drop-shadow(rgba(0, 0, 0, 0.2) 5px 5px 5px)";
     singleRenderFunction = renderWaveform;
 }
 @observer
 export class Darkness extends MultiCanvasRenderer {
+    preferredHeight = 50;
     singleRenderFunction = renderDarkness;
 }

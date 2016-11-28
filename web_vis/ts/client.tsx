@@ -18,7 +18,7 @@ export const globalConfig = observable({
     rmsColor: "#6464DC",
     leftBarSize: 200,
     zoomFactor: 1.2,
-    visualizerHeight: 100,
+    emptyVisHeight: 50,
     defaultConversation: "sw2807"
 });
 export class styles {
@@ -32,8 +32,11 @@ export interface VisualizerProps<T> {
     uiState: SingleUIState;
     feature: T;
 }
-export interface Visualizer<T> {
-    new (props?: VisualizerProps<T>, context?: any): React.Component<VisualizerProps<T>, {}>;
+export abstract class Visualizer<T> extends React.Component<VisualizerProps<T>, {}> {
+    preferredHeight: number;
+}
+export interface VisualizerConstructor<T> {
+    new (props?: VisualizerProps<T>, context?: any): Visualizer<T>;
 }
 export type NumFeatureCommon = {
     name: string,
@@ -75,8 +78,9 @@ export interface SingleUIState {
     config: VisualizerConfig;
     currentRange: {min: number, max: number} | null;
 }
-interface UIState {
+export interface UIState {
     uuid: number,
+    height: number | "auto",
     features: SingleUIState[];
 }
 let uuid = 0;
@@ -160,7 +164,6 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
     addPopover: B.Popover;
     render() {
-        
         let minmax;
         const {uiState, gui} = this.props;
         const firstWithRange = uiState.features.find(props => props.currentRange !== null);
@@ -190,8 +193,8 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
                 <div style={{position: "absolute", top:0, bottom:0, left:0, paddingLeft:"5px", display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
                     {uiState.features.map((info, i) => 
-                        <B.Popover interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
-                            content={<div key={i}>
+                        <B.Popover key={i} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
+                            content={<div>
                                     <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(i)}>Remove</button></label>
                                     {info.currentRange&&
                                         <label className="pt-label pt-inline">Range
@@ -233,7 +236,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
                 <div style={{flexGrow: 1}}>
-                    <highlights.OverlayVisualizer gui={gui} uiStates={uiState.features} />
+                    <highlights.OverlayVisualizer gui={gui} uiState={uiState} />
                 </div>
             </div>
         );
@@ -241,7 +244,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
 }
 @observer
-class TextVisualizer extends React.Component<VisualizerProps<Utterances>, {}> {
+class TextVisualizer extends Visualizer<Utterances> {
     @observable
     tooltip: number|null = null;
     @computed get playbackTooltip() {
@@ -432,15 +435,16 @@ export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
 
 @observer
 export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{}> {
-    static visualizers = {
+    preferredHeight: number;
+    static visualizers:{[name: string]: VisualizerConstructor<any>} = {
         "Waveform": Waveform.AudioWaveform,
         "Darkness": Waveform.Darkness,
         "Text": TextVisualizer,
         "Highlights": highlights.HighlightsVisualizer
     }
     render() {
-        const Visualizer = ChosenVisualizer.visualizers[this.props.uiState.visualizer] as Visualizer<Feature>;
-        return <Visualizer {...this.props} />;
+        const Visualizer = ChosenVisualizer.visualizers[this.props.uiState.visualizer];
+        return <Visualizer {...this.props} ref={e => this.preferredHeight = e?e.preferredHeight:0} />;
     }
 }
 
@@ -475,9 +479,6 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
 }
 
 const badExamples: {[name: string]: string} = {
-    "too early": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgHYqA2AJgE4yyAOAZkcYBZb2BWWgBoQAM3QQI6AO6po8JMlKioETAFMRiIgDd1AJ0xR8RUiEzT6rMlRAiArtkykA2qHuOAJqQCMwserG9vrqriBQnohQduGRUBRwiCAAuiI6Tvaq2ABeBmYA6lB64voAtjHpmJkQOQYAwkSi2ADmZs3YeoQASlCEzaFawSGEuD19oSSgpdjEJAC07PR0rCKlUAAepIvLAL47Qu5evlQiooG4wRMu5pbWVHMAgilpGVm5+mYAKurruABqrxq7wqgNq+gahCarRIIEI6DKb3UABl0FEIDFEEN1CMxv1SIR7JJ9odsN4SD4VgEgiEwmA8IgABbREQRKIJJKpECVapggpFdQlcovKqI8GNFpmOEIoHI1GqDFYnG9PGTEDTWb0fxrTYkRhUPYHEAeUm+Rinc6XWkyAzM2JsxLPLmg4EwwrFeFCp0imViyESmFStYylFohX6YajZUTKYzUhzShkLiMWgUxOsHycOhMVYbUiUdjsVjceiCdgMRg+fhkTgGklk+hkc3Uq52uAxVlwdmO7mivnusog71giFQtodbG4gYgTHh7GR8akGOzBZLWiU7VbVesWtGo4keg+JsXGkka4WKw2OYAIW7zryMO+vwBQ+Bwp57xH-thHsRIflg1nJUFxIAkiUNY163oI9LVPcB6QZNsWUiTsHU5HsfT7AUPUHd96nFaFv2lWo-3RACI0nRc1VjEgBBzHUOB3CDSHodhoJPa4wGtfRENbLs0LvD5XX5QUcNFT8CMDX85VI6dFXnFUlzjBMUyobhWH4HxGH4TgOHYGw6LzChuG4LhuHYbhtJsAQyD8PZOWydB0HKVUIAFXBDJoXgqDIfh6As2huCoEtuBEfQWgZdzyGoVhmBMwKbIrHwWNofYQFwdBcFUT5sFKdQAGV1G0QhPGcEhaBYCgM20qh+B2IA",
-    "very delayed": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgBYqyBWAdgDYAmMgZgA4BOKpsluwA0IAGboIEdAHdU0eEmSlRUCJgCmIxEQBu6gE6Yo+IqRCZpLTmQYgRAV2yZSAbVD3HAE1IBGJiNF1Y3t9dVcQKE9EKDsIqKgKOEQQAF0RHSd7VWwALwMzAHUoPXF9AFtYjMwsiFyDAGEiUWwAczNCdHLsvIAZdGiIWMQQ0MJcACUoQhawklAy7GISAFomHxYqETKoAA9SJm5BAF8joXcvXwYAoNwQ2ZdzS2sGZYBBVPTM7vySEAAVdQ7XAANS+tTy+kqYLq+kahGabV+HS64PUfQGQxG6jGk2ms0I9kkp3O2G8JB8nGuwVC4TAeEQAAsYiJItFEsk0iAqjUYYViupShVPtVvrCmq12p1tqj0apMfpRhMpjNSPNFqR2CwtrtfGQfCcziAPKTfNwqbcaSQHmAZAZmXE2UkPlzoRC+SUpVCRaixfCJUipd9ZYMtFiccrZmqlstKGRuNxOIw49x2HQqCwmAx1tq9uQKCxuExOFQGNw40WeFRCwaSWS2Oa7uFWXBYs32c7uaL3QLPcKeRC4QjJSi6sH5YrcSq5iAFtG6HHhDOdSRmAma0aLiQWD4G5aHhYrDZlgAhDuun7-QEg8+Qvuiwf+kDI6Wj-py0MK7FKvGkAlEw3GnWWpiDcjZWuA9IMi2LJRHA7acp2PrdoKXr9g04qIk+gYym+IYgMMn7hj+06zhqlJLrmnAMOugGkIIu73OAtr6NBDpwU6CE3shvYut6MIPphz5Brh45fpOkYzuqKyxqwLAMAw7BUOw6xUD4dDrIu2y5pQNB0JqFJWOsBw2KmJycjk6DoBU04QAKuCkDpXBkGQVZkEWLlxi5Ij6K0DL2XmVDznQxYCGwfh0EwEWnCAuDoLgqh-NgZTqAAyuo2iEJ4zgkPwlA+Km7AMHQRxAA",
-    "double, only when silence before": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOgBYAOGqgZgDYqqBOAdiYEYmBWAEzcANCABm6CBHQB3VNHhJkpMVAiYApqMREAbhoBOmKPiKkQmGQJpkOIUQFdsmUgG1QDpwBNSvUWI0TBwMNNxAoL0Qoe3DIqAo4RBAAXVFdZwc1bAAvQ3MAdSh9CQMAWxj0zEyIHMMAYSIxbABzc2bsfUIAJShCZtDtYJDCXB6+0JJQUuxiEgBaBgEuGlFSqAAPUkXlgF8d4Q9vXw5-QNxgidcLKxsOOYBBFLSMrNyDcwAVDXXcADUXmpvCoA2oGBqEJqtEggQjoMqvDQAGXQUQgMUQQw0IzG-VIhAcUn2h2wPhI3BW4jOFzCYDwiAAFtFRBEogkkqkQJVqqCCkUNCVys8qgiwY0WuZYfDAUiUWp0Zjsb1cZMQNNZotVhtfGQyHsDiBPCTfGxTkEQjTZIYmbFWYknpyQUDoYVinDBQ7hdLRRDxdDJWtpcjUfKDMNRkqJlMZqQ5pQyGw2DQmNYaNwdbQ0wwGJrNuQKMxuHx2EwOEWWEwGGRuHriaSBGRTedzSQriy4DE22z7VyRbzXWVgZ7QeDIW0OlicQMQBjQ1jw+NSFHZgslkwKWtc9s1zWDUcSEJG9SW9drLY5gAhbuOvLQr4-f5DoFC7lvEe+mFuhFBuWDWeKhckPihL6oadYCIezZXLSuAMu2zKRHAXYcj2Xp9vybqDi+9RilCH5SrU35or+YaTouqrRiQyY5qQbB8DuoGkAI2aUmalzgJaBhwTaiF2sh17vM6fICphIpvrh-pfrKRHTgq87KkuMZxjwa5MLRvAlrYZAMCaqpanmzCsHwXC2AIqnWBw1Y7By2ToOg5QqhA-K4KQlC0MmthUEsRnaRZtGiAYLT0s5ebsDQHBJkWSxJqwFn7CAuDoLgagfNgpQaAAyhoOiEF4LiUTqFDcAwfAMKWOxAA",
 }
 enum LoadingState {
     NotConnected, Connected, Loading, Complete
@@ -604,7 +605,8 @@ export class GUI extends React.Component<{}, {}> {
     getDefaultUIState(features: Feature[]): UIState {
         return {
             uuid: uuid++,
-            features: features.map(f => this.getDefaultSingleUIState(f))
+            features: features.map(f => this.getDefaultSingleUIState(f)),
+            height: "auto"
         }
     }
     checkTotalTime(feature: Feature) {
@@ -632,11 +634,18 @@ export class GUI extends React.Component<{}, {}> {
             this.loadConversation(globalConfig.defaultConversation);
         }
     }
+    @autobind
+    windowResize() {
+        if(this.windowWidth !== document.body.clientWidth)
+            runInAction("windowWidthChange", () => this.windowWidth = document.body.clientWidth);
+    }
     constructor() {
         super();
         this.socketManager = new s.SocketManager(`ws://${location.host.split(":")[0]}:8765`);
         window.addEventListener("wheel", e => this.onWheel(e));
-        window.addEventListener("resize", action("windowResize", (e: UIEvent) => this.windowWidth = window.innerWidth));
+        window.addEventListener("resize", this.windowResize);
+        // window resize is not fired when scroll bar appears. wtf.
+        setInterval(this.windowResize, 200)
         window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
     }
     getFeature(id: string|s.FeatureID) {
@@ -653,7 +662,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @action
     addUI(afterUuid: number) {
-        this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, {uuid: uuid++, features:[]});
+        this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, {uuid: uuid++, features:[], height: "auto"});
     }
     *getVisualizers() {
         for(const ui of this.uis) {
