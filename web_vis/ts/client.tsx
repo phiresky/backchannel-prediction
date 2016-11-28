@@ -92,36 +92,37 @@ export function isNumFeature(f: Feature): f is NumFeature {
 }
 export const loadingSpan = <span>Loading...</span>;
 
+function getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
+    if(!category) return {id: "unused", label: "unused", childNodes: []};
+
+    if(s.isFeatureID(category)) {
+        const name = category as any as string;
+        return {
+            id: parentPath + "/" + name, label: name
+        }
+    }
+    const path = parentPath + "/" + category.name;
+    const node: B.ITreeNode = {
+        id: path,
+        label: category.name,
+        childNodes: [],
+        isExpanded: false
+    }
+    for(const child of category.children) {
+        node.childNodes!.push(getFeaturesTree(path, child));
+    }
+    return node;
+}
 @observer
 class CategoryTree extends React.Component<{gui: GUI, features: s.GetFeaturesResponse, onClick:(feat: string) => void}, {}> {
     constructor(props: any) {
         super(props);
-        this.currentTree = this.props.features.categories.map(c => this.getFeaturesTree("", c));
+        this.currentTree = this.props.gui.categoryTree;
     }
-    getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
-        if(!category) return {id: "unused", label: "unused", childNodes: []};
-
-        if(s.isFeatureID(category)) {
-            const name = category as any as string;
-            return {
-                id: parentPath + "/" + name, label: name
-            }
-        }
-        const path = parentPath + "/" + category.name;
-        const node: B.ITreeNode = {
-            id: path,
-            label: category.name,
-            childNodes: [],
-            isExpanded: false
-        }
-        for(const child of category.children) {
-            node.childNodes!.push(this.getFeaturesTree(path, child));
-        }
-        return node;
-    }
+ 
     currentTree: B.ITreeNode[];
     @autobind @action
-    handleNodeClick(n: B.ITreeNode) {this.props.onClick(""+n.id); }
+    handleNodeClick(n: B.ITreeNode) {if(!n.childNodes) this.props.onClick(""+n.id); }
     @autobind @action
     handleNodeExpand(n: B.ITreeNode) {n.isExpanded = true;this.forceUpdate();}
     @autobind @action
@@ -467,21 +468,24 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     conversation = "sw2001";
     @autobind @action
     setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.conversation = e.currentTarget.value; }
+    @autobind
+    async randomConversation() {
+        const conversation = await this.props.gui.randomConversation() as any as string;
+        runInAction(() => this.conversation = conversation);
+        this.props.gui.loadConversation(conversation);
+    }
     render() {
         const convos = this.props.gui.getConversations().data;
         return (<div style={{display:"inline-block"}}>
             <input list="conversations" value={this.conversation} onChange={this.setConversation} />
             {convos && <datalist id="conversations">{convos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
             <button onClick={c => this.props.gui.loadConversation(this.conversation)}>Load</button>
-            <button onClick={c => this.props.gui.loadRandomConversation()}>RND</button>
+            <button onClick={this.randomConversation}>RND</button>
         </div>)
     }
 }
 
 const badExamples: {[name: string]: string} = {
-}
-enum LoadingState {
-    NotConnected, Connected, Loading, Complete
 }
 let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
     const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
@@ -512,8 +516,13 @@ export class GUI extends React.Component<{}, {}> {
     private socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
 
-    loadingState = LoadingState.NotConnected;
+    loadingState = 1;
     loadedFeatures = new Set<NumFeature>();
+    @computed get categoryTree() {
+        const data =  this.socketManager.getFeatures(this.conversation).data;
+        if(!data) return [];
+        else return data.categories.map(c => getFeaturesTree("", c));
+    }
     serialize() {
         return LZString.compressToEncodedURIComponent(JSON.stringify(toJS({
             playbackPosition: this.playbackPosition,
@@ -527,7 +536,7 @@ export class GUI extends React.Component<{}, {}> {
     @action
     deserialize(data: string) {
         if(this.audioPlayer) this.audioPlayer.stopPlayback();
-        if(this.loadingState === LoadingState.Loading) {
+        if(this.loadingState !== 1) {
             console.error("can't load while loading");
             return;
         }
@@ -558,11 +567,20 @@ export class GUI extends React.Component<{}, {}> {
             this.zoom.left = 0; this.zoom.right = 1;
             this.totalTimeSeconds = NaN;
             this.loadedFeatures.clear();
+            this.loadingState = 0;
         });
         const features = await this.socketManager.getFeatures(convID).promise;
+        const total = features.defaults.reduce((sum, next) => sum + next.length, 0);
+        let i = 0;
         for(const featureIDs of features.defaults) {
-            const feats = await Promise.all(featureIDs.map(id => this.getFeature(id).promise));
-            runInAction("addDefaultUI", () => this.uis.push(this.getDefaultUIState(feats)));
+            const feats = [] as Feature[];
+            for(const featureID of featureIDs) {
+                feats.push(await this.getFeature(featureID).promise);
+                runInAction("progressIncrement", () => this.loadingState = ++i / total);
+            }
+            runInAction("addDefaultUI", () => {
+                this.uis.push(this.getDefaultUIState(feats))
+            });
         }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
@@ -570,8 +588,8 @@ export class GUI extends React.Component<{}, {}> {
         if(convos.indexOf(id as any) >= 0) return id as any;
         throw Error("unknown conversation " + id);
     }
-    async loadRandomConversation() {
-        this.loadConversation(util.randomChoice(await this.getConversations().promise) as any);
+    async randomConversation(): Promise<s.ConversationID> {
+        return util.randomChoice(await this.getConversations().promise);
     }
     @action
     onWheel(event: MouseWheelEvent) {
@@ -626,8 +644,8 @@ export class GUI extends React.Component<{}, {}> {
             }
         }
     }
+    @autobind
     onSocketOpen() {
-        this.loadingState = LoadingState.Connected;
         if(location.hash.length > 1) {
             this.deserialize(location.hash.substr(1));
         } else {
@@ -647,6 +665,7 @@ export class GUI extends React.Component<{}, {}> {
         // window resize is not fired when scroll bar appears. wtf.
         setInterval(this.windowResize, 200)
         window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
+        this.socketManager.socketOpen().then(this.onSocketOpen);
     }
     getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
@@ -671,6 +690,15 @@ export class GUI extends React.Component<{}, {}> {
         }
     }
     render(): JSX.Element {
+        const self = this;
+        function ProgressIndicator() {
+            if(self.loadingState === 1) return <span>Loading complete</span>;
+            return (
+                <div style={{display:"inline-block", width:"200px"}}>
+                    Loading: <B.ProgressBar intent={B.Intent.PRIMARY} value={self.loadingState} />
+                </div>
+            );
+        }
         return (
             <div>
                 <div style={{margin: "10px"}} className="headerBar">
@@ -681,8 +709,9 @@ export class GUI extends React.Component<{}, {}> {
                     </label>
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
-                    Examples: {Object.keys(badExamples).map(txt => <a key={txt} href={badExamples[txt]}
-                        onClick={e => {this.deserialize(badExamples[txt].substr(1))}}>{txt}</a>)}
+                    <ProgressIndicator />
+                    {Object.keys(badExamples).length > 0 && <span>Examples: {Object.keys(badExamples).map(txt => <a key={txt} href={badExamples[txt]}
+                        onClick={e => {this.deserialize(badExamples[txt].substr(1))}}>{txt}</a>)}</span>}
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>

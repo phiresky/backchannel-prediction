@@ -13,14 +13,15 @@ export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiState: c.U
     container: HTMLDivElement;
     setContainer = (e: HTMLDivElement) => this.container = e;
     visses: c.ChosenVisualizer[] = [];
-    componentDidUpdate() {
+    componentDidReact() {
+        // TODO: make rerender on preferredHeight change
         let maxHeight = c.globalConfig.emptyVisHeight;
         if(this.props.uiState.features.length > 0) maxHeight = Math.max(...this.visses.filter(x => x).map(child => child.preferredHeight));
         if(maxHeight !== this.preferredHeight && !isNaN(maxHeight))
             mobx.runInAction("changeVisHeight", () => this.preferredHeight = maxHeight);
     }
     componentDidMount() {
-        this.componentDidUpdate();
+        this.componentDidReact();
     }
     @mobx.computed get height() {
         return this.props.uiState.height === "auto" ? this.preferredHeight : this.props.uiState.height;
