@@ -92,27 +92,29 @@ export function isNumFeature(f: Feature): f is NumFeature {
 }
 export const loadingSpan = <span>Loading...</span>;
 
-function getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
-    if(!category) return {id: "unused", label: "unused", childNodes: []};
+class OptimizedFeaturesTree {
+    getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
+        if(!category) return {id: "unused", label: "unused", childNodes: []};
 
-    if(s.isFeatureID(category)) {
-        const name = category as any as string;
+        if(s.isFeatureID(category)) {
+            const name = category as any as string;
+            return {
+                id: parentPath + "/" + name, label: name
+            }
+        }
+        const path = parentPath + "/" + category.name;
+        let children = category.children.map(c => this.getFeaturesTree(path, c));
         return {
-            id: parentPath + "/" + name, label: name
+            id: path,
+            label: category.name,
+            get childNodes(this: B.ITreeNode) {
+                if(!this.isExpanded) return [];
+                else return children;
+            }
         }
     }
-    const path = parentPath + "/" + category.name;
-    const node: B.ITreeNode = {
-        id: path,
-        label: category.name,
-        childNodes: [],
-        isExpanded: false
-    }
-    for(const child of category.children) {
-        node.childNodes!.push(getFeaturesTree(path, child));
-    }
-    return node;
 }
+
 @observer
 class CategoryTree extends React.Component<{gui: GUI, features: s.GetFeaturesResponse, onClick:(feat: string) => void}, {}> {
     constructor(props: any) {
@@ -521,7 +523,10 @@ export class GUI extends React.Component<{}, {}> {
     @computed get categoryTree() {
         const data =  this.socketManager.getFeatures(this.conversation).data;
         if(!data) return [];
-        else return data.categories.map(c => getFeaturesTree("", c));
+        else {
+            const ft = new OptimizedFeaturesTree();
+            return data.categories.map(c => ft.getFeaturesTree("", c));
+        }
     }
     serialize() {
         return LZString.compressToEncodedURIComponent(JSON.stringify(toJS({

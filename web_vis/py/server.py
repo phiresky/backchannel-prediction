@@ -132,7 +132,7 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
     elif tuple(parts[1:]) in netsDict:
         feat = parts[1:]
         channel = parts[0][-1].lower()
-        config_path, wid = netsDict[feat]
+        config_path, wid = netsDict[tuple(feat)]
         net = get_network_outputter(config_path, wid)
         await sendNumFeature(ws, id, "", evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
     else:
