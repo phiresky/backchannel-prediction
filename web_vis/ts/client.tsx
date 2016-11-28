@@ -567,8 +567,8 @@ export class GUI extends React.Component<{}, {}> {
     async loadConversation(conversation: string) {
         const convID = await this.verifyConversationID(conversation);
         runInAction("resetUIs", () => {
-            this.conversation = convID;
             this.uis = [];
+            this.conversation = convID;
             this.zoom.left = 0; this.zoom.right = 1;
             this.totalTimeSeconds = NaN;
             this.loadedFeatures.clear();
