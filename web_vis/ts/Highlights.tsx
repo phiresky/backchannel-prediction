@@ -86,7 +86,8 @@ export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Hi
                 className += " rightcutoff";
             }
             const padding = 0;
-            Object.assign(style, {left:left+"px", width: right-left-padding*2+"px", padding: padding + "px"});
+            if(right - left < 5) Object.assign(style, {borderRight: "none", borderLeft: "none"})
+            Object.assign(style, {left:left+"px", width: right-left+"px", padding: padding + "px"});
             return <div className={className} key={highlight.from} style={style}>{highlight.text}</div>;
         });
     }
