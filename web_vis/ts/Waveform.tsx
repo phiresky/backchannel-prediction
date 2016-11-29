@@ -3,11 +3,12 @@ import * as React from 'react';
 import {observer} from 'mobx-react';
 import {observable, autorun, computed, action} from 'mobx';
 import * as util from './util';
+import * as Data from './Data';
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
-    const start = Math.floor(zoom.left * data.length);
-    const end = Math.floor(zoom.right * data.length);
+        givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number}) {
+    const start = Math.floor(zoom.left * data.iterator.count);
+    const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
     const display = util.getMinMax(givenRange, config, data, start, end);
 
@@ -19,7 +20,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         const from = x / w, to = (x + 1) / w;
         const fromSample = start + Math.floor(length * from);
         const toSample = start + Math.ceil(length * to);
-        const {min, max, rms2:rmsSq, sum, count} = util.stats(data, fromSample, toSample);
+        const {min, max, rms2:rmsSq, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
         let h1 = Math.round(h * (1 - (max - display.min)/displayMinMax));
         let h2 = Math.round(h * (1 - (min - display.min)/displayMinMax));
@@ -49,16 +50,16 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 }
 
 function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number}) {
-    const start = Math.floor(zoom.left * data.length);
-    const end = Math.floor(zoom.right * data.length);
+        givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number}) {
+    const start = Math.floor(zoom.left * data.iterator.count);
+    const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
     const display = util.getMinMax(givenRange, config, data, start, end);
     for (let x = 0; x < w; x++) {
         const from = x / w, to = (x + 1) / w;
         const fromSample = start + Math.floor(length * from);
         const toSample = start + Math.ceil(length * to);
-        const {min, max, rms2, sum, count} = util.stats(data, fromSample, toSample);
+        const {min, max, rms2, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
         ctx.fillStyle = `rgba(0,0,0,${(avg - display.min)/(display.max - display.min)})`;
         ctx.fillRect(x, y, 1, h);
@@ -91,21 +92,10 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
 }
 
 abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
-    data: ArrayLike<number>[];
-
     abstract singleRenderFunction: 
         (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-            givenRange: [number, number]|null, config: c.VisualizerConfig, data: ArrayLike<number>, zoom: {left: number, right: number})
+            givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number})
             => {min: number, max: number};
-     
-    constructor(props: c.VisualizerProps<c.NumFeature>) {
-        super(props);
-        if(props.feature.typ === "FeatureType.SVector") this.data = [props.feature.data];
-        else if(props.feature.typ === "FeatureType.FMatrix") {
-            const data = props.feature.data;
-            this.data = props.feature.data[0].map((_,i) => data.map(v => v[i]));
-        } else throw Error("unknown type "+(props.feature as any).typ);
-    }
 
     @action
     setCurrentRange(range: {min: number, max: number}) {
@@ -117,14 +107,15 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
         this.props.gui.windowWidth; // for mobx tracking
         target.width = target.clientWidth;
         target.height = target.clientHeight;
-        
+        const data = this.props.feature.data;
         const w = target.width;
         const h = target.height;
         const ctx = target.getContext("2d")!;
-        const dim = this.data.length;
+        const dim = data.shape[1];
         let range;
         for(let y = 0; y < dim; y++) {
-            range = this.singleRenderFunction(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim), this.props.feature.range, this.props.uiState.config, this.data[y], this.props.gui.zoom);
+            range = this.singleRenderFunction(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim),
+                this.props.feature.range, this.props.uiState.config, {data, iterator:data.iterate("ALL", y)}, this.props.gui.zoom);
         }
         if(range) this.setCurrentRange(range);
     }

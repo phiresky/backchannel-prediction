@@ -9,6 +9,8 @@ from collections import OrderedDict
 from trainNN.evaluate import get_network_outputter
 from extract_pfiles_python import readDB
 import functools
+import math
+import time
 
 
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
@@ -21,6 +23,7 @@ def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nod
         'dtype': str(feature.dtype),
         'typ': str(feature.typ),
         'shift': feature.shift,
+        'shape': feature.shape,
         'data': None if nodata else feature.tolist(),
         'range': range
     }
@@ -72,15 +75,26 @@ featureExtractor = readDB.load_feature_extractor(config)
 netsDict, netsTree = findAllNets()
 
 
-async def sendNumFeature(ws, id, name, feat):
-    dataextra = feat.typ == FeatureType.SVector
+async def sendNumFeature(ws, id, conv: str, featname: str, feat):
+    global lasttime
+    dataextra = feat.typ == FeatureType.SVector or feat.typ == FeatureType.FMatrix
     await ws.send(json.dumps({
         "id": id,
-        "data": featureToJSON(feat, range=(-2 ** 15, 2 ** 15) if name.startswith("adc") else None,
+        "data": featureToJSON(feat, range=(-2 ** 15, 2 ** 15) if "adc" in featname else None,
                               nodata=dataextra)
     }))
     if dataextra:
-        await ws.send(feat.tobytes())
+        CHUNKSIZE = 200000
+        bytes = feat.tobytes()
+        # print(feat[0:100])
+        # print([x for x in bytes[0:200]])
+        for i in range(0, math.ceil(len(bytes) / CHUNKSIZE)):
+            offset = i * CHUNKSIZE
+            meta = json.dumps({'conversation': conv, 'feature': featname, 'byteOffset': offset}).encode('ascii')
+            if len(meta) % 4 != 0:
+                meta += b' ' * (4 - len(meta) % 4)
+            metaLen = len(meta).to_bytes(4, byteorder='little')
+            await ws.send(metaLen + meta + bytes[offset:min((i + 1) * CHUNKSIZE, len(bytes))])
 
 
 async def sendOtherFeature(ws, id, feat):
@@ -112,11 +126,12 @@ def getExtractedFeature(conv: str, feat: str):
 
 
 async def sendFeature(ws, id: str, conv: str, featFull: str):
-    featFull = featFull.lstrip('/')
-    parts = featFull.split("/")
+    if featFull[0] != '/':
+        raise Exception("featname must start with /")
+    parts = featFull.split("/")[1:]
     if parts[0] == "input":
         if parts[1] in ("adca", "adcb"):
-            return await sendNumFeature(ws, id, parts[1], getExtractedFeature(conv, parts[1]))
+            return await sendNumFeature(ws, id, conv, featFull, getExtractedFeature(conv, parts[1]))
         reader = islReader if parts[1] == "ISL transcript" else origReader
         feat = parts[2]
         if feat == "bca":
@@ -138,7 +153,7 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
     else:
         extracted = extractFeatures(conv)
         if parts[1] in extracted:
-            return await sendNumFeature(ws, id, "", extracted[parts[1]])
+            return await sendNumFeature(ws, id, conv, featFull, extracted[parts[1]])
         raise Exception("feature not found: {}".format(parts))
 
 
@@ -170,11 +185,13 @@ async def handler(websocket, path):
                 if msg['type'] == "getFeatures":
                     await websocket.send(json.dumps({"id": id, "data": {
                         'categories': getFeatures(msg['conversation']),
-                        'defaults': [s.split("&") for s in
-                                     ["input/adca&input/Original Transcript/bca",
-                                      "input/Original Transcript/texta", "extracted/pitcha", "extracted/powera",
-                                      "input/adcb&input/Original Transcript/bcb", "input/Original Transcript/textb",
-                                      "extracted/pitchb", "extracted/powerb"]]
+                        'defaults': [s.split(" & ") for s in
+                                     ["/input/adca & /input/Original Transcript/bcb",
+                                      "/input/Original Transcript/texta", "/extracted/pitcha", "/extracted/powera",
+                                      "/input/adcb & /input/Original Transcript/bcb",
+                                      "/input/Original Transcript/textb",
+                                      "/extracted/pitchb", "/extracted/powerb"
+                                      ]]
                     }}))
                 elif msg['type'] == "getConversations":
                     await websocket.send(json.dumps({"id": id, "data": conversations}))

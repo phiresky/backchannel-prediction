@@ -9,19 +9,14 @@ import {autobind} from 'core-decorators';
 @observer
 export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiState: c.UIState}, {}> {
     @mobx.observable
-    preferredHeight = c.globalConfig.emptyVisHeight;
     container: HTMLDivElement;
     setContainer = (e: HTMLDivElement) => this.container = e;
-    visses: c.ChosenVisualizer[] = [];
-    componentDidReact() {
-        // TODO: make rerender on preferredHeight change
-        let maxHeight = c.globalConfig.emptyVisHeight;
-        if(this.props.uiState.features.length > 0) maxHeight = Math.max(...this.visses.filter(x => x).map(child => child.preferredHeight));
-        if(maxHeight !== this.preferredHeight && !isNaN(maxHeight))
-            mobx.runInAction("changeVisHeight", () => this.preferredHeight = maxHeight);
-    }
-    componentDidMount() {
-        this.componentDidReact();
+    @mobx.observable
+    visses: number[] = [];
+    @mobx.computed get preferredHeight() {
+        const maxHeight = Math.max(...this.visses.filter(x => x !== null));
+        if(isFinite(maxHeight)) return maxHeight;
+        else return c.globalConfig.emptyVisHeight
     }
     @mobx.computed get height() {
         return this.props.uiState.height === "auto" ? this.preferredHeight : this.props.uiState.height;
@@ -40,25 +35,22 @@ export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiState: c.U
         };
         window.addEventListener("mouseup", removeListener);
     }
-    mouseUp() {
-
-    }
     render() {
         const ui = this.props.uiState;
         const gui = this.props.gui;
-        const visses = this.visses;
+        const self = this;
         const SingleOverlay = observer(function SingleOverlay({state, i}:{state: c.SingleUIState, i:number}) {
             const feature = gui.getFeature(state.feature).data;
             return (
                 <div style={{position:"absolute", top:0, left:0, width: "100%", height:"100%"}}>
-                    {feature && <c.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={d => visses[i] = d} />}
+                    {feature && <c.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={mobx.action((d:c.ChosenVisualizer) => self.visses[i] = d && d.preferredHeight)} />}
                 </div>
             );
         });
         return (
             <div style={{position: "relative", height: this.height, minHeight: "20px", width: "100%"}}>
                 {ui.features.map((state, i) => <SingleOverlay key={i} state={state} i={i} />)}
-                <div onMouseDown={this.mouseDown} onMouseUp={this.mouseUp} style={{position:"absolute", height: "10px", bottom:"-5px", width:"100%", cursor:"ns-resize"}}></div>
+                <div onMouseDown={this.mouseDown} style={{position:"absolute", height: "10px", bottom:"-5px", width:"100%", cursor:"ns-resize"}}></div>
             </div>
         )
     }

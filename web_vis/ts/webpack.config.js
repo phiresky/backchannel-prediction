@@ -36,6 +36,9 @@ module.exports = {
     data: '@import "theme/_config.scss";',
     includePaths: [path.resolve(__dirname, './src')]
   },
+  ts: {
+    transpileOnly: true
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development')

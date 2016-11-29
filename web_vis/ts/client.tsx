@@ -12,14 +12,15 @@ import * as LZString from 'lz-string';
 import * as highlights from './Highlights';
 import {autobind} from 'core-decorators';
 import * as B from '@blueprintjs/core';
-
+import * as Data from './Data';
 export const globalConfig = observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
     leftBarSize: 200,
     zoomFactor: 1.2,
     emptyVisHeight: 50,
-    defaultConversation: "sw2807"
+    defaultConversation: "sw2807",
+    minRenderDelayMS: 50
 });
 export class styles {
     @computed static get leftBarCSS() {
@@ -42,18 +43,15 @@ export type NumFeatureCommon = {
     name: string,
     samplingRate: number, // in kHz
     shift: number,
+    data: Data.TwoDimensionalArray,
     range: [number, number] | null
 };
 export type NumFeatureSVector = NumFeatureCommon & {
-    typ: "FeatureType.SVector",
-    data: ArrayLike<number>,
-    dtype: "int16"
+    typ: "FeatureType.SVector", dtype: "int16"
 };
 
 export type NumFeatureFMatrix = NumFeatureCommon & {
-    typ: "FeatureType.FMatrix",
-    data: number[][],
-    dtype: "float32"
+    typ: "FeatureType.FMatrix", dtype: "float32"
 };
 export type Color = [number, number, number];
 
@@ -317,21 +315,43 @@ class TextVisualizer extends Visualizer<Utterances> {
         );
     }
 }
+
+class RobinAudioNode {
+    constructor(private buf: AudioBuffer) {
+
+    }
+}
 @observer
 class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: Zoom, gui: GUI}, {}> {
     playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
     audio: AudioContext;
-    audioBuffers = new WeakMap<NumFeatureSVector, AudioBuffer>();
-    audioSources = [] as AudioBufferSourceNode[];
-    duration = 0;
     @observable
     playing: boolean;
     startedAt: number;
+    duration: number;
+    startPlayingAtom = new mobx.Atom("Player");
     constructor(props: any) {
         super(props);
         this.audio = new AudioContext();
         this.disposers.push(() => (this.audio as any).close());
+        this.disposers.push(mobx.autorun(() => {
+            for(const feature of this.props.features) this.makeAudioBuffer(feature);
+            if(this.playing) {
+                for(const feature of this.props.features) {
+                    const buffer = this.makeAudioBuffer(feature);
+                    const audioSource = this.toAudioSource({buffer, audio: this.audio});
+                
+                    this.duration = buffer.duration;
+                    audioSource.playbackRate.value = 1;
+                    const startPlaybackPosition = mobx.untracked(() => this.props.gui.playbackPosition);
+                    audioSource.start(0, startPlaybackPosition * buffer.duration);
+                    this.startedAt = this.audio.currentTime - startPlaybackPosition * buffer.duration;
+                    audioSource.addEventListener("ended", action("audioEnded", () => this.playing = false));
+                }
+                requestAnimationFrame(this.updatePlaybackPosition);
+            }
+        }));
     }
 
     center() {
@@ -342,60 +362,57 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         if (pos + w/2 > 1) pos = 1 - w/2;
         zoom.left = pos - w/2; zoom.right = pos + w/2;
     }
-
-    updatePlaybackPosition = action("updatePlaybackPosition", () => {
-        if(this.audioSources.length === 0) return;
+    @autobind @action
+    updatePlaybackPosition() {
+        if(!this.playing) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
         if(this.props.gui.followPlayback) this.center();
         if(this.playing) requestAnimationFrame(this.updatePlaybackPosition);
-    });
-    updatePlayerBar = () => {
+    }
+    @computed get xTranslation() {
         const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.zoom);
-        this.playerBar.style.transform = "translateX("+x+"px)";
+        return "translateX("+x+"px)";
     }
-    stopPlayback() {
-        while(this.audioSources.length > 0) {
-            this.audioSources.pop()!.stop();
-        }
-    }
+    makeAudioBuffer = mobx.createTransformer((feature: NumFeature) => {
+        console.log("creating buffer for " + feature.name);
+        const audioBuffer = this.audio.createBuffer(1, feature.data.shape[0], feature.samplingRate * 1000);
+        feature.data.iterate("ALL", 0);
+        const arr = Float32Array.from(feature.data.buffer, v => v / 2 ** 15);
+        audioBuffer.copyToChannel(arr, 0);
+        return audioBuffer;
+    });
+    toAudioSource = mobx.createTransformer(({buffer, audio}: {buffer: AudioBuffer, audio: AudioContext}) => {
+        const audioSource = audio.createBufferSource();
+        audioSource.buffer = buffer;
+        audioSource.playbackRate.value = 0;
+        audioSource.connect(audio.destination);
+        return audioSource;
+    }, buf => buf.stop());
 
-    onKeyUp = action("onKeyUp", (event: KeyboardEvent) => {
+    @autobind @action
+    onKeyUp(event: KeyboardEvent) {
         if(event.keyCode == 32) {
             event.preventDefault();
-            if(this.audioSources.length > 0) {
-                this.stopPlayback();
-            } else {
-                for(const feature of this.props.features) {
-                    const buffer = this.audioBuffers.get(feature)!;
-                    const audioSource = this.audio.createBufferSource();
-                    audioSource.buffer = buffer;
-                    audioSource.connect(this.audio.destination);
-                    audioSource.start(0, this.props.gui.playbackPosition * buffer.duration);
-                    this.startedAt = this.audio.currentTime - this.props.gui.playbackPosition * buffer.duration;
-                    audioSource.addEventListener("ended", action("audioEnded", () => this.playing = false));
-                    this.audioSources.push(audioSource);
-                }
-                this.playing = true;
-                requestAnimationFrame(this.updatePlaybackPosition);
-            }
+            this.playing = !this.playing;
         }
-    })
-    onKeyDown = (event: KeyboardEvent) => {
+    }
+    @autobind @action
+    onKeyDown(event: KeyboardEvent) {
         if(event.keyCode == 32) {
             event.preventDefault();
         }
     }
-    onClick = (event: MouseEvent) => {
+    @autobind @action
+    onClick(event: MouseEvent) {
         if(event.clientX < this.props.gui.left) return;
         event.preventDefault();
         const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
-        this.stopPlayback();
+        this.playing = false;
         runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
 
     componentDidMount() {
         const {gui, zoom} = this.props;
-        this.disposers.push(autorun("updatePlayerBar", this.updatePlayerBar));
         const uisDiv = this.props.gui.uisDiv;
         uisDiv.addEventListener("click", this.onClick);
         window.addEventListener("keydown", this.onKeyDown);
@@ -403,23 +420,14 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         this.disposers.push(() => uisDiv.removeEventListener("click", this.onClick));
         this.disposers.push(() => window.removeEventListener("keydown", this.onKeyDown));
         this.disposers.push(() => window.removeEventListener("keyup", this.onKeyUp));
-        this.disposers.push(() => this.stopPlayback());
+        this.disposers.push(action("stopPlaybackExit", () => this.playing = false));
     }
     componentWillUnmount() {
         for(const disposer of this.disposers) disposer();
     }
     render() {
-        for(const feature of this.props.features) {
-            if(this.audioBuffers.has(feature)) continue;
-            console.log("creating buffer for "+feature.name);
-            const audioBuffer = this.audio.createBuffer(1, feature.data.length, feature.samplingRate * 1000);
-            const arr = Float32Array.from(feature.data, v => v / 2 ** 15);
-            audioBuffer.copyToChannel(arr, 0);
-            this.duration = audioBuffer.duration;
-            this.audioBuffers.set(feature, audioBuffer);
-        }
         return (
-            <div ref={this.setPlayerBar} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, backgroundColor:"gray"}} />
+            <div ref={this.setPlayerBar} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, transform: this.xTranslation, backgroundColor:"gray"}} />
         );
     }
 }
@@ -438,6 +446,7 @@ export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
 
 @observer
 export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{}> {
+    @observable
     preferredHeight: number;
     static visualizers:{[name: string]: VisualizerConstructor<any>} = {
         "Waveform": Waveform.AudioWaveform,
@@ -447,7 +456,7 @@ export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{
     }
     render() {
         const Visualizer = ChosenVisualizer.visualizers[this.props.uiState.visualizer];
-        return <Visualizer {...this.props} ref={e => this.preferredHeight = e?e.preferredHeight:0} />;
+        return <Visualizer {...this.props} ref={action((e: Visualizer<any>) => this.preferredHeight = e?e.preferredHeight:0)} />;
     }
 }
 
@@ -490,6 +499,7 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
 const badExamples: {[name: string]: string} = {
 }
 let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
+    if(gui.loadingState !== 1) return <span/>;
     const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
     const visibleAudioFeatures = [...visibleFeatures]
         .map(f => gui.getFeature(f.feature).data)
@@ -517,7 +527,7 @@ export class GUI extends React.Component<{}, {}> {
     @observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = action("setWidthCalcDiv", (e:HTMLDivElement) => this.widthCalcDiv = e);
     private socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
-
+    @observable
     loadingState = 1;
     loadedFeatures = new Set<NumFeature>();
     @computed get categoryTree() {
@@ -540,7 +550,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @action
     deserialize(data: string) {
-        if(this.audioPlayer) this.audioPlayer.stopPlayback();
+        if(this.audioPlayer) this.audioPlayer.playing = false;
         if(this.loadingState !== 1) {
             console.error("can't load while loading");
             return;
@@ -579,13 +589,18 @@ export class GUI extends React.Component<{}, {}> {
         let i = 0;
         for(const featureIDs of features.defaults) {
             const feats = [] as Feature[];
-            for(const featureID of featureIDs) {
-                feats.push(await this.getFeature(featureID).promise);
-                runInAction("progressIncrement", () => this.loadingState = ++i / total);
-            }
+            const ui = this.getDefaultUIState([]);
             runInAction("addDefaultUI", () => {
-                this.uis.push(this.getDefaultUIState(feats))
+                this.uis.push(ui)
             });
+            for(const featureID of featureIDs) {
+                const feat = await this.getFeature(featureID).promise;
+                runInAction("progressIncrement", () => {
+                    ui.features.push(this.getDefaultSingleUIState(feat))
+                    this.loadingState = ++i / total;
+                });
+            }
+            
         }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
@@ -637,9 +652,9 @@ export class GUI extends React.Component<{}, {}> {
             if(this.loadedFeatures.has(feature)) return;
             let totalTime: number = NaN;
             if(feature.typ === "FeatureType.SVector") {
-                totalTime = feature.data.length / (feature.samplingRate * 1000);
+                totalTime = feature.data.shape[0] / (feature.samplingRate * 1000);
             } else if(feature.typ === "FeatureType.FMatrix") {
-                totalTime = feature.data.length * feature.shift / 1000;
+                totalTime = feature.data.shape[0] * feature.shift / 1000;
             }
             if (!isNaN(totalTime)) {
                 if(isNaN(this.totalTimeSeconds)) runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
@@ -696,14 +711,14 @@ export class GUI extends React.Component<{}, {}> {
     }
     render(): JSX.Element {
         const self = this;
-        function ProgressIndicator() {
+        const ProgressIndicator = observer(function ProgressIndicator() {
             if(self.loadingState === 1) return <span>Loading complete</span>;
             return (
                 <div style={{display:"inline-block", width:"200px"}}>
                     Loading: <B.ProgressBar intent={B.Intent.PRIMARY} value={self.loadingState} />
                 </div>
             );
-        }
+        });
         return (
             <div>
                 <div style={{margin: "10px"}} className="headerBar">
@@ -735,4 +750,5 @@ export class GUI extends React.Component<{}, {}> {
 
 
 const _gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
-Object.assign(window, {gui:_gui, util, globalConfig, mobx});
+
+Object.assign(window, {gui:_gui, util, globalConfig, mobx, Data});
