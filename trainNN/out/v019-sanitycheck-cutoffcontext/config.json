@@ -1,0 +1,150 @@
+{
+	"paths": {
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"test": "data/conversations.test",
+			"train": "data/conversations.train"
+		},
+		"adc": "data/adc",
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"databasePrefix": "data/db/all240302"
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.024577392407277854
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.017166724982505266
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.01201124037788659
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.009305020993701896
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.008378345871238646
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.007211117914625587
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.00834827676696992
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.006057557732680241
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.0052866952414275525
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.006339113890832748
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.004841125787263811
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.004524033414975537
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.00420147393282011
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.00371216759972004
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.00332126924422671
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.0032665981455562987
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.002812828026591996
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.002780025367389749
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.0028401635759272015
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.0023098539188243228
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.0026433476207138318
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.0023426565780265696
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.002509403428971324
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.0022989196990902405
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.0026269462911127084
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.002093903079076309
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.0021786432820154467
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.0020282977606718156
+			}
+		},
+		"model": "network_model.py",
+		"source": "extract_pfiles_python/out/v019-sanitycheck-cutoffcontext-context40/config.json"
+	},
+	"extract_config": {
+		"outputDirectory": "extract_pfiles_python/out",
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"useOriginalDB": true,
+		"context": 40
+	},
+	"train_config": {
+		"num_labels": 2,
+		"output_dim": 1,
+		"input_dim": 162,
+		"files": {
+			"validate": "validate.npz",
+			"test": "test.npz",
+			"train": "train.npz"
+		}
+	}
+}
