@@ -109,7 +109,7 @@ def getFeatures(conv: str):
                                      dict(name="ISL transcript", children="texta,bca,textb,bcb".split(",")),
                                      dict(name="Original transcript", children="texta,bca,textb,bcb".split(","))
                                      ]),
-        dict(name="extracted", children="pitcha,powera,pitchb,powerb,feata,featb".split(",")),
+        dict(name="extracted", children="pitcha,powera,pitchb,powerb,feata,featb,gaussbca,gaussbcb".split(",")),
         dict(name="NN outputs A", children=netsTree),
         dict(name="NN outputs B", children=netsTree),
     ]
@@ -117,7 +117,7 @@ def getFeatures(conv: str):
 
 @functools.lru_cache(maxsize=1)
 def extractFeatures(conv: str):
-    return origReader.feature_extractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
+    return origReader.eval_range(0, readDB.MAX_TIME, conv)
 
 
 def getExtractedFeature(conv: str, feat: str):
@@ -149,9 +149,13 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         config_path, wid = netsDict[tuple(feat)]
         net = get_network_outputter(config_path, wid)
         await sendNumFeature(ws, id, conv, featFull, evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
-    else:
+    elif parts[0] == "extracted":
+        feat = parts[1]
+        if feat.startswith("gaussbc"):
+            channel = feat[-1]
+            return await sendNumFeature(ws, id, conv, featFull, origReader.get_gauss_bcs(conv+"-"+channel.upper()))
         extracted = extractFeatures(conv)
-        if parts[1] in extracted:
+        if feat in extracted:
             return await sendNumFeature(ws, id, conv, featFull, extracted[parts[1]])
         raise Exception("feature not found: {}".format(parts))
 

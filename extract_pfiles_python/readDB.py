@@ -20,6 +20,7 @@ import os.path
 import re
 import functools
 
+MAX_TIME = 100 * 60 * 60 # 100 hours
 # these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
 # (counted with checkBackchannels.count_utterances)
 backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh',
@@ -137,7 +138,7 @@ class DBReader:
             raise Exception("only for extracted features")
         return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
 
-    @functools.lru_cache(maxsize=2)
+    @functools.lru_cache(maxsize=16)
     def getBCMaxTime(self, utt: str):
         uttInfo = self.uttDB[utt]
         (audiofile, channel) = uttInfo['convid'].split("-")
@@ -145,16 +146,21 @@ class DBReader:
         uttTo = float(uttInfo['to'])
         fromTime = max(0, uttFrom - 1)
         toTime = uttTo + 1
-        features = self.feature_extractor.eval(None, {
-            'from': fromTime,
-            'to': toTime,
-            'conv': audiofile
-        })
+        features = self.eval_range(fromTime, toTime, audiofile)
         power = features['power' + channel.lower()]
-        powerrange = power[self.time_to_sample_index(power, uttFrom - fromTime):self.time_to_sample_index(power, uttTo - fromTime)]
+        powerrange = power[self.time_to_sample_index(power, uttFrom - fromTime):self.time_to_sample_index(power,
+                                                                                                          uttTo - fromTime)]
         maxIndex = powerrange.argmax()
         maxTime = uttFrom + self.sample_index_to_time(powerrange, maxIndex)
         return maxTime
+
+    @functools.lru_cache(maxsize=16)
+    def eval_range(self, from_time: float, to_time: float, conv: str) -> Dict[str, jrtk.preprocessing.NumFeature]:
+        if from_time == 0 and to_time == MAX_TIME:
+            return self.feature_extractor.eval(None, {'from': from_time, 'to': to_time, 'conv': conv})
+        else:
+            feats = self.eval_range(0, MAX_TIME, conv)
+            return {k: v[str(from_time)+"s":str(to_time)+"s"] for k, v in feats.items()}
 
     def getBackchannelTrainingRange(self, utt: str):
         fromTime = self.getBCMaxTime(utt)
@@ -186,6 +192,33 @@ class DBReader:
                 for index, (utt, uttInfo) in enumerate(utts)
                 if self.is_backchannel(uttInfo, index, utts)
                 ]
+
+    def get_gauss_bc_feature(self, utt: str) -> Tuple[float, np.array]:
+        middle = self.getBCMaxTime(utt)
+        width = 1.8
+        times = np.arange(-width, width, 0.01, dtype="float32")
+        mean = 0
+        stddev = 0.3
+        variance = stddev**2
+        return middle - width, (1/np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean)**2)/(2*variance))
+
+    def get_gauss_bcs(self, spkr: str):
+        conv, channel = spkr.split("-")
+        feats = self.eval_range(0, MAX_TIME, conv)
+        powera = feats['powera']
+        arr = np.zeros_like(powera)
+        feat = jrtk.preprocessing.NumFeature(arr, shift=powera.shift)
+        for bc, _ in self.get_backchannels(list(self.get_utterances(spkr))):
+            offset, gauss = self.get_gauss_bc_feature(bc)
+            gauss = gauss.reshape((gauss.shape[0], 1))
+            start = self.time_to_sample_index(feat, offset)
+            startoffset = 0
+            if start < 0:
+                startoffset = -start
+                start += startoffset
+            feat[start:start + len(gauss) - startoffset] += gauss[startoffset:]
+        return feat
+
 
     def get_filtered_speakers(self, convIDs):
         return [spkr for spkr in self.spkDB if self.speakerFilter(convIDs, spkr)]
@@ -236,12 +269,7 @@ def parseConversations(speaker: str, reader: DBReader):
         else:
             raise Exception("Unknown channel " + channel)
 
-
-        features = reader.feature_extractor.eval(None, {
-            'from': fromTime,
-            'to': toTime,
-            'conv': audiofile
-        })
+        features = reader.eval_range(fromTime, toTime, audiofile)
         F = features["feat" + BCchannel.lower()]
         (frameN, coeffN) = F.shape
 
