@@ -143,8 +143,8 @@ class DBReader:
         (audiofile, channel) = uttInfo['convid'].split("-")
         uttFrom = float(uttInfo['from'])
         uttTo = float(uttInfo['to'])
-        fromTime = max(0, uttFrom) - 1
-        toTime = float(uttTo) + 1
+        fromTime = max(0, uttFrom - 1)
+        toTime = uttTo + 1
         features = self.feature_extractor.eval(None, {
             'from': fromTime,
             'to': toTime,
@@ -220,8 +220,9 @@ def parseConversations(speaker: str, reader: DBReader):
         # print('has backchannel: ' + uttInfo['text'])
         cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
         cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
-        fromTime = cNBCbegin - 0.05  # max(cNBCbegin - 1, 0)
-        toTime = cBCend + 0.05  # + 1
+
+        fromTime = cNBCbegin - 1
+        toTime = cBCend + 1
         if fromTime < 0:
             logging.debug(
                 "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
