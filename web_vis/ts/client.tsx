@@ -192,7 +192,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         const features = gui.getFeatures().data;
         return (
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
-                <div style={{position: "absolute", top:0, bottom:0, left:0, paddingLeft:"5px", display:"flex", justifyContent:"center", flexDirection:"column",alignItems:"flex-start"}}>
+                <div style={{position: "absolute", top:0, left:0, paddingLeft:"5px", paddingTop:"5px"}}>
                     {uiState.features.map((info, i) => 
                         <B.Popover key={i} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
                             content={<div>
@@ -616,15 +616,8 @@ export class GUI extends React.Component<{}, {}> {
             if (!event.ctrlKey) return;
             event.preventDefault();
             const position = util.getPositionFromPixel(event.clientX, this.left, this.width, this.zoom)!;
-            const scale = 1/(this.zoom.right - this.zoom.left);
             const scaleChange = event.deltaY > 0 ? globalConfig.zoomFactor : 1/globalConfig.zoomFactor;
-            const newScale = scale * scaleChange;
-            this.zoom.left -= position;
-            this.zoom.right -= position;
-            this.zoom.left *= scaleChange; 
-            this.zoom.right *= scaleChange;
-            this.zoom.left += position;
-            this.zoom.right += position;
+            this.zoom = util.rescale(this.zoom, scaleChange, position);
             this.zoom.right = Math.min(this.zoom.right, 1);
             this.zoom.left = Math.max(this.zoom.left, 0);
     }

@@ -1,4 +1,4 @@
-import {action, observable, reaction, asReference} from 'mobx';
+import * as mobx from 'mobx';
 import * as c from './client';
 import * as util from './util';
 import * as Data from './Data';
@@ -23,9 +23,9 @@ export type GetFeaturesResponse = {
 }
 
 class LulPromise<T> {
-    @observable data: T|null = null; //asReference(null);
+    @mobx.observable data: T|null = mobx.asReference(null);
     constructor(public promise: Promise<T>) {
-        promise.then(action("fromPromise", (result: T) => this.data = result));
+        promise.then(mobx.action("fromPromise", (result: T) => this.data = result));
     }
 }
 
@@ -72,7 +72,7 @@ export class SocketManager {
         if(this.socket.readyState === this.socket.OPEN) return;
         await new Promise(resolve => this.socket.addEventListener("open", e => resolve()));
     }
-    @autobind @action
+    @autobind @mobx.action
     squashQueue() {
         frameStart = performance.now();
         while(this.queue.length > 0) {
@@ -141,16 +141,9 @@ export class SocketManager {
         const feature = response.data as GetFeatureResponse;
         feature.name = featureID as any as string;
         if(feature.typ === "FeatureType.FMatrix" || feature.typ === "FeatureType.SVector") {
-            return {
-                name: feature.name,
-                typ: feature.typ,
-                dtype: feature.dtype,
-                shape: feature.shape,
-                samplingRate: feature.samplingRate,
-                shift: feature.shift,
-                range: feature.range,
-                data: new Data.TwoDimensionalArray(feature.dtype, feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1]),
-            } as c.NumFeature;
+            return mobx.extendObservable(feature, {
+                data: new Data.TwoDimensionalArray(feature.dtype, feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1])
+            }) as c.NumFeature;
         }
         return feature as c.Highlights;
     }

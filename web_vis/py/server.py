@@ -149,7 +149,7 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         channel = parts[0][-1].lower()
         config_path, wid = netsDict[tuple(feat)]
         net = get_network_outputter(config_path, wid)
-        await sendNumFeature(ws, id, "", evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
+        await sendNumFeature(ws, id, conv, featFull, evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
     else:
         extracted = extractFeatures(conv)
         if parts[1] in extracted:
@@ -186,7 +186,7 @@ async def handler(websocket, path):
                     await websocket.send(json.dumps({"id": id, "data": {
                         'categories': getFeatures(msg['conversation']),
                         'defaults': [s.split(" & ") for s in
-                                     ["/input/adca & /input/Original Transcript/bcb",
+                                     ["/input/adca & /input/Original Transcript/bca",
                                       "/input/Original Transcript/texta", "/extracted/pitcha", "/extracted/powera",
                                       "/input/adcb & /input/Original Transcript/bcb",
                                       "/input/Original Transcript/textb",

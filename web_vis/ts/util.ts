@@ -117,7 +117,7 @@ export function getMinMax(givenRange: [number, number]|null, config: VisualizerC
     else throw Error("unknown config "+config);
 }
 export function round1(num: number) {
-    if(num === (num|0)) return num;
+    if(+num.toPrecision(4) === (num|0)) return num;
     else return num.toPrecision(4);
 }
 export function randomChoice<T>(data: T[]) {
@@ -152,4 +152,14 @@ export class LazyHashMap<K, V> {
     *entries(): IterableIterator<[K, V]> {
         for(const [k,v] of this.map.entries()) yield [fromDeterministic(JSON.parse(k)), v]; 
     }
+}
+
+export function rescale({left = 0, right = 1}, scaleChange: number, position: number) {
+    left -= position;
+    right -= position;
+    left *= scaleChange; 
+    right *= scaleChange;
+    left += position;
+    right += position;
+    return {left, right};
 }
