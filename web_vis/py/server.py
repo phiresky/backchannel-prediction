@@ -10,7 +10,7 @@ from trainNN.evaluate import get_network_outputter
 from extract_pfiles_python import readDB
 import functools
 import math
-import time
+import os.path
 
 
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
@@ -175,6 +175,10 @@ def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
     return highlights
 
 
+def sanitize_conversation(conv):
+    return os.path.basename(conv)
+
+
 async def handler(websocket, path):
     print("new client connected.")
     while True:
@@ -183,8 +187,9 @@ async def handler(websocket, path):
             id = msg['id']
             try:
                 if msg['type'] == "getFeatures":
+                    conv = sanitize_conversation(msg['conversation'])
                     await websocket.send(json.dumps({"id": id, "data": {
-                        'categories': getFeatures(msg['conversation']),
+                        'categories': getFeatures(conv),
                         'defaults': [s.split(" & ") for s in
                                      ["/input/adca & /input/Original Transcript/bca",
                                       "/input/Original Transcript/texta", "/extracted/pitcha", "/extracted/powera",
@@ -196,7 +201,8 @@ async def handler(websocket, path):
                 elif msg['type'] == "getConversations":
                     await websocket.send(json.dumps({"id": id, "data": conversations}))
                 elif msg['type'] == "getFeature":
-                    await sendFeature(websocket, id, msg['conversation'], msg['feature'])
+                    conv = sanitize_conversation(msg['conversation'])
+                    await sendFeature(websocket, id, conv, msg['feature'])
                 else:
                     raise Exception("Unknown msg " + json.dumps(msg))
             except Exception as e:
