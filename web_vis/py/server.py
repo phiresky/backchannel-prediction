@@ -151,9 +151,6 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         await sendNumFeature(ws, id, conv, featFull, evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
     elif parts[0] == "extracted":
         feat = parts[1]
-        if feat.startswith("gaussbc"):
-            channel = feat[-1]
-            return await sendNumFeature(ws, id, conv, featFull, origReader.get_gauss_bcs(conv+"-"+channel.upper()))
         extracted = extractFeatures(conv)
         if feat in extracted:
             return await sendNumFeature(ws, id, conv, featFull, extracted[parts[1]])

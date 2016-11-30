@@ -6,6 +6,7 @@
 # on 2016-11-06
 
 import jrtk
+from jrtk.preprocessing import NumFeature
 from typing import Set, Dict, List, Iterable, Tuple
 import logging
 import os
@@ -20,7 +21,7 @@ import os.path
 import re
 import functools
 
-MAX_TIME = 100 * 60 * 60 # 100 hours
+MAX_TIME = 100 * 60 * 60  # 100 hours
 # these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
 # (counted with checkBackchannels.count_utterances)
 backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh',
@@ -85,11 +86,12 @@ def fromiter(iterator, dtype, shape):
 class DBReader:
     backchannels = None
 
-    # BC area
-    BCbegin = -0.75
-    BCend = -0.35
+    # BC prediction area relative to BC power peak
+    BCcenter = -0.55
+    BCbegin = BCcenter - 0.2
+    BCend = BCcenter + 0.2
 
-    # Non BC area
+    # Non BC prediction area relative to BC power peak
     NBCbegin = -2.3
     NBCend = -1.9
 
@@ -128,47 +130,54 @@ class DBReader:
                 len(lastUttText) == 0
                 )
 
-    def sample_index_to_time(self, feat: jrtk.preprocessing.NumFeature, sample_index):
+    def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ != jrtk.features.FeatureType.FMatrix:
             raise Exception("only for extracted features")
         return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
 
-    def time_to_sample_index(self, feat: jrtk.preprocessing.NumFeature, time_sec):
+    def time_to_sample_index(self, feat: NumFeature, time_sec):
         if feat.typ != jrtk.features.FeatureType.FMatrix:
             raise Exception("only for extracted features")
         return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
 
-    @functools.lru_cache(maxsize=16)
-    def getBCMaxTime(self, utt: str):
-        uttInfo = self.uttDB[utt]
-        (audiofile, channel) = uttInfo['convid'].split("-")
-        uttFrom = float(uttInfo['from'])
-        uttTo = float(uttInfo['to'])
-        fromTime = max(0, uttFrom - 1)
-        toTime = uttTo + 1
-        features = self.eval_range(fromTime, toTime, audiofile)
-        power = features['power' + channel.lower()]
-        powerrange = power[self.time_to_sample_index(power, uttFrom - fromTime):self.time_to_sample_index(power,
-                                                                                                          uttTo - fromTime)]
-        maxIndex = powerrange.argmax()
-        maxTime = uttFrom + self.sample_index_to_time(powerrange, maxIndex)
-        return maxTime
+    def getBCMaxTime(self, utt: str, power: NumFeature = None):
+        if power is None:
+            (conv, speaker) = self.uttDB[utt]['convid'].split("-")
+            power = self.eval_range(0, MAX_TIME, conv)['power'+speaker.lower()]
+
+        @functools.lru_cache(maxsize=16)
+        def inner(utt: str):
+            uttInfo = self.uttDB[utt]
+            uttFrom = float(uttInfo['from'])
+            uttTo = float(uttInfo['to'])
+
+            powerrange = power[self.time_to_sample_index(power, uttFrom):self.time_to_sample_index(power, uttTo)]
+            maxIndex = powerrange.argmax()
+            maxTime = uttFrom + self.sample_index_to_time(powerrange, maxIndex)
+            return maxTime
+
+        return inner(utt)
 
     @functools.lru_cache(maxsize=16)
-    def eval_range(self, from_time: float, to_time: float, conv: str) -> Dict[str, jrtk.preprocessing.NumFeature]:
+    def eval_range(self, from_time: float, to_time: float, conv: str) -> Dict[str, NumFeature]:
         if from_time == 0 and to_time == MAX_TIME:
-            return self.feature_extractor.eval(None, {'from': from_time, 'to': to_time, 'conv': conv})
+            feats = self.feature_extractor.eval(None, {'from': from_time, 'to': to_time, 'conv': conv})
+            return {
+                **feats,
+                'gaussbca': self.get_gauss_bcs(feats['powera'], conv + "-A"),
+                'gaussbcb': self.get_gauss_bcs(feats['powerb'], conv + "-B")
+            }
         else:
             feats = self.eval_range(0, MAX_TIME, conv)
-            return {k: v[str(from_time)+"s":str(to_time)+"s"] for k, v in feats.items()}
+            return {k: v[str(from_time) + "s":str(to_time) + "s"] for k, v in feats.items()}
 
     def getBackchannelTrainingRange(self, utt: str):
-        fromTime = self.getBCMaxTime(utt)
-        return fromTime + self.BCbegin, fromTime + self.BCend
+        peak_time = self.getBCMaxTime(utt)
+        return peak_time + self.BCbegin, peak_time + self.BCend
 
     def getNonBackchannelTrainingRange(self, utt: str):
-        fromTime = self.getBCMaxTime(utt)
-        return fromTime + self.NBCbegin, fromTime + self.NBCend
+        peak_time = self.getBCMaxTime(utt)
+        return peak_time + self.NBCbegin, peak_time + self.NBCend
 
     def load_db(self) -> (DBase, DBase):
         if self.config['extract_config']['useOriginalDB']:
@@ -193,32 +202,29 @@ class DBReader:
                 if self.is_backchannel(uttInfo, index, utts)
                 ]
 
-    def get_gauss_bc_feature(self, utt: str) -> Tuple[float, np.array]:
-        middle = self.getBCMaxTime(utt)
+    def get_gauss_bc_array(self, power: NumFeature, utt: str) -> Tuple[float, np.array]:
+        middle = self.getBCMaxTime(utt, power) + self.BCcenter
         width = 1.8
-        times = np.arange(-width, width, 0.01, dtype="float32")
+        times = np.arange(-width, width, power.shift / 1000, dtype="float32")
         mean = 0
         stddev = 0.3
-        variance = stddev**2
-        return middle - width, (1/np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean)**2)/(2*variance))
+        variance = stddev ** 2
+        return middle - width, (1 / np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean) ** 2) / (2 * variance))
 
-    def get_gauss_bcs(self, spkr: str):
-        conv, channel = spkr.split("-")
-        feats = self.eval_range(0, MAX_TIME, conv)
-        powera = feats['powera']
-        arr = np.zeros_like(powera)
-        feat = jrtk.preprocessing.NumFeature(arr, shift=powera.shift)
+    def get_gauss_bcs(self, power_feature: np.array, spkr: str):
+        arr = np.zeros_like(power_feature)
+        feat = NumFeature(arr, shift=power_feature.shift)
         for bc, _ in self.get_backchannels(list(self.get_utterances(spkr))):
-            offset, gauss = self.get_gauss_bc_feature(bc)
+            offset, gauss = self.get_gauss_bc_array(power_feature, bc)
             gauss = gauss.reshape((gauss.shape[0], 1))
             start = self.time_to_sample_index(feat, offset)
-            startoffset = 0
             if start < 0:
-                startoffset = -start
-                start += startoffset
-            feat[start:start + len(gauss) - startoffset] += gauss[startoffset:]
+                gauss = gauss[0 - start:]
+                start = 0
+            if len(gauss) > arr.size - start:
+                gauss = gauss[:arr.size - start]
+            feat[start:start + len(gauss)] += gauss
         return feat
-
 
     def get_filtered_speakers(self, convIDs):
         return [spkr for spkr in self.spkDB if self.speakerFilter(convIDs, spkr)]
@@ -240,62 +246,81 @@ def load_backchannels(path):
     return backchannels_hardcoded | bcs
 
 
+def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
+    convID = uttInfo['convid']
+    (conv, back_channel) = convID.split("-")
+    radius_sec = 0.5
+    peak = reader.getBCMaxTime(utt)
+    features = reader.eval_range(0, MAX_TIME, conv)
+
+    speaking_channel = dict(A="B", B="A")[back_channel]
+
+    input = features["feat" + speaking_channel.lower()]
+    (frameN, coeffN) = input.shape
+
+    output = features["gaussbc"+back_channel.lower()]
+
+    if coeffN != input_dim:
+        raise Exception("coeff and dim don't match")
+
+    left_bound = reader.time_to_sample_index(input, peak - radius_sec)
+    right_bound = reader.time_to_sample_index(input, peak + radius_sec)
+
+    yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
+
+def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
+    convID = uttInfo['convid']
+    (audiofile, channel) = convID.split("-")
+    # print('has backchannel: ' + uttInfo['text'])
+    cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
+    cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
+
+    fromTime = cNBCbegin - 1
+    toTime = cBCend + 1
+    if fromTime < 0:
+        logging.debug(
+            "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
+                                                                              toTime))
+        return
+
+    BCchannel = dict(A="B", B="A")[channel]
+
+    features = reader.eval_range(fromTime, toTime, audiofile)
+    F = features["feat" + BCchannel.lower()]
+    (frameN, coeffN) = F.shape
+
+    if coeffN != input_dim:
+        raise Exception("coeff and dim don't match")
+
+    expectedNumOfFrames = (toTime - fromTime) * 100
+    deltaFrames = abs(expectedNumOfFrames - frameN)
+    # logging.debug("deltaFrames %d", deltaFrames)
+    if deltaFrames > 10:
+        logging.warning("Frame deviation too big!")
+        return
+
+    NBCframeStart = int((cNBCbegin - fromTime) * 100)
+    NBCframeEnd = int((cNBCend - fromTime) * 100)
+    BCframeStart = int((cBCbegin - fromTime) * 100)
+    BCframeEnd = int((cBCend - fromTime) * 100)
+    frameCount = 0
+    for frameX in range(NBCframeStart, NBCframeEnd):
+        yield np.append(F[frameX], [0], axis=0)
+        frameCount += 1
+
+    frameCount = 0
+    for frameX in range(BCframeStart, BCframeEnd):
+        yield np.append(F[frameX], [1], axis=0)
+        frameCount += 1
+
 def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
     for index, (utt, uttInfo) in enumerate(utts):
-        convID = uttInfo['convid']
-        (audiofile, channel) = convID.split("-")
-        toTime = float(uttInfo['to'])
-        fromTime = float(uttInfo['from'])
         if not reader.is_backchannel(uttInfo, index, utts):
             continue
-        # print('has backchannel: ' + uttInfo['text'])
-        cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
-        cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
 
-        fromTime = cNBCbegin - 1
-        toTime = cBCend + 1
-        if fromTime < 0:
-            logging.debug(
-                "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
-                                                                                  toTime))
-            continue
-
-        if channel == "A":
-            BCchannel = "B"
-        elif channel == "B":
-            BCchannel = "A"
-        else:
-            raise Exception("Unknown channel " + channel)
-
-        features = reader.eval_range(fromTime, toTime, audiofile)
-        F = features["feat" + BCchannel.lower()]
-        (frameN, coeffN) = F.shape
-
-        if coeffN != input_dim:
-            raise Exception("coeff and dim don't match")
-
-        expectedNumOfFrames = (toTime - fromTime) * 100
-        deltaFrames = abs(expectedNumOfFrames - frameN)
-        # logging.debug("deltaFrames %d", deltaFrames)
-        if deltaFrames > 10:
-            logging.warning("Frame deviation too big!")
-            continue
-
-        NBCframeStart = int((cNBCbegin - fromTime) * 100)
-        NBCframeEnd = int((cNBCend - fromTime) * 100)
-        BCframeStart = int((cBCbegin - fromTime) * 100)
-        BCframeEnd = int((cBCend - fromTime) * 100)
-        frameCount = 0
-        for frameX in range(NBCframeStart, NBCframeEnd):
-            yield np.append(F[frameX], [0], axis=0)
-            frameCount += 1
-
-        frameCount = 0
-        for frameX in range(BCframeStart, BCframeEnd):
-            yield np.append(F[frameX], [1], axis=0)
-            frameCount += 1
+        yield from outputBackchannelGauss(reader, utt, uttInfo)
 
         counter += 1
         if counter % 100 == 0:
