@@ -27,8 +27,9 @@ class Step(AbstractStep):
 
         adca = ADC0A[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
         adcb = ADC0B[str(uttInfo['from']) + 's': str(uttInfo['to']) + 's'].substractMean()  # type: NumFeature
-        powerrawa = adca.adc2pow("32ms")
-        powerrawb = adcb.adc2pow("32ms")
+        sample_window = str(featExtractor.config['extract_config']['sample_window_ms']) + "ms"
+        powerrawa = adca.adc2pow(sample_window)
+        powerrawb = adcb.adc2pow(sample_window)
         return {
             'adca': adca,
             'adcb': adcb,

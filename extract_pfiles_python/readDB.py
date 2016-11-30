@@ -85,12 +85,12 @@ class DBReader:
     backchannels = None
 
     # BC area
-    BCbegin = -0.4
-    BCend = 0.0
+    BCbegin = -0.75
+    BCend = -0.35
 
     # Non BC area
-    NBCbegin = -2.0
-    NBCend = -1.6
+    NBCbegin = -2.3
+    NBCend = -1.9
 
     noise_filter = None
     spkDB = None
@@ -103,6 +103,8 @@ class DBReader:
         self.context = self.extract_config['context']
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
+        self.feature_extractor = load_feature_extractor(config)
+        self.sample_window_ms = self.extract_config['sample_window_ms']
 
     def __enter__(self):
         return self
@@ -125,12 +127,41 @@ class DBReader:
                 len(lastUttText) == 0
                 )
 
-    def getBackchannelTrainingRange(self, uttInfo: DBEntry):
-        fromTime = float(uttInfo['from'])
+    def sample_index_to_time(self, feat: jrtk.preprocessing.NumFeature, sample_index):
+        if feat.typ != jrtk.features.FeatureType.FMatrix:
+            raise Exception("only for extracted features")
+        return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
+
+    def time_to_sample_index(self, feat: jrtk.preprocessing.NumFeature, time_sec):
+        if feat.typ != jrtk.features.FeatureType.FMatrix:
+            raise Exception("only for extracted features")
+        return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
+
+    @functools.lru_cache(maxsize=2)
+    def getBCMaxTime(self, utt: str):
+        uttInfo = self.uttDB[utt]
+        (audiofile, channel) = uttInfo['convid'].split("-")
+        uttFrom = float(uttInfo['from'])
+        uttTo = float(uttInfo['to'])
+        fromTime = max(0, uttFrom) - 1
+        toTime = float(uttTo) + 1
+        features = self.feature_extractor.eval(None, {
+            'from': fromTime,
+            'to': toTime,
+            'conv': audiofile
+        })
+        power = features['power' + channel.lower()]
+        powerrange = power[self.time_to_sample_index(power, uttFrom - fromTime):self.time_to_sample_index(power, uttTo - fromTime)]
+        maxIndex = powerrange.argmax()
+        maxTime = uttFrom + self.sample_index_to_time(powerrange, maxIndex)
+        return maxTime
+
+    def getBackchannelTrainingRange(self, utt: str):
+        fromTime = self.getBCMaxTime(utt)
         return fromTime + self.BCbegin, fromTime + self.BCend
 
-    def getNonBackchannelTrainingRange(self, uttInfo: DBEntry):
-        fromTime = float(uttInfo['from'])
+    def getNonBackchannelTrainingRange(self, utt: str):
+        fromTime = self.getBCMaxTime(utt)
         return fromTime + self.NBCbegin, fromTime + self.NBCend
 
     def load_db(self) -> (DBase, DBase):
@@ -176,7 +207,7 @@ def load_backchannels(path):
     return backchannels_hardcoded | bcs
 
 
-def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preprocessing.FeatureExtractor):
+def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
     for index, (utt, uttInfo) in enumerate(utts):
@@ -187,8 +218,8 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
         if not reader.is_backchannel(uttInfo, index, utts):
             continue
         # print('has backchannel: ' + uttInfo['text'])
-        cBCbegin, cBCend = reader.getBackchannelTrainingRange(uttInfo)
-        cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(uttInfo)
+        cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
+        cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
         fromTime = cNBCbegin - 0.05  # max(cNBCbegin - 1, 0)
         toTime = cBCend + 0.05  # + 1
         if fromTime < 0:
@@ -205,7 +236,7 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
             raise Exception("Unknown channel " + channel)
 
 
-        features = featureSet.eval(None, {
+        features = reader.feature_extractor.eval(None, {
             'from': fromTime,
             'to': toTime,
             'conv': audiofile
@@ -244,12 +275,12 @@ def parseConversations(speaker: str, reader: DBReader, featureSet: jrtk.preproce
             logging.info("Written elements: %d (%.3fs per element)", counter, took / 100)
 
 
-def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str], featureSet):
+def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str]):
     logging.debug("parseConversationSet(" + setname + ")")
     speakers = list(speaker for speaker in reader.spkDB if reader.speakerFilter(convIDs, speaker))
     for (i, speaker) in enumerate(speakers):
         logging.debug("parseConversations({}, {}) [{}/{}]".format(setname, speaker, i, len(speakers)))
-        yield from parseConversations(speaker, reader, featureSet)
+        yield from parseConversations(speaker, reader)
 
 
 def load_config(path):
@@ -329,7 +360,6 @@ def main():
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
     with DBReader(config) as reader:
-        featureSet = load_feature_extractor(config)
 
         input_dim = 2 * (context * 2 + 1)
         output_dim = 1
@@ -344,7 +374,7 @@ def main():
             with open(path) as f:
                 convIDs = set([line.strip() for line in f.readlines()])
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
-            data = fromiter(parseConversationSet(reader, setname, convIDs, featureSet),
+            data = fromiter(parseConversationSet(reader, setname, convIDs),
                             dtype="float32", shape=(-1, input_dim + output_dim))
             fname = os.path.join(outputDir, setname + ".npz")
             np.savez_compressed(fname, data=data)

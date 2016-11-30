@@ -11,7 +11,7 @@ from extract_pfiles_python import readDB
 import functools
 import math
 import os.path
-
+from time import perf_counter
 
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
     return NumFeature(net(input)[:, [1]])
@@ -71,7 +71,6 @@ origReader = readDB.DBReader(config)
 config['extract_config']['useOriginalDB'] = False
 islReader = readDB.DBReader(config)
 conversations = sorted({spk.split("-")[0] for spk in origReader.spkDB if spk[0:2] == "sw"})
-featureExtractor = readDB.load_feature_extractor(config)
 netsDict, netsTree = findAllNets()
 
 
@@ -118,7 +117,7 @@ def getFeatures(conv: str):
 
 @functools.lru_cache(maxsize=1)
 def extractFeatures(conv: str):
-    return featureExtractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
+    return origReader.feature_extractor.eval(None, {'conv': conv, 'from': 0, 'to': 60 * 100})
 
 
 def getExtractedFeature(conv: str, feat: str):
@@ -168,9 +167,11 @@ def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
     bcs = reader.get_backchannels(utts)
     highlights = []
     for bc, bcInfo in bcs:
-        (a, b) = reader.getBackchannelTrainingRange(bcInfo)
+        t = reader.getBCMaxTime(bc)
+        highlights.append({'from': t - 0.01, 'to': t+0.01, 'color': (0,0,255), 'text': 'power max'})
+        (a, b) = reader.getBackchannelTrainingRange(bc)
         highlights.append({'from': a, 'to': b, 'color': (0, 255, 0), 'text': 'BC'})
-        (a, b) = reader.getNonBackchannelTrainingRange(bcInfo)
+        (a, b) = reader.getNonBackchannelTrainingRange(bc)
         highlights.append({'from': a, 'to': b, 'color': (255, 0, 0), 'text': 'NBC'})
     return highlights
 

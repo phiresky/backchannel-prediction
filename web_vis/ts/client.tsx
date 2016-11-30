@@ -322,7 +322,7 @@ class RobinAudioNode {
     }
 }
 @observer
-class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: Zoom, gui: GUI}, {}> {
+class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: GUI}, {}> {
     playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
     audio: AudioContext;
@@ -370,7 +370,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
         if(this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
     @computed get xTranslation() {
-        const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.zoom);
+        const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
         return "translateX("+x+"px)";
     }
     makeAudioBuffer = mobx.createTransformer((feature: NumFeature) => {
@@ -406,13 +406,13 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], zoom: 
     onClick(event: MouseEvent) {
         if(event.clientX < this.props.gui.left) return;
         event.preventDefault();
-        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.zoom)!;
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom)!;
         this.playing = false;
         runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
 
     componentDidMount() {
-        const {gui, zoom} = this.props;
+        const {gui} = this.props;
         const uisDiv = this.props.gui.uisDiv;
         uisDiv.addEventListener("click", this.onClick);
         window.addEventListener("keydown", this.onKeyDown);
@@ -505,7 +505,7 @@ let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui
         .map(f => gui.getFeature(f.feature).data)
         .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
     if(visibleAudioFeatures.length > 0)
-        return <AudioPlayer features={visibleAudioFeatures} zoom={gui.zoom} gui={gui} ref={gui.setAudioPlayer} />;
+        return <AudioPlayer features={visibleAudioFeatures} gui={gui} ref={gui.setAudioPlayer} />;
     else return <span/>;
 });
 @observer

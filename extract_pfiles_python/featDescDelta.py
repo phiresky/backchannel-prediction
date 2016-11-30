@@ -14,7 +14,8 @@ class Step(AbstractStep):
 
     def eval(self, featExtractor: FeatureExtractor, spkInfo, uttInfo, feats: Dict[str, NumFeature]):
         tracker = PitchTracker()
-        [pitcha, pitchb] = [feats[which].applyPitchTracker(tracker, window='32ms')
+        sample_window = str(featExtractor.config['extract_config']['sample_window_ms']) + "ms"
+        [pitcha, pitchb] = [feats[which].applyPitchTracker(tracker, window=sample_window)
                             for which in ('adca', 'adcb')]  # type: NumFeature
         pitcha = pitcha.normalize(min=-1, max=1)
         pitchb = pitchb.normalize(min=-1, max=1)
