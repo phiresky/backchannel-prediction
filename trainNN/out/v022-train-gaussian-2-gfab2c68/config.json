@@ -1,0 +1,179 @@
+{
+	"train_config": {
+		"output_dim": 1,
+		"num_labels": 2,
+		"input_dim": 162,
+		"files": {
+			"train": "train.npz",
+			"test": "test.npz",
+			"validate": "validate.npz"
+		}
+	},
+	"paths": {
+		"backchannels": "data/backchannels-top200.txt",
+		"databasePrefix": "data/db/all240302",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"adc": "data/adc",
+		"conversations": {
+			"train": "data/conversations.train",
+			"test": "data/conversations.test",
+			"validate": "data/conversations.valid"
+		}
+	},
+	"extract_config": {
+		"outputDirectory": "extract_pfiles_python/out",
+		"useOriginalDB": true,
+		"context": 40,
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"sample_window_ms": 32
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 201.05286956578493
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 200.93874414265156
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 200.94481345266104
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 200.95455485582352
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 200.97275841236115
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 200.94045413285494
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 200.94391714036465
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 200.95799292623997
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 200.92951995879412
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 200.960682451725
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 200.936613753438
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 200.94176472723484
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 200.9804689064622
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 200.94277950376272
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 200.94024676829576
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 200.92984367907047
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 200.92508395761251
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 200.94175653904676
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 200.93216817080975
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 200.93234805762768
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 200.93045353889465
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 200.9355555549264
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 200.94246731698513
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 200.94233898818493
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 200.92896906286478
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 200.94492119550705
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 200.93023718893528
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 200.92989521473646
+			},
+			"28": {
+				"weights": "epoch-028.pkl",
+				"validation_error": 200.94677948206663
+			},
+			"29": {
+				"weights": "epoch-029.pkl",
+				"validation_error": 200.9403108805418
+			},
+			"30": {
+				"weights": "epoch-030.pkl",
+				"validation_error": 200.9332931265235
+			},
+			"31": {
+				"weights": "epoch-031.pkl",
+				"validation_error": 200.93316381424665
+			},
+			"32": {
+				"weights": "epoch-032.pkl",
+				"validation_error": 200.93390687555075
+			},
+			"33": {
+				"weights": "epoch-033.pkl",
+				"validation_error": 200.9332660883665
+			},
+			"34": {
+				"weights": "epoch-034.pkl",
+				"validation_error": 200.9351401552558
+			}
+		},
+		"model": "network_model.py",
+		"source": "extract_pfiles_python/out/v021-extract-gaussian-context40/config.json"
+	}
+}
