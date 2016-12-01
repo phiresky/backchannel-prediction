@@ -153,9 +153,12 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     @action remove(i: number) {
         this.props.uiState.features.splice(i, 1);
         if(this.props.uiState.features.length === 0) {
-            const uis = this.props.gui.uis;
-            uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
+            this.removeSelf();
         }
+    }
+    @autobind @action removeSelf() {
+        const uis = this.props.gui.uis;
+        uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
     }
     @action async add(feat: string) {
         this.addPopover.setState({isOpen: false});
@@ -213,6 +216,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                     )}
                 </div>
                 <div style={{position:"absolute", bottom:0, left:0, margin:"5px"}}>
+                    <button onClick={this.removeSelf}>Remove</button>
                     <B.Popover content={features ? <CategoryTree gui={gui} features={features} onClick={e => this.add(e)} />: "not loaded" }
                             interactionKind={B.PopoverInteractionKind.CLICK}
                             position={B.Position.RIGHT}
@@ -557,8 +561,7 @@ export class GUI extends React.Component<{}, {}> {
         }
         const obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
         if(this.conversation !== obj.conversation) {
-            this.stateAfterLoading = obj;
-            this.loadConversation(obj.conversation);
+            this.loadConversation(obj.conversation, obj);
         } else {
             Object.assign(this, obj);
         }
@@ -574,7 +577,7 @@ export class GUI extends React.Component<{}, {}> {
         return this.widthCalcDiv ? this.widthCalcDiv.clientWidth : 100;
     }
     @action
-    async loadConversation(conversation: string) {
+    async loadConversation(conversation: string, targetState?: GUI) {
         const convID = await this.verifyConversationID(conversation);
         runInAction("resetUIs", () => {
             this.uis = [];
@@ -585,9 +588,10 @@ export class GUI extends React.Component<{}, {}> {
             this.loadingState = 0;
         });
         const features = await this.socketManager.getFeatures(convID).promise;
-        const total = features.defaults.reduce((sum, next) => sum + next.length, 0);
+        const targetFeatures = targetState?targetState.uis.map(ui => ui.features.map(ui => ui.feature as any as s.FeatureID)):features.defaults;
+        const total = targetFeatures.reduce((sum, next) => sum + next.length, 0);
         let i = 0;
-        for(const featureIDs of features.defaults) {
+        for(const featureIDs of targetFeatures) {
             const feats = [] as Feature[];
             const ui = this.getDefaultUIState([]);
             runInAction("addDefaultUI", () => {
@@ -600,8 +604,8 @@ export class GUI extends React.Component<{}, {}> {
                     this.loadingState = ++i / total;
                 });
             }
-            
         }
+        if(targetState) runInAction("applySerializedState", () => Object.assign(this, targetState));
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
         const convos = await this.socketManager.getConversations().promise;
@@ -683,7 +687,13 @@ export class GUI extends React.Component<{}, {}> {
     getFeature(id: string|s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
         if(f.data) this.checkTotalTime(f.data);
-        else f.promise.then(f => this.checkTotalTime(f));
+        else {
+            runInAction("loadSingleFeature", () => this.loadingState = 0);
+            f.promise.then(f => {
+                runInAction("singleFeatureLoadComplete", () => this.loadingState = 1);
+                this.checkTotalTime(f)
+            });
+        }
         return f;
     }
     getFeatures() {
