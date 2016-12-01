@@ -67,8 +67,8 @@ def train():
         scheduling_params=(0.8, 0.000001),
         update_method="adam",
         # learning_rate=0.01,
-        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data[:, :input_dim], train_data[:, input_dim].astype("int32")),
-        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")),
+        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data[:, :input_dim], train_data[:, input_dim]/1.33),
+        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data[:, :input_dim], validate_data[:, input_dim]/1.33),
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")

@@ -17,7 +17,7 @@ def create_network(config, BATCH_SIZE):
                                 # W=lasagne.init.Constant(0)
                                 )
     output_layer = DenseLayer(hidden_layer_2,
-                              num_units=num_labels,
-                              nonlinearity=lasagne.nonlinearities.softmax
+                              num_units=1,
+                              nonlinearity=lasagne.nonlinearities.sigmoid
                               )
     return locals()
