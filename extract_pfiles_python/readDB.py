@@ -249,7 +249,7 @@ def load_backchannels(path):
 def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     convID = uttInfo['convid']
     (conv, back_channel) = convID.split("-")
-    radius_sec = 0.5
+    radius_sec = 1
     peak = reader.getBCMaxTime(utt)
     features = reader.eval_range(0, MAX_TIME, conv)
 
