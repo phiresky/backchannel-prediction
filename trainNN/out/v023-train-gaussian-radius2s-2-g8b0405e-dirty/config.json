@@ -1,0 +1,151 @@
+{
+	"train_config": {
+		"num_labels": 2,
+		"files": {
+			"validate": "validate.npz",
+			"test": "test.npz",
+			"train": "train.npz"
+		},
+		"input_dim": 162,
+		"output_dim": 1
+	},
+	"train_output": {
+		"model": "network_model.py",
+		"source": "extract_pfiles_python/out/v023-train-gaussian-radius2s-context40/config.json",
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.13780130174047261
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.13781923723195955
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.1378249249450852
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.1378211303198288
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.13783132894811775
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.13780774170110555
+			},
+			"6": {
+				"weights": "epoch-006.pkl",
+				"validation_error": 0.1378399213949563
+			},
+			"7": {
+				"weights": "epoch-007.pkl",
+				"validation_error": 0.13781291781529598
+			},
+			"8": {
+				"weights": "epoch-008.pkl",
+				"validation_error": 0.13780362852881448
+			},
+			"9": {
+				"weights": "epoch-009.pkl",
+				"validation_error": 0.13781808648305077
+			},
+			"10": {
+				"weights": "epoch-010.pkl",
+				"validation_error": 0.13780014984962505
+			},
+			"11": {
+				"weights": "epoch-011.pkl",
+				"validation_error": 0.13779972853224534
+			},
+			"12": {
+				"weights": "epoch-012.pkl",
+				"validation_error": 0.13780484303355384
+			},
+			"13": {
+				"weights": "epoch-013.pkl",
+				"validation_error": 0.13780371166444455
+			},
+			"14": {
+				"weights": "epoch-014.pkl",
+				"validation_error": 0.13780268750701394
+			},
+			"15": {
+				"weights": "epoch-015.pkl",
+				"validation_error": 0.137799234756674
+			},
+			"16": {
+				"weights": "epoch-016.pkl",
+				"validation_error": 0.13780470806302214
+			},
+			"17": {
+				"weights": "epoch-017.pkl",
+				"validation_error": 0.13779793002426374
+			},
+			"18": {
+				"weights": "epoch-018.pkl",
+				"validation_error": 0.13780301667138498
+			},
+			"19": {
+				"weights": "epoch-019.pkl",
+				"validation_error": 0.13779976601933902
+			},
+			"20": {
+				"weights": "epoch-020.pkl",
+				"validation_error": 0.13779944687957393
+			},
+			"21": {
+				"weights": "epoch-021.pkl",
+				"validation_error": 0.1377997147896028
+			},
+			"22": {
+				"weights": "epoch-022.pkl",
+				"validation_error": 0.13780071484611495
+			},
+			"23": {
+				"weights": "epoch-023.pkl",
+				"validation_error": 0.13779972916020802
+			},
+			"24": {
+				"weights": "epoch-024.pkl",
+				"validation_error": 0.13779907972656802
+			},
+			"25": {
+				"weights": "epoch-025.pkl",
+				"validation_error": 0.13780100376906082
+			},
+			"26": {
+				"weights": "epoch-026.pkl",
+				"validation_error": 0.13779759900294689
+			},
+			"27": {
+				"weights": "epoch-027.pkl",
+				"validation_error": 0.1377989515185522
+			}
+		}
+	},
+	"paths": {
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"test": "data/conversations.test",
+			"train": "data/conversations.train"
+		},
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"backchannels": "data/backchannels-top200.txt"
+	},
+	"extract_config": {
+		"useOriginalDB": true,
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"context": 40,
+		"outputDirectory": "extract_pfiles_python/out",
+		"sample_window_ms": 32
+	}
+}
