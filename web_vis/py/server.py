@@ -14,7 +14,11 @@ import os.path
 from time import perf_counter
 
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
-    return NumFeature(net(input)[:, [1]])
+    output = net(input)
+    if output.shape[1] == 1:
+        return NumFeature(output)
+    else:
+        return NumFeature(output[:, [1]])
 
 
 def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
@@ -68,6 +72,9 @@ def findAllNets():
 config = readDB.load_config(sys.argv[1])
 
 origReader = readDB.DBReader(config)
+config['extract_config']['useWordsTranscript'] = True
+wordsReader = readDB.DBReader(config)
+config['extract_config']['useWordsTranscript'] = False
 config['extract_config']['useOriginalDB'] = False
 islReader = readDB.DBReader(config)
 conversations = sorted({spk.split("-")[0] for spk in origReader.spkDB if spk[0:2] == "sw"})
@@ -107,7 +114,7 @@ def getFeatures(conv: str):
     return [
         dict(name="input", children=["adca", "adcb",
                                      dict(name="ISL transcript", children="texta,bca,textb,bcb".split(",")),
-                                     dict(name="Original transcript", children="texta,bca,textb,bcb".split(","))
+                                     dict(name="Original transcript", children="texta,wordsa,bca,textb,wordsb,bcb".split(","))
                                      ]),
         dict(name="extracted", children="pitcha,powera,pitchb,powerb,feata,featb,gaussbca,gaussbcb".split(",")),
         dict(name="NN outputs A", children=netsTree),
@@ -143,6 +150,10 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
             await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-A", feat))
         elif feat == "textb":
             await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-B", feat))
+        elif feat == "wordsa":
+            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-A", feat))
+        elif feat == "wordsb":
+            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-B", feat))
     elif tuple(parts[1:]) in netsDict:
         feat = parts[1:]
         channel = parts[0][-1].lower()

@@ -143,7 +143,7 @@ class DBReader:
     def getBCMaxTime(self, utt: str, power: NumFeature = None):
         if power is None:
             (conv, speaker) = self.uttDB[utt]['convid'].split("-")
-            power = self.eval_range(0, MAX_TIME, conv)['power'+speaker.lower()]
+            power = self.eval_range(0, MAX_TIME, conv)['power' + speaker.lower()]
 
         @functools.lru_cache(maxsize=16)
         def inner(utt: str):
@@ -180,8 +180,8 @@ class DBReader:
         return peak_time + self.NBCbegin, peak_time + self.NBCend
 
     def load_db(self) -> (DBase, DBase):
-        if self.config['extract_config']['useOriginalDB']:
-            uttDB = FakeUttDB(self.paths_config)
+        if self.extract_config['useOriginalDB']:
+            uttDB = FakeUttDB(self.paths_config, self.extract_config['useWordsTranscript'])
             self.noise_filter = orig_noise_filter
             self.spkDB = uttDB.makeSpkDB()
             self.uttDB = uttDB
@@ -258,7 +258,7 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     input = features["feat" + speaking_channel.lower()]
     (frameN, coeffN) = input.shape
 
-    output = features["gaussbc"+back_channel.lower()]
+    output = features["gaussbc" + back_channel.lower()]
 
     if coeffN != input_dim:
         raise Exception("coeff and dim don't match")
@@ -267,6 +267,7 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     right_bound = reader.time_to_sample_index(input, peak + radius_sec)
 
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
+
 
 def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
     convID = uttInfo['convid']
@@ -313,6 +314,7 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
         yield np.append(F[frameX], [1], axis=0)
         frameCount += 1
 
+
 def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
@@ -350,10 +352,11 @@ def load_feature_extractor(config):
 
 
 class FakeUttDB:
-    def __init__(self, paths_config):
+    def __init__(self, paths_config, single_words=False):
         self.root = paths_config['originalSwbTranscriptions']
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
         self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
+        self.single_words = single_words
 
     def makeSpkDB(self):
         class FakeSpkDB():
@@ -371,9 +374,20 @@ class FakeUttDB:
     def load_utterances(self, track: str, speaker: str):
         utts = OrderedDict()
         convid = 'sw{}-{}'.format(track, speaker)
-        with open(os.path.join(self.root, track[:2], track, "sw{}{}-ms98-a-trans.text".format(track, speaker))) as file:
+        type = "word" if self.single_words else "trans"
+        id_counter = 0
+        last_id = None
+        with open(os.path.join(self.root, track[:2], track,
+                               "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
                 id, _from, to, text = line.split(" ", 3)
+                if self.single_words:
+                    if id == last_id:
+                        id_counter += 1
+                    else:
+                        id_counter = 0
+                    last_id = id
+                    id += '-{}'.format(id_counter)
                 utts[id] = {
                     'from': _from, 'to': to, 'text': text.strip(), 'convid': convid
                 }

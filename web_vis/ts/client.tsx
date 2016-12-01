@@ -513,7 +513,7 @@ export class GUI extends React.Component<{}, {}> {
     
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
-    @observable followPlayback = true;
+    @observable followPlayback = false;
 
     @observable conversation: s.ConversationID;
     @observable uis = [] as UIState[];
