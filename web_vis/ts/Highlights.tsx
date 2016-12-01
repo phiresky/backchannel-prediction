@@ -35,6 +35,12 @@ export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiState: c.U
         };
         window.addEventListener("mouseup", removeListener);
     }
+    private keys = new WeakMap<c.SingleUIState, number>();
+    /*private uuid = 10;
+    private getKey(ui: c.SingleUIState) {
+        if(!this.keys.has(ui)) this.keys.set(ui, this.uuid++);
+        return this.keys.get(ui);
+    }*/
     render() {
         const ui = this.props.uiState;
         const gui = this.props.gui;
@@ -43,13 +49,13 @@ export class OverlayVisualizer extends React.Component<{gui: c.GUI, uiState: c.U
             const feature = gui.getFeature(state.feature).data;
             return (
                 <div style={{position:"absolute", top:0, left:0, width: "100%", height:"100%"}}>
-                    {feature && <c.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={mobx.action((d:c.ChosenVisualizer) => self.visses[i] = d && d.preferredHeight)} />}
+                    {feature && <c.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={mobx.action("setChosenVis", (d:c.ChosenVisualizer) => self.visses[i] = d && d.preferredHeight)} />}
                 </div>
             );
         });
         return (
             <div style={{position: "relative", height: this.height, minHeight: "20px", width: "100%"}}>
-                {ui.features.map((state, i) => <SingleOverlay key={i} state={state} i={i} />)}
+                {ui.features.map((state, i) => <SingleOverlay key={state.uuid} state={state} i={i} />)}
                 <div onMouseDown={this.mouseDown} style={{position:"absolute", height: "10px", bottom:"-5px", width:"100%", cursor:"ns-resize"}}></div>
             </div>
         )

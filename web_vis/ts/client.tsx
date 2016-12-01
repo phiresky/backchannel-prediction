@@ -71,6 +71,7 @@ export type Utterance = {from: number | string, to: number | string, text?: stri
 export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
 
 export interface SingleUIState {
+    uuid: number;
     visualizer: VisualizerChoice;
     feature: string;
     config: VisualizerConfig;
@@ -150,7 +151,8 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise)
         runInAction("changeFeature"+i, () => this.props.uiState.features[i] = state);
     }
-    @action remove(i: number) {
+    @action remove(uuid: number) {
+        const i = this.props.uiState.features.findIndex(ui => ui.uuid === uuid);
         this.props.uiState.features.splice(i, 1);
         if(this.props.uiState.features.length === 0) {
             this.removeSelf();
@@ -196,10 +198,10 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         return (
             <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
                 <div style={{position: "absolute", top:0, left:0, paddingLeft:"5px", paddingTop:"5px"}}>
-                    {uiState.features.map((info, i) => 
-                        <B.Popover key={i} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
+                    {uiState.features.map(info => 
+                        <B.Popover key={info.uuid} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
                             content={<div>
-                                    <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(i)}>Remove</button></label>
+                                    <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(info.uuid)}>Remove</button></label>
                                     {info.currentRange&&
                                         <label className="pt-label pt-inline">Range
                                             <div className="pt-select">
@@ -451,7 +453,7 @@ export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
 @observer
 export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{}> {
     @observable
-    preferredHeight: number;
+    preferredHeight: number = 50;
     static visualizers:{[name: string]: VisualizerConstructor<any>} = {
         "Waveform": Waveform.AudioWaveform,
         "Darkness": Waveform.Darkness,
@@ -460,7 +462,7 @@ export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{
     }
     render() {
         const Visualizer = ChosenVisualizer.visualizers[this.props.uiState.visualizer];
-        return <Visualizer {...this.props} ref={action((e: Visualizer<any>) => this.preferredHeight = e?e.preferredHeight:0)} />;
+        return <Visualizer {...this.props} />;//ref={action("setPreferredHeight", (e: Visualizer<any>) => this.preferredHeight = e?e.preferredHeight:0)} />;
     }
 }
 
@@ -500,7 +502,9 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     }
 }
 
-const badExamples: {[name: string]: string} = {
+const examples: {[name: string]: string} = {
+    "word alignment": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjIDYAmAZgFZaAORgRgE4AWdsgdhZCANCABm6CBHQB3VNHhJkpMVAiYApqMREAbhoBOmKPiKkQmGawEhRAV2yZSAbVB2HAE1JlRYjSbsDDScSV3F-XECNcwB6bEIwO1wYqA9EKFsQXUc7NWwAL0NzAHUofQkDAFtMnUIxbABzcwbsfUIAJShCBujtQKDCXE7u6JJQSvjSAFp6Wn5qFlFKqAAPUln5lgBfLeFQPwCg2PjE5IB5A0b4tQACABUDLsxES7BkuHTM7MxciAKikggAASjQAFn8GqDcE5tER6k1AYR0FU8oUADLodIQGr9DSDYY9UiEOxSLYAXVEoI0YNw5igSXQIF2bk8pHYvgiURCYQOkSOgLiCSSMQuV0ItweTxe2DeMVwGhWuAyom+v3+BnMdwVtNhdUa5iRKL+6MxahxBgGQy6hJIxNJFJAVJppG4-GZIHc2C8JE4HMOwRc+05-JAgtOIsuLXFEBuuEehGer2SMmRHmMXxyqIBIC1ipqcP1iORy2NGgxWPNloJoztEHJlOpkNpJEY3Hdnu93D9fIDoSD-uOQuSqUQcAzPyzGsBpXKxfzeoRIBabWrlbxVpGpHGkxIMzmCyWq3W++27t5UUH4dFUYl8cTMveo-HasKU+BYIhUJhIFq8INxazcszT6C111XW0STrB0nSbOkGSZPYPVZFtuy5QNwgHAUTmFa9rhjSUE2lWV5UVMcVUzUs31zHUfwLRdDRLf4gOxECq2tGtIPrR1GyhODcEZdtkL4VCgm5fse0vHDIzw2M7yI5NU0wMisgo9VNW1ec-yLI0mNNFif1xfF2KJTjoJ45sQHpfimQdfJ0HQaoxhACANDEZtKDIVt6BoFh2EYThBH4fhuFoX0QEjXjyAodgmH87h6HoXygsSkLGF2EB+KVCA7mwSoNAAZQ0Wo01IagyEoGLGHofg0qAA",
+
 }
 let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
     if(gui.loadingState !== 1) return <span/>;
@@ -605,7 +609,10 @@ export class GUI extends React.Component<{}, {}> {
                 });
             }
         }
-        if(targetState) runInAction("applySerializedState", () => Object.assign(this, targetState));
+        if(targetState) {
+            targetState.uis.forEach(ui => {ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++)});
+            runInAction("applySerializedState", () => Object.assign(this, targetState));
+        }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
         const convos = await this.socketManager.getConversations().promise;
@@ -632,6 +639,7 @@ export class GUI extends React.Component<{}, {}> {
         } else visualizerConfig = "normalizeLocal";
         return {
             feature: feature.name,
+            uuid: uuid++,
             visualizer: getVisualizerChoices(feature)[0],
             config: visualizerConfig,
             currentRange: asStructure(null),
@@ -688,9 +696,9 @@ export class GUI extends React.Component<{}, {}> {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
         if(f.data) this.checkTotalTime(f.data);
         else {
-            runInAction("loadSingleFeature", () => this.loadingState = 0);
+            //runInAction("loadSingleFeature", () => this.loadingState = 0);
             f.promise.then(f => {
-                runInAction("singleFeatureLoadComplete", () => this.loadingState = 1);
+                //runInAction("singleFeatureLoadComplete", () => this.loadingState = 1);
                 this.checkTotalTime(f)
             });
         }
@@ -733,8 +741,8 @@ export class GUI extends React.Component<{}, {}> {
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
-                    {Object.keys(badExamples).length > 0 && <span>Examples: {Object.keys(badExamples).map(txt => <a key={txt} href={badExamples[txt]}
-                        onClick={e => {this.deserialize(badExamples[txt].substr(1))}}>{txt}</a>)}</span>}
+                    {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(txt => <a key={txt} href={examples[txt]}
+                        onClick={e => {this.deserialize(examples[txt].substr(1))}}>{txt}</a>)}</span>}
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>
