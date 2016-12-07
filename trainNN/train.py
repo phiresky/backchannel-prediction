@@ -61,14 +61,23 @@ def train():
     input_dim = train_config['input_dim']
     train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
     validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
+    gaussian = False
+    if gaussian:
+        train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim] / 1.33
+        validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim] / 1.33
+    else:
+        train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim].astype("int32")
+        validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")
+
     stats = train_func.train_network(
         network=model['output_layer'],
         scheduling_method=None,
-        scheduling_params=(0.8, 0.000001),
+        # scheduling_params=(0.8, 0.000001),
         update_method="sgd",
         learning_rate_num=1,
-        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data[:, :input_dim], train_data[:, input_dim]/1.33),
-        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data[:, :input_dim], validate_data[:, input_dim]/1.33),
+        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_inputs, train_outputs),
+        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_inputs, validate_outputs),
+        categorical_output=not gaussian,
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")
