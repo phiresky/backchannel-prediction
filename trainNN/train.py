@@ -63,10 +63,10 @@ def train():
     validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
     stats = train_func.train_network(
         network=model['output_layer'],
-        scheduling_method="fuzzy_newbob",
+        scheduling_method=None,
         scheduling_params=(0.8, 0.000001),
-        update_method="adam",
-        # learning_rate=0.01,
+        update_method="sgd",
+        learning_rate_num=1,
         iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_data[:, :input_dim], train_data[:, input_dim]/1.33),
         iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_data[:, :input_dim], validate_data[:, input_dim]/1.33),
         output_prefix=os.path.join(out_dir, "epoch")
