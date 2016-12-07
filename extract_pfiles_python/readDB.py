@@ -332,7 +332,7 @@ def parseConversations(speaker: str, reader: DBReader):
         if not reader.is_backchannel(uttInfo, index, utts):
             continue
 
-        yield from outputBackchannelGauss(reader, utt, uttInfo)
+        yield from outputBackchannelDiscrete(reader, utt, uttInfo)
 
         counter += 1
         if counter % 100 == 0:
@@ -393,7 +393,7 @@ class FakeUttDB:
         with open(os.path.join(self.root, track[:2], track,
                                "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
-                id, _from, to, text = line.split(" ", 3)
+                id, _from, to, text = re.split(" +", line, maxsplit=3)
                 if self.single_words:
                     if id == last_id:
                         id_counter += 1
