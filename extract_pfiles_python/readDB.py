@@ -86,12 +86,12 @@ def fromiter(iterator, dtype, shape):
 class DBReader:
     backchannels = None
 
-    # BC prediction area relative to BC power peak
-    BCcenter = -0.55
+    # BC prediction area relative to BC start
+    BCcenter = -0.4
     BCbegin = BCcenter - 0.2
     BCend = BCcenter + 0.2
 
-    # Non BC prediction area relative to BC power peak
+    # Non BC prediction area relative to BC start
     NBCbegin = -2.3
     NBCend = -1.9
 
@@ -104,6 +104,7 @@ class DBReader:
         self.extract_config = self.config['extract_config']
         self.paths_config = self.config['paths']
         self.context = self.extract_config['context']
+        self.use_original_db = self.extract_config['useOriginalDB']
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.feature_extractor = load_feature_extractor(config)
@@ -140,6 +141,15 @@ class DBReader:
             raise Exception("only for extracted features")
         return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
 
+    def getBcRealStartTime(self, utt: str):
+        if self.use_original_db:
+            for word in self.uttDB.get_words_for_utterance(self.uttDB[utt]):
+                text = self.noise_filter(word['text'])
+                if len(text) > 0:
+                    return float(word['from'])
+        else:
+            return self.getBCMaxTime(utt) - 0.3
+
     def getBCMaxTime(self, utt: str, power: NumFeature = None):
         if power is None:
             (conv, speaker) = self.uttDB[utt]['convid'].split("-")
@@ -172,15 +182,15 @@ class DBReader:
             return {k: v[str(from_time) + "s":str(to_time) + "s"] for k, v in feats.items()}
 
     def getBackchannelTrainingRange(self, utt: str):
-        peak_time = self.getBCMaxTime(utt)
-        return peak_time + self.BCbegin, peak_time + self.BCend
+        bc_start_time = self.getBcRealStartTime(utt)
+        return bc_start_time + self.BCbegin, bc_start_time + self.BCend
 
     def getNonBackchannelTrainingRange(self, utt: str):
-        peak_time = self.getBCMaxTime(utt)
-        return peak_time + self.NBCbegin, peak_time + self.NBCend
+        bc_start_time = self.getBcRealStartTime(utt)
+        return bc_start_time + self.NBCbegin, bc_start_time + self.NBCend
 
     def load_db(self) -> (DBase, DBase):
-        if self.extract_config['useOriginalDB']:
+        if self.use_original_db:
             uttDB = FakeUttDB(self.paths_config, self.extract_config['useWordsTranscript'])
             self.noise_filter = orig_noise_filter
             self.spkDB = uttDB.makeSpkDB()
@@ -352,7 +362,9 @@ def load_feature_extractor(config):
 
 
 class FakeUttDB:
+    alignment_db = None
     def __init__(self, paths_config, single_words=False):
+        self.paths_config = paths_config
         self.root = paths_config['originalSwbTranscriptions']
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
         self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
@@ -370,7 +382,7 @@ class FakeUttDB:
 
         return FakeSpkDB()
 
-    @functools.lru_cache(maxsize=5)
+    @functools.lru_cache(maxsize=10)
     def load_utterances(self, track: str, speaker: str):
         utts = OrderedDict()
         convid = 'sw{}-{}'.format(track, speaker)
@@ -398,6 +410,17 @@ class FakeUttDB:
 
     def get_utterances(self, id: str):
         return self.load_utterances(id[2:6], id[-1]).items()
+
+    def get_words_for_utterance(self, utt: DBEntry) -> List[DBEntry]:
+        if self.single_words:
+            raise Exception("run this on the utts instance")
+        if not self.alignment_db:
+            self.alignment_db = FakeUttDB(self.paths_config, True)
+        fromTime = float(utt['from'])
+        toTime = float(utt['to'])
+        words = self.alignment_db.get_utterances(utt['convid'])
+        return [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
+
 
     def __getitem__(self, id):
         track, speaker, uttid = self.extractname.fullmatch(id).groups()
