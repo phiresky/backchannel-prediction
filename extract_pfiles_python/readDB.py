@@ -20,6 +20,7 @@ from collections import OrderedDict
 import os.path
 import re
 import functools
+from .features import Features
 
 MAX_TIME = 100 * 60 * 60  # 100 hours
 # these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
@@ -105,9 +106,9 @@ class DBReader:
         self.paths_config = self.config['paths']
         self.context = self.extract_config['context']
         self.use_original_db = self.extract_config['useOriginalDB']
+        self.features = Features(config)
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
-        self.feature_extractor = load_feature_extractor(config)
         self.sample_window_ms = self.extract_config['sample_window_ms']
 
     def __enter__(self):
@@ -131,15 +132,8 @@ class DBReader:
                 len(lastUttText) == 0
                 )
 
-    def sample_index_to_time(self, feat: NumFeature, sample_index):
-        if feat.typ != jrtk.features.FeatureType.FMatrix:
-            raise Exception("only for extracted features")
-        return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
-
-    def time_to_sample_index(self, feat: NumFeature, time_sec):
-        if feat.typ != jrtk.features.FeatureType.FMatrix:
-            raise Exception("only for extracted features")
-        return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
+    def get_gauss_bc_feature(self, convid: str):
+        return self.get_gauss_bcs(self.features.get_power(convid), convid)
 
     def getBcRealStartTime(self, utt: str):
         if self.use_original_db:
@@ -150,36 +144,16 @@ class DBReader:
         else:
             return self.getBCMaxTime(utt) - 0.3
 
-    def getBCMaxTime(self, utt: str, power: NumFeature = None):
-        if power is None:
-            (conv, speaker) = self.uttDB[utt]['convid'].split("-")
-            power = self.eval_range(0, MAX_TIME, conv)['power' + speaker.lower()]
-
-        @functools.lru_cache(maxsize=16)
-        def inner(utt: str):
-            uttInfo = self.uttDB[utt]
-            uttFrom = float(uttInfo['from'])
-            uttTo = float(uttInfo['to'])
-
-            powerrange = power[self.time_to_sample_index(power, uttFrom):self.time_to_sample_index(power, uttTo)]
-            maxIndex = powerrange.argmax()
-            maxTime = uttFrom + self.sample_index_to_time(powerrange, maxIndex)
-            return maxTime
-
-        return inner(utt)
-
     @functools.lru_cache(maxsize=16)
-    def eval_range(self, from_time: float, to_time: float, conv: str) -> Dict[str, NumFeature]:
-        if from_time == 0 and to_time == MAX_TIME:
-            feats = self.feature_extractor.eval(None, {'from': from_time, 'to': to_time, 'conv': conv})
-            return {
-                **feats,
-                'gaussbca': self.get_gauss_bcs(feats['powera'], conv + "-A"),
-                'gaussbcb': self.get_gauss_bcs(feats['powerb'], conv + "-B")
-            }
-        else:
-            feats = self.eval_range(0, MAX_TIME, conv)
-            return {k: v[str(from_time) + "s":str(to_time) + "s"] for k, v in feats.items()}
+    def getBCMaxTime(self, utt: str):
+        uttInfo = self.uttDB[utt]
+        uttFrom = float(uttInfo['from'])
+        uttTo = float(uttInfo['to'])
+
+        powerrange = self.features.cut_range(self.features.get_power(uttInfo['convid']), uttFrom, uttTo)
+        maxIndex = powerrange.argmax()
+        maxTime = uttFrom + self.features.sample_index_to_time(powerrange, maxIndex)
+        return maxTime
 
     def getBackchannelTrainingRange(self, utt: str):
         bc_start_time = self.getBcRealStartTime(utt)
@@ -227,7 +201,7 @@ class DBReader:
         for bc, _ in self.get_backchannels(list(self.get_utterances(spkr))):
             offset, gauss = self.get_gauss_bc_array(power_feature, bc)
             gauss = gauss.reshape((gauss.shape[0], 1))
-            start = self.time_to_sample_index(feat, offset)
+            start = self.features.time_to_sample_index(feat, offset)
             if start < 0:
                 gauss = gauss[0 - start:]
                 start = 0
@@ -256,33 +230,35 @@ def load_backchannels(path):
     return backchannels_hardcoded | bcs
 
 
+def swap_speaker(convid: str):
+    (conv, speaker) = convid.split("-")
+    other_channel = dict(A="B", B="A")[speaker]
+    return conv + "-" + other_channel
+
+
 def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
-    convID = uttInfo['convid']
-    (conv, back_channel) = convID.split("-")
+    back_channel_convid = uttInfo['convid']
+    speaking_channel_convid = swap_speaker(back_channel_convid)
     radius_sec = 1
     peak = reader.getBCMaxTime(utt)
-    features = reader.eval_range(0, MAX_TIME, conv)
 
-    speaking_channel = dict(A="B", B="A")[back_channel]
-
-    input = features["feat" + speaking_channel.lower()]
+    input = reader.features.get_combined_feat(speaking_channel_convid)
     (frameN, coeffN) = input.shape
 
-    output = features["gaussbc" + back_channel.lower()]
+    output = reader.get_gauss_bc_feature(back_channel_convid)
 
     if coeffN != input_dim:
         raise Exception("coeff and dim don't match")
 
-    left_bound = reader.time_to_sample_index(input, peak - radius_sec)
-    right_bound = reader.time_to_sample_index(input, peak + radius_sec)
+    left_bound = reader.features.time_to_sample_index(input, peak - radius_sec)
+    right_bound = reader.features.time_to_sample_index(input, peak + radius_sec)
 
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
 
 
 def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
-    convID = uttInfo['convid']
-    (audiofile, channel) = convID.split("-")
-    # print('has backchannel: ' + uttInfo['text'])
+    back_channel_convid = uttInfo['convid']
+    speaking_channel_convid = swap_speaker(back_channel_convid)
     cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
     cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
 
@@ -294,10 +270,8 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
                                                                               toTime))
         return
 
-    BCchannel = dict(A="B", B="A")[channel]
-
-    features = reader.eval_range(fromTime, toTime, audiofile)
-    F = features["feat" + BCchannel.lower()]
+    F = reader.features.get_combined_feat(speaking_channel_convid)
+    F = reader.features.cut_range(F, fromTime, toTime)
     (frameN, coeffN) = F.shape
 
     if coeffN != input_dim:
@@ -307,7 +281,7 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
     deltaFrames = abs(expectedNumOfFrames - frameN)
     # logging.debug("deltaFrames %d", deltaFrames)
     if deltaFrames > 10:
-        logging.warning("Frame deviation too big!")
+        logging.warning("Frame deviation too big! expected {}, got {}".format(expectedNumOfFrames, frameN))
         return
 
     NBCframeStart = int((cNBCbegin - fromTime) * 100)
@@ -354,13 +328,6 @@ def load_config(path):
         return json.load(config_file, object_pairs_hook=OrderedDict)
 
 
-def load_feature_extractor(config):
-    featureSet = jrtk.preprocessing.FeatureExtractor(config=config)
-    for step in config['extract_config']['featureExtractionSteps']:
-        featureSet.appendStep(step)
-    return featureSet
-
-
 class FakeUttDB:
     alignment_db = None
 
@@ -393,7 +360,7 @@ class FakeUttDB:
         with open(os.path.join(self.root, track[:2], track,
                                "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
-                id, _from, to, text = re.split(" +", line, maxsplit=3)
+                id, _from, to, text = re.split("\s+", line, maxsplit=3)
                 if self.single_words:
                     if id == last_id:
                         id_counter += 1

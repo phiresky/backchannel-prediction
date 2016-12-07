@@ -13,6 +13,7 @@ import math
 import os.path
 from time import perf_counter
 
+
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
     output = net(input)
     if output.shape[1] == 1:
@@ -110,15 +111,27 @@ async def sendOtherFeature(ws, id, feat):
     }))
 
 
-def getFeatures(conv: str):
+def get_extracted_features(reader: readDB.DBReader):
+    return OrderedDict([
+        ("adc", reader.features.get_adc),
+        ("power", reader.features.get_power),
+        ("pitch", reader.features.get_pitch),
+        ("gaussbc", reader.get_gauss_bc_feature),
+        ("combined_feat", reader.features.get_combined_feat)
+    ])
+
+
+def get_features():
+    feature_names = list(get_extracted_features(origReader))
+    features = [
+        dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
+                                     dict(name="Original", children="text,words,bc".split(","))]),
+        dict(name="extracted", children=feature_names),
+        dict(name="NN outputs", children=netsTree),
+    ]
     return [
-        dict(name="input", children=["adca", "adcb",
-                                     dict(name="ISL transcript", children="texta,bca,textb,bcb".split(",")),
-                                     dict(name="Original transcript", children="texta,wordsa,bca,textb,wordsb,bcb".split(","))
-                                     ]),
-        dict(name="extracted", children="pitcha,powera,pitchb,powerb,feata,featb,gaussbca,gaussbcb".split(",")),
-        dict(name="NN outputs A", children=netsTree),
-        dict(name="NN outputs B", children=netsTree),
+        dict(name="A", children=features),
+        dict(name="B", children=features)
     ]
 
 
@@ -134,38 +147,31 @@ def getExtractedFeature(conv: str, feat: str):
 async def sendFeature(ws, id: str, conv: str, featFull: str):
     if featFull[0] != '/':
         raise Exception("featname must start with /")
-    parts = featFull.split("/")[1:]
-    if parts[0] == "input":
-        if parts[1] in ("adca", "adcb"):
-            return await sendNumFeature(ws, id, conv, featFull, getExtractedFeature(conv, parts[1]))
-        reader = islReader if parts[1] == "ISL transcript" else origReader
-        feat = parts[2]
-        if feat == "bca":
+    channel, category, *path = featFull.split("/")[1:]
+    if category == "transcript":
+        readerType, featname = path
+        reader = islReader if readerType == "ISL" else origReader
+        if featname == "bc":
             await sendOtherFeature(ws, id,
-                                   {"typ": "highlights", "data": getHighlights(reader, conv, "A")})
-        elif feat == "bcb":
-            await sendOtherFeature(ws, id,
-                                   {"typ": "highlights", "data": getHighlights(reader, conv, "B")})
-        elif feat == "texta":
-            await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-A", feat))
-        elif feat == "textb":
-            await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-B", feat))
-        elif feat == "wordsa":
-            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-A", feat))
-        elif feat == "wordsb":
-            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-B", feat))
-    elif tuple(parts[1:]) in netsDict:
-        feat = parts[1:]
-        channel = parts[0][-1].lower()
-        config_path, wid = netsDict[tuple(feat)]
+                                   {"typ": "highlights", "data": getHighlights(reader, conv, channel)})
+        elif featname == "text":
+            await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-" + channel, featFull))
+        elif featname == "words":
+            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-" + channel, featFull))
+    elif category == "NN outputs":
+        config_path, wid = netsDict[tuple(path)]
         net = get_network_outputter(config_path, wid)
-        await sendNumFeature(ws, id, conv, featFull, evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel)))
-    elif parts[0] == "extracted":
-        feat = parts[1]
-        extracted = extractFeatures(conv)
-        if feat in extracted:
-            return await sendNumFeature(ws, id, conv, featFull, extracted[parts[1]])
-        raise Exception("feature not found: {}".format(parts))
+        await sendNumFeature(ws, id, conv, featFull,
+                             evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel.lower())))
+    elif category == "extracted":
+        feats = get_extracted_features(origReader)
+        featname, = path
+        convid = conv + "-" + channel
+        if featname in feats:
+            return await sendNumFeature(ws, id, conv, featFull, feats[featname](convid))
+        raise Exception("feature not found: {}".format(featFull))
+    else:
+        raise Exception("unknown category " + category)
 
 
 def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
@@ -180,7 +186,7 @@ def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
     highlights = []
     for bc, bcInfo in bcs:
         t = reader.getBCMaxTime(bc)
-        highlights.append({'from': t - 0.01, 'to': t+0.01, 'color': (0,0,255), 'text': 'power max'})
+        highlights.append({'from': t - 0.01, 'to': t + 0.01, 'color': (0, 0, 255), 'text': 'power max'})
         (a, b) = reader.getBackchannelTrainingRange(bc)
         highlights.append({'from': a, 'to': b, 'color': (0, 255, 0), 'text': 'BC'})
         (a, b) = reader.getNonBackchannelTrainingRange(bc)
@@ -200,16 +206,14 @@ async def handler(websocket, path):
             id = msg['id']
             try:
                 if msg['type'] == "getFeatures":
+                    cats = [s.split(" & ") for s in
+                            ["/extracted/adc & /transcript/Original/bc",
+                             "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
                     conv = sanitize_conversation(msg['conversation'])
                     await websocket.send(json.dumps({"id": id, "data": {
-                        'categories': getFeatures(conv),
-                        'defaults': [s.split(" & ") for s in
-                                     ["/input/adca & /input/Original Transcript/bca",
-                                      "/input/Original Transcript/texta", "/extracted/pitcha", "/extracted/powera",
-                                      "/input/adcb & /input/Original Transcript/bcb",
-                                      "/input/Original Transcript/textb",
-                                      "/extracted/pitchb", "/extracted/powerb"
-                                      ]]
+                        'categories': get_features(),
+                        'defaults': [["/A" + sub for sub in l] for l in cats] +
+                                    [["/B" + sub for sub in l] for l in cats]
                     }}))
                 elif msg['type'] == "getConversations":
                     await websocket.send(json.dumps({"id": id, "data": conversations}))
