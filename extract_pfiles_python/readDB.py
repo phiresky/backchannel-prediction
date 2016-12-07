@@ -363,6 +363,7 @@ def load_feature_extractor(config):
 
 class FakeUttDB:
     alignment_db = None
+
     def __init__(self, paths_config, single_words=False):
         self.paths_config = paths_config
         self.root = paths_config['originalSwbTranscriptions']
@@ -420,7 +421,6 @@ class FakeUttDB:
         toTime = float(utt['to'])
         words = self.alignment_db.get_utterances(utt['convid'])
         return [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
-
 
     def __getitem__(self, id):
         track, speaker, uttid = self.extractname.fullmatch(id).groups()
