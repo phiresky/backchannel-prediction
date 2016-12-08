@@ -97,14 +97,17 @@ class Features:
         return power
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
-        if feat.typ != FeatureType.FMatrix:
-            raise Exception("only for extracted features")
-        return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
+        if feat.typ == FeatureType.FMatrix:
+            return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
+        if feat.typ == FeatureType.SVector:
+            return sample_index / (feat.samplingRate * 1000)
+        raise Exception("only for extracted features")
 
     def time_to_sample_index(self, feat: NumFeature, time_sec):
-        if feat.typ != FeatureType.FMatrix:
-            raise Exception("only for extracted features")
-        return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
+        if feat.typ == FeatureType.FMatrix:
+            return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
+        if feat.typ == FeatureType.SVector:
+            return int(round(1000 * feat.samplingRate * time_sec))
 
     def cut_range(self, feat: NumFeature, from_time: float, to_time: float):
         if feat.typ == FeatureType.SVector:
