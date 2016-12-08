@@ -84,6 +84,11 @@ def fromiter(iterator, dtype, shape):
                        [("_", dtype, res_shape)], shape[0])["_"]
 
 
+def speakerFilter(self, convIDs: Set[str], speaker: str) -> bool:
+    shortID = speaker.split("-")[0]
+    return shortID in convIDs
+
+
 class DBReader:
     backchannels = None
 
@@ -117,10 +122,6 @@ class DBReader:
     def __exit__(self, *exc):
         self.spkDB.close()
         self.uttDB.close()
-
-    def speakerFilter(self, convIDs: Set[str], speaker: str) -> bool:
-        shortID = speaker.split("-")[0]
-        return shortID in convIDs
 
     def is_backchannel(self, uttInfo: dict, index: int, utts: List[Tuple[str, DBEntry]]):
         uttText = uttInfo['text']
@@ -398,6 +399,11 @@ class FakeUttDB:
         self.spkDB.close()
 
 
+def parse_conversations_file(path: str):
+    with open(path) as f:
+        return set([line.strip() for line in f.readlines()])
+
+
 def main():
     global input_dim
     np.seterr(all='raise')
@@ -429,8 +435,7 @@ def main():
             'files': {}
         }
         for setname, path in config['paths']['conversations'].items():
-            with open(path) as f:
-                convIDs = set([line.strip() for line in f.readlines()])
+            convIDs = parse_conversations_file(path)
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
             data = fromiter(parseConversationSet(reader, setname, convIDs),
                             dtype="float32", shape=(-1, input_dim + output_dim))
