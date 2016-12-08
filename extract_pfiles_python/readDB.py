@@ -145,16 +145,18 @@ class DBReader:
         else:
             return self.getBCMaxTime(utt) - 0.3
 
+    def get_max_time(self, feat: NumFeature, fromTime: float, toTime: float):
+        powerrange = self.features.cut_range(feat, fromTime, toTime)
+        maxIndex = powerrange.argmax()
+        maxTime = fromTime + self.features.sample_index_to_time(powerrange, maxIndex)
+        return maxTime
+
     @functools.lru_cache(maxsize=16)
     def getBCMaxTime(self, utt: str):
         uttInfo = self.uttDB[utt]
         uttFrom = float(uttInfo['from'])
         uttTo = float(uttInfo['to'])
-
-        powerrange = self.features.cut_range(self.features.get_power(uttInfo['convid']), uttFrom, uttTo)
-        maxIndex = powerrange.argmax()
-        maxTime = uttFrom + self.features.sample_index_to_time(powerrange, maxIndex)
-        return maxTime
+        return self.get_max_time(self.features.get_power(uttInfo['convid']), uttFrom, uttTo)
 
     def getBackchannelTrainingRange(self, utt: str):
         bc_start_time = self.getBcRealStartTime(utt)
@@ -188,7 +190,7 @@ class DBReader:
                 ]
 
     def get_gauss_bc_array(self, power: NumFeature, utt: str) -> Tuple[float, np.array]:
-        middle = self.getBCMaxTime(utt, power) + self.BCcenter
+        middle = self.getBCMaxTime(utt) + self.BCcenter
         width = 1.8
         times = np.arange(-width, width, power.shift / 1000, dtype="float32")
         mean = 0
@@ -212,7 +214,7 @@ class DBReader:
         return feat
 
     def get_filtered_speakers(self, convIDs):
-        return [spkr for spkr in self.spkDB if self.speakerFilter(convIDs, spkr)]
+        return [spkr for spkr in self.spkDB if speakerFilter(convIDs, spkr)]
 
     def count_total(self, convIDs):
         l = list(bc for spkr in self.get_filtered_speakers(convIDs) for bc in
