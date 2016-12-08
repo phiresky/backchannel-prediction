@@ -37,7 +37,7 @@ def NumFeatureCache(f):
             val = f(featuresInstance, convid)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:
-                pickle.dump(NumFeature_to_dict(val), file)
+                pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
             os.rename(path + ".part", path)
             return val
 

@@ -125,7 +125,7 @@ def get_features():
     feature_names = list(get_extracted_features(origReader))
     features = [
         dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
-                                     dict(name="Original", children="text,words,bc".split(","))]),
+                                          dict(name="Original", children="text,words,bc".split(","))]),
         dict(name="extracted", children=feature_names),
         dict(name="NN outputs", children=netsTree),
     ]
@@ -135,19 +135,11 @@ def get_features():
     ]
 
 
-@functools.lru_cache(maxsize=1)
-def extractFeatures(conv: str):
-    return origReader.eval_range(0, readDB.MAX_TIME, conv)
-
-
-def getExtractedFeature(conv: str, feat: str):
-    return extractFeatures(conv)[feat]
-
-
 async def sendFeature(ws, id: str, conv: str, featFull: str):
     if featFull[0] != '/':
         raise Exception("featname must start with /")
     channel, category, *path = featFull.split("/")[1:]
+    convid = conv + "-" + channel
     if category == "transcript":
         readerType, featname = path
         reader = islReader if readerType == "ISL" else origReader
@@ -155,18 +147,17 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
             await sendOtherFeature(ws, id,
                                    {"typ": "highlights", "data": getHighlights(reader, conv, channel)})
         elif featname == "text":
-            await sendOtherFeature(ws, id, segsToJSON(reader, conv + "-" + channel, featFull))
+            await sendOtherFeature(ws, id, segsToJSON(reader, convid, featFull))
         elif featname == "words":
-            await sendOtherFeature(ws, id, segsToJSON(wordsReader, conv + "-" + channel, featFull))
+            await sendOtherFeature(ws, id, segsToJSON(wordsReader, convid, featFull))
     elif category == "NN outputs":
         config_path, wid = netsDict[tuple(path)]
         net = get_network_outputter(config_path, wid)
         await sendNumFeature(ws, id, conv, featFull,
-                             evaluateNetwork(net, getExtractedFeature(conv, 'feat' + channel.lower())))
+                             evaluateNetwork(net, origReader.features.get_combined_feat(convid)))
     elif category == "extracted":
         feats = get_extracted_features(origReader)
         featname, = path
-        convid = conv + "-" + channel
         if featname in feats:
             return await sendNumFeature(ws, id, conv, featFull, feats[featname](convid))
         raise Exception("feature not found: {}".format(featFull))
