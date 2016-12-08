@@ -74,7 +74,9 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
     disposers: (() => void)[] = [];
     abstract preferredHeight: number;
     abstract renderCanvas(canvas: HTMLCanvasElement): void;
-    canvasWidthFactor = 1;
+    @mobx.computed get canvasWidthFactor() {
+        return this.props.gui.followPlayback && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing ? 2 : 1; 
+    }
     filter?: string;
     @mobx.observable
     canvasZoom = mobx.asStructure({

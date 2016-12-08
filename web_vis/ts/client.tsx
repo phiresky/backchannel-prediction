@@ -481,30 +481,33 @@ const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
 
 @observer
 class ConversationSelector extends React.Component<{gui: GUI}, {}> {
-    @observable
-    conversation = "sw2001";
     @autobind @action
-    setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.conversation = e.currentTarget.value; }
+    setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.props.gui.conversationSelectorText = e.currentTarget.value; }
     @autobind
     async randomConversation() {
         const conversation = await this.props.gui.randomConversation() as any as string;
-        runInAction(() => this.conversation = conversation);
         this.props.gui.loadConversation(conversation);
     }
     render() {
         const convos = this.props.gui.getConversations().data;
         return (<div style={{display:"inline-block"}}>
-            <input list="conversations" value={this.conversation} onChange={this.setConversation} />
+            <input list="conversations" value={this.props.gui.conversationSelectorText} onChange={this.setConversation} />
             {convos && <datalist id="conversations">{convos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
-            <button onClick={c => this.props.gui.loadConversation(this.conversation)}>Load</button>
+            <button onClick={c => this.props.gui.loadConversation(this.props.gui.conversationSelectorText)}>Load</button>
             <button onClick={this.randomConversation}>RND</button>
         </div>)
     }
 }
 
-const examples: {[name: string]: string} = {
-    "word alignment": "#N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjIDYAmAZgFZaAORgRgE4AWdsgdhZCANCABm6CBHQB3VNHhJkpMVAiYApqMREAbhoBOmKPiKkQmGawEhRAV2yZSAbVB2HAE1JlRYjSbsDDScSV3F-XECNcwB6bEIwO1wYqA9EKFsQXUc7NWwAL0NzAHUofQkDAFtMnUIxbABzcwbsfUIAJShCBujtQKDCXE7u6JJQSvjSAFp6Wn5qFlFKqAAPUln5lgBfLeFQPwCg2PjE5IB5A0b4tQACABUDLsxES7BkuHTM7MxciAKikggAASjQAFn8GqDcE5tER6k1AYR0FU8oUADLodIQGr9DSDYY9UiEOxSLYAXVEoI0YNw5igSXQIF2bk8pHYvgiURCYQOkSOgLiCSSMQuV0ItweTxe2DeMVwGhWuAyom+v3+BnMdwVtNhdUa5iRKL+6MxahxBgGQy6hJIxNJFJAVJppG4-GZIHc2C8JE4HMOwRc+05-JAgtOIsuLXFEBuuEehGer2SMmRHmMXxyqIBIC1ipqcP1iORy2NGgxWPNloJoztEHJlOpkNpJEY3Hdnu93D9fIDoSD-uOQuSqUQcAzPyzGsBpXKxfzeoRIBabWrlbxVpGpHGkxIMzmCyWq3W++27t5UUH4dFUYl8cTMveo-HasKU+BYIhUJhIFq8INxazcszT6C111XW0STrB0nSbOkGSZPYPVZFtuy5QNwgHAUTmFa9rhjSUE2lWV5UVMcVUzUs31zHUfwLRdDRLf4gOxECq2tGtIPrR1GyhODcEZdtkL4VCgm5fse0vHDIzw2M7yI5NU0wMisgo9VNW1ec-yLI0mNNFif1xfF2KJTjoJ45sQHpfimQdfJ0HQaoxhACANDEZtKDIVt6BoFh2EYThBH4fhuFoX0QEjXjyAodgmH87h6HoXygsSkLGF2EB+KVCA7mwSoNAAZQ0Wo01IagyEoGLGHofg0qAA",
-
+const examples: {[name: string]: any} = {
+    "NN output": {uis:[
+        {"features":[{"feature":"/A/extracted/adc","visualizer":"Waveform","config":"givenRange","currentRange":{"min":-32768,"max":32768}}],"height":"auto"},
+        {"features":[{"feature":"/A/transcript/Original/text","visualizer":"Text","config":"normalizeLocal","currentRange":null}],"height":"auto"},
+        {"features":[{"feature":"/A/NN outputs/latest/best","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":0.169875830411911,"max":0.8434500098228455}}],"height":"auto"},
+        {"features":[{"feature":"/A/NN outputs/latest/best.smooth","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":0.2547765076160431,"max":0.7286926507949829},"uuid":26},{"feature":"/A/NN outputs/latest/best.smooth.thres","uuid":31,"visualizer":"Highlights","config":"normalizeLocal","currentRange":null}],"height":85,"uuid":25},
+        {"features":[{"feature":"/A/NN outputs/latest/best.smooth.bc","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-32768,"max":32768}}],"height":"auto"},
+        {"features":[{"feature":"/A/extracted/pitch","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-1,"max":1}}],"height":"auto"},
+        {"features":[{"feature":"/A/extracted/power","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-1,"max":1}}],"height":"auto"}]}
 }
 let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
     if(gui.loadingState !== 1) return <span/>;
@@ -524,6 +527,7 @@ export class GUI extends React.Component<{}, {}> {
     @observable followPlayback = false;
 
     @observable conversation: s.ConversationID;
+    @observable conversationSelectorText: string;
     @observable uis = [] as UIState[];
     @observable zoom = {
         left: 0, right: 1
@@ -551,24 +555,31 @@ export class GUI extends React.Component<{}, {}> {
             playbackPosition: this.playbackPosition,
             followPlayback: this.followPlayback,
             conversation: this.conversation,
-            uis: this.uis, //TODO: fix uuids
+            uis: this.uis, //TODO: remove uuids
             zoom: this.zoom,
             totalTimeSeconds: this.totalTimeSeconds
         })));
     }
     @action
-    deserialize(data: string) {
+    deserialize(data: string|GUI) {
         if(this.audioPlayer) this.audioPlayer.playing = false;
         if(this.loadingState !== 1) {
             console.error("can't load while loading");
             return;
         }
-        const obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
-        if(this.conversation !== obj.conversation) {
+        let obj;
+        if(typeof data === "string") obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
+        else obj = data;
+        if(obj.conversation && this.conversation !== obj.conversation) {
             this.loadConversation(obj.conversation, obj);
         } else {
-            Object.assign(this, obj);
+            this.applyState(obj);
         }
+    }
+    @action
+    applyState(targetState: GUI) {
+        if(targetState.uis) targetState.uis.forEach(ui => {ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++)});
+        Object.assign(this, targetState);
     }
     @computed
     get left() {
@@ -590,6 +601,7 @@ export class GUI extends React.Component<{}, {}> {
             this.totalTimeSeconds = NaN;
             this.loadedFeatures.clear();
             this.loadingState = 0;
+            this.conversationSelectorText = conversation;
         });
         const features = await this.socketManager.getFeatures(convID).promise;
         const targetFeatures = targetState?targetState.uis.map(ui => ui.features.map(ui => ui.feature as any as s.FeatureID)):features.defaults;
@@ -610,8 +622,7 @@ export class GUI extends React.Component<{}, {}> {
             }
         }
         if(targetState) {
-            targetState.uis.forEach(ui => {ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++)});
-            runInAction("applySerializedState", () => Object.assign(this, targetState));
+            this.applyState(targetState);
         }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
@@ -741,8 +752,9 @@ export class GUI extends React.Component<{}, {}> {
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
-                    {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(txt => <a key={txt} href={examples[txt]}
-                        onClick={e => {this.deserialize(examples[txt].substr(1))}}>{txt}</a>)}</span>}
+                    {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(k =>
+                            <button key={k} onClick={e => {this.deserialize(examples[k])}}>{k}</button>)}</span>
+                    }
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{display: "flex", visibility: "hidden"}}>
