@@ -82,7 +82,8 @@ wordsReader = readDB.DBReader(config)
 config['extract_config']['useWordsTranscript'] = False
 config['extract_config']['useOriginalDB'] = False
 islReader = readDB.DBReader(config)
-conversations = sorted({spk.split("-")[0] for spk in origReader.spkDB if spk[0:2] == "sw"})
+conversations = {name: list(readDB.parse_conversations_file(path)) for name, path in
+                 config['paths']['conversations'].items()}
 netsDict, netsTree = findAllNets()
 
 
@@ -176,7 +177,7 @@ def get_larger_threshold(feat: NumFeature, name: str, threshold=0.5, color=[0, 2
 
 
 def get_bc_audio(feat: NumFeature):
-    sampletrack = "sw2807-A"  # "sw3614-A"
+    sampletrack = "sw4687-B"  # ""sw2807-A"  # "sw3614-A"
     reader = origReader
     sampletrack_audio = reader.features.get_adc(sampletrack)
     bcs = reader.get_backchannels(list(reader.get_utterances(sampletrack)))

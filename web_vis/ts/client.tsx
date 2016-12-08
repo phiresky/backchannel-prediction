@@ -483,18 +483,21 @@ const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
 class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     @autobind @action
     setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.props.gui.conversationSelectorText = e.currentTarget.value; }
-    @autobind
-    async randomConversation() {
-        const conversation = await this.props.gui.randomConversation() as any as string;
+    async randomConversation(t?: string) {
+        const conversation = await this.props.gui.randomConversation(t) as any as string;
         this.props.gui.loadConversation(conversation);
     }
     render() {
         const convos = this.props.gui.getConversations().data;
+        const allconvos = convos && Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
         return (<div style={{display:"inline-block"}}>
             <input list="conversations" value={this.props.gui.conversationSelectorText} onChange={this.setConversation} />
-            {convos && <datalist id="conversations">{convos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
+            {allconvos && <datalist id="conversations">{allconvos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
             <button onClick={c => this.props.gui.loadConversation(this.props.gui.conversationSelectorText)}>Load</button>
-            <button onClick={this.randomConversation}>RND</button>
+            <button onClick={() => this.randomConversation()}>Random</button>
+            {convos && Object.keys(convos).map(name =>
+                <button key={name} onClick={() => this.randomConversation(name)}>Random {name}</button>
+            )}
         </div>)
     }
 }
@@ -527,7 +530,7 @@ export class GUI extends React.Component<{}, {}> {
     @observable followPlayback = false;
 
     @observable conversation: s.ConversationID;
-    @observable conversationSelectorText: string;
+    @observable conversationSelectorText = "";
     @observable uis = [] as UIState[];
     @observable zoom = {
         left: 0, right: 1
@@ -627,11 +630,15 @@ export class GUI extends React.Component<{}, {}> {
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
         const convos = await this.socketManager.getConversations().promise;
-        if(convos.indexOf(id as any) >= 0) return id as any;
+        if(Object.keys(convos).some(name => convos[name].indexOf(id as any) >= 0)) return id as any;
         throw Error("unknown conversation " + id);
     }
-    async randomConversation(): Promise<s.ConversationID> {
-        return util.randomChoice(await this.getConversations().promise);
+    async randomConversation(category?: string): Promise<s.ConversationID> {
+        const convos = await this.getConversations().promise;
+        let choices;
+        if(!category) choices = Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
+        else choices = convos[category];
+        return util.randomChoice(choices);
     }
     @action
     onWheel(event: MouseWheelEvent) {

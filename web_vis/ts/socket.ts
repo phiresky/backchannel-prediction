@@ -14,7 +14,7 @@ export type ClientMessage = {
     conversation: ConversationID,
     feature: FeatureID
 }
-type GetConversationsResponse = ConversationID[];
+type GetConversationsResponse = {[name: string]: ConversationID[]};
 type GetFeatureResponse = FeatureReceive;
 export type CategoryTreeElement = {name: string, children: CategoryTreeElement[]}|FeatureID;
 export type GetFeaturesResponse = {

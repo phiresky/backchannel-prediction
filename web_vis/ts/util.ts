@@ -163,3 +163,8 @@ export function rescale({left = 0, right = 1}, scaleChange: number, position: nu
     right += position;
     return {left, right};
 }
+
+
+export function mergeArray<T>(a: T[], b:T[]) {
+    return a.concat(b);
+}
