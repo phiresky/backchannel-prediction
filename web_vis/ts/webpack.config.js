@@ -20,15 +20,15 @@ module.exports = {
   },
   module: {
     loaders: [{
-        test: /\.tsx?$/,
-        loaders: ['ts-loader'],
-        //include: path.join(__dirname, 'src')
-      },
-      {
-        test: /(\.scss)$/,
-        loader: ExtractTextPlugin.extract('style', 'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!sass')
-      },
-      { test: /\.css$/, loader: "style-loader!css-loader" },
+      test: /\.tsx?$/,
+      loaders: ['ts-loader'],
+      //include: path.join(__dirname, 'src')
+    },
+    {
+      test: /(\.scss)$/,
+      loader: ExtractTextPlugin.extract('style', 'css?sourceMap&modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss!sass')
+    },
+    { test: /\.css$/, loader: "style-loader!css-loader" },
     ]
   },
   postcss: [autoprefixer],

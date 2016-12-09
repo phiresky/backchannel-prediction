@@ -1,100 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="dist/bundle.css">-->
-    <link href="node_modules/@blueprintjs/core/dist/blueprint.css" rel="stylesheet" />
-    <style>
-      canvas {
-        image-rendering: pixelated;
-      }
-      .headerBar > * {
-        margin-right: 2em;
-      }
-      .utterance {
-        position: absolute;        
-        white-space: nowrap;
-        text-align: center;
-        display: inline-block;
-      }
-      .add-visualizer .pt-popover-content {
-        max-height: 60vh;
-        overflow-y: auto;
-      }
-      .change-visualizer .pt-popover-content {
-        padding: 20px;
-      }
-      .highlight {
-        position: absolute;
-        border-right: 1px solid gray;
-        border-left: 1px solid gray;
-      }
-      .utterance-text {
-        background-color: white;
-        border: 1px solid black;
-      }
-      .tooltip span.content {
-         display: none;
-      }
-      .tooltip.visible span.content {
-        display: initial;
-        position: absolute;
-        background-color: white;
-        margin-top: -10px;
-        padding: 5px;
-        border-radius: 2px;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 1px solid gray;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        z-index: 100;
-        min-width: 40vw;
-        max-width: 50vw;
-        white-space: initial;
-      }
-      .tooltip.visible span.content::after {
-        content: " ";
-        position: absolute;
-        bottom: 100%;  /* At the top of the tooltip */
-        left: 50%;
-        margin-left: -6px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent transparent black transparent;
-      }
-      .leftcutoff::before {
-        content: " ";
-        position: absolute;
-        top: 50%;
-        right: 100%; /* To the left of the tooltip */
-        margin-top: -5px;
-        margin-right: -6px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent black transparent transparent;
-      }
-      .rightcutoff::after {
-        content: " ";
-        position: absolute;
-        top: 50%;
-        left: 100%; /* To the right of the tooltip */
-        margin-top: -5px;
-        border-width: 5px;
-        margin-left: -6px;
-        border-style: solid;
-        border-color: transparent transparent transparent black;
-      }
-      .left-bar * {
-        font-size: 0.7rem;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="dist/bundle.js"></script>
-  </body>
+  <link href="node_modules/@blueprintjs/core/dist/blueprint.css" rel="stylesheet" />
+  <style>
+    canvas {
+      image-rendering: pixelated;
+    }
+    
+    .headerBar > * {
+      margin-right: 2em;
+    }
+    
+    .utterance {
+      position: absolute;
+      white-space: nowrap;
+      text-align: center;
+      display: inline-block;
+    }
+    
+    .add-visualizer .pt-popover-content {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    .change-visualizer .pt-popover-content {
+      padding: 20px;
+    }
+    
+    .highlight {
+      position: absolute;
+      border-right: 1px solid gray;
+      border-left: 1px solid gray;
+    }
+    
+    .utterance-text {
+      background-color: white;
+      border: 1px solid black;
+    }
+    
+    .tooltip span.content {
+      display: none;
+    }
+    
+    .tooltip.visible span.content {
+      display: initial;
+      position: absolute;
+      background-color: white;
+      margin-top: -10px;
+      padding: 5px;
+      border-radius: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 1px solid gray;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      z-index: 100;
+      min-width: 40vw;
+      max-width: 50vw;
+      white-space: initial;
+    }
+    
+    .tooltip.visible span.content::after {
+      content: " ";
+      position: absolute;
+      bottom: 100%;
+      /* At the top of the tooltip */
+      left: 50%;
+      margin-left: -6px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent black transparent;
+    }
+    
+    .leftcutoff::before {
+      content: " ";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      /* To the left of the tooltip */
+      margin-top: -5px;
+      margin-right: -6px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent black transparent transparent;
+    }
+    
+    .rightcutoff::after {
+      content: " ";
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      /* To the right of the tooltip */
+      margin-top: -5px;
+      border-width: 5px;
+      margin-left: -6px;
+      border-style: solid;
+      border-color: transparent transparent transparent black;
+    }
+    
+    .left-bar * {
+      font-size: 0.7rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script src="dist/bundle.js"></script>
+</body>
+
 </html>

@@ -1,12 +1,12 @@
 import * as c from './client';
 import * as React from 'react';
-import {observer} from 'mobx-react';
+import { observer } from 'mobx-react';
 import * as mobx from 'mobx';
 import * as util from './util';
 import * as Data from './Data';
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number}) {
+    givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
     const start = Math.floor(zoom.left * data.iterator.count);
     const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
@@ -20,18 +20,18 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         const from = x / w, to = (x + 1) / w;
         const fromSample = start + Math.floor(length * from);
         const toSample = start + Math.ceil(length * to);
-        if(fromSample < 0) continue;
-        if(toSample >= data.iterator.count) continue;
-        const {min, max, rms2:rmsSq, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
+        if (fromSample < 0) continue;
+        if (toSample >= data.iterator.count) continue;
+        const {min, max, rms2: rmsSq, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
-        let h1 = Math.round(h * (1 - (max - display.min)/displayMinMax));
-        let h2 = Math.round(h * (1 - (min - display.min)/displayMinMax));
-        const hAvg = Math.round(h * (1 - (avg - display.min)/displayMinMax));
+        let h1 = Math.round(h * (1 - (max - display.min) / displayMinMax));
+        let h2 = Math.round(h * (1 - (min - display.min) / displayMinMax));
+        const hAvg = Math.round(h * (1 - (avg - display.min) / displayMinMax));
         if (x > 0) {
             if (h1 > lasth2) h1 = lasth2 + 1;
             if (h2 < lasth1) h2 = lasth1 - 1;
         }
-        if(h1 >= h2) h2 = h1 + 1;
+        if (h1 >= h2) h2 = h1 + 1;
         lasth1 = h1;
         lasth2 = h2;
         ctx.fillRect(x, y + h1, 1, h2 - h1);
@@ -41,18 +41,18 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         if (rms1 < h1 + 1) rms1 = h1 + 1;
         if (rms2 > h2 - 1) rms2 = h2 - 1;
         if (rms1 > rms2) rms2 = rms1;
-        rmsc[2*x] = rms1;
-        rmsc[2*x+1] = rms2;
+        rmsc[2 * x] = rms1;
+        rmsc[2 * x + 1] = rms2;
     }
     ctx.fillStyle = c.globalConfig.rmsColor;
     for (let x = 0; x < w; x++) {
-        ctx.fillRect(x, y + rmsc[2*x], 1, rmsc[2*x + 1] - rmsc[2*x]);
+        ctx.fillRect(x, y + rmsc[2 * x], 1, rmsc[2 * x + 1] - rmsc[2 * x]);
     }
     return display;
 }
 
 function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number}) {
+    givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
     const start = Math.floor(zoom.left * data.iterator.count);
     const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
@@ -63,7 +63,7 @@ function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         const toSample = start + Math.ceil(length * to);
         const {min, max, rms2, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
-        ctx.fillStyle = `rgba(0,0,0,${(avg - display.min)/(display.max - display.min)})`;
+        ctx.fillStyle = `rgba(0,0,0,${(avg - display.min) / (display.max - display.min)})`;
         ctx.fillRect(x, y, 1, h);
     }
     return display;
@@ -75,7 +75,7 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
     abstract preferredHeight: number;
     abstract renderCanvas(canvas: HTMLCanvasElement): void;
     @mobx.computed get canvasWidthFactor() {
-        return this.props.gui.followPlayback && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing ? 2 : 1; 
+        return this.props.gui.followPlayback && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing ? 2 : 1;
     }
     filter?: string;
     @mobx.observable
@@ -88,12 +88,11 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
         const canvasZoom = this.canvasZoom;
         const zw = zoom.right - zoom.left;
         const cw = canvasZoom.right - canvasZoom.left;
-        if(!(canvasZoom.left <= zoom.left && zoom.right <= canvasZoom.right) || Math.abs(this.canvasWidthFactor * zw / cw - 1) > 0.01) {
+        if (!(canvasZoom.left <= zoom.left && zoom.right <= canvasZoom.right) || Math.abs(this.canvasWidthFactor * zw / cw - 1) > 0.01) {
             // const anchor = (zoom.left + zoom.right) / 2;
             // prerender to the right, offset a random bit to prevent multiple tracks from rendering on the same frame
             const anchor = zoom.left + (zoom.right - zoom.left) * 0.1 * Math.random();
-            mobx.runInAction("canvas zoom", () => 
-            {
+            mobx.runInAction("canvas zoom", () => {
                 Object.assign(this.canvasZoom, util.rescale(zoom, this.canvasWidthFactor, anchor));
             });
         }
@@ -102,27 +101,27 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
         const screenLeft = (zoom.left - canvasZoom.left) / (zoom.left - zoom.right) * screenW;
         const screenRight = screenLeft + this.canvasWidthFactor * canvW * screenW;
         const border = 1;
-        return <div style={{height:"100%", position: "relative", borderStyle:"solid", borderWidth:border+"px", overflow: "hidden"}}>
-            <canvas style={{display:"block", filter: this.filter, position: "absolute", width: Math.round(this.canvasWidthFactor * screenW)+"px", left: screenLeft, height: "100%",}}
-                ref={c => this.canvas = c}/>
+        return <div style={{ height: "100%", position: "relative", borderStyle: "solid", borderWidth: border + "px", overflow: "hidden" }}>
+            <canvas style={{ display: "block", filter: this.filter, position: "absolute", width: Math.round(this.canvasWidthFactor * screenW) + "px", left: screenLeft, height: "100%", }}
+                ref={c => this.canvas = c} />
         </div>;
     }
     componentDidMount() {
         this.disposers.push(mobx.autorun("renderCanvas", () => this.renderCanvas(this.canvas)));
     }
     componentWillUnmount() {
-        for(const disposer of this.disposers) disposer();
+        for (const disposer of this.disposers) disposer();
     }
 }
 
 abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
-    abstract singleRenderFunction: 
-        (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-            givenRange: [number, number]|null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: {left: number, right: number})
-            => {min: number, max: number};
+    abstract singleRenderFunction:
+    (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
+        givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number })
+        => { min: number, max: number };
 
     @mobx.action
-    setCurrentRange(range: {min: number, max: number}) {
+    setCurrentRange(range: { min: number, max: number }) {
         this.props.uiState.currentRange = range;
     }
 
@@ -133,14 +132,14 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
         const data = this.props.feature.data;
         const w = target.width;
         const h = target.height;
-        const ctx = target.getContext("2d")!;
+        const ctx = target.getContext("2d") !;
         const dim = data.shape[1];
         let range;
-        for(let y = 0; y < dim; y++) {
+        for (let y = 0; y < dim; y++) {
             range = this.singleRenderFunction(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim),
-                this.props.feature.range, this.props.uiState.config, {data, iterator:data.iterate("ALL", y)}, this.canvasZoom)//this.props.gui.zoom);
+                this.props.feature.range, this.props.uiState.config, { data, iterator: data.iterate("ALL", y) }, this.canvasZoom)//this.props.gui.zoom);
         }
-        if(range) this.setCurrentRange(range);
+        if (range) this.setCurrentRange(range);
     }
 }
 @observer

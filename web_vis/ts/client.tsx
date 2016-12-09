@@ -10,7 +10,7 @@ import DevTools from 'mobx-react-devtools';
 import * as s from './socket';
 import * as LZString from 'lz-string';
 import * as highlights from './Highlights';
-import {autobind} from 'core-decorators';
+import { autobind } from 'core-decorators';
 import * as B from '@blueprintjs/core';
 import * as Data from './Data';
 export const globalConfig = observable({
@@ -24,7 +24,7 @@ export const globalConfig = observable({
 });
 export class styles {
     @computed static get leftBarCSS() {
-        return {flexBasis: "content", flexGrow:0, flexShrink: 0, width:globalConfig.leftBarSize+"px", border:"1px solid", marginRight:"5px"}
+        return { flexBasis: "content", flexGrow: 0, flexShrink: 0, width: globalConfig.leftBarSize + "px", border: "1px solid", marginRight: "5px" }
     }
 }
 
@@ -67,15 +67,15 @@ export type Highlights = {
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances | Highlights;
-export type Utterance = {from: number | string, to: number | string, text?: string, id?: string, color?: Color};
-export type VisualizerConfig  = "normalizeGlobal" | "normalizeLocal" | "givenRange";
+export type Utterance = { from: number | string, to: number | string, text?: string, id?: string, color?: Color };
+export type VisualizerConfig = "normalizeGlobal" | "normalizeLocal" | "givenRange";
 
 export interface SingleUIState {
     uuid: number;
     visualizer: VisualizerChoice;
     feature: string;
     config: VisualizerConfig;
-    currentRange: {min: number, max: number} | null;
+    currentRange: { min: number, max: number } | null;
 }
 export interface UIState {
     uuid: number,
@@ -93,9 +93,9 @@ export const loadingSpan = <span>Loading...</span>;
 
 class OptimizedFeaturesTree {
     getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
-        if(!category) return {id: "unused", label: "unused", childNodes: []};
+        if (!category) return { id: "unused", label: "unused", childNodes: [] };
 
-        if(s.isFeatureID(category)) {
+        if (s.isFeatureID(category)) {
             const name = category as any as string;
             return {
                 id: parentPath + "/" + name, label: name
@@ -107,7 +107,7 @@ class OptimizedFeaturesTree {
             id: path,
             label: category.name,
             get childNodes(this: B.ITreeNode) {
-                if(!this.isExpanded) return [];
+                if (!this.isExpanded) return [];
                 else return children;
             }
         }
@@ -115,31 +115,31 @@ class OptimizedFeaturesTree {
 }
 
 @observer
-class CategoryTree extends React.Component<{gui: GUI, features: s.GetFeaturesResponse, onClick:(feat: string) => void}, {}> {
+class CategoryTree extends React.Component<{ gui: GUI, features: s.GetFeaturesResponse, onClick: (feat: string) => void }, {}> {
     constructor(props: any) {
         super(props);
         this.currentTree = this.props.gui.categoryTree;
     }
- 
+
     currentTree: B.ITreeNode[];
     @autobind @action
-    handleNodeClick(n: B.ITreeNode) {if(!n.childNodes) this.props.onClick(""+n.id); }
+    handleNodeClick(n: B.ITreeNode) { if (!n.childNodes) this.props.onClick("" + n.id); }
     @autobind @action
-    handleNodeExpand(n: B.ITreeNode) {n.isExpanded = true;this.forceUpdate();}
+    handleNodeExpand(n: B.ITreeNode) { n.isExpanded = true; this.forceUpdate(); }
     @autobind @action
-    handleNodeCollapse(n: B.ITreeNode) {n.isExpanded = false;this.forceUpdate();}
+    handleNodeCollapse(n: B.ITreeNode) { n.isExpanded = false; this.forceUpdate(); }
     render() {
         return <div>
             <B.Tree contents={this.currentTree}
-                    onNodeCollapse={this.handleNodeCollapse}
-                    onNodeClick={this.handleNodeClick}
-                    onNodeExpand={this.handleNodeExpand} />
+                onNodeCollapse={this.handleNodeCollapse}
+                onNodeClick={this.handleNodeClick}
+                onNodeExpand={this.handleNodeExpand} />
             <button className="pt-button pt-popover-dismiss">Cancel</button>
         </div>;
     }
 }
 @observer
-class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
+class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
     static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"]
     @action changeVisualizerConfig(info: SingleUIState, value: string) {
         info.config = value as VisualizerConfig;
@@ -149,12 +149,12 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
     async changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
         const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise)
-        runInAction("changeFeature"+i, () => this.props.uiState.features[i] = state);
+        runInAction("changeFeature" + i, () => this.props.uiState.features[i] = state);
     }
     @action remove(uuid: number) {
         const i = this.props.uiState.features.findIndex(ui => ui.uuid === uuid);
         this.props.uiState.features.splice(i, 1);
-        if(this.props.uiState.features.length === 0) {
+        if (this.props.uiState.features.length === 0) {
             this.removeSelf();
         }
     }
@@ -163,7 +163,7 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
     }
     @action async add(feat: string) {
-        this.addPopover.setState({isOpen: false});
+        this.addPopover.setState({ isOpen: false });
         const gui = this.props.gui;
         const state = gui.getDefaultSingleUIState(await gui.getFeature(feat).promise);
         runInAction(() => this.props.uiState.features.push(state));
@@ -173,17 +173,17 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
         let minmax;
         const {uiState, gui} = this.props;
         const firstWithRange = uiState.features.find(props => props.currentRange !== null);
-        if(firstWithRange && firstWithRange.currentRange) {
+        if (firstWithRange && firstWithRange.currentRange) {
             minmax = [
-                <div key="max" style={{position: "absolute", margin:0, top:0, right:0}}>{util.round1(firstWithRange.currentRange.max)}</div>,
-                <div key="min" style={{position: "absolute", margin:0, bottom:0, right:0}}>{util.round1(firstWithRange.currentRange.min)}</div>,
+                <div key="max" style={{ position: "absolute", margin: 0, top: 0, right: 0 }}>{util.round1(firstWithRange.currentRange.max)}</div>,
+                <div key="min" style={{ position: "absolute", margin: 0, bottom: 0, right: 0 }}>{util.round1(firstWithRange.currentRange.min)}</div>,
             ];
         } else minmax = "";
-        const VisualizerChoices = observer((props:{info: SingleUIState}) => {
+        const VisualizerChoices = observer((props: { info: SingleUIState }) => {
             const feature = gui.getFeature(props.info.feature).data;
-            if(!feature) return <span/>;
+            if (!feature) return <span />;
             const c = getVisualizerChoices(feature);
-            if(c.length > 1) return (
+            if (c.length > 1) return (
                 <label className="pt-label pt-inline">Visualizer
                     <div className="pt-select">
                         <select value={props.info.visualizer} onChange={e => this.changeVisualizer(props.info, e.currentTarget.value)}>
@@ -192,39 +192,39 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
                     </div>
                 </label>
             );
-            else return <span/>;
+            else return <span />;
         });
         const features = gui.getFeatures().data;
         return (
-            <div className="left-bar" style={{position: "relative", width:"100%", height:"100%"}}>
-                <div style={{position: "absolute", top:0, left:0, paddingLeft:"5px", paddingTop:"5px"}}>
-                    {uiState.features.map(info => 
+            <div className="left-bar" style={{ position: "relative", width: "100%", height: "100%" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, paddingLeft: "5px", paddingTop: "5px" }}>
+                    {uiState.features.map(info =>
                         <B.Popover key={info.uuid} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
                             content={<div>
-                                    <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(info.uuid)}>Remove</button></label>
-                                    {info.currentRange&&
-                                        <label className="pt-label pt-inline">Range
+                                <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(info.uuid)}>Remove</button></label>
+                                {info.currentRange &&
+                                    <label className="pt-label pt-inline">Range
                                             <div className="pt-select">
-                                                <select value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
-                                                    {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
-                                                </select>
-                                            </div>
-                                        </label>
-                                    }
+                                            <select value={info.config} onChange={e => this.changeVisualizerConfig(info, e.currentTarget.value)}>
+                                                {LeftBar.rangeOptions.map(op => <option key={op} value={op}>{op}</option>)}
+                                            </select>
+                                        </div>
+                                    </label>
+                                }
                                 <VisualizerChoices info={info} />
-                                </div>
-                            }><div className="pt-tooltip-indicator" style={{ marginBottom:"5px"}}>{info.feature}</div></B.Popover>
-                        
+                            </div>
+                            }><div className="pt-tooltip-indicator" style={{ marginBottom: "5px" }}>{info.feature}</div></B.Popover>
+
                     )}
                 </div>
-                <div style={{position:"absolute", bottom:0, left:0, margin:"5px"}}>
+                <div style={{ position: "absolute", bottom: 0, left: 0, margin: "5px" }}>
                     <button onClick={this.removeSelf}>Remove</button>
-                    <B.Popover content={features ? <CategoryTree gui={gui} features={features} onClick={e => this.add(e)} />: "not loaded" }
-                            interactionKind={B.PopoverInteractionKind.CLICK}
-                            position={B.Position.RIGHT}
-                            popoverClassName="add-visualizer"
-                            useSmartPositioning={true} ref={p => this.addPopover = p}>
-                            <button>Add feature</button>
+                    <B.Popover content={features ? <CategoryTree gui={gui} features={features} onClick={e => this.add(e)} /> : "not loaded"}
+                        interactionKind={B.PopoverInteractionKind.CLICK}
+                        position={B.Position.RIGHT}
+                        popoverClassName="add-visualizer"
+                        useSmartPositioning={true} ref={p => this.addPopover = p}>
+                        <button>Add feature</button>
                     </B.Popover>
                 </div>
                 {minmax}
@@ -233,16 +233,16 @@ class LeftBar extends React.Component<{uiState: UIState, gui: GUI}, {}> {
     }
 }
 @observer
-class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
+class InfoVisualizer extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
     render() {
         const {uiState, gui} = this.props;
-        
+
         return (
-            <div style={{display: "flex", boxShadow: "-9px 10px 35px -10px rgba(0,0,0,0.29)",zIndex: 1}}>
+            <div style={{ display: "flex", boxShadow: "-9px 10px 35px -10px rgba(0,0,0,0.29)", zIndex: 1 }}>
                 <div style={styles.leftBarCSS}>
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
-                <div style={{flexGrow: 1}}>
+                <div style={{ flexGrow: 1 }}>
                     <highlights.OverlayVisualizer gui={gui} uiState={uiState} />
                 </div>
             </div>
@@ -253,7 +253,7 @@ class InfoVisualizer extends React.Component<{uiState: UIState, gui: GUI}, {}> {
 @observer
 class TextVisualizer extends Visualizer<Utterances> {
     @observable
-    tooltip: number|null = null;
+    tooltip: number | null = null;
     @computed get playbackTooltip() {
         const data = this.props.feature.data;
         const b = util.binarySearch(0, data.length, x => +data[x].from, this.props.gui.playbackPosition * this.props.gui.totalTimeSeconds);
@@ -262,29 +262,29 @@ class TextVisualizer extends Visualizer<Utterances> {
     // @computed currentlyVisibleTh
     getElements() {
         const width = this.props.gui.width;
-        return this.props.feature.data.map((utt,i) => {
+        return this.props.feature.data.map((utt, i) => {
             const from = +utt.from / this.props.gui.totalTimeSeconds, to = +utt.to / this.props.gui.totalTimeSeconds;
             let left = util.getPixelFromPosition(from, 0, width, this.props.gui.zoom);
             let right = util.getPixelFromPosition(to, 0, width, this.props.gui.zoom);
-            if ( right < 0 || left > this.props.gui.width) return null;
+            if (right < 0 || left > this.props.gui.width) return null;
             const style = {};
-            if(utt.color) Object.assign(style, {backgroundColor: `rgb(${utt.color})`});
+            if (utt.color) Object.assign(style, { backgroundColor: `rgb(${utt.color})` });
             let className = "utterance utterance-text";
-            if(left < 0) {
+            if (left < 0) {
                 left = 0;
-                Object.assign(style, {borderLeft: "none"});
+                Object.assign(style, { borderLeft: "none" });
                 className += " leftcutoff";
             }
-            if(right > width) {
+            if (right > width) {
                 right = width;
-                Object.assign(style, {borderRight: "none"});
+                Object.assign(style, { borderRight: "none" });
                 className += " rightcutoff";
             }
             const padding = 3;
-            Object.assign(style, {left:left+"px", width: (right-left)+"px", padding: padding +"px"});
+            Object.assign(style, { left: left + "px", width: (right - left) + "px", padding: padding + "px" });
             return <div className={className} key={utt.id !== undefined ? utt.id : i} style={style}
-                    onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
-                    onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
+                onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
+                onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
                 <span>{utt.text}</span>
             </div>;
         });
@@ -295,27 +295,27 @@ class TextVisualizer extends Visualizer<Utterances> {
         const from = +utt.from / this.props.gui.totalTimeSeconds, to = +utt.to / this.props.gui.totalTimeSeconds;
         let left = util.getPixelFromPosition(from, 0, width, this.props.gui.zoom);
         let right = util.getPixelFromPosition(to, 0, width, this.props.gui.zoom);
-        if ( right < 0 || left > this.props.gui.width) return null;
+        if (right < 0 || left > this.props.gui.width) return null;
         let className = "utterance tooltip visible";
         let styleText;
-        if(utt.color) styleText = {backgroundColor: `rgb(${utt.color})`}
+        if (utt.color) styleText = { backgroundColor: `rgb(${utt.color})` }
         else styleText = {};
-        const style = {left:left+"px", width: (right-left)+"px"};
+        const style = { left: left + "px", width: (right - left) + "px" };
         return <div className={className} key={utt.id} style={style}>
-            <span className="content" style={styleText}><b/>{utt.text}</span>
+            <span className="content" style={styleText}><b />{utt.text}</span>
         </div>;
     }
     Tooltip = observer(function Tooltip(this: TextVisualizer) {
         return <div>
             {this.playbackTooltip !== null && this.props.gui.audioPlayer && this.props.gui.audioPlayer.playing &&
-                <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.playbackTooltip)}</div>}
-            {this.tooltip !== null && <div style={{position: "relative", height: "0px", width:"100%"}}>{this.getTooltip(this.tooltip)}</div>}
+                <div style={{ position: "relative", height: "0px", width: "100%" }}>{this.getTooltip(this.playbackTooltip)}</div>}
+            {this.tooltip !== null && <div style={{ position: "relative", height: "0px", width: "100%" }}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
     }.bind(this))
     render() {
         return (
-            <div style={{height: "4em"}}>
-                <div style={{overflow: "hidden", position: "relative", height: "40px", width:"100%"}}>{this.getElements()}</div>
+            <div style={{ height: "4em" }}>
+                <div style={{ overflow: "hidden", position: "relative", height: "40px", width: "100%" }}>{this.getElements()}</div>
                 <this.Tooltip />
             </div>
         );
@@ -328,7 +328,7 @@ class RobinAudioNode {
     }
 }
 @observer
-class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: GUI}, {}> {
+class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: GUI }, {}> {
     playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
     audio: AudioContext;
@@ -342,12 +342,12 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: G
         this.audio = new AudioContext();
         this.disposers.push(() => (this.audio as any).close());
         this.disposers.push(mobx.autorun(() => {
-            for(const feature of this.props.features) this.makeAudioBuffer(feature);
-            if(this.playing) {
-                for(const feature of this.props.features) {
+            for (const feature of this.props.features) this.makeAudioBuffer(feature);
+            if (this.playing) {
+                for (const feature of this.props.features) {
                     const buffer = this.makeAudioBuffer(feature);
-                    const audioSource = this.toAudioSource({buffer, audio: this.audio});
-                
+                    const audioSource = this.toAudioSource({ buffer, audio: this.audio });
+
                     this.duration = buffer.duration;
                     audioSource.playbackRate.value = 1;
                     const startPlaybackPosition = mobx.untracked(() => this.props.gui.playbackPosition);
@@ -364,20 +364,20 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: G
         const zoom = this.props.gui.zoom;
         const w = zoom.right - zoom.left;
         let pos = this.props.gui.playbackPosition;
-        if (pos - w/2 < 0) pos = w/2;
-        if (pos + w/2 > 1) pos = 1 - w/2;
-        zoom.left = pos - w/2; zoom.right = pos + w/2;
+        if (pos - w / 2 < 0) pos = w / 2;
+        if (pos + w / 2 > 1) pos = 1 - w / 2;
+        zoom.left = pos - w / 2; zoom.right = pos + w / 2;
     }
     @autobind @action
     updatePlaybackPosition() {
-        if(!this.playing) return;
+        if (!this.playing) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
-        if(this.props.gui.followPlayback) this.center();
-        if(this.playing) requestAnimationFrame(this.updatePlaybackPosition);
+        if (this.props.gui.followPlayback) this.center();
+        if (this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
     @computed get xTranslation() {
         const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
-        return "translateX("+x+"px)";
+        return "translateX(" + x + "px)";
     }
     makeAudioBuffer = mobx.createTransformer((feature: NumFeature) => {
         console.log("creating buffer for " + feature.name);
@@ -387,7 +387,7 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: G
         audioBuffer.copyToChannel(arr, 0);
         return audioBuffer;
     });
-    toAudioSource = mobx.createTransformer(({buffer, audio}: {buffer: AudioBuffer, audio: AudioContext}) => {
+    toAudioSource = mobx.createTransformer(({buffer, audio}: { buffer: AudioBuffer, audio: AudioContext }) => {
         const audioSource = audio.createBufferSource();
         audioSource.buffer = buffer;
         audioSource.playbackRate.value = 0;
@@ -397,22 +397,22 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: G
 
     @autobind @action
     onKeyUp(event: KeyboardEvent) {
-        if(event.keyCode == 32) {
+        if (event.keyCode == 32) {
             event.preventDefault();
             this.playing = !this.playing;
         }
     }
     @autobind @action
     onKeyDown(event: KeyboardEvent) {
-        if(event.keyCode == 32) {
+        if (event.keyCode == 32) {
             event.preventDefault();
         }
     }
     @autobind @action
     onClick(event: MouseEvent) {
-        if(event.clientX < this.props.gui.left) return;
+        if (event.clientX < this.props.gui.left) return;
         event.preventDefault();
-        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom)!;
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
         this.playing = false;
         runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
@@ -429,32 +429,32 @@ class AudioPlayer extends React.Component<{features: NumFeatureSVector[], gui: G
         this.disposers.push(action("stopPlaybackExit", () => this.playing = false));
     }
     componentWillUnmount() {
-        for(const disposer of this.disposers) disposer();
+        for (const disposer of this.disposers) disposer();
     }
     render() {
         return (
-            <div ref={this.setPlayerBar} style={{position: "fixed", width: "2px", height: "100vh", top:0, left:0, transform: this.xTranslation, backgroundColor:"gray"}} />
+            <div ref={this.setPlayerBar} style={{ position: "fixed", width: "2px", height: "100vh", top: 0, left: 0, transform: this.xTranslation, backgroundColor: "gray" }} />
         );
     }
 }
-type VisualizerChoice = "Waveform"|"Darkness"|"Text"|"Highlights";
+type VisualizerChoice = "Waveform" | "Darkness" | "Text" | "Highlights";
 
 export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
-    if(!feature) return [];
-    if(feature.typ === "FeatureType.SVector" || feature.typ === "FeatureType.FMatrix") {
+    if (!feature) return [];
+    if (feature.typ === "FeatureType.SVector" || feature.typ === "FeatureType.FMatrix") {
         return ["Waveform", "Darkness"];
     } else if (feature.typ === "utterances") {
         return ["Text", "Highlights"];
     } else if (feature.typ === "highlights") {
         return ["Highlights", "Text"];
-    }else throw Error("Can't visualize " + (feature as any).typ);
+    } else throw Error("Can't visualize " + (feature as any).typ);
 }
 
 @observer
-export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{}> {
+export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>, {}> {
     @observable
     preferredHeight: number = 50;
-    static visualizers:{[name: string]: VisualizerConstructor<any>} = {
+    static visualizers: { [name: string]: VisualizerConstructor<any> } = {
         "Waveform": Waveform.AudioWaveform,
         "Darkness": Waveform.Darkness,
         "Text": TextVisualizer,
@@ -468,19 +468,19 @@ export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>,{
 
 function splitIn(count: number, data: Utterances) {
     const feats: Utterances[] = [];
-    for(let i = 0; i < count; i++) {
-        feats[i] = {name: data.name+"."+i, typ: data.typ, data: []};
+    for (let i = 0; i < count; i++) {
+        feats[i] = { name: data.name + "." + i, typ: data.typ, data: [] };
     }
-    data.data.forEach((utt, i) => feats[i%count].data.push(utt));
+    data.data.forEach((utt, i) => feats[i % count].data.push(utt));
     return feats;
 }
 
-const PlaybackPosition = observer(function PlaybackPosition({gui}: {gui: GUI}) {
+const PlaybackPosition = observer(function PlaybackPosition({gui}: { gui: GUI }) {
     return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>
 });
 
 @observer
-class ConversationSelector extends React.Component<{gui: GUI}, {}> {
+class ConversationSelector extends React.Component<{ gui: GUI }, {}> {
     @autobind @action
     setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.props.gui.conversationSelectorText = e.currentTarget.value; }
     async randomConversation(t?: string) {
@@ -490,9 +490,9 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     render() {
         const convos = this.props.gui.getConversations().data;
         const allconvos = convos && Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
-        return (<div style={{display:"inline-block"}}>
+        return (<div style={{ display: "inline-block" }}>
             <input list="conversations" value={this.props.gui.conversationSelectorText} onChange={this.setConversation} />
-            {allconvos && <datalist id="conversations">{allconvos.map(c => <option key={c as any} value={c as any}/>)}</datalist>}
+            {allconvos && <datalist id="conversations">{allconvos.map(c => <option key={c as any} value={c as any} />)}</datalist>}
             <button onClick={c => this.props.gui.loadConversation(this.props.gui.conversationSelectorText)}>Load</button>
             <button onClick={() => this.randomConversation()}>Random</button>
             {convos && Object.keys(convos).map(name =>
@@ -502,29 +502,31 @@ class ConversationSelector extends React.Component<{gui: GUI}, {}> {
     }
 }
 
-const examples: {[name: string]: any} = {
-    "NN output": {uis:[
-        {"features":[{"feature":"/A/extracted/adc","visualizer":"Waveform","config":"givenRange","currentRange":{"min":-32768,"max":32768}}],"height":"auto"},
-        {"features":[{"feature":"/A/transcript/Original/text","visualizer":"Text","config":"normalizeLocal","currentRange":null}],"height":"auto"},
-        {"features":[{"feature":"/A/NN outputs/latest/best","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":0.169875830411911,"max":0.8434500098228455}}],"height":"auto"},
-        {"features":[{"feature":"/A/NN outputs/latest/best.smooth","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":0.2547765076160431,"max":0.7286926507949829},"uuid":26},{"feature":"/A/NN outputs/latest/best.smooth.thres","uuid":31,"visualizer":"Highlights","config":"normalizeLocal","currentRange":null}],"height":85,"uuid":25},
-        {"features":[{"feature":"/A/NN outputs/latest/best.smooth.bc","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-32768,"max":32768}}],"height":"auto"},
-        {"features":[{"feature":"/A/extracted/pitch","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-1,"max":1}}],"height":"auto"},
-        {"features":[{"feature":"/A/extracted/power","visualizer":"Waveform","config":"normalizeLocal","currentRange":{"min":-1,"max":1}}],"height":"auto"}]}
+const examples: { [name: string]: any } = {
+    "NN output": {
+        uis: [
+            { "features": [{ "feature": "/A/extracted/adc", "visualizer": "Waveform", "config": "givenRange", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
+            { "features": [{ "feature": "/A/transcript/Original/text", "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
+            { "features": [{ "feature": "/A/NN outputs/latest/best", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.169875830411911, "max": 0.8434500098228455 } }], "height": "auto" },
+            { "features": [{ "feature": "/A/NN outputs/latest/best.smooth", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 }, { "feature": "/A/NN outputs/latest/best.smooth.thres", "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25 },
+            { "features": [{ "feature": "/A/NN outputs/latest/best.smooth.bc", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
+            { "features": [{ "feature": "/A/extracted/pitch", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" },
+            { "features": [{ "feature": "/A/extracted/power", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
+    }
 }
-let MaybeAudioPlayer = observer<{gui:GUI}>(function MaybeAudioPlayer({gui}: {gui: GUI}) {
-    if(gui.loadingState !== 1) return <span/>;
-    const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a,b) => (a.push(...b),a), []));
+let MaybeAudioPlayer = observer<{ gui: GUI }>(function MaybeAudioPlayer({gui}: { gui: GUI }) {
+    if (gui.loadingState !== 1) return <span />;
+    const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []));
     const visibleAudioFeatures = [...visibleFeatures]
         .map(f => gui.getFeature(f.feature).data)
         .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
-    if(visibleAudioFeatures.length > 0)
+    if (visibleAudioFeatures.length > 0)
         return <AudioPlayer features={visibleAudioFeatures} gui={gui} ref={gui.setAudioPlayer} />;
-    else return <span/>;
+    else return <span />;
 });
 @observer
 export class GUI extends React.Component<{}, {}> {
-    
+
     @observable windowWidth = window.innerWidth;
     @observable playbackPosition = 0;
     @observable followPlayback = false;
@@ -539,15 +541,15 @@ export class GUI extends React.Component<{}, {}> {
 
     audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
     uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
-    @observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = action("setWidthCalcDiv", (e:HTMLDivElement) => this.widthCalcDiv = e);
+    @observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
     private socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
     @observable
     loadingState = 1;
     loadedFeatures = new Set<NumFeature>();
     @computed get categoryTree() {
-        const data =  this.socketManager.getFeatures(this.conversation).data;
-        if(!data) return [];
+        const data = this.socketManager.getFeatures(this.conversation).data;
+        if (!data) return [];
         else {
             const ft = new OptimizedFeaturesTree();
             return data.categories.map(c => ft.getFeaturesTree("", c));
@@ -564,16 +566,16 @@ export class GUI extends React.Component<{}, {}> {
         })));
     }
     @action
-    deserialize(data: string|GUI) {
-        if(this.audioPlayer) this.audioPlayer.playing = false;
-        if(this.loadingState !== 1) {
+    deserialize(data: string | GUI) {
+        if (this.audioPlayer) this.audioPlayer.playing = false;
+        if (this.loadingState !== 1) {
             console.error("can't load while loading");
             return;
         }
         let obj;
-        if(typeof data === "string") obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
+        if (typeof data === "string") obj = JSON.parse(LZString.decompressFromEncodedURIComponent(data));
         else obj = data;
-        if(obj.conversation && this.conversation !== obj.conversation) {
+        if (obj.conversation && this.conversation !== obj.conversation) {
             this.loadConversation(obj.conversation, obj);
         } else {
             this.applyState(obj);
@@ -581,7 +583,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @action
     applyState(targetState: GUI) {
-        if(targetState.uis) targetState.uis.forEach(ui => {ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++)});
+        if (targetState.uis) targetState.uis.forEach(ui => { ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++) });
         Object.assign(this, targetState);
     }
     @computed
@@ -607,16 +609,16 @@ export class GUI extends React.Component<{}, {}> {
             this.conversationSelectorText = conversation;
         });
         const features = await this.socketManager.getFeatures(convID).promise;
-        const targetFeatures = targetState?targetState.uis.map(ui => ui.features.map(ui => ui.feature as any as s.FeatureID)):features.defaults;
+        const targetFeatures = targetState ? targetState.uis.map(ui => ui.features.map(ui => ui.feature as any as s.FeatureID)) : features.defaults;
         const total = targetFeatures.reduce((sum, next) => sum + next.length, 0);
         let i = 0;
-        for(const featureIDs of targetFeatures) {
+        for (const featureIDs of targetFeatures) {
             const feats = [] as Feature[];
             const ui = this.getDefaultUIState([]);
             runInAction("addDefaultUI", () => {
                 this.uis.push(ui)
             });
-            for(const featureID of featureIDs) {
+            for (const featureID of featureIDs) {
                 const feat = await this.getFeature(featureID).promise;
                 runInAction("progressIncrement", () => {
                     ui.features.push(this.getDefaultSingleUIState(feat))
@@ -624,35 +626,35 @@ export class GUI extends React.Component<{}, {}> {
                 });
             }
         }
-        if(targetState) {
+        if (targetState) {
             this.applyState(targetState);
         }
     }
     async verifyConversationID(id: string): Promise<s.ConversationID> {
         const convos = await this.socketManager.getConversations().promise;
-        if(Object.keys(convos).some(name => convos[name].indexOf(id as any) >= 0)) return id as any;
+        if (Object.keys(convos).some(name => convos[name].indexOf(id as any) >= 0)) return id as any;
         throw Error("unknown conversation " + id);
     }
     async randomConversation(category?: string): Promise<s.ConversationID> {
         const convos = await this.getConversations().promise;
         let choices;
-        if(!category) choices = Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
+        if (!category) choices = Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
         else choices = convos[category];
         return util.randomChoice(choices);
     }
     @action
     onWheel(event: MouseWheelEvent) {
-            if (!event.ctrlKey) return;
-            event.preventDefault();
-            const position = util.getPositionFromPixel(event.clientX, this.left, this.width, this.zoom)!;
-            const scaleChange = event.deltaY > 0 ? globalConfig.zoomFactor : 1/globalConfig.zoomFactor;
-            this.zoom = util.rescale(this.zoom, scaleChange, position);
-            this.zoom.right = Math.min(this.zoom.right, 1);
-            this.zoom.left = Math.max(this.zoom.left, 0);
+        if (!event.ctrlKey) return;
+        event.preventDefault();
+        const position = util.getPositionFromPixel(event.clientX, this.left, this.width, this.zoom) !;
+        const scaleChange = event.deltaY > 0 ? globalConfig.zoomFactor : 1 / globalConfig.zoomFactor;
+        this.zoom = util.rescale(this.zoom, scaleChange, position);
+        this.zoom.right = Math.min(this.zoom.right, 1);
+        this.zoom.left = Math.max(this.zoom.left, 0);
     }
     getDefaultSingleUIState(feature: Feature): SingleUIState {
         let visualizerConfig: VisualizerConfig;
-        if(isNumFeature(feature) && feature.range instanceof Array) {
+        if (isNumFeature(feature) && feature.range instanceof Array) {
             visualizerConfig = "givenRange";
         } else visualizerConfig = "normalizeLocal";
         return {
@@ -671,17 +673,17 @@ export class GUI extends React.Component<{}, {}> {
         }
     }
     checkTotalTime(feature: Feature) {
-        if(isNumFeature(feature))  {
-            if(this.loadedFeatures.has(feature)) return;
+        if (isNumFeature(feature)) {
+            if (this.loadedFeatures.has(feature)) return;
             let totalTime: number = NaN;
-            if(feature.typ === "FeatureType.SVector") {
+            if (feature.typ === "FeatureType.SVector") {
                 totalTime = feature.data.shape[0] / (feature.samplingRate * 1000);
-            } else if(feature.typ === "FeatureType.FMatrix") {
+            } else if (feature.typ === "FeatureType.FMatrix") {
                 totalTime = feature.data.shape[0] * feature.shift / 1000;
             }
             if (!isNaN(totalTime)) {
-                if(isNaN(this.totalTimeSeconds)) runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
-                else if(Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
+                if (isNaN(this.totalTimeSeconds)) runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
+                else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
             }
@@ -689,7 +691,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @autobind
     onSocketOpen() {
-        if(location.hash.length > 1) {
+        if (location.hash.length > 1) {
             this.deserialize(location.hash.substr(1));
         } else {
             this.loadConversation(globalConfig.defaultConversation);
@@ -697,7 +699,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @autobind
     windowResize() {
-        if(this.windowWidth !== document.body.clientWidth)
+        if (this.windowWidth !== document.body.clientWidth)
             runInAction("windowWidthChange", () => this.windowWidth = document.body.clientWidth);
     }
     constructor() {
@@ -710,9 +712,9 @@ export class GUI extends React.Component<{}, {}> {
         window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
         this.socketManager.socketOpen().then(this.onSocketOpen);
     }
-    getFeature(id: string|s.FeatureID) {
+    getFeature(id: string | s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
-        if(f.data) this.checkTotalTime(f.data);
+        if (f.data) this.checkTotalTime(f.data);
         else {
             //runInAction("loadSingleFeature", () => this.loadingState = 0);
             f.promise.then(f => {
@@ -730,43 +732,43 @@ export class GUI extends React.Component<{}, {}> {
     }
     @action
     addUI(afterUuid: number) {
-        this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, {uuid: uuid++, features:[], height: "auto"});
+        this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, { uuid: uuid++, features: [], height: "auto" });
     }
     *getVisualizers() {
-        for(const ui of this.uis) {
+        for (const ui of this.uis) {
             yield <InfoVisualizer key={ui.uuid} uiState={ui} gui={this} />;
-            yield <button key={ui.uuid+"+"} onClick={() => this.addUI(ui.uuid)}>Add Visualizer</button>;
+            yield <button key={ui.uuid + "+"} onClick={() => this.addUI(ui.uuid)}>Add Visualizer</button>;
         }
     }
     render(): JSX.Element {
         const self = this;
         const ProgressIndicator = observer(function ProgressIndicator() {
-            if(self.loadingState === 1) return <span>Loading complete</span>;
+            if (self.loadingState === 1) return <span>Loading complete</span>;
             return (
-                <div style={{display:"inline-block", width:"200px"}}>
+                <div style={{ display: "inline-block", width: "200px" }}>
                     Loading: <B.ProgressBar intent={B.Intent.PRIMARY} value={self.loadingState} />
                 </div>
             );
         });
         return (
             <div>
-                <div style={{margin: "10px"}} className="headerBar">
+                <div style={{ margin: "10px" }} className="headerBar">
                     <ConversationSelector gui={this} />
                     <label>Follow playback:
                         <input type="checkbox" checked={this.followPlayback}
-                            onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)}/>
+                            onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
                     </label>
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
                     {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(k =>
-                            <button key={k} onClick={e => {this.deserialize(examples[k])}}>{k}</button>)}</span>
+                        <button key={k} onClick={e => { this.deserialize(examples[k]) } }>{k}</button>)}</span>
                     }
                 </div>
                 <div ref={this.setUisDiv}>
-                    <div style={{display: "flex", visibility: "hidden"}}>
+                    <div style={{ display: "flex", visibility: "hidden" }}>
                         <div style={styles.leftBarCSS} />
-                        <div style={{flexGrow: 1}} ref={this.setWidthCalcDiv} />
+                        <div style={{ flexGrow: 1 }} ref={this.setWidthCalcDiv} />
                     </div>
                     {[...this.getVisualizers()]}
                 </div>
@@ -781,4 +783,4 @@ export class GUI extends React.Component<{}, {}> {
 
 const _gui = ReactDOM.render(<GUI />, document.getElementById("root")) as GUI;
 
-Object.assign(window, {gui:_gui, util, globalConfig, mobx, Data});
+Object.assign(window, { gui: _gui, util, globalConfig, mobx, Data });
