@@ -1,7 +1,7 @@
 import * as Data from "./Data";
 
 export type NumFeatureCommon = {
-    name: string,
+    name: FeatureID,
     samplingRate: number, // in kHz
     shift: number,
     data: Data.TwoDimensionalArray,
@@ -17,15 +17,25 @@ export type NumFeatureFMatrix = NumFeatureCommon & {
 export type Color = [number, number, number];
 
 export type Utterances = {
-    name: string,
+    name: FeatureID,
     typ: "utterances",
     data: Utterance[]
 }
 export type Highlights = {
-    name: string,
+    name: FeatureID,
     typ: "highlights",
     data: Utterance[]
 }
 export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances | Highlights;
 export type Utterance = { from: number | string, to: number | string, text?: string, id?: string, color?: Color };
+
+export interface ConversationID extends String {
+    __typeBrand: "ConversationID";
+}
+export interface FeatureID extends String {
+    __typeBrand: "FeatureID";
+}
+export function isFeatureID(f: any): f is FeatureID {
+    return typeof f === "string";
+}

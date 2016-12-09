@@ -3,8 +3,10 @@ import * as mobx from "mobx";
 import { observer } from "mobx-react";
 import * as util from "./util";
 import { autobind } from "core-decorators";
-import { NumFeature, NumFeatureSVector } from "./features";
+import { NumFeature, NumFeatureSVector, FeatureID } from "./features";
 import { GUI } from "./client";
+import * as Data from "./Data";
+import * as Resampler from "./Resampler";
 
 @observer
 export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: GUI }, {}> {
@@ -21,7 +23,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
         this.audio = new AudioContext();
         this.disposers.push(() => (this.audio as any).close());
         this.disposers.push(mobx.autorun(() => {
-            for (const feature of this.props.features) this.makeAudioBuffer(feature);
+            // for (const feature of this.props.features) this.makeAudioBuffer(feature);
             if (this.playing) {
                 for (const feature of this.props.features) {
                     const buffer = this.makeAudioBuffer(feature);
@@ -62,7 +64,9 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
         console.log("creating buffer for " + feature.name);
         const audioBuffer = this.audio.createBuffer(1, feature.data.shape[0], feature.samplingRate * 1000);
         feature.data.iterate("ALL", 0);
-        const arr = Float32Array.from(feature.data.buffer, v => v / 2 ** 15);
+        let arr;
+        if (feature.data.dataType === "float32") arr = feature.data.buffer as Float32Array;
+        else arr = Float32Array.from(feature.data.buffer, v => v / 2 ** 15);
         audioBuffer.copyToChannel(arr, 0);
         return audioBuffer;
     });
@@ -124,13 +128,78 @@ export class PlaybackPosition extends React.Component<{ gui: GUI }, {}> {
     }
 }
 
+export const microphoneFeature = {
+    id: "/microphone" as any as FeatureID,
+    name: "microphone"
+};
 
-export class AudioRecorder {
-    constructor() {
-        this.init();
+export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
+    static bufferDuration_s = 100;
+    static sampleRate = 8000;
+    static bufferSize = 16384;
+    microphone: MediaStreamTrack;
+    inputStream: MediaStream;
+    source: MediaStreamAudioSourceNode;
+    audioContext: AudioContext;
+    processor: ScriptProcessorNode;
+
+    constructor(props: any) {
+        super(props);
+
     }
 
-    init() {
-        const constraints = navigator.mediaDevices.getSupportedConstraints();
+    private static feature: NumFeatureSVector;
+    static getFeature(): NumFeatureSVector {
+        return AudioRecorder.feature || (AudioRecorder.feature = {
+            name: microphoneFeature.id,
+            typ: "FeatureType.SVector",
+            data: new Data.TwoDimensionalArray("float32", [this.bufferDuration_s * this.sampleRate, 1]),
+            samplingRate: this.sampleRate / 1000,
+            shift: 0,
+            range: [-1, 1],
+            dtype: "int16"
+        });
+    }
+    @autobind
+    async startRecording() {
+        this.audioContext = new AudioContext();
+        this.inputStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: this.audioContext.sampleRate, channelCount: 1, echoCancellation: false } as any });
+        const [microphone, ...others] = this.inputStream.getAudioTracks();
+        if (others.length > 0) throw Error("expected single channel");
+        this.microphone = microphone;
+        console.log(microphone.getConstraints());
+        console.log("Got microphone", microphone.label);
+        this.source = this.audioContext.createMediaStreamSource(this.inputStream);
+        this.processor = this.audioContext.createScriptProcessor(AudioRecorder.bufferSize, 1, 1);
+        const feat = AudioRecorder.getFeature().data;
+        let lastOffset = 0;
+        let realOffset = 0;
+        let lastTime = 0;
+        this.processor.addEventListener("audioprocess", event => {
+            const dataSoSampled = event.inputBuffer.getChannelData(0);
+            //const offset = (((event.playbackTime % AudioRecorder.bufferDuration_s) * AudioRecorder.sampleRate) | 0);
+            //console.log(event.playbackTime, offset, offset - lastOffset, data.length, Math.round(data.length/(event.playbackTime-lastTime))|0, data);
+            //lastOffset = offset;
+            //lastTime = event.playbackTime;
+            const promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, this.audioContext.sampleRate, AudioRecorder.sampleRate);
+            promise.then(data => {
+                feat.setData(realOffset * 4, data.buffer, data.byteOffset, data.byteLength);
+                realOffset += data.length;
+            });
+        });
+        this.source.connect(this.processor);
+        this.processor.connect(this.audioContext.destination);
+    }
+    @autobind
+    stopRecording() {
+        this.microphone.stop();
+        this.source.disconnect(this.processor);
+        this.processor.disconnect(this.audioContext.destination);
+    }
+
+    render() {
+        return (
+            <div><button onClick={this.startRecording}>Start Rec</button><button onClick={this.stopRecording}>Stop Rec</button></div>
+        );
     }
 }

@@ -31,7 +31,7 @@ const toFake = (iterator: { count: number, start: number, stride: number }, igno
 };
 export class TwoDimensionalArray {
     public readonly buffer: ArrayLike<number>;
-    private readonly dataType: TypedArrayType;
+    public readonly dataType: TypedArrayType;
     private readonly atom: mobx.Atom;
     readonly shape: [number, number];
     constructor(dataType: TypedArrayType, shape: [number, number]) {

@@ -58,7 +58,7 @@ class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
         info.visualizer = value as VisualizerChoice;
     }
     async changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
-        const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise);
+        const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value));
         mobx.runInAction("changeFeature" + i, () => this.props.uiState.features[i] = state);
     }
     @mobx.action remove(uuid: number) {
@@ -75,7 +75,7 @@ class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
     @mobx.action async add(feat: string) {
         this.addPopover.setState({ isOpen: false });
         const gui = this.props.gui;
-        const state = gui.getDefaultSingleUIState(await gui.getFeature(feat).promise);
+        const state = gui.getDefaultSingleUIState(await gui.getFeature(feat));
         mobx.runInAction(() => this.props.uiState.features.push(state));
     }
     addPopover: B.Popover;

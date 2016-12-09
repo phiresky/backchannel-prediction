@@ -11,8 +11,8 @@ import { autobind } from "core-decorators";
 import * as B from "@blueprintjs/core";
 import * as Data from "./Data";
 import * as v from "./Visualizer";
-import { Feature, NumFeature, NumFeatureSVector } from "./features";
-import { AudioPlayer, PlaybackPosition } from "./Audio";
+import { Feature, NumFeature, NumFeatureSVector, FeatureID, ConversationID } from "./features";
+import { AudioPlayer, PlaybackPosition, AudioRecorder, microphoneFeature } from "./Audio";
 
 export const globalConfig = mobx.observable({
     maxColor: "#3232C8",
@@ -39,7 +39,7 @@ interface Zoom {
 export interface SingleUIState {
     uuid: number;
     visualizer: v.VisualizerChoice;
-    feature: string;
+    feature: FeatureID;
     config: v.VisualizerConfig;
     currentRange: { min: number, max: number } | null;
 }
@@ -59,10 +59,9 @@ class OptimizedFeaturesTree {
     getFeaturesTree(parentPath: string, category: s.CategoryTreeElement): B.ITreeNode {
         if (!category) return { id: "unused", label: "unused", childNodes: [] };
 
-        if (s.isFeatureID(category)) {
-            const name = category as any as string;
+        if (typeof category === "string") {
             return {
-                id: parentPath + "/" + name, label: name
+                id: parentPath + "/" + category, label: category
             };
         }
         const path = parentPath + "/" + category.name;
@@ -114,16 +113,32 @@ const examples: { [name: string]: any } = {
             { "features": [{ "feature": "/A/extracted/power", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
     }
 };
-let MaybeAudioPlayer = observer<{ gui: GUI }>(function MaybeAudioPlayer({gui}: { gui: GUI }) {
-    if (gui.loadingState !== 1) return <span />;
-    const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []));
-    const visibleAudioFeatures = [...visibleFeatures]
-        .map(f => gui.getFeature(f.feature).data)
-        .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
-    if (visibleAudioFeatures.length > 0)
-        return <AudioPlayer features={visibleAudioFeatures} gui={gui} ref={gui.setAudioPlayer} />;
-    else return <span />;
-});
+@observer
+class MaybeAudioPlayer extends React.Component<{ gui: GUI }, {}> {
+    render() {
+        const gui = this.props.gui;
+        if (gui.loadingState !== 1) return <span />;
+        const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []));
+        const visibleAudioFeatures = [...visibleFeatures]
+            .map(f => gui.getFeature(f.feature).data)
+            .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
+        if (visibleAudioFeatures.length > 0)
+            return <AudioPlayer features={visibleAudioFeatures} gui={gui} ref={gui.setAudioPlayer} />;
+        else return <span />;
+    }
+}
+@observer
+class MaybeAudioRecorder extends React.Component<{ gui: GUI }, {}> {
+    render() {
+        const gui = this.props.gui;
+        if (gui.loadingState !== 1) return <span />;
+        const visibleFeatures = [...new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []))];
+        const visible = visibleFeatures.some(f => f.feature === microphoneFeature.id);
+        if (visible)
+            return <AudioRecorder gui={gui} />;
+        else return <span />;
+    }
+}
 @observer
 export class GUI extends React.Component<{}, {}> {
 
@@ -131,7 +146,7 @@ export class GUI extends React.Component<{}, {}> {
     @mobx.observable playbackPosition = 0;
     @mobx.observable followPlayback = false;
 
-    @mobx.observable conversation: s.ConversationID;
+    @mobx.observable conversation: ConversationID;
     @mobx.observable conversationSelectorText = "";
     @mobx.observable uis = [] as UIState[];
     @mobx.observable zoom = {
@@ -148,7 +163,7 @@ export class GUI extends React.Component<{}, {}> {
     loadingState = 1;
     loadedFeatures = new Set<NumFeature>();
     @mobx.computed get categoryTree() {
-        const data = this.socketManager.getFeatures(this.conversation).data;
+        const data = this.getFeatures().data;
         if (!data) return [];
         else {
             const ft = new OptimizedFeaturesTree();
@@ -208,8 +223,8 @@ export class GUI extends React.Component<{}, {}> {
             this.loadingState = 0;
             this.conversationSelectorText = conversation;
         });
-        const features = await this.socketManager.getFeatures(convID).promise;
-        const targetFeatures = targetState ? targetState.uis.map(ui => ui.features.map(ui => ui.feature as any as s.FeatureID)) : features.defaults;
+        const features = await this.getFeatures();
+        const targetFeatures = targetState ? targetState.uis.map(ui => ui.features.map(ui => ui.feature)) : features.defaults;
         const total = targetFeatures.reduce((sum, next) => sum + next.length, 0);
         let i = 0;
         for (const featureIDs of targetFeatures) {
@@ -218,7 +233,7 @@ export class GUI extends React.Component<{}, {}> {
                 this.uis.push(ui);
             });
             for (const featureID of featureIDs) {
-                const feat = await this.getFeature(featureID).promise;
+                const feat = await this.getFeature(featureID);
                 mobx.runInAction("progressIncrement", () => {
                     ui.features.push(this.getDefaultSingleUIState(feat));
                     this.loadingState = ++i / total;
@@ -229,13 +244,13 @@ export class GUI extends React.Component<{}, {}> {
             this.applyState(targetState);
         }
     }
-    async verifyConversationID(id: string): Promise<s.ConversationID> {
-        const convos = await this.socketManager.getConversations().promise;
+    async verifyConversationID(id: string): Promise<ConversationID> {
+        const convos = await this.socketManager.getConversations();
         if (Object.keys(convos).some(name => convos[name].indexOf(id as any) >= 0)) return id as any;
         throw Error("unknown conversation " + id);
     }
-    async randomConversation(category?: string): Promise<s.ConversationID> {
-        const convos = await this.getConversations().promise;
+    async randomConversation(category?: string): Promise<ConversationID> {
+        const convos = await this.getConversations();
         let choices;
         if (!category) choices = Object.keys(convos).map(k => convos[k]).reduce(util.mergeArray);
         else choices = convos[category];
@@ -311,13 +326,21 @@ export class GUI extends React.Component<{}, {}> {
         window.addEventListener("hashchange", mobx.action("hashChange", e => this.deserialize(location.hash.substr(1))));
         this.socketManager.socketOpen().then(this.onSocketOpen);
     }
-    getFeature(id: string | s.FeatureID) {
-        const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
+    getFeature(id: string | FeatureID) {
+        if (id === microphoneFeature.id) {
+            return new s.LulPromise(AudioRecorder.getFeature());
+        }
+        const f = this.socketManager.getFeature(this.conversation, id as any as FeatureID);
         f.then(f => this.checkTotalTime(f));
         return f;
     }
     getFeatures() {
-        return this.socketManager.getFeatures(this.conversation);
+        return this.socketManager.getFeatures(this.conversation).then(features => {
+            return {
+                ...features,
+                categories: [...features.categories, microphoneFeature.name],
+            };
+        });
     }
     getConversations() {
         return this.socketManager.getConversations();
@@ -351,6 +374,7 @@ export class GUI extends React.Component<{}, {}> {
                             onChange={mobx.action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
                     </label>
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
+                    <MaybeAudioRecorder gui={this} />
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
                     {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(k =>

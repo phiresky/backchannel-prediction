@@ -289,6 +289,8 @@ async def handler(websocket, path):
                 elif msg['type'] == "getFeature":
                     conv = sanitize_conversation(msg['conversation'])
                     await sendFeature(websocket, id, conv, msg['feature'])
+                elif msg['type'] == "echo":
+                    await websocket.send(json.dumps({"id": id}))
                 else:
                     raise Exception("Unknown msg " + json.dumps(msg))
             except Exception as e:

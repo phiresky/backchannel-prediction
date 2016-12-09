@@ -3,7 +3,7 @@ import * as c from "./client";
 import * as util from "./util";
 import * as Data from "./Data";
 import { autobind } from "core-decorators";
-import { NumFeatureCommon, Utterances, Highlights, NumFeature, Feature } from "./features";
+import { NumFeatureCommon, Utterances, Highlights, NumFeature, Feature, FeatureID, ConversationID } from "./features";
 
 export type ClientMessage = {
     type: "getConversations"
@@ -14,38 +14,44 @@ export type ClientMessage = {
         type: "getFeature",
         conversation: ConversationID,
         feature: FeatureID
-    }
+    } | {
+        type: "echo"
+    };
 type GetConversationsResponse = { [name: string]: ConversationID[] };
 type GetFeatureResponse = FeatureReceive;
-export type CategoryTreeElement = { name: string, children: CategoryTreeElement[] } | FeatureID;
+export type CategoryTreeElement = { name: string, children: CategoryTreeElement[] } | string;
 export type GetFeaturesResponse = {
     categories: CategoryTreeElement[];
     defaults: FeatureID[][];
 }
 
-class LulPromise<T> implements PromiseLike<T> {
+export class LulPromise<T> implements PromiseLike<T> {
     @mobx.observable data: T | null = mobx.asReference(null);
-    constructor(public promise: Promise<T>) {
-        promise.then(mobx.action("fromPromise", (result: T) => this.data = result));
-    }
-    then<R>(resolve: (t: T) => R, reject?: (error: any) => any): Promise<R> {
-        if (this.data) {
-            return Promise.resolve(resolve(this.data));
+    promise: Promise<T>;
+    constructor(arg: T | Promise<T>) {
+        if (typeof arg === "object" && typeof (arg as any)["then"] !== "function") {
+            mobx.runInAction("instaresolve", () => this.data = arg as T);
+            this.promise = Promise.resolve(this.data);
         } else {
-            return this.promise.then(resolve, reject);
+            this.promise = arg as Promise<T>;
+            this.promise.then(mobx.action("fromPromise", (result: T) => this.data = result));
+        }
+    }
+    then<R>(resolve: (t: T) => R, reject?: (error: any) => any): LulPromise<R> {
+        if (this.data) {
+            // resolve instantly without waiting for call stack to empty
+            const nextVal = resolve(this.data);
+            const nextLul = new LulPromise(Promise.resolve(nextVal));
+            if (typeof nextVal === "object" && typeof (nextVal as any)["then"] !== "function") {
+                mobx.runInAction("then()", () => nextLul.data = nextVal);
+            }
+            return nextLul;
+        } else {
+            return new LulPromise(this.promise.then(resolve, reject));
         }
     }
 }
 
-export interface ConversationID extends String {
-    __typeBrand: "ConversationID";
-}
-export interface FeatureID extends String {
-    __typeBrand: "FeatureID";
-}
-export function isFeatureID(f: any): f is FeatureID {
-    return typeof f === "string";
-}
 export type ServerMessage = { id: number, error: undefined, data: any };
 export type ServerError = { id: number, error: string };
 
@@ -144,10 +150,15 @@ export class SocketManager {
     getFeatures(conversation: ConversationID): LulPromise<GetFeaturesResponse> {
         return lulCache("getFeatures", this, this.getFeaturesRemote, Array.from(arguments));
     }
+    async echo() {
+        var before = performance.now();
+        await this.sendMessage({ type: "echo" })
+        console.log("roundtrip took", performance.now() - before, "ms");
+    }
     async getFeatureRemote(conversation: ConversationID, featureID: FeatureID): Promise<Feature> {
         const response = await this.sendMessage({ type: "getFeature", conversation, feature: featureID });
         const feature = response.data as GetFeatureResponse;
-        feature.name = featureID as any as string;
+        feature.name = featureID;
         if (feature.typ === "FeatureType.FMatrix" || feature.typ === "FeatureType.SVector") {
             return mobx.extendObservable(feature, {
                 data: new Data.TwoDimensionalArray(feature.dtype, feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1])
