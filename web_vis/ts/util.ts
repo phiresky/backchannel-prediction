@@ -1,5 +1,5 @@
-import { VisualizerConfig } from './client';
-import * as Data from './Data';
+import { VisualizerConfig } from "./client";
+import * as Data from "./Data";
 
 export interface ValueGetter<T> {
     getValue: (start: number, end: number) => T;
@@ -25,7 +25,7 @@ export class BinaryCacheTree<T> implements ValueGetter<T> {
         }
     }
     static toValueGetter<T>(b: BinaryCacheTree<T> | ValueGetter<T>) {
-        if (typeof b === 'function') return b;
+        if (typeof b === "function") return b;
         else return b.getValue.bind(b);
     }
     getValue(start: number, end: number): T {
@@ -78,7 +78,7 @@ export function statsCombinator(stats1: Stats, stats2: Stats) {
         max: Math.max(stats1.max, stats2.max),
         rms2: (stats1.count * stats1.rms2 + stats2.count * stats2.rms2) / count,
         count, sum: stats1.sum + stats2.sum
-    }
+    };
 }
 export function stats(data: ArrayLike<number>, start: number, end: number): Stats {
     if (!cache.has(data))
@@ -130,7 +130,7 @@ export function randomChoice<T>(data: T[]) {
  */
 export function toDeterministic(obj: any): any {
     if (obj instanceof Array) return [null, obj.map(x => toDeterministic(x))];
-    if (obj instanceof Object) return Object.keys(obj).sort().map(k => [k, toDeterministic(obj[k])])
+    if (obj instanceof Object) return Object.keys(obj).sort().map(k => [k, toDeterministic(obj[k])]);
     return obj;
 }
 export function fromDeterministic(obj: any): any {

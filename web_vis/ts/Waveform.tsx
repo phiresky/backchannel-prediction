@@ -1,9 +1,9 @@
-import * as c from './client';
-import * as React from 'react';
-import { observer } from 'mobx-react';
-import * as mobx from 'mobx';
-import * as util from './util';
-import * as Data from './Data';
+import * as c from "./client";
+import * as React from "react";
+import { observer } from "mobx-react";
+import * as mobx from "mobx";
+import * as util from "./util";
+import * as Data from "./Data";
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
     givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
@@ -61,7 +61,7 @@ function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         const from = x / w, to = (x + 1) / w;
         const fromSample = start + Math.floor(length * from);
         const toSample = start + Math.ceil(length * to);
-        const {min, max, rms2, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
+        const {sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
         ctx.fillStyle = `rgba(0,0,0,${(avg - display.min) / (display.max - display.min)})`;
         ctx.fillRect(x, y, 1, h);
@@ -82,7 +82,7 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
     canvasZoom = mobx.asStructure({
         left: 10,
         right: 10 + this.canvasWidthFactor
-    })
+    });
     render() {
         const zoom = this.props.gui.zoom;
         const canvasZoom = this.canvasZoom;
@@ -97,9 +97,7 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
             });
         }
         const screenW = this.props.gui.width;
-        const canvW = canvasZoom.right - canvasZoom.left;
         const screenLeft = (zoom.left - canvasZoom.left) / (zoom.left - zoom.right) * screenW;
-        const screenRight = screenLeft + this.canvasWidthFactor * canvW * screenW;
         const border = 1;
         return <div style={{ height: "100%", position: "relative", borderStyle: "solid", borderWidth: border + "px", overflow: "hidden" }}>
             <canvas style={{ display: "block", filter: this.filter, position: "absolute", width: Math.round(this.canvasWidthFactor * screenW) + "px", left: screenLeft, height: "100%", }}
@@ -137,7 +135,7 @@ abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
         let range;
         for (let y = 0; y < dim; y++) {
             range = this.singleRenderFunction(ctx, Math.floor(y / dim * h), w, Math.floor(h / dim),
-                this.props.feature.range, this.props.uiState.config, { data, iterator: data.iterate("ALL", y) }, this.canvasZoom)//this.props.gui.zoom);
+                this.props.feature.range, this.props.uiState.config, { data, iterator: data.iterate("ALL", y) }, this.canvasZoom); // this.props.gui.zoom);
         }
         if (range) this.setCurrentRange(range);
     }

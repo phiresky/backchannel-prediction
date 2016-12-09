@@ -1,10 +1,10 @@
-import { observer } from 'mobx-react';
-import * as mobx from 'mobx';
-import * as React from 'react';
+import { observer } from "mobx-react";
+import * as mobx from "mobx";
+import * as React from "react";
 
-import * as c from './client';
-import * as util from './util';
-import { autobind } from 'core-decorators';
+import * as c from "./client";
+import * as util from "./util";
+import { autobind } from "core-decorators";
 
 @observer
 export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.UIState }, {}> {
@@ -16,7 +16,7 @@ export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.
     @mobx.computed get preferredHeight() {
         const maxHeight = Math.max(...this.visses.filter(x => x !== null));
         if (isFinite(maxHeight)) return maxHeight;
-        else return c.globalConfig.emptyVisHeight
+        else return c.globalConfig.emptyVisHeight;
     }
     @mobx.computed get height() {
         return this.props.uiState.height === "auto" ? this.preferredHeight : this.props.uiState.height;
@@ -35,12 +35,6 @@ export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.
         };
         window.addEventListener("mouseup", removeListener);
     }
-    private keys = new WeakMap<c.SingleUIState, number>();
-    /*private uuid = 10;
-    private getKey(ui: c.SingleUIState) {
-        if(!this.keys.has(ui)) this.keys.set(ui, this.uuid++);
-        return this.keys.get(ui);
-    }*/
     render() {
         const ui = this.props.uiState;
         const gui = this.props.gui;
@@ -58,7 +52,7 @@ export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.
                 {ui.features.map((state, i) => <SingleOverlay key={state.uuid} state={state} i={i} />)}
                 <div onMouseDown={this.mouseDown} style={{ position: "absolute", height: "10px", bottom: "-5px", width: "100%", cursor: "ns-resize" }}></div>
             </div>
-        )
+        );
     }
 }
 @observer
@@ -84,7 +78,7 @@ export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Hi
                 className += " rightcutoff";
             }
             const padding = 0;
-            if (right - left < 5) Object.assign(style, { borderRight: "none", borderLeft: "none" })
+            if (right - left < 5) Object.assign(style, { borderRight: "none", borderLeft: "none" });
             Object.assign(style, { left: left + "px", width: right - left + "px", padding: padding + "px" });
             return <div className={className} key={highlight.from} style={style}>{highlight.text}</div>;
         });
@@ -92,6 +86,6 @@ export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Hi
     render() {
         return (
             <div style={{ fontSize: "smaller" }}>{this.getElements()}</div>
-        )
+        );
     }
 }

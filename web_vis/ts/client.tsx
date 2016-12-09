@@ -1,19 +1,18 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { autorun, computed, observable, action, extendObservable, isObservableArray, asMap, toJS, runInAction, asStructure } from 'mobx';
-import * as mobx from 'mobx';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import * as mobx from "mobx";
 mobx.useStrict(true);
-import { observer } from 'mobx-react';
-import * as Waveform from './Waveform';
-import * as util from './util';
-import DevTools from 'mobx-react-devtools';
-import * as s from './socket';
-import * as LZString from 'lz-string';
-import * as highlights from './Highlights';
-import { autobind } from 'core-decorators';
-import * as B from '@blueprintjs/core';
-import * as Data from './Data';
-export const globalConfig = observable({
+import { observer } from "mobx-react";
+import * as Waveform from "./Waveform";
+import * as util from "./util";
+import DevTools from "mobx-react-devtools";
+import * as s from "./socket";
+import * as LZString from "lz-string";
+import * as highlights from "./Highlights";
+import { autobind } from "core-decorators";
+import * as B from "@blueprintjs/core";
+import * as Data from "./Data";
+export const globalConfig = mobx.observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
     leftBarSize: 200,
@@ -22,9 +21,9 @@ export const globalConfig = observable({
     defaultConversation: "sw2807",
     minRenderDelayMS: 50
 });
-export class styles {
-    @computed static get leftBarCSS() {
-        return { flexBasis: "content", flexGrow: 0, flexShrink: 0, width: globalConfig.leftBarSize + "px", border: "1px solid", marginRight: "5px" }
+export class Styles {
+    @mobx.computed static get leftBarCSS() {
+        return { flexBasis: "content", flexGrow: 0, flexShrink: 0, width: globalConfig.leftBarSize + "px", border: "1px solid", marginRight: "5px" };
     }
 }
 
@@ -69,7 +68,9 @@ export type NumFeature = NumFeatureSVector | NumFeatureFMatrix;
 export type Feature = NumFeature | Utterances | Highlights;
 export type Utterance = { from: number | string, to: number | string, text?: string, id?: string, color?: Color };
 export type VisualizerConfig = "normalizeGlobal" | "normalizeLocal" | "givenRange";
-
+interface Zoom {
+    left: number; right: number;
+}
 export interface SingleUIState {
     uuid: number;
     visualizer: VisualizerChoice;
@@ -78,14 +79,12 @@ export interface SingleUIState {
     currentRange: { min: number, max: number } | null;
 }
 export interface UIState {
-    uuid: number,
-    height: number | "auto",
+    uuid: number;
+    height: number | "auto";
     features: SingleUIState[];
 }
 let uuid = 0;
-interface Zoom {
-    left: number; right: number;
-}
+
 export function isNumFeature(f: Feature): f is NumFeature {
     return f.typ === "FeatureType.SVector" || f.typ === "FeatureType.FMatrix";
 }
@@ -99,7 +98,7 @@ class OptimizedFeaturesTree {
             const name = category as any as string;
             return {
                 id: parentPath + "/" + name, label: name
-            }
+            };
         }
         const path = parentPath + "/" + category.name;
         let children = category.children.map(c => this.getFeaturesTree(path, c));
@@ -110,7 +109,7 @@ class OptimizedFeaturesTree {
                 if (!this.isExpanded) return [];
                 else return children;
             }
-        }
+        };
     }
 }
 
@@ -122,11 +121,11 @@ class CategoryTree extends React.Component<{ gui: GUI, features: s.GetFeaturesRe
     }
 
     currentTree: B.ITreeNode[];
-    @autobind @action
+    @autobind @mobx.action
     handleNodeClick(n: B.ITreeNode) { if (!n.childNodes) this.props.onClick("" + n.id); }
-    @autobind @action
+    @autobind @mobx.action
     handleNodeExpand(n: B.ITreeNode) { n.isExpanded = true; this.forceUpdate(); }
-    @autobind @action
+    @autobind @mobx.action
     handleNodeCollapse(n: B.ITreeNode) { n.isExpanded = false; this.forceUpdate(); }
     render() {
         return <div>
@@ -140,33 +139,33 @@ class CategoryTree extends React.Component<{ gui: GUI, features: s.GetFeaturesRe
 }
 @observer
 class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
-    static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"]
-    @action changeVisualizerConfig(info: SingleUIState, value: string) {
+    static rangeOptions = ["normalizeGlobal", "normalizeLocal", "givenRange"];
+    @mobx.action changeVisualizerConfig(info: SingleUIState, value: string) {
         info.config = value as VisualizerConfig;
     }
-    @action changeVisualizer(info: SingleUIState, value: string) {
+    @mobx.action changeVisualizer(info: SingleUIState, value: string) {
         info.visualizer = value as VisualizerChoice;
     }
     async changeFeature(e: React.SyntheticEvent<HTMLSelectElement>, i: number) {
-        const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise)
-        runInAction("changeFeature" + i, () => this.props.uiState.features[i] = state);
+        const state = this.props.gui.getDefaultSingleUIState(await this.props.gui.getFeature(e.currentTarget.value).promise);
+        mobx.runInAction("changeFeature" + i, () => this.props.uiState.features[i] = state);
     }
-    @action remove(uuid: number) {
+    @mobx.action remove(uuid: number) {
         const i = this.props.uiState.features.findIndex(ui => ui.uuid === uuid);
         this.props.uiState.features.splice(i, 1);
         if (this.props.uiState.features.length === 0) {
             this.removeSelf();
         }
     }
-    @autobind @action removeSelf() {
+    @autobind @mobx.action removeSelf() {
         const uis = this.props.gui.uis;
         uis.splice(uis.findIndex(ui => ui.uuid === this.props.uiState.uuid), 1);
     }
-    @action async add(feat: string) {
+    @mobx.action async add(feat: string) {
         this.addPopover.setState({ isOpen: false });
         const gui = this.props.gui;
         const state = gui.getDefaultSingleUIState(await gui.getFeature(feat).promise);
-        runInAction(() => this.props.uiState.features.push(state));
+        mobx.runInAction(() => this.props.uiState.features.push(state));
     }
     addPopover: B.Popover;
     render() {
@@ -239,7 +238,7 @@ class InfoVisualizer extends React.Component<{ uiState: UIState, gui: GUI }, {}>
 
         return (
             <div style={{ display: "flex", boxShadow: "-9px 10px 35px -10px rgba(0,0,0,0.29)", zIndex: 1 }}>
-                <div style={styles.leftBarCSS}>
+                <div style={Styles.leftBarCSS}>
                     <LeftBar gui={gui} uiState={uiState} />
                 </div>
                 <div style={{ flexGrow: 1 }}>
@@ -252,9 +251,9 @@ class InfoVisualizer extends React.Component<{ uiState: UIState, gui: GUI }, {}>
 }
 @observer
 class TextVisualizer extends Visualizer<Utterances> {
-    @observable
+    @mobx.observable
     tooltip: number | null = null;
-    @computed get playbackTooltip() {
+    @mobx.computed get playbackTooltip() {
         const data = this.props.feature.data;
         const b = util.binarySearch(0, data.length, x => +data[x].from, this.props.gui.playbackPosition * this.props.gui.totalTimeSeconds);
         return b;
@@ -283,8 +282,8 @@ class TextVisualizer extends Visualizer<Utterances> {
             const padding = 3;
             Object.assign(style, { left: left + "px", width: (right - left) + "px", padding: padding + "px" });
             return <div className={className} key={utt.id !== undefined ? utt.id : i} style={style}
-                onMouseEnter={action("hoverTooltip", _ => this.tooltip = i)}
-                onMouseLeave={action("hoverTooltipDisable", _ => this.tooltip = null)}>
+                onMouseEnter={mobx.action("hoverTooltip", _ => this.tooltip = i)}
+                onMouseLeave={mobx.action("hoverTooltipDisable", _ => this.tooltip = null)}>
                 <span>{utt.text}</span>
             </div>;
         });
@@ -298,7 +297,7 @@ class TextVisualizer extends Visualizer<Utterances> {
         if (right < 0 || left > this.props.gui.width) return null;
         let className = "utterance tooltip visible";
         let styleText;
-        if (utt.color) styleText = { backgroundColor: `rgb(${utt.color})` }
+        if (utt.color) styleText = { backgroundColor: `rgb(${utt.color})` };
         else styleText = {};
         const style = { left: left + "px", width: (right - left) + "px" };
         return <div className={className} key={utt.id} style={style}>
@@ -311,7 +310,7 @@ class TextVisualizer extends Visualizer<Utterances> {
                 <div style={{ position: "relative", height: "0px", width: "100%" }}>{this.getTooltip(this.playbackTooltip)}</div>}
             {this.tooltip !== null && <div style={{ position: "relative", height: "0px", width: "100%" }}>{this.getTooltip(this.tooltip)}</div>}
         </div>;
-    }.bind(this))
+    }.bind(this));
     render() {
         return (
             <div style={{ height: "4em" }}>
@@ -322,17 +321,12 @@ class TextVisualizer extends Visualizer<Utterances> {
     }
 }
 
-class RobinAudioNode {
-    constructor(private buf: AudioBuffer) {
-
-    }
-}
 @observer
 class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: GUI }, {}> {
     playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
     audio: AudioContext;
-    @observable
+    @mobx.observable
     playing: boolean;
     startedAt: number;
     duration: number;
@@ -353,7 +347,7 @@ class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: 
                     const startPlaybackPosition = mobx.untracked(() => this.props.gui.playbackPosition);
                     audioSource.start(0, startPlaybackPosition * buffer.duration);
                     this.startedAt = this.audio.currentTime - startPlaybackPosition * buffer.duration;
-                    audioSource.addEventListener("ended", action("audioEnded", () => this.playing = false));
+                    audioSource.addEventListener("ended", mobx.action("audioEnded", () => this.playing = false));
                 }
                 requestAnimationFrame(this.updatePlaybackPosition);
             }
@@ -368,14 +362,14 @@ class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: 
         if (pos + w / 2 > 1) pos = 1 - w / 2;
         zoom.left = pos - w / 2; zoom.right = pos + w / 2;
     }
-    @autobind @action
+    @autobind @mobx.action
     updatePlaybackPosition() {
         if (!this.playing) return;
         this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
         if (this.props.gui.followPlayback) this.center();
         if (this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
-    @computed get xTranslation() {
+    @mobx.computed get xTranslation() {
         const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
         return "translateX(" + x + "px)";
     }
@@ -395,30 +389,29 @@ class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: 
         return audioSource;
     }, buf => buf.stop());
 
-    @autobind @action
+    @autobind @mobx.action
     onKeyUp(event: KeyboardEvent) {
-        if (event.keyCode == 32) {
+        if (event.keyCode === 32) {
             event.preventDefault();
             this.playing = !this.playing;
         }
     }
-    @autobind @action
+    @autobind @mobx.action
     onKeyDown(event: KeyboardEvent) {
-        if (event.keyCode == 32) {
+        if (event.keyCode === 32) {
             event.preventDefault();
         }
     }
-    @autobind @action
+    @autobind @mobx.action
     onClick(event: MouseEvent) {
         if (event.clientX < this.props.gui.left) return;
         event.preventDefault();
         const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
         this.playing = false;
-        runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
+        mobx.runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
 
     componentDidMount() {
-        const {gui} = this.props;
         const uisDiv = this.props.gui.uisDiv;
         uisDiv.addEventListener("click", this.onClick);
         window.addEventListener("keydown", this.onKeyDown);
@@ -426,7 +419,7 @@ class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: 
         this.disposers.push(() => uisDiv.removeEventListener("click", this.onClick));
         this.disposers.push(() => window.removeEventListener("keydown", this.onKeyDown));
         this.disposers.push(() => window.removeEventListener("keyup", this.onKeyUp));
-        this.disposers.push(action("stopPlaybackExit", () => this.playing = false));
+        this.disposers.push(mobx.action("stopPlaybackExit", () => this.playing = false));
     }
     componentWillUnmount() {
         for (const disposer of this.disposers) disposer();
@@ -452,36 +445,27 @@ export function getVisualizerChoices(feature: Feature): VisualizerChoice[] {
 
 @observer
 export class ChosenVisualizer extends React.Component<VisualizerProps<Feature>, {}> {
-    @observable
+    @mobx.observable
     preferredHeight: number = 50;
     static visualizers: { [name: string]: VisualizerConstructor<any> } = {
         "Waveform": Waveform.AudioWaveform,
         "Darkness": Waveform.Darkness,
         "Text": TextVisualizer,
         "Highlights": highlights.HighlightsVisualizer
-    }
+    };
     render() {
         const Visualizer = ChosenVisualizer.visualizers[this.props.uiState.visualizer];
-        return <Visualizer {...this.props} />;//ref={action("setPreferredHeight", (e: Visualizer<any>) => this.preferredHeight = e?e.preferredHeight:0)} />;
+        return <Visualizer {...this.props} />; // ref={action("setPreferredHeight", (e: Visualizer<any>) => this.preferredHeight = e?e.preferredHeight:0)} />;
     }
-}
-
-function splitIn(count: number, data: Utterances) {
-    const feats: Utterances[] = [];
-    for (let i = 0; i < count; i++) {
-        feats[i] = { name: data.name + "." + i, typ: data.typ, data: [] };
-    }
-    data.data.forEach((utt, i) => feats[i % count].data.push(utt));
-    return feats;
 }
 
 const PlaybackPosition = observer(function PlaybackPosition({gui}: { gui: GUI }) {
-    return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>
+    return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>;
 });
 
 @observer
 class ConversationSelector extends React.Component<{ gui: GUI }, {}> {
-    @autobind @action
+    @autobind @mobx.action
     setConversation(e: React.SyntheticEvent<HTMLInputElement>) { this.props.gui.conversationSelectorText = e.currentTarget.value; }
     async randomConversation(t?: string) {
         const conversation = await this.props.gui.randomConversation(t) as any as string;
@@ -498,7 +482,7 @@ class ConversationSelector extends React.Component<{ gui: GUI }, {}> {
             {convos && Object.keys(convos).map(name =>
                 <button key={name} onClick={() => this.randomConversation(name)}>Random {name}</button>
             )}
-        </div>)
+        </div>);
     }
 }
 
@@ -513,7 +497,7 @@ const examples: { [name: string]: any } = {
             { "features": [{ "feature": "/A/extracted/pitch", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" },
             { "features": [{ "feature": "/A/extracted/power", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
     }
-}
+};
 let MaybeAudioPlayer = observer<{ gui: GUI }>(function MaybeAudioPlayer({gui}: { gui: GUI }) {
     if (gui.loadingState !== 1) return <span />;
     const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []));
@@ -527,27 +511,27 @@ let MaybeAudioPlayer = observer<{ gui: GUI }>(function MaybeAudioPlayer({gui}: {
 @observer
 export class GUI extends React.Component<{}, {}> {
 
-    @observable windowWidth = window.innerWidth;
-    @observable playbackPosition = 0;
-    @observable followPlayback = false;
+    @mobx.observable windowWidth = window.innerWidth;
+    @mobx.observable playbackPosition = 0;
+    @mobx.observable followPlayback = false;
 
-    @observable conversation: s.ConversationID;
-    @observable conversationSelectorText = "";
-    @observable uis = [] as UIState[];
-    @observable zoom = {
+    @mobx.observable conversation: s.ConversationID;
+    @mobx.observable conversationSelectorText = "";
+    @mobx.observable uis = [] as UIState[];
+    @mobx.observable zoom = {
         left: 0, right: 1
     };
-    @observable totalTimeSeconds = NaN;
+    @mobx.observable totalTimeSeconds = NaN;
 
     audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
     uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
-    @observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
+    @mobx.observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = mobx.action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
     private socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
-    @observable
+    @mobx.observable
     loadingState = 1;
     loadedFeatures = new Set<NumFeature>();
-    @computed get categoryTree() {
+    @mobx.computed get categoryTree() {
         const data = this.socketManager.getFeatures(this.conversation).data;
         if (!data) return [];
         else {
@@ -556,16 +540,16 @@ export class GUI extends React.Component<{}, {}> {
         }
     }
     serialize() {
-        return LZString.compressToEncodedURIComponent(JSON.stringify(toJS({
+        return LZString.compressToEncodedURIComponent(JSON.stringify(mobx.toJS({
             playbackPosition: this.playbackPosition,
             followPlayback: this.followPlayback,
             conversation: this.conversation,
-            uis: this.uis, //TODO: remove uuids
+            uis: this.uis, // TODO: remove uuids
             zoom: this.zoom,
             totalTimeSeconds: this.totalTimeSeconds
         })));
     }
-    @action
+    @mobx.action
     deserialize(data: string | GUI) {
         if (this.audioPlayer) this.audioPlayer.playing = false;
         if (this.loadingState !== 1) {
@@ -581,25 +565,25 @@ export class GUI extends React.Component<{}, {}> {
             this.applyState(obj);
         }
     }
-    @action
+    @mobx.action
     applyState(targetState: GUI) {
-        if (targetState.uis) targetState.uis.forEach(ui => { ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++) });
+        if (targetState.uis) targetState.uis.forEach(ui => { ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++); });
         Object.assign(this, targetState);
     }
-    @computed
+    @mobx.computed
     get left() {
         this.windowWidth;
         return this.widthCalcDiv ? this.widthCalcDiv.getBoundingClientRect().left : 0;
     }
-    @computed
+    @mobx.computed
     get width() {
         this.windowWidth;
         return this.widthCalcDiv ? this.widthCalcDiv.clientWidth : 100;
     }
-    @action
+    @mobx.action
     async loadConversation(conversation: string, targetState?: GUI) {
         const convID = await this.verifyConversationID(conversation);
-        runInAction("resetUIs", () => {
+        mobx.runInAction("resetUIs", () => {
             this.uis = [];
             this.conversation = convID;
             this.zoom.left = 0; this.zoom.right = 1;
@@ -613,15 +597,14 @@ export class GUI extends React.Component<{}, {}> {
         const total = targetFeatures.reduce((sum, next) => sum + next.length, 0);
         let i = 0;
         for (const featureIDs of targetFeatures) {
-            const feats = [] as Feature[];
             const ui = this.getDefaultUIState([]);
-            runInAction("addDefaultUI", () => {
-                this.uis.push(ui)
+            mobx.runInAction("addDefaultUI", () => {
+                this.uis.push(ui);
             });
             for (const featureID of featureIDs) {
                 const feat = await this.getFeature(featureID).promise;
-                runInAction("progressIncrement", () => {
-                    ui.features.push(this.getDefaultSingleUIState(feat))
+                mobx.runInAction("progressIncrement", () => {
+                    ui.features.push(this.getDefaultSingleUIState(feat));
                     this.loadingState = ++i / total;
                 });
             }
@@ -642,7 +625,7 @@ export class GUI extends React.Component<{}, {}> {
         else choices = convos[category];
         return util.randomChoice(choices);
     }
-    @action
+    @mobx.action
     onWheel(event: MouseWheelEvent) {
         if (!event.ctrlKey) return;
         event.preventDefault();
@@ -662,15 +645,15 @@ export class GUI extends React.Component<{}, {}> {
             uuid: uuid++,
             visualizer: getVisualizerChoices(feature)[0],
             config: visualizerConfig,
-            currentRange: asStructure(null),
-        }
+            currentRange: mobx.asStructure(null),
+        };
     }
     getDefaultUIState(features: Feature[]): UIState {
         return {
             uuid: uuid++,
             features: features.map(f => this.getDefaultSingleUIState(f)),
             height: "auto"
-        }
+        };
     }
     checkTotalTime(feature: Feature) {
         if (isNumFeature(feature)) {
@@ -682,7 +665,7 @@ export class GUI extends React.Component<{}, {}> {
                 totalTime = feature.data.shape[0] * feature.shift / 1000;
             }
             if (!isNaN(totalTime)) {
-                if (isNaN(this.totalTimeSeconds)) runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
+                if (isNaN(this.totalTimeSeconds)) mobx.runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
                 else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
@@ -700,7 +683,7 @@ export class GUI extends React.Component<{}, {}> {
     @autobind
     windowResize() {
         if (this.windowWidth !== document.body.clientWidth)
-            runInAction("windowWidthChange", () => this.windowWidth = document.body.clientWidth);
+            mobx.runInAction("windowWidthChange", () => this.windowWidth = document.body.clientWidth);
     }
     constructor() {
         super();
@@ -708,18 +691,18 @@ export class GUI extends React.Component<{}, {}> {
         window.addEventListener("wheel", e => this.onWheel(e));
         window.addEventListener("resize", this.windowResize);
         // window resize is not fired when scroll bar appears. wtf.
-        setInterval(this.windowResize, 200)
-        window.addEventListener("hashchange", action("hashChange", e => this.deserialize(location.hash.substr(1))));
+        setInterval(this.windowResize, 200);
+        window.addEventListener("hashchange", mobx.action("hashChange", e => this.deserialize(location.hash.substr(1))));
         this.socketManager.socketOpen().then(this.onSocketOpen);
     }
     getFeature(id: string | s.FeatureID) {
         const f = this.socketManager.getFeature(this.conversation, id as any as s.FeatureID);
         if (f.data) this.checkTotalTime(f.data);
         else {
-            //runInAction("loadSingleFeature", () => this.loadingState = 0);
+            // runInAction("loadSingleFeature", () => this.loadingState = 0);
             f.promise.then(f => {
-                //runInAction("singleFeatureLoadComplete", () => this.loadingState = 1);
-                this.checkTotalTime(f)
+                // runInAction("singleFeatureLoadComplete", () => this.loadingState = 1);
+                this.checkTotalTime(f);
             });
         }
         return f;
@@ -730,7 +713,7 @@ export class GUI extends React.Component<{}, {}> {
     getConversations() {
         return this.socketManager.getConversations();
     }
-    @action
+    @mobx.action
     addUI(afterUuid: number) {
         this.uis.splice(this.uis.findIndex(ui => ui.uuid === afterUuid) + 1, 0, { uuid: uuid++, features: [], height: "auto" });
     }
@@ -756,18 +739,18 @@ export class GUI extends React.Component<{}, {}> {
                     <ConversationSelector gui={this} />
                     <label>Follow playback:
                         <input type="checkbox" checked={this.followPlayback}
-                            onChange={action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
+                            onChange={mobx.action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
                     </label>
                     <span>Playback position: <PlaybackPosition gui={this} /></span>
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
                     {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(k =>
-                        <button key={k} onClick={e => { this.deserialize(examples[k]) } }>{k}</button>)}</span>
+                        <button key={k} onClick={e => this.deserialize(examples[k])}>{k}</button>)}</span>
                     }
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{ display: "flex", visibility: "hidden" }}>
-                        <div style={styles.leftBarCSS} />
+                        <div style={Styles.leftBarCSS} />
                         <div style={{ flexGrow: 1 }} ref={this.setWidthCalcDiv} />
                     </div>
                     {[...this.getVisualizers()]}

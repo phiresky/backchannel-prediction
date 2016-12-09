@@ -1,11 +1,11 @@
-import * as mobx from 'mobx';
-import * as util from './util';
+import * as mobx from "mobx";
+import * as util from "./util";
 
-export type TypedArrayType = 'float32' | 'int16';
+export type TypedArrayType = "float32" | "int16";
 function TypedArrayOf(type: TypedArrayType) {
     switch (type) {
-        case 'float32': return Float32Array;
-        case 'int16': return Int16Array;
+        case "float32": return Float32Array;
+        case "int16": return Int16Array;
         default: throw Error("unknown type");
     }
 }
@@ -23,12 +23,12 @@ export type DataIterator = {
 const toReal = (iterator: { count: number, start: number, stride: number }) => (i: number) => {
     if (i > iterator.count || i < 0) throw Error("OOB:" + i + ">=/<=" + iterator.count);
     return iterator.start + i * iterator.stride;
-}
+};
 const toFake = (iterator: { count: number, start: number, stride: number }, ignoreFloats = false) => (j: number) => {
     const ret = (j - iterator.start) / iterator.stride;
     if (!ignoreFloats && ret !== (ret | 0)) throw Error("ERR1");
     return ret;
-}
+};
 export class TwoDimensionalArray {
     public readonly buffer: ArrayLike<number>;
     private readonly dataType: TypedArrayType;
@@ -49,13 +49,13 @@ export class TwoDimensionalArray {
                 start: this.getIndex(0, dim2),
                 stride: this.shape[1],
                 count: this.shape[0]
-            }
+            };
         } else if (dim1 !== "ALL" && dim2 === "ALL") {
             return {
                 start: this.getIndex(dim1, 0),
                 stride: 1,
                 count: this.shape[1]
-            }
+            };
         } else throw Error("one dimension must be ALL");
     }
     @mobx.action

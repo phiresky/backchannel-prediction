@@ -1,8 +1,8 @@
-import * as mobx from 'mobx';
-import * as c from './client';
-import * as util from './util';
-import * as Data from './Data';
-import { autobind } from 'core-decorators';
+import * as mobx from "mobx";
+import * as c from "./client";
+import * as util from "./util";
+import * as Data from "./Data";
+import { autobind } from "core-decorators";
 
 export type ClientMessage = {
     type: "getConversations"
@@ -30,10 +30,10 @@ class LulPromise<T> {
 }
 
 export interface ConversationID extends String {
-    __typeBrand: "ConversationID"
+    __typeBrand: "ConversationID";
 }
 export interface FeatureID extends String {
-    __typeBrand: "FeatureID"
+    __typeBrand: "FeatureID";
 }
 export function isFeatureID(f: any): f is FeatureID {
     return typeof f === "string";
