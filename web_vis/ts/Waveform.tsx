@@ -4,9 +4,11 @@ import { observer } from "mobx-react";
 import * as mobx from "mobx";
 import * as util from "./util";
 import * as Data from "./Data";
+import { VisualizerConfig, VisualizerProps } from "./Visualizer";
+import { NumFeature } from "./features";
 
 function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-    givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
+    givenRange: [number, number] | null, config: VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
     const start = Math.floor(zoom.left * data.iterator.count);
     const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
@@ -52,7 +54,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
 }
 
 function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-    givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
+    givenRange: [number, number] | null, config: VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number }) {
     const start = Math.floor(zoom.left * data.iterator.count);
     const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
@@ -69,7 +71,7 @@ function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     return display;
 }
 
-abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {}> {
+abstract class CanvasRenderer<P> extends React.Component<VisualizerProps<P>, {}> {
     canvas: HTMLCanvasElement;
     disposers: (() => void)[] = [];
     abstract preferredHeight: number;
@@ -112,10 +114,10 @@ abstract class CanvasRenderer<P> extends React.Component<c.VisualizerProps<P>, {
     }
 }
 
-abstract class MultiCanvasRenderer extends CanvasRenderer<c.NumFeature> {
+abstract class MultiCanvasRenderer extends CanvasRenderer<NumFeature> {
     abstract singleRenderFunction:
     (ctx: CanvasRenderingContext2D, y: number, w: number, h: number,
-        givenRange: [number, number] | null, config: c.VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number })
+        givenRange: [number, number] | null, config: VisualizerConfig, data: Data.DataIterator, zoom: { left: number, right: number })
         => { min: number, max: number };
 
     @mobx.action

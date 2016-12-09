@@ -3,8 +3,10 @@ import * as mobx from "mobx";
 import * as React from "react";
 
 import * as c from "./client";
+import * as v from "./Visualizer";
 import * as util from "./util";
 import { autobind } from "core-decorators";
+import { Highlights } from "./features";
 
 @observer
 export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.UIState }, {}> {
@@ -43,7 +45,7 @@ export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.
             const feature = gui.getFeature(state.feature).data;
             return (
                 <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}>
-                    {feature && <c.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={mobx.action("setChosenVis", (d: c.ChosenVisualizer) => self.visses[i] = d && d.preferredHeight)} />}
+                    {feature && <v.ChosenVisualizer feature={feature} gui={gui} uiState={state} ref={mobx.action("setChosenVis", (d: v.ChosenVisualizer) => self.visses[i] = d && d.preferredHeight)} />}
                 </div>
             );
         });
@@ -56,7 +58,7 @@ export class OverlayVisualizer extends React.Component<{ gui: c.GUI, uiState: c.
     }
 }
 @observer
-export class HighlightsVisualizer extends React.Component<c.VisualizerProps<c.Highlights>, {}> {
+export class HighlightsVisualizer extends React.Component<v.VisualizerProps<Highlights>, {}> {
     preferredHeight = 0;
     getElements() {
         const width = this.props.gui.width;

@@ -3,6 +3,7 @@ import * as c from "./client";
 import * as util from "./util";
 import * as Data from "./Data";
 import { autobind } from "core-decorators";
+import { NumFeatureCommon, Utterances, Highlights, NumFeature, Feature } from "./features";
 
 export type ClientMessage = {
     type: "getConversations"
@@ -22,10 +23,17 @@ export type GetFeaturesResponse = {
     defaults: FeatureID[][];
 }
 
-class LulPromise<T> {
+class LulPromise<T> implements PromiseLike<T> {
     @mobx.observable data: T | null = mobx.asReference(null);
     constructor(public promise: Promise<T>) {
         promise.then(mobx.action("fromPromise", (result: T) => this.data = result));
+    }
+    then<R>(resolve: (t: T) => R, reject?: (error: any) => any): Promise<R> {
+        if (this.data) {
+            return Promise.resolve(resolve(this.data));
+        } else {
+            return this.promise.then(resolve, reject);
+        }
     }
 }
 
@@ -42,12 +50,12 @@ export type ServerMessage = { id: number, error: undefined, data: any };
 export type ServerError = { id: number, error: string };
 
 
-export type NumFeatureReceive = c.NumFeatureCommon & {
+export type NumFeatureReceive = NumFeatureCommon & {
     typ: "FeatureType.SVector" | "FeatureType.FMatrix",
     shape: number[],
     dtype: Data.TypedArrayType
 };
-export type FeatureReceive = NumFeatureReceive | c.Utterances | c.Highlights;
+export type FeatureReceive = NumFeatureReceive | Utterances | Highlights;
 declare var TextDecoder: any;
 export type BinaryFrameMeta = {
     conversation: ConversationID,
@@ -136,18 +144,18 @@ export class SocketManager {
     getFeatures(conversation: ConversationID): LulPromise<GetFeaturesResponse> {
         return lulCache("getFeatures", this, this.getFeaturesRemote, Array.from(arguments));
     }
-    async getFeatureRemote(conversation: ConversationID, featureID: FeatureID): Promise<c.Feature> {
+    async getFeatureRemote(conversation: ConversationID, featureID: FeatureID): Promise<Feature> {
         const response = await this.sendMessage({ type: "getFeature", conversation, feature: featureID });
         const feature = response.data as GetFeatureResponse;
         feature.name = featureID as any as string;
         if (feature.typ === "FeatureType.FMatrix" || feature.typ === "FeatureType.SVector") {
             return mobx.extendObservable(feature, {
                 data: new Data.TwoDimensionalArray(feature.dtype, feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1])
-            }) as c.NumFeature;
+            }) as NumFeature;
         }
-        return feature as c.Highlights;
+        return feature as Highlights;
     }
-    getFeature(conversation: ConversationID, featureID: FeatureID): LulPromise<c.Feature> {
+    getFeature(conversation: ConversationID, featureID: FeatureID): LulPromise<Feature> {
         return lulCache("getFeature", this, this.getFeatureRemote, Array.from(arguments));
     }
 }
