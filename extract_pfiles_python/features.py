@@ -66,18 +66,21 @@ class Features:
         if channel == "B":
             return ADC0B
 
+    def power_transform(self, adc: NumFeature) -> NumFeature:
+        return self.filter_power(adc.adc2pow("{}ms".format(self.sample_window_ms)))
+
+    def pitch_transform(self, adc: NumFeature) -> NumFeature:
+        return adc.applyPitchTracker(self.tracker, window="{}ms".format(self.sample_window_ms)).normalize(min=-1, max=1)
+
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_power(self, convid: str) -> NumFeature:
-        powerraw = self.get_adc(convid).adc2pow("{}ms".format(self.sample_window_ms))
-        return self.filter_power(powerraw)
+        return self.power_transform(self.get_adc(convid))
 
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_pitch(self, convid: str) -> NumFeature:
-        return self.get_adc(convid).applyPitchTracker(self.tracker,
-                                                      window="{}ms".format(self.sample_window_ms)).normalize(min=-1,
-                                                                                                             max=1)
+        return self.pitch_transform(self.get_adc(convid))
 
     def get_combined_feat(self, convid: str) -> NumFeature:
         pitch = self.get_pitch(convid)

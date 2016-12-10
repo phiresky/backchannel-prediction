@@ -157,7 +157,7 @@ export class GUI extends React.Component<{}, {}> {
     audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
     uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
     @mobx.observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = mobx.action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
-    private socketManager: s.SocketManager;
+    socketManager: s.SocketManager;
     stateAfterLoading = null as any | null;
     @mobx.observable
     loadingState = 1;
@@ -338,7 +338,7 @@ export class GUI extends React.Component<{}, {}> {
         return this.socketManager.getFeatures(this.conversation).then(features => {
             return {
                 ...features,
-                categories: [...features.categories, microphoneFeature.name],
+                categories: [...features.categories, {name: "client", children: [microphoneFeature.name]}],
             };
         });
     }

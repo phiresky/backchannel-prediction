@@ -123,7 +123,7 @@ export class PlaybackPosition extends React.Component<{ gui: GUI }, {}> {
 }
 
 export const microphoneFeature = {
-    id: "/microphone" as any as FeatureID,
+    id: "/client/microphone" as any as FeatureID,
     name: "microphone"
 };
 
@@ -164,6 +164,7 @@ export function getAudioBuffer(feat: NumFeatureSVector) {
 }
 const audioContext = new AudioContext();
 
+@observer
 export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     static bufferDuration_s = 100;
     static sampleRate = 8000;
@@ -172,8 +173,8 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     inputStream: MediaStream;
     source: MediaStreamAudioSourceNode;
     processor: ScriptProcessorNode;
-
-
+    @mobx.observable recording = false;
+    recordingStartTime = NaN;
     constructor(props: any) {
         super(props);
     }
@@ -194,9 +195,27 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
             dtype: "int16"
         });
     }
+    gotData(feat: Data.TwoDimensionalArray, event: AudioProcessingEvent, resampledData: Float32Array) {
+        const shouldBeOffset = Math.round((event.playbackTime - this.recordingStartTime) * AudioRecorder.sampleRate);
+        feat.setData(shouldBeOffset, resampledData);
+        this.props.gui.socketManager.sendFeatureSegment({
+            conversation: null as any, feature: microphoneFeature.id, byteOffset: shouldBeOffset * Float32Array.BYTES_PER_ELEMENT
+        }, resampledData);
+    }
     @autobind
     async startRecording() {
-        this.inputStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: audioContext.sampleRate, channelCount: 1, echoCancellation: false } as any });
+        this.inputStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                mandatory: {
+                    googEchoCancellation: false,
+                    googAutoGainControl: false,
+                    googNoiseSuppression: false,
+                    googHighpassFilter: true,
+                    googTypingNoiseDetection: false,
+                    echoCancellation: false
+                },
+            } as any
+        });
         const [microphone, ...others] = this.inputStream.getAudioTracks();
         if (others.length > 0) throw Error("expected single channel");
         this.microphone = microphone;
@@ -205,26 +224,20 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         this.source = audioContext.createMediaStreamSource(this.inputStream);
         this.processor = audioContext.createScriptProcessor(AudioRecorder.bufferSize, 1, 1);
         const feat = AudioRecorder.getFeature().data;
-        let lastOffset = 0;
-        let realOffset = 0;
-        let lastTime = 0;
+        this.recordingStartTime = audioContext.currentTime;
         this.processor.addEventListener("audioprocess", event => {
             const dataSoSampled = event.inputBuffer.getChannelData(0);
-            //const offset = (((event.playbackTime % AudioRecorder.bufferDuration_s) * AudioRecorder.sampleRate) | 0);
-            //console.log(event.playbackTime, offset, offset - lastOffset, data.length, Math.round(data.length/(event.playbackTime-lastTime))|0, data);
-            //lastOffset = offset;
-            //lastTime = event.playbackTime;
             const promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
-            promise.then(data => {
-                feat.setData(realOffset * 4, data.buffer, data.byteOffset, data.byteLength);
-                realOffset += data.length;
-            });
+            promise.then(data => this.gotData(feat, event, data));
         });
         this.source.connect(this.processor);
         this.processor.connect(audioContext.destination);
+        mobx.runInAction("startRecording", () => this.recording = true);
+
     }
-    @autobind
+    @autobind @mobx.action
     stopRecording() {
+        this.recording = false;
         this.microphone.stop();
         this.source.disconnect(this.processor);
         this.processor.disconnect(audioContext.destination);
@@ -232,7 +245,10 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
 
     render() {
         return (
-            <div><button onClick={this.startRecording}>Start Rec</button><button onClick={this.stopRecording}>Stop Rec</button></div>
+            <div>{this.recording
+                ? <button onClick={this.stopRecording}>Stop Rec</button>
+                : <button onClick={this.startRecording}>Start Rec</button>
+            }</div>
         );
     }
 }

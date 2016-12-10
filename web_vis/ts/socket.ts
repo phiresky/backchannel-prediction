@@ -91,6 +91,8 @@ export type BinaryFrameMeta = {
     byteOffset: number
 }
 let frameStart = 0;
+
+
 export class SocketManager {
     socket: WebSocket;
     nextMessageID = 1;
@@ -157,6 +159,10 @@ export class SocketManager {
             if (msg.error !== undefined) listener.reject(msg.error);
             else listener.resolve(msg as ServerMessage);
         }
+    }
+    async sendFeatureSegment(meta: BinaryFrameMeta, data: Float32Array) {
+        await this.socketOpen();
+        this.socket.send(createBinaryFrameWithMetadata(meta, data));
     }
     async sendMessage(message: ClientMessage): Promise<ServerMessage> {
         await this.socketOpen();

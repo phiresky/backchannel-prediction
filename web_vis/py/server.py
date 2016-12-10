@@ -16,6 +16,20 @@ import numpy as np
 import random
 
 
+def parse_binary_frame_with_metadata(buffer: bytes):
+    meta_length = int.from_bytes(buffer[0:4], byteorder='little')
+    meta = json.loads(buffer[4:meta_length + 4].decode('ascii'))
+    return meta, buffer[4 + meta_length:]
+
+
+def create_binary_frame_with_metadata(meta_dict: dict, data: bytes):
+    meta = json.dumps(meta_dict).encode('ascii')
+    if len(meta) % 4 != 0:
+        meta += b' ' * (4 - len(meta) % 4)
+    meta_length = len(meta).to_bytes(4, byteorder='little')
+    return meta_length + meta + data
+
+
 def evaluateNetwork(net, input: NumFeature) -> NumFeature:
     output = net(input)
     if output.shape[1] == 1:
@@ -102,11 +116,8 @@ async def sendNumFeature(ws, id, conv: str, featname: str, feat):
         # print([x for x in bytes[0:200]])
         for i in range(0, math.ceil(len(bytes) / CHUNKSIZE)):
             offset = i * CHUNKSIZE
-            meta = json.dumps({'conversation': conv, 'feature': featname, 'byteOffset': offset}).encode('ascii')
-            if len(meta) % 4 != 0:
-                meta += b' ' * (4 - len(meta) % 4)
-            metaLen = len(meta).to_bytes(4, byteorder='little')
-            await ws.send(metaLen + meta + bytes[offset:min((i + 1) * CHUNKSIZE, len(bytes))])
+            meta = {'conversation': conv, 'feature': featname, 'byteOffset': offset}
+            await ws.send(create_binary_frame_with_metadata(meta, bytes[offset:min((i + 1) * CHUNKSIZE, len(bytes))]))
 
 
 async def sendOtherFeature(ws, id, feat):
@@ -136,7 +147,9 @@ def get_features():
     ]
     return [
         dict(name="A", children=features),
-        dict(name="B", children=features)
+        dict(name="B", children=features),
+        dict(name="microphone", children=[dict(name="extracted", children=feature_names),
+                                          dict(name="NN outputs", children=netsTree)])
     ]
 
 
@@ -271,33 +284,38 @@ async def handler(websocket, path):
     print("new client connected.")
     while True:
         try:
-            msg = json.loads(await websocket.recv())
-            id = msg['id']
-            try:
-                if msg['type'] == "getFeatures":
-                    cats = [s.split(" & ") for s in
-                            ["/extracted/adc & /transcript/Original/bc",
-                             "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
-                    conv = sanitize_conversation(msg['conversation'])
-                    await websocket.send(json.dumps({"id": id, "data": {
-                        'categories': get_features(),
-                        'defaults': [["/A" + sub for sub in l] for l in cats] +
-                                    [["/B" + sub for sub in l] for l in cats]
-                    }}))
-                elif msg['type'] == "getConversations":
-                    await websocket.send(json.dumps({"id": id, "data": conversations}))
-                elif msg['type'] == "getFeature":
-                    conv = sanitize_conversation(msg['conversation'])
-                    await sendFeature(websocket, id, conv, msg['feature'])
-                elif msg['type'] == "echo":
-                    await websocket.send(json.dumps({"id": id}))
-                else:
-                    raise Exception("Unknown msg " + json.dumps(msg))
-            except Exception as e:
-                if isinstance(e, websockets.exceptions.ConnectionClosed): raise e
-                import traceback
-                await websocket.send(json.dumps({"id": id, "error": traceback.format_exc()}))
-                print(traceback.format_exc())
+            data = await websocket.recv()
+            if type(data) is bytes:
+                meta, data = parse_binary_frame_with_metadata(data)
+                print(meta)
+            else:
+                msg = json.loads(data)
+                id = msg['id']
+                try:
+                    if msg['type'] == "getFeatures":
+                        cats = [s.split(" & ") for s in
+                                ["/extracted/adc & /transcript/Original/bc",
+                                 "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
+                        conv = sanitize_conversation(msg['conversation'])
+                        await websocket.send(json.dumps({"id": id, "data": {
+                            'categories': get_features(),
+                            'defaults': [["/A" + sub for sub in l] for l in cats] +
+                                        [["/B" + sub for sub in l] for l in cats]
+                        }}))
+                    elif msg['type'] == "getConversations":
+                        await websocket.send(json.dumps({"id": id, "data": conversations}))
+                    elif msg['type'] == "getFeature":
+                        conv = sanitize_conversation(msg['conversation'])
+                        await sendFeature(websocket, id, conv, msg['feature'])
+                    elif msg['type'] == "echo":
+                        await websocket.send(json.dumps({"id": id}))
+                    else:
+                        raise Exception("Unknown msg " + json.dumps(msg))
+                except Exception as e:
+                    if isinstance(e, websockets.exceptions.ConnectionClosed): raise e
+                    import traceback
+                    await websocket.send(json.dumps({"id": id, "error": traceback.format_exc()}))
+                    print(traceback.format_exc())
 
         except websockets.exceptions.ConnectionClosed as e:
             return
