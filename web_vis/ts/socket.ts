@@ -26,6 +26,27 @@ export type GetFeaturesResponse = {
     defaults: FeatureID[][];
 }
 
+function parseBinaryFrameWithMetadata<MetaType>(buffer: ArrayBuffer) {
+    const metaLength = new Int32Array(buffer, 0, 1)[0];
+    const metaBuffer = new Uint8Array(buffer, 4, metaLength);
+    const metaText = new TextDecoder("utf-8").decode(metaBuffer) as string;
+    const meta = JSON.parse(metaText) as MetaType;
+    const dataOffset = metaLength + 4;
+    const dataLengthBytes = buffer.byteLength - dataOffset;
+    return { meta, dataOffset, dataLengthBytes };
+}
+function createBinaryFrameWithMetadata<MetaType>(meta: MetaType, data: Int16Array | Float32Array) {
+    let metaText = JSON.stringify(meta);
+    metaText += "    ".slice(metaText.length % 4);
+    const metaBytes = new TextEncoder("utf-8").encode(metaText) as Uint8Array;
+    const metaLength = metaBytes.byteLength;
+    const totalLength = 4 + metaLength + data.byteLength;
+    const buffer = new ArrayBuffer(totalLength);
+    new Int32Array(buffer, 0, 1)[0] = metaLength;
+    new Uint8Array(buffer, 4, metaLength).set(metaBytes);
+    new Uint8Array(buffer, 4 + metaLength).set(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+    return buffer;
+}
 export class LulPromise<T> implements PromiseLike<T> {
     @mobx.observable data: T | null = mobx.asReference(null);
     promise: Promise<T>;
@@ -63,7 +84,7 @@ export type NumFeatureReceive = NumFeatureCommon & {
     dtype: Data.TypedArrayType
 };
 export type FeatureReceive = NumFeatureReceive | Utterances | Highlights;
-declare var TextDecoder: any;
+declare var TextDecoder: any, TextEncoder: any;
 export type BinaryFrameMeta = {
     conversation: ConversationID,
     feature: FeatureID,
@@ -106,26 +127,24 @@ export class SocketManager {
             }
             this.queue.push(() => {
                 const buffer = event.data;
-                const metaLength = new Int32Array(buffer, 0, 1)[0];
-                const metaBuffer = new Uint8Array(buffer, 4, metaLength);
-                const metaText = new TextDecoder("utf-8").decode(metaBuffer);
-                const meta = JSON.parse(metaText) as BinaryFrameMeta;
+                const {meta, dataLengthBytes, dataOffset} = parseBinaryFrameWithMetadata<BinaryFrameMeta>(buffer);
+
                 console.log("RECEIVING BUF", meta);
                 const feature = this.getFeature(meta.conversation, meta.feature).data;
                 if (!feature) throw Error("received feature data before feature: " + meta.feature);
                 if (!c.isNumFeature(feature)) throw Error("wat2");
-                const prefixLength = metaLength + 4;
-                const dataLengthBytes = buffer.byteLength - prefixLength;
+
                 let floatsArray;
                 let offset;
                 if (feature.dtype === "int16") {
-                    const samplesCount = dataLengthBytes / Int16Array.BYTES_PER_ELEMENT;
-                    const dataArray = new Int16Array(buffer, prefixLength, samplesCount);
-                    floatsArray = new Float32Array(samplesCount);
+                    const dataLength = dataLengthBytes / Int16Array.BYTES_PER_ELEMENT;
+                    const dataArray = new Int16Array(buffer, dataOffset, dataLength);
+                    floatsArray = new Float32Array(dataLength);
                     offset = meta.byteOffset / Int16Array.BYTES_PER_ELEMENT;
                     Audio.fillAudioBuffer(dataArray, floatsArray);
                 } else {
-                    floatsArray = new Float32Array(buffer, prefixLength, dataLengthBytes / Float32Array.BYTES_PER_ELEMENT);
+                    const dataLength = dataLengthBytes / Float32Array.BYTES_PER_ELEMENT;
+                    floatsArray = new Float32Array(buffer, dataOffset, dataLength);
                     offset = meta.byteOffset / floatsArray.BYTES_PER_ELEMENT;
                 }
                 feature.data.setData(offset, floatsArray);
@@ -177,7 +196,7 @@ export class SocketManager {
         if (feature.typ === "FeatureType.FMatrix" || feature.typ === "FeatureType.SVector") {
             return mobx.extendObservable(feature, {
                 data: new Data.TwoDimensionalArray("float32", feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1]),
-                range: feature.dtype === "int16" ? [-1,1] : feature.range
+                range: feature.dtype === "int16" ? [-1, 1] : feature.range
             }) as NumFeature;
         }
         return feature as Highlights;
