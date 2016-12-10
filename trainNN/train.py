@@ -74,7 +74,7 @@ def train():
         scheduling_method=None,
         # scheduling_params=(0.8, 0.000001),
         update_method="sgd",
-        num_epochs=100,
+        num_epochs=1000,
         learning_rate_num=1,
         iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_inputs, train_outputs),
         iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_inputs, validate_outputs),
