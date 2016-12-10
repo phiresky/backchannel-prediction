@@ -12,33 +12,13 @@ import * as Resampler from "./Resampler";
 export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[], gui: GUI }, {}> {
     playerBar: HTMLDivElement; setPlayerBar = (p: HTMLDivElement) => this.playerBar = p;
     disposers: (() => void)[] = [];
-    audio: AudioContext;
     @mobx.observable
     playing: boolean;
     startedAt: number;
     duration: number;
-    startPlayingAtom = new mobx.Atom("Player");
+    audioSources = [] as AudioBufferSourceNode[];
     constructor(props: any) {
         super(props);
-        this.audio = new AudioContext();
-        this.disposers.push(() => (this.audio as any).close());
-        this.disposers.push(mobx.autorun(() => {
-            // for (const feature of this.props.features) this.makeAudioBuffer(feature);
-            if (this.playing) {
-                for (const feature of this.props.features) {
-                    const buffer = this.makeAudioBuffer(feature);
-                    const audioSource = this.toAudioSource({ buffer, audio: this.audio });
-
-                    this.duration = buffer.duration;
-                    audioSource.playbackRate.value = 1;
-                    const startPlaybackPosition = mobx.untracked(() => this.props.gui.playbackPosition);
-                    audioSource.start(0, startPlaybackPosition * buffer.duration);
-                    this.startedAt = this.audio.currentTime - startPlaybackPosition * buffer.duration;
-                    audioSource.addEventListener("ended", mobx.action("audioEnded", () => this.playing = false));
-                }
-                requestAnimationFrame(this.updatePlaybackPosition);
-            }
-        }));
     }
 
     center() {
@@ -52,7 +32,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     @autobind @mobx.action
     updatePlaybackPosition() {
         if (!this.playing) return;
-        this.props.gui.playbackPosition = (this.audio.currentTime - this.startedAt) / this.duration;
+        this.props.gui.playbackPosition = (audioContext.currentTime - this.startedAt) / this.duration;
         if (this.props.gui.followPlayback) this.center();
         if (this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
@@ -60,43 +40,57 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
         const x = util.getPixelFromPosition(this.props.gui.playbackPosition, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
         return "translateX(" + x + "px)";
     }
-    makeAudioBuffer = mobx.createTransformer((feature: NumFeature) => {
-        console.log("creating buffer for " + feature.name);
-        const audioBuffer = this.audio.createBuffer(1, feature.data.shape[0], feature.samplingRate * 1000);
-        feature.data.iterate("ALL", 0);
-        let arr;
-        if (feature.data.dataType === "float32") arr = feature.data.buffer as Float32Array;
-        else arr = Float32Array.from(feature.data.buffer, v => v / 2 ** 15);
-        audioBuffer.copyToChannel(arr, 0);
-        return audioBuffer;
-    });
-    toAudioSource = mobx.createTransformer(({buffer, audio}: { buffer: AudioBuffer, audio: AudioContext }) => {
-        const audioSource = audio.createBufferSource();
+
+    toAudioSource(buffer: AudioBuffer) {
+        const audioSource = audioContext.createBufferSource();
         audioSource.buffer = buffer;
         audioSource.playbackRate.value = 0;
-        audioSource.connect(audio.destination);
+        audioSource.connect(audioContext.destination);
         return audioSource;
-    }, buf => buf.stop());
+    }
+
+    @mobx.action
+    startPlaying() {
+        this.playing = true;
+        for (const feature of this.props.features) {
+            const buffer = getAudioBuffer(feature);
+            const audioSource = this.toAudioSource(buffer);
+            this.audioSources.push(audioSource);
+            this.duration = buffer.duration;
+            audioSource.playbackRate.value = 1;
+            const startPlaybackPosition = this.props.gui.playbackPosition;
+            audioSource.start(0, startPlaybackPosition * buffer.duration);
+            this.startedAt = audioContext.currentTime - startPlaybackPosition * buffer.duration;
+            audioSource.addEventListener("ended", this.stopPlaying);
+        }
+        requestAnimationFrame(this.updatePlaybackPosition);
+    }
 
     @autobind @mobx.action
+    stopPlaying() {
+        this.playing = false;
+        while (this.audioSources.length > 0) this.audioSources.pop() !.stop();
+    }
+    @autobind
     onKeyUp(event: KeyboardEvent) {
         if (event.keyCode === 32) {
             event.preventDefault();
-            this.playing = !this.playing;
+            if (this.playing) this.stopPlaying();
+            else this.startPlaying();
         }
     }
-    @autobind @mobx.action
+    @autobind
     onKeyDown(event: KeyboardEvent) {
         if (event.keyCode === 32) {
             event.preventDefault();
         }
     }
-    @autobind @mobx.action
+    @autobind
     onClick(event: MouseEvent) {
         if (event.clientX < this.props.gui.left) return;
         event.preventDefault();
         const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
-        this.playing = false;
+        if (this.playing) this.stopPlaying();
         mobx.runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
 
@@ -133,6 +127,43 @@ export const microphoneFeature = {
     name: "microphone"
 };
 
+const cache = new WeakMap<NumFeatureSVector, AudioBuffer>();
+
+export function fillAudioBuffer(source: Float32Array | Int16Array, target: Float32Array) {
+    if (source instanceof Float32Array) target.set(source);
+    else {
+        for (let i = 0; i < source.length; i++) {
+            target[i] = source[i] / 2 ** 15;
+        }
+    }
+}
+export function getAudioBuffer(feat: NumFeatureSVector) {
+    const buf = cache.get(feat);
+    if (buf) {
+        console.log("got cached AudioBuffer");
+        return buf;
+    } else {
+        console.log("creating buffer for " + feat.name);
+        const buffer = audioContext.createBuffer(1, feat.data.shape[0], feat.samplingRate * 1000);
+        const audioBufferData = buffer.getChannelData(0);
+        fillAudioBuffer(feat.data.buffer, audioBufferData);
+        if (feat.data.dataType === "float32") {
+            // data types are compatible, make the buffer shared so writes directly affect the audio buffer
+            feat.data.buffer = audioBufferData;
+        }
+        cache.set(feat, buffer);
+        mobx.reaction(feat.name + " data changed", () => feat.data.iterate("ALL", 0), () => {
+            // only update if it isn't a shared buffer
+            if (feat.data.buffer !== audioBufferData) {
+                console.log("update audio buffer for " + feat.name);
+                fillAudioBuffer(feat.data.buffer, audioBufferData);
+            }
+        });
+        return buffer;
+    }
+}
+const audioContext = new AudioContext();
+
 export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     static bufferDuration_s = 100;
     static sampleRate = 8000;
@@ -140,20 +171,23 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     microphone: MediaStreamTrack;
     inputStream: MediaStream;
     source: MediaStreamAudioSourceNode;
-    audioContext: AudioContext;
     processor: ScriptProcessorNode;
+
 
     constructor(props: any) {
         super(props);
-
     }
 
     private static feature: NumFeatureSVector;
     static getFeature(): NumFeatureSVector {
+        const count = this.bufferDuration_s * this.sampleRate;
+        const buffer = audioContext.createBuffer(1, count, this.sampleRate);
+        const data = new Data.TwoDimensionalArray("float32", [count, 1], buffer.getChannelData(0));
+        (data.buffer as Float32Array).fill(NaN);
         return AudioRecorder.feature || (AudioRecorder.feature = {
             name: microphoneFeature.id,
             typ: "FeatureType.SVector",
-            data: new Data.TwoDimensionalArray("float32", [this.bufferDuration_s * this.sampleRate, 1]),
+            data,
             samplingRate: this.sampleRate / 1000,
             shift: 0,
             range: [-1, 1],
@@ -162,15 +196,14 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     }
     @autobind
     async startRecording() {
-        this.audioContext = new AudioContext();
-        this.inputStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: this.audioContext.sampleRate, channelCount: 1, echoCancellation: false } as any });
+        this.inputStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: audioContext.sampleRate, channelCount: 1, echoCancellation: false } as any });
         const [microphone, ...others] = this.inputStream.getAudioTracks();
         if (others.length > 0) throw Error("expected single channel");
         this.microphone = microphone;
         console.log(microphone.getConstraints());
         console.log("Got microphone", microphone.label);
-        this.source = this.audioContext.createMediaStreamSource(this.inputStream);
-        this.processor = this.audioContext.createScriptProcessor(AudioRecorder.bufferSize, 1, 1);
+        this.source = audioContext.createMediaStreamSource(this.inputStream);
+        this.processor = audioContext.createScriptProcessor(AudioRecorder.bufferSize, 1, 1);
         const feat = AudioRecorder.getFeature().data;
         let lastOffset = 0;
         let realOffset = 0;
@@ -181,20 +214,20 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
             //console.log(event.playbackTime, offset, offset - lastOffset, data.length, Math.round(data.length/(event.playbackTime-lastTime))|0, data);
             //lastOffset = offset;
             //lastTime = event.playbackTime;
-            const promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, this.audioContext.sampleRate, AudioRecorder.sampleRate);
+            const promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
             promise.then(data => {
                 feat.setData(realOffset * 4, data.buffer, data.byteOffset, data.byteLength);
                 realOffset += data.length;
             });
         });
         this.source.connect(this.processor);
-        this.processor.connect(this.audioContext.destination);
+        this.processor.connect(audioContext.destination);
     }
     @autobind
     stopRecording() {
         this.microphone.stop();
         this.source.disconnect(this.processor);
-        this.processor.disconnect(this.audioContext.destination);
+        this.processor.disconnect(audioContext.destination);
     }
 
     render() {

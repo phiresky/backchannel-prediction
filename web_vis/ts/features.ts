@@ -11,6 +11,9 @@ export type NumFeatureSVector = NumFeatureCommon & {
     typ: "FeatureType.SVector", dtype: "int16"
 };
 
+type Test = {
+    typ: "FeatureType.SVector"
+}
 export type NumFeatureFMatrix = NumFeatureCommon & {
     typ: "FeatureType.FMatrix", dtype: "float32"
 };

@@ -76,7 +76,7 @@ class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
         this.addPopover.setState({ isOpen: false });
         const gui = this.props.gui;
         const state = gui.getDefaultSingleUIState(await gui.getFeature(feat));
-        mobx.runInAction(() => this.props.uiState.features.push(state));
+        mobx.runInAction("addFeature", () => this.props.uiState.features.push(state));
     }
     addPopover: B.Popover;
     render() {

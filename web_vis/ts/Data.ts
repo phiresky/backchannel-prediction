@@ -30,15 +30,26 @@ const toFake = (iterator: { count: number, start: number, stride: number }, igno
     return ret;
 };
 export class TwoDimensionalArray {
-    public readonly buffer: ArrayLike<number>;
+    public buffer: Int16Array | Float32Array;
     public readonly dataType: TypedArrayType;
     private readonly atom: mobx.Atom;
     readonly shape: [number, number];
-    constructor(dataType: TypedArrayType, shape: [number, number]) {
+    static create(dataType: TypedArrayType, shape: [number, number]) {
+
+    }
+    constructor(dataType: TypedArrayType, shape: [number, number], data?: Float32Array | Int16Array) {
         this.atom = new mobx.Atom("MultiDimensionalArray");
         this.dataType = dataType;
         this.shape = shape;
-        this.buffer = new (TypedArrayOf(dataType))(shape.reduce((a, b) => a * b));
+        const clazz = TypedArrayOf(dataType);
+        if (data) {
+            if (!(data instanceof clazz)) throw Error("wrong array type");
+            this.buffer = data;
+        } else {
+            this.buffer = new clazz(shape.reduce((a, b) => a * b));
+            console.log("filling buffer with nan")
+            this.buffer.fill(NaN);
+        }
     }
 
     /** iterate over a dimension. one dimension index must be "ALL" */
@@ -59,13 +70,9 @@ export class TwoDimensionalArray {
         } else throw Error("one dimension must be ALL");
     }
     @mobx.action
-    setData(byteOffset: number, buffer: ArrayBuffer, bufferOffset: number, byteLength: number) {
-        const Cons = TypedArrayOf(this.dataType);
-        const offset = byteOffset / Cons.BYTES_PER_ELEMENT;
-        const length = byteLength / Cons.BYTES_PER_ELEMENT;
-        const view = new Cons(buffer, bufferOffset, length);
-        const backing = this.buffer as Float32Array | Int16Array;
-        backing.set(view, byteOffset / Cons.BYTES_PER_ELEMENT);
+    setData(offset: number, data: Float32Array | Int16Array) {
+        const length = data.length;
+        this.buffer.set(data, offset);
         this.invalidateRange(offset, offset + length);
         this.atom.reportChanged();
     }

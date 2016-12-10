@@ -2,6 +2,7 @@ import * as mobx from "mobx";
 import * as c from "./client";
 import * as util from "./util";
 import * as Data from "./Data";
+import * as Audio from "./Audio";
 import { autobind } from "core-decorators";
 import { NumFeatureCommon, Utterances, Highlights, NumFeature, Feature, FeatureID, ConversationID } from "./features";
 
@@ -113,7 +114,21 @@ export class SocketManager {
                 const feature = this.getFeature(meta.conversation, meta.feature).data;
                 if (!feature) throw Error("received feature data before feature: " + meta.feature);
                 if (!c.isNumFeature(feature)) throw Error("wat2");
-                feature.data.setData(meta.byteOffset, buffer, metaLength + 4, buffer.byteLength - metaLength - 4);
+                const prefixLength = metaLength + 4;
+                const dataLengthBytes = buffer.byteLength - prefixLength;
+                let floatsArray;
+                let offset;
+                if (feature.dtype === "int16") {
+                    const samplesCount = dataLengthBytes / Int16Array.BYTES_PER_ELEMENT;
+                    const dataArray = new Int16Array(buffer, prefixLength, samplesCount);
+                    floatsArray = new Float32Array(samplesCount);
+                    offset = meta.byteOffset / Int16Array.BYTES_PER_ELEMENT;
+                    Audio.fillAudioBuffer(dataArray, floatsArray);
+                } else {
+                    floatsArray = new Float32Array(buffer, prefixLength, dataLengthBytes / Float32Array.BYTES_PER_ELEMENT);
+                    offset = meta.byteOffset / floatsArray.BYTES_PER_ELEMENT;
+                }
+                feature.data.setData(offset, floatsArray);
             });
         } else {
             const msg: ServerMessage | ServerError = JSON.parse(event.data);
@@ -161,7 +176,8 @@ export class SocketManager {
         feature.name = featureID;
         if (feature.typ === "FeatureType.FMatrix" || feature.typ === "FeatureType.SVector") {
             return mobx.extendObservable(feature, {
-                data: new Data.TwoDimensionalArray(feature.dtype, feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1])
+                data: new Data.TwoDimensionalArray("float32", feature.typ === "FeatureType.FMatrix" ? feature.shape as any : [feature.shape[0], 1]),
+                range: feature.dtype === "int16" ? [-1,1] : feature.range
             }) as NumFeature;
         }
         return feature as Highlights;
