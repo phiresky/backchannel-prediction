@@ -54,30 +54,29 @@ export class BinaryCacheTree<T> implements ValueGetter<T> {
 
 export function statsRaw(data: ArrayLike<number>, start: number, end: number, stride = 1): Stats {
     let min = Infinity, max = -Infinity;
-    let rms2 = 0;
+    let squareSum = 0;
     let sum = 0;
     let count = 0;
     for (let i = start; i < end; i += stride) {
         const v = data[i];
         if (v < min) min = v;
         if (v > max) max = v;
-        rms2 += v * v;
+        squareSum += v * v;
         sum += v;
         count++;
     }
-    rms2 = rms2 / count;
-    return { min, max, rms2, sum, count };
+    return { min, max, squareSum, sum, count };
 }
 
-export type Stats = { min: number, max: number, rms2: number, sum: number, count: number };
+export type Stats = { min: number, max: number, squareSum: number, sum: number, count: number };
 export const cache = new Map<ArrayLike<number>, ValueGetter<Stats>>();
-export function statsCombinator(stats1: Stats, stats2: Stats) {
-    const count = stats1.count + stats2.count;
+export function statsCombinator(stats1: Stats, stats2: Stats): Stats {
     return {
         min: Math.min(stats1.min, stats2.min),
         max: Math.max(stats1.max, stats2.max),
-        rms2: (stats1.count * stats1.rms2 + stats2.count * stats2.rms2) / count,
-        count, sum: stats1.sum + stats2.sum
+        squareSum: stats1.squareSum + stats2.squareSum,
+        count: stats1.count + stats2.count,
+        sum: stats1.sum + stats2.sum,
     };
 }
 export function stats(data: ArrayLike<number>, start: number, end: number): Stats {

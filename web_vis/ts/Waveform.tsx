@@ -24,7 +24,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         const toSample = start + Math.ceil(length * to);
         if (fromSample < 0) continue;
         if (toSample >= data.iterator.count) continue;
-        const {min, max, rms2: rmsSq, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
+        const {min, max, squareSum, sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         if(isNaN(sum)) continue;
         const avg = sum / count;
         let h1 = Math.round(h * (1 - (max - display.min) / displayMinMax));
@@ -38,7 +38,7 @@ function renderWaveform(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
         lasth1 = h1;
         lasth2 = h2;
         ctx.fillRect(x, y + h1, 1, h2 - h1);
-        const rms = Math.sqrt(rmsSq * Math.sqrt(count) / 4);
+        const rms = Math.sqrt(squareSum / Math.sqrt(count) / 4);
         let rms1 = Math.round((1 - rms / displayMinMax) * hAvg);
         let rms2 = Math.round((1 + rms / displayMinMax) * hAvg);
         if (rms1 < h1 + 1) rms1 = h1 + 1;
