@@ -84,7 +84,7 @@ def fromiter(iterator, dtype, shape):
                        [("_", dtype, res_shape)], shape[0])["_"]
 
 
-def speakerFilter(self, convIDs: Set[str], speaker: str) -> bool:
+def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
     shortID = speaker.split("-")[0]
     return shortID in convIDs
 
@@ -320,7 +320,7 @@ def parseConversations(speaker: str, reader: DBReader):
 
 def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str]):
     logging.debug("parseConversationSet(" + setname + ")")
-    speakers = list(speaker for speaker in reader.spkDB if reader.speakerFilter(convIDs, speaker))
+    speakers = list(speaker for speaker in reader.spkDB if speakerFilter(convIDs, speaker))
     for (i, speaker) in enumerate(speakers):
         logging.debug("parseConversations({}, {}) [{}/{}]".format(setname, speaker, i, len(speakers)))
         yield from parseConversations(speaker, reader)
