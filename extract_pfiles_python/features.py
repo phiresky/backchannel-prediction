@@ -64,11 +64,11 @@ def filter_power(power: NumFeature) -> NumFeature:
 tracker = PitchTracker()
 
 
-def power_transform(adc: NumFeature, sample_window_ms: int) -> NumFeature:
+def power_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
     return filter_power(adc.adc2pow("{}ms".format(sample_window_ms)))
 
 
-def pitch_transform(adc: NumFeature, sample_window_ms: int) -> NumFeature:
+def pitch_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
     return adc.applyPitchTracker(tracker, window="{}ms".format(sample_window_ms)).normalize(min=-1, max=1)
 
 
@@ -110,12 +110,12 @@ class Features:
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_power(self, convid: str) -> NumFeature:
-        return power_transform(self.get_adc(convid))
+        return power_transform(self.get_adc(convid), self.sample_window_ms)
 
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_pitch(self, convid: str) -> NumFeature:
-        return pitch_transform(self.get_adc(convid))
+        return pitch_transform(self.get_adc(convid), self.sample_window_ms)
 
     @functools.lru_cache(maxsize=16)
     def get_combined_feat(self, convid: str) -> NumFeature:
