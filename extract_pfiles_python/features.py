@@ -60,6 +60,7 @@ def filter_power(power: NumFeature) -> NumFeature:
     power = power.normalize(min=-1, max=1)
     return power
 
+
 tracker = PitchTracker()
 
 
@@ -78,12 +79,13 @@ def adjacent(feat: NumFeature, offsets: Iterable[int]):
         raise Exception("only works for FMatrix")
     (frame_count, feature_dimension) = feat.shape
     out_feat = np.zeros((frame_count, offset_count * feature_dimension), dtype='float32')
+    offsets = np.array(offsets)
+    out_offsets = feature_dimension * np.array(range(len(offsets) + 1))
+    frame_indices = np.array(range(frame_count))
     for column, offset in enumerate(offsets):
-        for frame in range(0, frame_count):
-            offset_frame = min(max(frame + offset, 0), frame_count - 1)
-            out_feat[frame][column * feature_dimension:(column + 1) * feature_dimension] = feat[offset_frame]
+        column_offsets = np.clip(frame_indices + offset, 0, frame_count - 1)
+        out_feat[:, out_offsets[column]:out_offsets[column + 1]] = feat[column_offsets]
     return NumFeature(out_feat, shift=feat.shift, samplingRate=feat.samplingRate)
-
 
 
 class Features:
