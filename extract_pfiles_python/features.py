@@ -121,8 +121,10 @@ class Features:
     def get_combined_feat(self, convid: str) -> NumFeature:
         pitch = self.get_pitch(convid)
         power = self.get_power(convid)
-        context = self.config['extract_config']['context']
-        return adjacent(pitch.merge(power), range(-context + 1, 1))
+        context_ms = self.config['extract_config']['context_ms']
+        ms_shift = power.shift
+        stride = self.config['extract_config']['context_stride']
+        return adjacent(pitch.merge(power), range(stride - int(context_ms / ms_shift), 1, stride))
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:

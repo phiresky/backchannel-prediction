@@ -109,7 +109,6 @@ class DBReader:
         self.config = config
         self.extract_config = self.config['extract_config']
         self.paths_config = self.config['paths']
-        self.context = self.extract_config['context']
         self.use_original_db = self.extract_config['useOriginalDB']
         self.features = Features(config)
         self.load_db()
@@ -278,7 +277,7 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
     (frameN, coeffN) = F.shape
 
     if coeffN != input_dim:
-        raise Exception("coeff and dim don't match")
+        raise Exception("coeff={} and dim={} don't match".format(coeffN, input_dim))
 
     expectedNumOfFrames = (toTime - fromTime) * 100
     deltaFrames = abs(expectedNumOfFrames - frameN)
@@ -413,7 +412,7 @@ def main():
     config = load_config(sys.argv[1])
 
     extract_config = config['extract_config']
-    context = extract_config['context']
+    context_ms = extract_config['context_ms']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
     outputDir = os.path.join(extract_config['outputDirectory'], "{}".format(version))
     if os.path.isdir(outputDir):
@@ -426,7 +425,7 @@ def main():
 
     with DBReader(config) as reader:
 
-        input_dim = 2 * context
+        input_dim = 2 * context_ms // 10 / extract_config['context_stride']
         output_dim = 1
 
         nnConfig = {

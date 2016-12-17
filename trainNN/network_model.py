@@ -9,16 +9,16 @@ def create_network(config, BATCH_SIZE):
     hidden_layer_1 = DenseLayer(input_layer,
                                 num_units=100,
                                 nonlinearity=lasagne.nonlinearities.sigmoid,
-                                W=lasagne.init.Constant(0)
+                                W=lasagne.init.GlorotNormal()
                                 )
     hidden_layer_2 = DenseLayer(hidden_layer_1,
                                 num_units=50,
                                 nonlinearity=lasagne.nonlinearities.sigmoid,
-                                W=lasagne.init.Constant(0)
+                                W=lasagne.init.GlorotNormal()
                                 )
     output_layer = DenseLayer(hidden_layer_2,
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax,
-                              W=lasagne.init.Constant(0)
+                              W=lasagne.init.GlorotNormal()
                               )
     return locals()

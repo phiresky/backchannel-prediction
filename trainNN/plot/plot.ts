@@ -17,6 +17,8 @@ const relevant = [
     ...all.map(version => ({ version })),
 ];
 async function retrieveData() {
+    const versions = await fetch("dist/dirindex.txt").then(resp => resp.text());
+    const relevant = versions.split("\n").map(version => ({version}));
     const div = document.getElementById("content")!;
     for (const {version} of relevant) {
         const resp = await fetch(config(version));
