@@ -11,6 +11,7 @@ import soundfile as sf
 import functools
 import pickle
 import logging
+from typing import Iterable
 
 
 def NumFeature_to_dict(n: NumFeature):
@@ -44,13 +45,51 @@ def NumFeatureCache(f):
     return wrap
 
 
-class Features:
-    filtr = Filter(-2, [1, 2, 3, 2, 1])
+filtr = Filter(-2, [1, 2, 3, 2, 1])
 
+
+def filter_power(power: NumFeature) -> NumFeature:
+    b = power.max() / 10 ** 4
+    val = power + b
+    for i in range(0, len(val)):
+        if val[i] <= 0:
+            val[i] = 1
+    power = np.log10(val)
+    power = power.applyFilter(filtr)
+    power = power.applyFilter(filtr)
+    power = power.normalize(min=-1, max=1)
+    return power
+
+tracker = PitchTracker()
+
+
+def power_transform(adc: NumFeature, sample_window_ms: int) -> NumFeature:
+    return filter_power(adc.adc2pow("{}ms".format(sample_window_ms)))
+
+
+def pitch_transform(adc: NumFeature, sample_window_ms: int) -> NumFeature:
+    return adc.applyPitchTracker(tracker, window="{}ms".format(sample_window_ms)).normalize(min=-1, max=1)
+
+
+def adjacent(feat: NumFeature, offsets: Iterable[int]):
+    offsets = list(offsets)
+    offset_count = len(offsets)
+    if feat.typ != FeatureType.FMatrix:
+        raise Exception("only works for FMatrix")
+    (frame_count, feature_dimension) = feat.shape
+    out_feat = np.zeros((frame_count, offset_count * feature_dimension), dtype='float32')
+    for column, offset in enumerate(offsets):
+        for frame in range(0, frame_count):
+            offset_frame = np.clip(frame + offset, 0, frame_count - 1)
+            out_feat[frame][column * feature_dimension:(column + 1) * feature_dimension] = feat[offset_frame]
+    return NumFeature(out_feat, shift=feat.shift, samplingRate=feat.samplingRate)
+
+
+
+class Features:
     def __init__(self, config):
         self.config = config
         self.sample_window_ms = config['extract_config']['sample_window_ms']  # type: float
-        self.tracker = PitchTracker()
 
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
@@ -66,38 +105,21 @@ class Features:
         if channel == "B":
             return ADC0B
 
-    def power_transform(self, adc: NumFeature) -> NumFeature:
-        return self.filter_power(adc.adc2pow("{}ms".format(self.sample_window_ms)))
-
-    def pitch_transform(self, adc: NumFeature) -> NumFeature:
-        return adc.applyPitchTracker(self.tracker, window="{}ms".format(self.sample_window_ms)).normalize(min=-1, max=1)
-
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_power(self, convid: str) -> NumFeature:
-        return self.power_transform(self.get_adc(convid))
+        return power_transform(self.get_adc(convid))
 
     @functools.lru_cache(maxsize=32)
     @NumFeatureCache
     def get_pitch(self, convid: str) -> NumFeature:
-        return self.pitch_transform(self.get_adc(convid))
+        return pitch_transform(self.get_adc(convid))
 
     def get_combined_feat(self, convid: str) -> NumFeature:
         pitch = self.get_pitch(convid)
         power = self.get_power(convid)
-        return pitch.merge(power).adjacent(self.config['extract_config']['context'])
-
-    def filter_power(self, power: NumFeature) -> NumFeature:
-        b = power.max() / 10 ** 4
-        val = power + b
-        for i in range(0, len(val)):
-            if val[i] <= 0:
-                val[i] = 1
-        power = np.log10(val)
-        power = power.applyFilter(self.filtr)
-        power = power.applyFilter(self.filtr)
-        power = power.normalize(min=-1, max=1)
-        return power
+        context = self.config['extract_config']['context']
+        return adjacent(pitch.merge(power), range(-context + 1, 1))
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:
@@ -138,3 +160,17 @@ def readAudioFile(filename: str, dtype='int16', **kwargs):
         # multi channel, each column is a channel
         return [NumFeature(col, samplingRate=samplingRate / 1000, shift=0) for col in data.T]
     return NumFeature(data, featureSet=fs, samplingRate=samplingRate / 1000, shift=0)
+
+
+def test():
+    f = Features(dict(extract_config=dict(sample_window_ms=32)))
+    arr = np.array([[1, 2], [3, 4], [5, 6], [7, 8]], dtype='float32')
+    feat = NumFeature(arr)
+    print(feat)
+    print(feat.adjacent(1))
+    print(f.adjacent(feat, [-1, 0, 1]))
+    print(f.adjacent(feat, range(-5, 1)))
+
+
+if __name__ == '__main__':
+    test()

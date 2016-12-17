@@ -415,8 +415,7 @@ def main():
     extract_config = config['extract_config']
     context = extract_config['context']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
-    outputDir = os.path.join(extract_config['outputDirectory'],
-                             "{}-context{}".format(version, context))
+    outputDir = os.path.join(extract_config['outputDirectory'], "{}".format(version))
     if os.path.isdir(outputDir):
         print("Output directory {} already exists, aborting".format(outputDir))
         sys.exit(1)
@@ -427,7 +426,7 @@ def main():
 
     with DBReader(config) as reader:
 
-        input_dim = 2 * (context * 2 + 1)
+        input_dim = 2 * context
         output_dim = 1
 
         nnConfig = {
