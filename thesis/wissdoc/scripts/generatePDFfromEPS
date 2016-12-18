@@ -1,0 +1,89 @@
+#!/bin/tcsh
+# generatePDFfromEPS <files>
+# 
+if ("$1" == "") then
+ echo "usage: generatePDFfromEPS <directories>"
+ exit 1
+endif
+set dirs = ( $* )
+
+# collect all files that may be EPS pictures
+set files = ( `find $dirs -type f | egrep -v '(src|old)' | egrep '\.(ps|eps)(\.(gz|Z))?$'` )
+
+set maindir=$cwd;
+set workingdir = ""
+
+foreach file ($files)
+   set filename="$file:t"; # filename without leading directory
+   set infilename="$filename";
+   set outfilename="$filename:r.pdf";
+   set tmpfilename="";
+   set uncompress="";
+
+   if ( "$file:h" != "$workingdir" ) then 
+     # file is not in the current working dir, so change the dir
+     set workingdir="$file:h";
+     cd $maindir; cd $workingdir;
+     echo "Working directory: [$workingdir]";
+   endif
+
+   echo -n " Processing $filename..."
+
+   if ( ! -f "$filename" ) then
+      echo "is not a plain file, skipping.";
+      continue;
+   endif
+
+   # uncompressed
+   if ( ( "$filename:e" == "ps" ) && ( -e "$filename:r.eps" ) ) then
+      # .ps exists but also a corresponding .eps -> skip it we'll use .eps
+     echo "$filename:r.eps exists, will use this instead"
+     continue;
+   endif
+
+   # compressed .(eps|ps).(gz|Z)
+   if ( "$filename:e" == "gz" || "$filename:e" == "Z") then
+      if ( "$filename:r:e" == "ps" ) then
+   
+        if  ( -e "$filename:r:r.eps" || -e "$filename:r:r.eps.gz" || -e "$filename:r:r.eps.Z" ) then # skip .ps, we'll use .eps instead
+         echo "$filename:r:r.eps(.gz|Z) exists, will use this instead"
+         continue;
+        else # use .ps only if .eps doesn't exist
+            set tmpfilename="/tmp/generatePDFfromEPS$$.ps";
+   	    set infilename=$tmpfilename;
+            set outfilename="$filename:r:r.pdf"
+   	    set uncompress="gzip -dc $filename";
+        endif
+   
+      endif
+   
+      if ( "$filename:r:e" == "eps") then # check for eps.gz
+        set tmpfilename="/tmp/generatePDFfromEPS$$.ps"
+   	set infilename=$tmpfilename;
+        set outfilename="$filename:r:r.pdf"
+        set uncompress="gzip -dc $filename"
+      endif
+   else
+     if ( "$filename:e" != "ps" &&  "$filename:e" != "eps" ) then # unknown extension
+        echo "unknown file type/extension, skipping";
+        continue;
+     endif
+   endif
+
+   #check whether newer .pdf-File already exists
+   if ( -e "$outfilename" && -M "$outfilename" >= -M "$filename" ) then
+     #pdf file is newer
+     echo "a newer $outfilename exists already, skipping"
+     continue;
+   endif
+
+   echo -n "-> "; #echo "$outfilename"; continue;
+   if ( "$uncompress" != "" ) then
+     $uncompress >$infilename;
+   endif
+   epstopdf ${infilename} |& grep -v "^%%"
+   if ( -e "$tmpfilename:r.pdf" ) then
+     mv -f "$tmpfilename:r.pdf" "$outfilename";
+   endif
+   echo "$outfilename";
+end

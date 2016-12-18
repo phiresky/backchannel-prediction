@@ -1,0 +1,5 @@
+#!/bin/sh
+# Makeindex kennt nur die Schreibweise "a,"u,"o, usw. nicht aber \"a, etc.
+# also ersetzen:
+# \"o->"o, \"a->"a, \"u->"u, \"s->"s, usw.
+perl -pe 's/\\"a/"a/g; s/\\"o/"o/g; s/\\"u/"u/g; s/\\"A/"A/g; s/\\"O/"O/g; s/\\"U/"U/g; s/\\"s/"s/g;'

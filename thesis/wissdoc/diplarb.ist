@@ -1,0 +1,27 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% *.ist Datei
+% Style Datei fuer makeindex
+% $Id: praktikum.ist 1089 2005-02-23 10:06:26Z admin $
+% $Source$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Quote-Charakter wird zu « verändert, ist sonst ".
+% Damit können auch Umlaute sinnvoll behandelt werden.
+quote '«'
+
+% Wenn man lieber dots zwischen Eintrag und Seitennummer moechte
+% statt eines Kommas (plus Blank).
+delim_0 " \\nobreak\\mydotfill\\kern 0pt\\mydotfill\\nobreak\\textrm{"
+delim_1 " \\nobreak\\mydotfill\\kern 0pt\\mydotfill\\nobreak\\textrm{"
+delim_2 " \\nobreak\\mydotfill\\kern 0pt\\mydotfill\\nobreak\\textrm{"
+
+% 
+page_compositor "-"
+
+% Seitenzahlen im gleichen Stil wie in der Kopfzeile
+delim_t "}"
+
+% Zeilenlänge für .ind-Datei
+line_max 256
+
+% end of .ist

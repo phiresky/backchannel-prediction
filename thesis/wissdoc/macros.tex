@@ -1,0 +1,183 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% macros.tex -- einige mehr oder weniger nuetzliche Makros
+% Autor: Roland Bless 1998
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% $Id: macros.tex 33 2007-01-23 09:00:59Z bless $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Kommentare 
+%%%%%%%%%%%%%%%%%%%%%%%
+\ifnotdraftelse{
+\newcommand{\Kommentar}[1]{}
+}{\newcommand{\Kommentar}[1]{{\em #1}}}
+% Alles innerhalb von \Hide{} oder \ignore{} 
+% wird von LaTeX komplett ignoriert (wie ein Kommentar)
+\newcommand{\Hide}[1]{}
+\let\ignore\Hide
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Leere Seite ohne Seitennummer, wird aber gezaehlt
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\leereseite}{% Leerseite ohne Seitennummer, nächste Seite rechts (wenn 2-seitig)
+ \clearpage{\pagestyle{empty}\cleardoublepage}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Flattersatz rechts und Silbentrennung, Leerraum nach rechts maximal 1cm
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\newcommand{\myraggedright}{%
+ \let\\\@centercr\@rightskip 0pt plus 1cm
+ \rightskip\@rightskip
+  \leftskip\z@skip
+  \parindent\z@
+  \spaceskip=.3333em
+  \xspaceskip=.5em}
+\makeatother
+
+\makeatletter
+\newcommand{\mynewline}{%
+ \@centercr\@rightskip 0pt plus 1cm
+}
+\makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Für Index
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\def\mydotfill{\leavevmode\xleaders\hb@xt@ .44em{\hss.\hss}\hfill\kern\z@}
+\makeatother
+\def\bold#1{{\bfseries #1}}
+\newbox\dbox \setbox\dbox=\hbox to .4em{\hss.\hss} % dot box for leaders
+\newskip\rrskipb \rrskipb=.5em plus3em % ragged right space before break
+\newskip\rrskipa \rrskipa=-.17em plus -3em minus.11em % ditto, after
+\newskip\rlskipa \rlskipa=0pt plus3em % ragged left space after break
+\newskip\rlskipb \rlskipb=.33em plus-3em minus.11em % ragged left before break
+\newskip\lskip \lskip=3.3\wd\dbox plus1fil minus.3\wd\dbox % for leaders
+\newskip \lskipa \lskipa=-2.67em plus -3em minus.11em %after leaders
+\mathchardef\rlpen=1000 \mathchardef\leadpen=600
+\def\rrspace{\nobreak\hskip\rrskipb\penalty0\hskip\rrskipa}
+\def\rlspace{\penalty\rlpen\hskip\rlskipb\vadjust{}\nobreak\hskip\rlskipa}
+\let\indexbreak\rlspace
+\def\raggedurl{\penalty10000 \hskip.5em plus15em \penalty0 \hskip-.17em plus-15em minus.11em}
+\def\raggeditems{\nobreak\hskip\rrskipb \penalty\leadpen \hskip\rrskipa %
+\vadjust{}\nobreak\leaders\copy\dbox\hskip\lskip %
+\kern3em \penalty\leadpen \hskip\lskipa %
+\vadjust{}\nobreak\hskip\rlskipa}
+\renewcommand*\see[2]{\rlspace\emph{\seename}~#1} % from makeidx.sty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Neue Seite rechts, leere linke Seite ohne Headings
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\xcleardoublepage}
+{{\pagestyle{empty}\cleardoublepage}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tabellenspaltentypen (benoetigt colortbl)
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\PBS}[1]{\let\temp=\\#1\let\\=\temp}
+\newcolumntype{y}{>{\PBS{\raggedright\hspace{0pt}}}p{1.35cm}}
+\newcolumntype{z}{>{\PBS{\raggedright\hspace{0pt}}}p{2.5cm}}
+\newcolumntype{q}{>{\PBS{\raggedright\hspace{0pt}}}p{6.5cm}}
+\newcolumntype{g}{>{\columncolor[gray]{0.8}}c} % Grau
+\newcolumntype{G}{>{\columncolor[gray]{0.9}}c} % helleres Grau
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Anführungszeichen oben und unten
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\anf}[1]{"`{#1}"'}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tiefstellen von Text
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% S\tl{0} setzt die 0 unter das S (ohne Mathemodus!)
+% zum Hochstellen gibt es uebrigens \textsuperscript
+\makeatletter
+\DeclareRobustCommand*\textlowerscript[1]{%
+  \@textlowerscript{\selectfont#1}}
+\def\@textlowerscript#1{%
+  {\m@th\ensuremath{_{\mbox{\fontsize\sf@size\z@#1}}}}}
+\let\tl\textlowerscript
+\let\ts\textsuperscript
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Gauß-Klammern
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\ceil}[1]{\lceil{#1}\rceil}
+\newcommand{\floor}[1]{\lfloor{#1}\rfloor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Average Operator (analog zu min, max)
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\avg{\mathop{\mathgroup\symoperators avg}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Wortabkürzungen
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\zB{z.\,B.\ }
+\def\dh{d.\,h.\ }
+\def\ua{u.\,a.\ }
+\def\su{s.\,u.\ }
+\newcommand{\bzw}{bzw.\ }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Einbinden von Graphiken
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% global scaling factor
+\def\gsf{0.9}
+%% Graphik, 
+%% 3 Argumente: Datei, Label, Unterschrift
+\newcommand{\Abbildung}[3]{%
+\begin{figure}[tbh] %
+\centerline{\scalebox{\gsf}{\includegraphics*{#1}}} %
+\caption{#3} %
+\label{#2} %
+\end{figure} %
+}
+\let\Abb\Abbildung
+%% Abbps
+%% Graphik, skaliert, Angabe der Position
+%% 5 Argumente: Position, Breite (0 bis 1.0), Datei, Label, Unterschrift
+\newcommand{\Abbildungps}[5]{%
+\begin{figure}[#1]%
+\begin{center}
+\scalebox{\gsf}{\includegraphics*[width=#2\textwidth]{#3}}%
+\caption{#5}%
+\label{#4}%
+\end{center}
+\end{figure}%
+}
+\let\Abbps\Abbildungps
+%% Graphik, Angabe der Position, frei wählbares Argument für includegraphics
+%% 5 Argumente: Position, Optionen, Datei, Label, Unterschrift
+\newcommand{\Abbildungpf}[5]{%
+\begin{figure}[#1]%
+\begin{center}
+\scalebox{\gsf}{\includegraphics*[#2]{#3}}%
+\caption{#5}%
+\label{#4}%
+\end{center}
+\end{figure}%
+}
+\let\Abbpf\Abbildungpf
+
+%%
+% Anmerkung: \resizebox{x}{y}{box} skaliert die box auf Breite x und Höhe y,
+%            ist x oder y ein !, dann wird das usprüngliche 
+%            Seitenverhältnis beibehalten.
+%            \rescalebox funktioniert ähnlich, nur das dort ein Faktor
+%            statt einer Dimension angegeben wird.
+%%
+% \Abbps{Position}{Breite in Bruchteilen der Textbreite}{Dateiname}{Label}{Bildunterschrift}
+%
+
+\newcommand{\refAbb}[1]{%
+s.~Abbildung \ref{#1}}
+
+%%%%%%%%%%%%%%%%%%%%
+%% end of macros.tex
+%%%%%%%%%%%%%%%%%%%%
