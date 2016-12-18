@@ -123,8 +123,14 @@ class Features:
         power = self.get_power(convid)
         context_ms = self.config['extract_config']['context_ms']
         ms_shift = power.shift
+        context = int(context_ms / ms_shift)
         stride = self.config['extract_config']['context_stride']
-        return adjacent(pitch.merge(power), range(stride - int(context_ms / ms_shift), 1, stride))
+        offline = True
+        if offline:
+            offsets = range(-context // 2, context // 2, stride)
+        else:
+            offsets = range(stride - context, 1, stride)
+        return adjacent(pitch.merge(power), offsets)
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:
