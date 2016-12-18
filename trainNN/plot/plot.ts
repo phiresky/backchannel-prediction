@@ -39,6 +39,7 @@ async function retrieveData() {
             color: "green",
             axis: "Error"
         }];
+        if(!stats["0"]["validation_loss"]) continue;
         const plotData = keys.map(info => ({
             label: info.key,
             borderColor: info.color,

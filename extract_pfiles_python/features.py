@@ -125,8 +125,8 @@ class Features:
         ms_shift = power.shift
         context = int(context_ms / ms_shift)
         stride = self.config['extract_config']['context_stride']
-        offline = True
-        if offline:
+        online = self.config['extract_config']['online']
+        if not online:
             offsets = range(-context // 2, context // 2, stride)
         else:
             offsets = range(stride - context, 1, stride)
