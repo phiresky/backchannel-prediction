@@ -1,3 +1,58 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:12104be182e41b7268c9390a4c8b0a6b95cd550055baf3054121907e61cec53b
-size 1495
+{
+	"train_output": {
+		"source": "extract_pfiles_python/out/v025-bc-at-word-alignment-context40/config.json",
+		"stats": {
+			"0": {
+				"training_loss": 0.4892720784788602,
+				"validation_loss": 0.4868910441538711,
+				"validation_error": 0.22008471700083543,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"training_loss": 0.48325392611017237,
+				"validation_loss": 0.4821924694199909,
+				"validation_error": 0.21866406467557786,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"training_loss": 0.481214024939645,
+				"validation_loss": 0.48024833204021894,
+				"validation_error": 0.2174957793790031,
+				"weights": "epoch-002.pkl"
+			}
+		},
+		"model": "network_model.py"
+	},
+	"train_config": {
+		"input_dim": 162,
+		"output_dim": 1,
+		"num_labels": 2,
+		"files": {
+			"train": "train.npz",
+			"test": "test.npz",
+			"validate": "validate.npz"
+		}
+	},
+	"extract_config": {
+		"sample_window_ms": 32,
+		"context": 40,
+		"useWordsTranscript": false,
+		"outputDirectory": "extract_pfiles_python/out",
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"useOriginalDB": true
+	},
+	"paths": {
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"adc": "data/adc",
+		"databasePrefix": "data/db/all240302",
+		"backchannels": "data/backchannels-top200.txt",
+		"conversations": {
+			"train": "data/conversations.train",
+			"test": "data/conversations.test",
+			"validate": "data/conversations.valid"
+		}
+	}
+}

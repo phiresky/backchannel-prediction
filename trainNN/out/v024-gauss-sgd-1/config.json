@@ -1,3 +1,67 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:301f34321ddf5c87586ff673cec2f0cadd6362d82812f7b14bc180b69bff08a7
-size 1581
+{
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"train": "data/conversations.train",
+			"validate": "data/conversations.valid",
+			"test": "data/conversations.test"
+		},
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"backchannels": "data/backchannels-top200.txt"
+	},
+	"train_output": {
+		"model": "network_model.py",
+		"stats": {
+			"0": {
+				"validation_error": 0.13782555270675823,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.1378010687455846,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.13785450482567427,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.13781453374571195,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.1378476813497729,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.13780062265580154,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.13779801927164964,
+				"weights": "epoch-006.pkl"
+			}
+		},
+		"source": "extract_pfiles_python/out/v023-train-gaussian-radius2s-context40/config.json"
+	},
+	"extract_config": {
+		"featureExtractionSteps": [
+			"extract_pfiles_python/featAccess.py",
+			"extract_pfiles_python/featDescDelta.py"
+		],
+		"useOriginalDB": true,
+		"context": 40,
+		"outputDirectory": "extract_pfiles_python/out",
+		"sample_window_ms": 32
+	},
+	"train_config": {
+		"output_dim": 1,
+		"input_dim": 162,
+		"num_labels": 2,
+		"files": {
+			"train": "train.npz",
+			"validate": "validate.npz",
+			"test": "test.npz"
+		}
+	}
+}

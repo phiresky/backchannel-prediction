@@ -1,3 +1,23 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1eb22b82f569049ffd650f10fc47776494e074799c304ae8da693f29daa659de
-size 1000
+import lasagne
+from lasagne.layers import InputLayer, DenseLayer, DropoutLayer
+
+
+def create_network(config, BATCH_SIZE):
+    input_dim = config['input_dim']
+    num_labels = config['num_labels']
+    input_layer = InputLayer(shape=(BATCH_SIZE, input_dim))
+    hidden_layer_1 = DenseLayer(input_layer,
+                                num_units=100,
+                                nonlinearity=lasagne.nonlinearities.sigmoid,
+                                # W=lasagne.init.Constant(0)
+                                )
+    hidden_layer_2 = DenseLayer(hidden_layer_1,
+                                num_units=50,
+                                nonlinearity=lasagne.nonlinearities.sigmoid,
+                                # W=lasagne.init.Constant(0)
+                                )
+    output_layer = DenseLayer(hidden_layer_2,
+                              num_units=1,
+                              nonlinearity=lasagne.nonlinearities.sigmoid
+                              )
+    return locals()
