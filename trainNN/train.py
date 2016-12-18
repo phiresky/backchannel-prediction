@@ -69,7 +69,7 @@ def train():
         train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim].astype("int32")
         validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")
 
-    stats = train_func.train_network(
+    stats_generator = train_func.train_network(
         network=model['output_layer'],
         scheduling_method=None,
         # scheduling_params=(0.8, 0.000001),
@@ -82,15 +82,16 @@ def train():
         output_prefix=os.path.join(out_dir, "epoch")
     )
     config_out = os.path.join(out_dir, "config.json")
-    for k, v in stats.items():
-        v['weights'] = os.path.basename(v['weights'])
-    with open(config_out, "w") as f:
-        json.dump({**config, 'train_output': {
-            'stats': stats,
-            'source': config_path,
-            'model': os.path.basename(model_file)
-        }}, f, indent='\t')
-    misc_func.myPrint("Wrote output to " + config_out)
+    for stats in stats_generator:
+        for k, v in stats.items():
+            v['weights'] = os.path.basename(v['weights'])
+        with open(config_out, "w") as f:
+            json.dump({**config, 'train_output': {
+                'stats': stats,
+                'source': config_path,
+                'model': os.path.basename(model_file)
+            }}, f, indent='\t')
+        misc_func.myPrint("Wrote output to " + config_out)
     latest_path = os.path.join("trainNN", "out", "latest")
     with contextlib.suppress(FileNotFoundError):
         os.remove(latest_path)

@@ -426,10 +426,12 @@ def main():
     with DBReader(config) as reader:
 
         input_dim = 2 * context_ms // 10 / extract_config['context_stride']
+        if not input_dim.is_integer():
+            raise Exception("input dim is not integer: " + str(input_dim))
         output_dim = 1
 
         nnConfig = {
-            'input_dim': input_dim,
+            'input_dim': int(input_dim),
             'output_dim': output_dim,
             'num_labels': 2,
             'files': {}
