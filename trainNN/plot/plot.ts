@@ -25,7 +25,7 @@ async function retrieveData() {
         if (!resp.ok) continue;
         const data = await resp.json();
         const stats = data.train_output.stats;
-        if(Object.keys(stats).length < 5) continue;
+        if(Object.keys(stats).length < 3) continue;
         const keys = [{
             key: "training_loss",
             color: "blue",

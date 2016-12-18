@@ -18,11 +18,13 @@ NUM_EPOCHS = 10000
 
 def iterate_minibatches(batchsize, inputs, outputs):
     frames, dim = inputs.shape
+    sequence_length = dim // 2
+    input_dim_single = 2
     indices = numpy.arange(len(inputs))
     numpy.random.shuffle(indices)
     for i in range(0, frames // batchsize):
         elements = indices[i * batchsize:(i + 1) * batchsize]
-        yield inputs[elements], outputs[elements]
+        yield inputs[elements].reshape((batchsize, sequence_length, input_dim_single)), outputs[elements]
 
 
 def load_numpy_file(fname):
