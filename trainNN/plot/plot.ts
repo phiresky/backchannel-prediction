@@ -55,7 +55,6 @@ async function retrieveData() {
         console.log(plotData);
         const div2 = document.createElement("div");
         const canvas = document.createElement("canvas");
-        div2.style.width = "45vw";
         if(version in titles) {
             var title = `${titles[version]} (${version})`;
         } else {
