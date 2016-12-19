@@ -6,18 +6,34 @@ author: Robin
 
 # Introduction
 
+# Methodology and Implementation
+
 # Extraction
 
 ## Backchannel selection
 
-## 
+list of 200 most common BCs...
+
+## Prediction outputs
+
+- expect `1` shortly before BC, `0` 2 seconds earlier
+- bell curve
 
 # Training
 
 ## Feed forward
 
-## LSTM?
+
+## RNN / LSTM
+
+# Postprocessing
+
+low-pass filter, trigger BC at maxima
+
+use random BC sample from training data
 
 # Evaluation
 
-# Methodology and Implementation
+# Future Work
+
+predict specific BCs / categories
