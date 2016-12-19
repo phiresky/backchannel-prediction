@@ -105,12 +105,12 @@ class DBReader:
     spkDB = None
     uttDB = None
 
-    def __init__(self, config):
+    def __init__(self, config: Dict, config_path: str):
         self.config = config
         self.extract_config = self.config['extract_config']
         self.paths_config = self.config['paths']
         self.use_original_db = self.extract_config['useOriginalDB']
-        self.features = Features(config)
+        self.features = Features(config, config_path)
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.sample_window_ms = self.extract_config['sample_window_ms']
@@ -409,7 +409,8 @@ def main():
     global input_dim
     np.seterr(all='raise')
     logging.debug("loading config file {}".format(sys.argv[1]))
-    config = load_config(sys.argv[1])
+    config_path = sys.argv[1]
+    config = load_config(config_path)
 
     extract_config = config['extract_config']
     context_ms = extract_config['context_ms']
@@ -423,7 +424,7 @@ def main():
 
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
-    with DBReader(config) as reader:
+    with DBReader(config, config_path) as reader:
 
         input_dim = 2 * context_ms // 10 / extract_config['context_stride']
         if not input_dim.is_integer():

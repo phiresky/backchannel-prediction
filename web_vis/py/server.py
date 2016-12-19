@@ -14,6 +14,7 @@ import os.path
 from time import perf_counter
 import numpy as np
 import random
+from extract_pfiles_python.features import Features, NumFeatureCache
 
 
 def parse_binary_frame_with_metadata(buffer: bytes):
@@ -28,15 +29,6 @@ def create_binary_frame_with_metadata(meta_dict: dict, data: bytes):
         meta += b' ' * (4 - len(meta) % 4)
     meta_length = len(meta).to_bytes(4, byteorder='little')
     return meta_length + meta + data
-
-
-def evaluateNetwork(net, input: NumFeature) -> NumFeature:
-    output = net(input)
-    if output.shape[1] == 1:
-        return NumFeature(output)
-    else:
-        return NumFeature(output[:, [1]])
-
 
 def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
     return {
@@ -66,7 +58,6 @@ def findAllNets():
     from os.path import join, isdir, isfile
     folder = join("trainNN", "out")
     rootList = []
-    accessDict = OrderedDict()
     for netversion in sorted(os.listdir(folder)):
         path = join(folder, netversion)
         if not isdir(path) or not isfile(join(path, "train.log")):
@@ -77,28 +68,25 @@ def findAllNets():
             rootList.append({'name': netversion, 'children': curList})
             net_conf = readDB.load_config(net_conf_path)
             stats = net_conf['train_output']['stats']
-            bestid = min(stats.keys(), key=lambda k: stats[k]['validation_error'])
-            accessDict[(netversion, "best")] = (net_conf_path, bestid)
             curList.append("best")
             curList.append("best.smooth")
             curList.append("best.smooth.thres")
             for id, info in stats.items():
-                accessDict[(netversion, info['weights'])] = (net_conf_path, id)
                 curList.append(info["weights"])
-    return accessDict, rootList
+    return rootList
 
+config_path = sys.argv[1]
+config = readDB.load_config(config_path)
 
-config = readDB.load_config(sys.argv[1])
-
-origReader = readDB.DBReader(config)
+origReader = readDB.DBReader(config, config_path)
 config['extract_config']['useWordsTranscript'] = True
-wordsReader = readDB.DBReader(config)
+wordsReader = readDB.DBReader(config, config_path)
 config['extract_config']['useWordsTranscript'] = False
 config['extract_config']['useOriginalDB'] = False
-islReader = readDB.DBReader(config)
+islReader = readDB.DBReader(config, config_path)
 conversations = {name: list(readDB.parse_conversations_file(path)) for name, path in
                  config['paths']['conversations'].items()}
-netsDict, netsTree = findAllNets()
+netsTree = findAllNets()
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -152,16 +140,19 @@ def get_features():
                                           dict(name="NN outputs", children=netsTree)])
     ]
 
-
-def get_net_output(reader: readDB.DBReader, convid: str, path):
+def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
         path[-1] = path[-1][:-len(".smooth")]
         smooth = True
     else:
         smooth = False
-    config_path, wid = netsDict[tuple(path)]
-    net = get_network_outputter(config_path, wid)
-    feature = evaluateNetwork(net, origReader.features.get_combined_feat(convid))
+
+    version, id = path
+    version_path = os.path.realpath(os.path.join("trainNN", "out", version))
+    config_path = os.path.join(version_path, "config.json")
+    config = readDB.load_config(config_path)
+    features = Features(config, config_path)
+    feature = features.get_net_output(convid, id)
 
     if smooth:
         import scipy
@@ -237,14 +228,14 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
     elif category == "NN outputs":
         if path[-1].endswith(".thres"):
             path[-1] = path[-1][:-len(".thres")]
-            feature = get_net_output(origReader, convid, path)
+            feature = get_net_output(convid, path)
             await sendOtherFeature(ws, id, get_larger_threshold(feature, featFull, threshold=0.6))
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
-            feature = get_net_output(origReader, convid, path)
+            feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, get_bc_audio(feature))
         else:
-            feature = get_net_output(origReader, convid, path)
+            feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, feature)
     elif category == "extracted":
         feats = get_extracted_features(origReader)

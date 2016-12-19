@@ -12,6 +12,7 @@ import functools
 import pickle
 import logging
 from typing import Iterable
+from trainNN.evaluate import get_network_outputter
 
 
 def NumFeature_to_dict(n: NumFeature):
@@ -28,14 +29,15 @@ def NumFeature_from_dict(d: dict):
 
 def NumFeatureCache(f):
     @functools.wraps(f)
-    def wrap(featuresInstance, convid):
-        path = os.path.join(featuresInstance.config['paths']['cacheDirectory'], convid + "." + f.__name__)
+    def wrap(featuresInstance, *args):
+        key = ".".join([f.__name__, featuresInstance.config_path.replace("/", "_"), *args])
+        path = os.path.join(featuresInstance.config['paths']['cacheDirectory'], key)
         if os.path.exists(path):
             with open(path, 'rb') as file:
                 return NumFeature_from_dict(pickle.load(file))
         else:
             logging.debug("cache miss: " + path)
-            val = f(featuresInstance, convid)
+            val = f(featuresInstance, *args)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:
                 pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -89,8 +91,9 @@ def adjacent(feat: NumFeature, offsets: Iterable[int]):
 
 
 class Features:
-    def __init__(self, config):
+    def __init__(self, config: dict, config_path: str):
         self.config = config
+        self.config_path = config_path
         self.sample_window_ms = config['extract_config']['sample_window_ms']  # type: float
 
     @functools.lru_cache(maxsize=32)
@@ -132,6 +135,20 @@ class Features:
         else:
             offsets = range(stride - context, 1, stride)
         return adjacent(pitch.merge(power), offsets)
+
+    @functools.lru_cache(maxsize=2)
+    @NumFeatureCache
+    def get_net_output(self, convid: str, epoch: str):
+        layers, fn = get_network_outputter(self.config_path, epoch)
+        input = self.get_combined_feat(convid)
+        batchsize, *dims = layers[0].shape
+        framecount, *_ = input.shape
+        shape = (framecount, *dims)
+        output = fn(input.reshape(shape))
+        if output.shape[1] == 1:
+            return NumFeature(output)
+        else:
+            return NumFeature(output[:, [1]])
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:
