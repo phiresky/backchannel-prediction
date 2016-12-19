@@ -65,8 +65,8 @@ def train():
     validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
     gaussian = False
     if gaussian:
-        train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim] / 1.33
-        validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim] / 1.33
+        train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim]
+        validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim]
     else:
         train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim].astype("int32")
         validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")
