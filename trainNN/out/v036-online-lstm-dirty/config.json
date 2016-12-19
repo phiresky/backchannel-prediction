@@ -1,0 +1,75 @@
+{
+	"train_config": {
+		"num_labels": 2,
+		"files": {
+			"validate": "validate.npz",
+			"eval": "eval.npz",
+			"train": "train.npz"
+		},
+		"input_dim": 80,
+		"output_dim": 1
+	},
+	"extract_config": {
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"context_stride": 2,
+		"context_ms": 800,
+		"online": true,
+		"useOriginalDB": true,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"paths": {
+		"adc": "data/adc",
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"conversations": {
+			"train": "data/conversations.train",
+			"eval": "data/conversations.test",
+			"validate": "data/conversations.valid"
+		},
+		"cacheDirectory": "data/cache",
+		"databasePrefix": "data/db/all240302"
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.371344433180536,
+				"training_loss": 0.5680821952908282,
+				"validation_loss": 0.6423339434335867
+			},
+			"1": {
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.33115248148801124,
+				"training_loss": 0.6233153852274358,
+				"validation_loss": 0.6033627771271973
+			},
+			"2": {
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.3238138002468265,
+				"training_loss": 0.5981370606259315,
+				"validation_loss": 0.5970854235468865
+			},
+			"3": {
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.325012120944993,
+				"training_loss": 0.5874535290570895,
+				"validation_loss": 0.6011426260508335
+			},
+			"4": {
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.3218772038081805,
+				"training_loss": 0.5784138308780441,
+				"validation_loss": 0.5986696933153149
+			},
+			"5": {
+				"weights": "epoch-005.pkl",
+				"validation_error": 0.32779442877291964,
+				"training_loss": 0.5684714818408566,
+				"validation_loss": 0.6053614024551026
+			}
+		},
+		"source": "extract_pfiles_python/out/v033-online-800ms-stride=2-glorotnormal/config.json",
+		"model": "network_model.py"
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"train_config": {
+		"output_dim": 1,
+		"num_labels": 2,
+		"files": {
+			"eval": "eval.npz",
+			"train": "train.npz",
+			"validate": "validate.npz"
+		},
+		"input_dim": 80
+	},
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"cacheDirectory": "data/cache",
+		"backchannels": "data/backchannels-top200.txt",
+		"conversations": {
+			"eval": "data/conversations.test",
+			"train": "data/conversations.train",
+			"validate": "data/conversations.valid"
+		},
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions",
+		"adc": "data/adc"
+	},
+	"extract_config": {
+		"useWordsTranscript": false,
+		"outputDirectory": "extract_pfiles_python/out",
+		"useOriginalDB": true,
+		"sample_window_ms": 32,
+		"context_ms": 800,
+		"online": true,
+		"context_stride": 2
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"training_loss": 0.6420171941605395,
+				"weights": "epoch-000.pkl",
+				"validation_error": 0.34363430007052187,
+				"validation_loss": 0.6165431645424309
+			},
+			"1": {
+				"training_loss": 0.60606710705787,
+				"weights": "epoch-001.pkl",
+				"validation_error": 0.3270864553949224,
+				"validation_loss": 0.6002949087004399
+			},
+			"2": {
+				"training_loss": 0.5913780250739397,
+				"weights": "epoch-002.pkl",
+				"validation_error": 0.3227752556417489,
+				"validation_loss": 0.5945348508855688
+			},
+			"3": {
+				"training_loss": 0.5852281663901203,
+				"weights": "epoch-003.pkl",
+				"validation_error": 0.3234281338152327,
+				"validation_loss": 0.5951055665362537
+			},
+			"4": {
+				"training_loss": 0.5728379820992301,
+				"weights": "epoch-004.pkl",
+				"validation_error": 0.32633991537376583,
+				"validation_loss": 0.602980348303893
+			}
+		},
+		"source": "extract_pfiles_python/out/v033-online-800ms-stride=2-glorotnormal/config.json",
+		"model": "network_model.py"
+	}
+}
