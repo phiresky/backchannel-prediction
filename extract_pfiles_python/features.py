@@ -121,11 +121,12 @@ class Features:
     def get_combined_feat(self, convid: str) -> NumFeature:
         pitch = self.get_pitch(convid)
         power = self.get_power(convid)
-        context_ms = self.config['extract_config']['context_ms']
+        ex_config = self.config['extract_config']
+        context_ms = ex_config['context_ms']
         ms_shift = power.shift
         context = int(context_ms / ms_shift)
-        stride = self.config['extract_config']['context_stride']
-        online = self.config['extract_config']['online']
+        stride = ex_config['context_stride']
+        online = ex_config['online'] if 'online' in ex_config else False
         if not online:
             offsets = range(-context // 2, context // 2, stride)
         else:
