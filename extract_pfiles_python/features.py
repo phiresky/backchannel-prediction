@@ -36,7 +36,7 @@ def NumFeatureCache(f):
             with open(path, 'rb') as file:
                 return NumFeature_from_dict(pickle.load(file))
         else:
-            logging.debug("cache miss: " + path)
+            logging.info("cache miss: " + path)
             val = f(featuresInstance, *args)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:

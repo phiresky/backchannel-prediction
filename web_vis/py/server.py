@@ -6,7 +6,6 @@ from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional, List
 import json
 from collections import OrderedDict
-from trainNN.evaluate import get_network_outputter
 from extract_pfiles_python import readDB
 import functools
 import math
@@ -15,7 +14,11 @@ from time import perf_counter
 import numpy as np
 import random
 from extract_pfiles_python.features import Features, NumFeatureCache
+import logging
 
+# logging.getLogger().setLevel(logging.DEBUG)
+# for handler in logging.getLogger().handlers:
+#    handler.setLevel(logging.DEBUG)
 
 def parse_binary_frame_with_metadata(buffer: bytes):
     meta_length = int.from_bytes(buffer[0:4], byteorder='little')
@@ -29,6 +32,7 @@ def create_binary_frame_with_metadata(meta_dict: dict, data: bytes):
         meta += b' ' * (4 - len(meta) % 4)
     meta_length = len(meta).to_bytes(4, byteorder='little')
     return meta_length + meta + data
+
 
 def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
     return {
@@ -74,6 +78,7 @@ def findAllNets():
             for id, info in stats.items():
                 curList.append(info["weights"])
     return rootList
+
 
 config_path = sys.argv[1]
 config = readDB.load_config(config_path)
@@ -140,6 +145,7 @@ def get_features():
                                           dict(name="NN outputs", children=netsTree)])
     ]
 
+
 def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
         path[-1] = path[-1][:-len(".smooth")]
@@ -148,7 +154,7 @@ def get_net_output(convid: str, path: List[str]):
         smooth = False
 
     version, id = path
-    version_path = os.path.realpath(os.path.join("trainNN", "out", version))
+    version_path = os.path.relpath(os.path.realpath(os.path.join("trainNN", "out", version)))
     config_path = os.path.join(version_path, "config.json")
     config = readDB.load_config(config_path)
     features = Features(config, config_path)
