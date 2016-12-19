@@ -25,7 +25,7 @@ async function retrieveData() {
             continue;
         const data = await resp.json();
         const stats = data.train_output.stats;
-        if (Object.keys(stats).length < 5)
+        if (Object.keys(stats).length < 3)
             continue;
         const keys = [{
                 key: "training_loss",
@@ -57,7 +57,6 @@ async function retrieveData() {
         console.log(plotData);
         const div2 = document.createElement("div");
         const canvas = document.createElement("canvas");
-        div2.style.width = "45vw";
         if (version in titles) {
             var title = `${titles[version]} (${version})`;
         }
