@@ -76,7 +76,7 @@ def findAllNets():
             curList.append("best.smooth")
             curList.append("best.smooth.thres")
             for id, info in stats.items():
-                curList.append(info["weights"])
+                curList.append(id)
     return rootList
 
 

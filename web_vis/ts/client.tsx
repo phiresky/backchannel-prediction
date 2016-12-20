@@ -13,6 +13,7 @@ import * as Data from "./Data";
 import * as v from "./Visualizer";
 import { Feature, NumFeature, NumFeatureSVector, FeatureID, ConversationID } from "./features";
 import { AudioPlayer, PlaybackPosition, AudioRecorder, microphoneFeature } from "./Audio";
+import * as queryString from "query-string";
 
 export const globalConfig = mobx.observable({
     maxColor: "#3232C8",
@@ -101,18 +102,78 @@ class ConversationSelector extends React.Component<{ gui: GUI }, {}> {
     }
 }
 
-const examples: { [name: string]: any } = {
-    "NN output": {
+function getNNOutput(channel: string, version: string, epoch: string): any {
+    return {
         uis: [
-            { "features": [{ "feature": "/A/extracted/adc", "visualizer": "Waveform", "config": "givenRange", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
-            { "features": [{ "feature": "/A/transcript/Original/text", "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
-            { "features": [{ "feature": "/A/NN outputs/latest/best", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.169875830411911, "max": 0.8434500098228455 } }], "height": "auto" },
-            { "features": [{ "feature": "/A/NN outputs/latest/best.smooth", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 }, { "feature": "/A/NN outputs/latest/best.smooth.thres", "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25 },
-            { "features": [{ "feature": "/A/NN outputs/latest/best.smooth.bc", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
-            { "features": [{ "feature": "/A/extracted/pitch", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" },
-            { "features": [{ "feature": "/A/extracted/power", "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
-    }
+            { "features": [{ "feature": `/${channel}/extracted/adc`, "visualizer": "Waveform", "config": "givenRange", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/transcript/Original/text`, "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.169875830411911, "max": 0.8434500098228455 } }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 }, { "feature": "/A/NN outputs/latest/best.smooth.thres", "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25 },
+            { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth.bc`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/extracted/pitch`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/extracted/power`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
+    };
+}
+const examples: { [name: string]: any } = {
+    "NN output for A, latest, best": getNNOutput("A", "latest", "best")
 };
+
+@observer
+class NNExample extends React.Component<{gui: GUI}, {}> {
+    @mobx.observable
+    channel = "A";
+    @mobx.observable
+    version = "latest";
+    @mobx.observable
+    epoch = "best";
+
+    render() {
+        if(!this.props.gui.conversation) return <span/>;
+        const fes = this.props.gui.getFeatures().data;
+        return (
+        <B.Popover popoverClassName="withpadding" position={B.Position.BOTTOM}
+            content={<div>
+                    <label className="pt-label pt-inline">Channel
+                        <div className="pt-select">
+                            <select value={this.channel} onChange={mobx.action("set channel", (e: React.SyntheticEvent<HTMLSelectElement>) => this.channel = e.currentTarget.value)}>
+                                <option value="A">A</option><option value="B">B</option>
+                                </select>
+                        </div>
+                    </label>
+                    <label className="pt-label pt-inline">NN version
+                        <div className="pt-select">
+                            <select value={this.version} onChange={mobx.action("set nn version", (e: React.SyntheticEvent<HTMLSelectElement>) => this.version = e.currentTarget.value)}>
+                                {fes && (((fes.categories
+                                    .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] })
+                                    .children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] }))
+                                    .children.map(x => typeof x !== "string"? x.name:x ).map(version =>
+                                        <option key={version} value={version}>{version}</option>)
+                                }
+                            </select>
+                        </div>
+                    </label>
+                    <label className="pt-label pt-inline">epoch
+                        <div className="pt-select">
+                            <select value={this.epoch} onChange={mobx.action("set nn epoch", (e: React.SyntheticEvent<HTMLSelectElement>) => this.epoch = e.currentTarget.value)}>
+                                {fes && (((((fes.categories
+                                    .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] })
+                                    .children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] }))
+                                    .children.find(x => typeof x !== "string" && x.name === this.version)! as { name: string, children: s.CategoryTreeElement[] }))
+                                    .children.map(x => typeof x !== "string"? x.name:x ).map(epoch =>
+                                        <option key={epoch} value={epoch}>{epoch}</option>)
+                                }
+                            </select>
+                        </div>
+                    </label>
+                
+                <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove pt-popover-dismiss" onClick={e =>
+                    this.props.gui.deserialize(getNNOutput(this.channel, this.version, this.epoch))}>Load</button></label>
+            </div>
+            }><button>NN output</button></B.Popover>
+        );
+    }
+}
+
 @observer
 class MaybeAudioPlayer extends React.Component<{ gui: GUI }, {}> {
     render() {
@@ -318,7 +379,13 @@ export class GUI extends React.Component<{}, {}> {
     }
     constructor() {
         super();
-        this.socketManager = new s.SocketManager(`ws://${location.host.split(":")[0]}:8765`);
+        const query = queryString.parse(location.search);
+        let server = query["socket"] as string;
+        if(!server) {
+            if(location.host.includes("sexy")) server = `wss://${location.host}/web-vis/backend`;
+            else server = `ws://${location.host.split(":")[0]}:8765`;
+        }
+        this.socketManager = new s.SocketManager(server);
         window.addEventListener("wheel", e => this.onWheel(e));
         window.addEventListener("resize", this.windowResize);
         // window resize is not fired when scroll bar appears. wtf.
@@ -338,7 +405,7 @@ export class GUI extends React.Component<{}, {}> {
         return this.socketManager.getFeatures(this.conversation).then(features => {
             return {
                 ...features,
-                categories: [...features.categories, {name: "client", children: [microphoneFeature.name]}],
+                categories: [...features.categories, { name: "client", children: [microphoneFeature.name] }],
             };
         });
     }
@@ -380,6 +447,7 @@ export class GUI extends React.Component<{}, {}> {
                     {Object.keys(examples).length > 0 && <span>Examples: {Object.keys(examples).map(k =>
                         <button key={k} onClick={e => this.deserialize(examples[k])}>{k}</button>)}</span>
                     }
+                    <NNExample gui={this} />
                 </div>
                 <div ref={this.setUisDiv}>
                     <div style={{ display: "flex", visibility: "hidden" }}>
