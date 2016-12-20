@@ -15,10 +15,24 @@ const titles = {
 const relevant = [
     ...all.map(version => ({ version })),
 ];
+const useMinMax = location.search.includes("fixed");
 async function retrieveData() {
     const versions = await fetch("dist/dirindex.txt").then(resp => resp.text());
     const relevant = versions.split("\n").map(version => ({ version }));
     const div = document.getElementById("content");
+    const keys = [{
+            key: "training_loss",
+            color: "blue",
+            axis: "Loss"
+        }, {
+            key: "validation_loss",
+            color: "red",
+            axis: "Loss"
+        }, {
+            key: "validation_error",
+            color: "green",
+            axis: "Error"
+        }];
     for (const { version } of relevant) {
         const resp = await fetch(config(version));
         if (!resp.ok)
@@ -27,19 +41,6 @@ async function retrieveData() {
         const stats = data.train_output.stats;
         if (Object.keys(stats).length < 3)
             continue;
-        const keys = [{
-                key: "training_loss",
-                color: "blue",
-                axis: "Loss"
-            }, {
-                key: "validation_loss",
-                color: "red",
-                axis: "Loss"
-            }, {
-                key: "validation_error",
-                color: "green",
-                axis: "Error"
-            }];
         if (!stats["0"]["validation_loss"])
             continue;
         const plotData = keys.map(info => ({
@@ -78,8 +79,8 @@ async function retrieveData() {
                             position: 'bottom'
                         }],
                     yAxes: [
-                        { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" } },
-                        { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" } }
+                        { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: useMinMax ? { min: 0.5, max: 0.68 } : {} },
+                        { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: useMinMax ? { min: 0.2, max: 0.5 } : {} }
                     ]
                 }
             }
