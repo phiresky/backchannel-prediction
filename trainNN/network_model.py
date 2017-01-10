@@ -7,8 +7,8 @@ def create_network(config, BATCH_SIZE):
     num_labels = config['num_labels']
     input_layer = InputLayer(shape=(BATCH_SIZE, input_dim // 2, 2))
     input_var = input_layer.input_var
-    hidden_layer_1 = LSTMLayer(input_layer, 100, unroll_scan=True)
-    hidden_layer_2 = LSTMLayer(hidden_layer_1, 50, only_return_final=True, unroll_scan=True)
+    hidden_layer_1 = LSTMLayer(input_layer, 100)
+    hidden_layer_2 = LSTMLayer(hidden_layer_1, 50, only_return_final=True)
     output_layer = DenseLayer(hidden_layer_2,
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax)
