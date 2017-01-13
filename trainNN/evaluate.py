@@ -4,6 +4,8 @@ import theano
 import lasagne.layers
 import numpy
 import os.path
+import functools
+
 
 def load_module_from_path(path: str):
     import importlib.util
@@ -13,6 +15,7 @@ def load_module_from_path(path: str):
     return module
 
 
+@functools.lru_cache(maxsize=1)
 def get_network_outputter(config_path, key: str):
     config = load_config(config_path)
     model_file = os.path.join(os.path.dirname(config_path), config['train_output']['model'])

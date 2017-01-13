@@ -29,15 +29,15 @@ def NumFeature_from_dict(d: dict):
 
 def NumFeatureCache(f):
     @functools.wraps(f)
-    def wrap(featuresInstance, *args):
-        key = ".".join([f.__name__, featuresInstance.config_path.replace("/", "_"), *args])
+    def wrap(featuresInstance, *args, **kwargs):
+        key = ".".join([featuresInstance.config_path.replace("/", "_"), f.__name__, *[str(arg) for arg in args], *["{}={}".format(arg, val) for arg, val in kwargs.items()]])
         path = os.path.join(featuresInstance.config['paths']['cacheDirectory'], key)
         if os.path.exists(path):
             with open(path, 'rb') as file:
                 return NumFeature_from_dict(pickle.load(file))
         else:
             logging.info("cache miss: " + path)
-            val = f(featuresInstance, *args)
+            val = f(featuresInstance, *args, **kwargs)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:
                 pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -138,7 +138,7 @@ class Features:
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
-    def get_net_output(self, convid: str, epoch: str):
+    def get_net_output(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
         input = self.get_combined_feat(convid)
         batchsize, *dims = layers[0].shape
@@ -146,22 +146,29 @@ class Features:
         shape = (framecount, *dims)
         output = fn(input.reshape(shape))
         if output.shape[1] == 1:
-            return NumFeature(output)
+            feature = NumFeature(output)
         else:
-            return NumFeature(output[:, [1]])
+            feature = NumFeature(output[:, [1]])
+        if smooth:
+            import scipy
+            res = scipy.ndimage.filters.gaussian_filter1d(feature, 300 / feature.shift, axis=0)
+            return NumFeature(res)
+        else:
+            return feature
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:
             return (self.sample_window_ms / 2 + sample_index * feat.shift) / 1000
         if feat.typ == FeatureType.SVector:
             return sample_index / (feat.samplingRate * 1000)
-        raise Exception("only for extracted features")
+        raise Exception("Unknown feature type")
 
     def time_to_sample_index(self, feat: NumFeature, time_sec):
         if feat.typ == FeatureType.FMatrix:
             return int(round((1000 * time_sec - self.sample_window_ms / 2) / feat.shift))
         if feat.typ == FeatureType.SVector:
             return int(round(1000 * feat.samplingRate * time_sec))
+        raise Exception("Unknown feature type")
 
     def cut_range(self, feat: NumFeature, from_time: float, to_time: float):
         if feat.typ == FeatureType.SVector:

@@ -125,6 +125,9 @@ class DBReader:
     def is_backchannel(self, uttInfo: dict, index: int, utts: List[Tuple[str, DBEntry]]):
         uttText = uttInfo['text']
         uttText = self.noise_filter(uttText)
+        if index == 0:
+            # first utterance can't be a backchannel
+            return False
         lastUttText = utts[index - 1][1]['text']
         lastUttText = self.noise_filter(lastUttText)
         return (uttText.lower() in self.backchannels and
