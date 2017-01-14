@@ -304,6 +304,10 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
         frameCount += 1
 
 
+def read_conversations(config):
+    return {name: list(parse_conversations_file(path)) for name, path in
+            config['paths']['conversations'].items()}
+
 def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
@@ -440,8 +444,7 @@ def main():
             'num_labels': 2,
             'files': {}
         }
-        for setname, path in config['paths']['conversations'].items():
-            convIDs = parse_conversations_file(path)
+        for setname, convIDs in read_conversations(config):
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
             data = fromiter(parseConversationSet(reader, setname, convIDs),
                             dtype="float32", shape=(-1, input_dim + output_dim))
