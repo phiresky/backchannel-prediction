@@ -308,6 +308,7 @@ def read_conversations(config):
     return {name: list(parse_conversations_file(path)) for name, path in
             config['paths']['conversations'].items()}
 
+
 def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
@@ -332,6 +333,7 @@ def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str]):
         yield from parseConversations(speaker, reader)
 
 
+@functools.lru_cache(maxsize=8)
 def load_config(path):
     with open(path) as config_file:
         return json.load(config_file, object_pairs_hook=OrderedDict)

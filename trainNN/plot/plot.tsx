@@ -1,6 +1,10 @@
 import { Line } from 'react-chartjs-2';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {Table} from 'reactable';
+
+// defined by webpack
+declare var VERSIONS: string[];
 
 interface SingleEvalResult {
     "selected": number,
@@ -14,30 +18,26 @@ interface SingleEvalResult {
 }
 interface EvalResult {
     config: {
-        margin_of_error: [number, number]
+        margin_of_error: [number, number],
+        min_talk_len: number | null,
+        threshold: number,
+        epoch: string,
+        weights_file: string
     },
     totals: SingleEvalResult,
     details: { [convid: string]: SingleEvalResult }
 }
 const config = (version: string) => `../out/${version}/config.json`;
 const evalResult = (version: string) => `../../evaluate/out/${version}/results.json`;
-const all = [
-    "v026-sgd-1",
-    "v027-momentum-1",
-    "v028-nesterov-1",
-    "v029-adadelta-1",
-    "v030-sgd-1-init0"
-];
 const titles = {
     "v026-sgd-1": "sgd, learning rate=1",
     "v027-momentum-1": "momentum, learning rate=1",
     "v028-nesterov-1": "nesterov, learning rate=1",
     "v029-adadelta-1": "adadelta, learning rate=1"
 } as { [version: string]: string };
-const relevant = [
-    ...all.map(version => ({ version })),
-];
-
+const ignore = [
+    "v036-online-lstm", "v036-online-lstm-dirty"
+]
 const useMinMax = location.search.includes("fixed");
 
 type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: any };
@@ -53,31 +53,35 @@ class VersionGUI extends React.Component<VGProps, {}> {
                 <h3>{version in titles ? `${titles[version]} (${version})` : `${version}`}</h3>
                 <Line data={data} options={options} />
                 {evalInfo &&
-                    <table className="evalTable">
-                        <tr><th /><th /><th>Precision</th><th>Recall</th><th>F1</th></tr>
-                        {evalInfo.map((v, k) =>
-                            <tr className={k === bestIndex ? "highlighted" : ""}>
-                                {v.config.margin_of_error.map(x => <th>{x}s</th>)}
-                                <td>{v.totals.precision.toFixed(3)}</td>
-                                <td>{v.totals.recall.toFixed(3)}</td>
-                                <td>{v.totals.f1_score.toFixed(3)}</td>
-                            </tr>
-                        )}
-                    </table>
+                    <div>
+                    Eval Results for best epoch ({evalInfo[0].config.weights_file}):
+                    <Table className="evalTable" sortable
+                        defaultSort={{column: 'F1 Score', direction: 'desc'}} itemsPerPage={5} pageButtonLimit={1}
+                        data={
+                            evalInfo.map((v, k) => ({
+                                "Margin of Error": v.config.margin_of_error.map(s => `${s}s`).join(", "),
+                                "Threshold": v.config.threshold,
+                                "Min Talk Len": v.config.min_talk_len,
+                                Precision: v.totals.precision.toFixed(3),
+                                Recall: v.totals.recall.toFixed(3),
+                                "F1 Score": v.totals.f1_score.toFixed(3)
+                            }))
+                        }
+                    />
+                    </div>
                 }
             </div>
         );
     }
 }
-class GUI extends React.Component<{}, { results: VGProps[] }> {
+class GUI extends React.Component<{}, { results: VGProps[], showUnevaluated: boolean }> {
     constructor() {
         super();
-        this.state = { results: [] };
+        this.state = { results: [], showUnevaluated: false };
         this.retrieveData();
     }
     async retrieveData() {
-        const versions = await fetch("dist/dirindex.txt").then(resp => resp.text());
-        const relevant = versions.split("\n").map(version => ({ version }));
+        const relevant = VERSIONS.filter(version => !ignore.includes(version)).map(version => ({ version }));
         const keys = [{
             key: "training_loss",
             color: "blue",
@@ -139,10 +143,19 @@ class GUI extends React.Component<{}, { results: VGProps[] }> {
         }
     }
     render() {
-
+        let results = this.state.results;
+        if(!this.state.showUnevaluated) results = results.filter(res => res.evalInfo);
         return (
-            <div className="gui">
-                {this.state.results.map(info => <VersionGUI {...info} />)}
+            <div>
+                <div>
+                    <label>Show unevaluated:
+                        <input type="checkbox" checked={this.state.showUnevaluated} onChange={x => this.setState({showUnevaluated: x.currentTarget.checked})}
+                        />
+                    </label>
+                </div>
+                <div className="gui">
+                    {results.map(info => <VersionGUI key={info.version} {...info} />)}
+                </div>
             </div>
         );
     }

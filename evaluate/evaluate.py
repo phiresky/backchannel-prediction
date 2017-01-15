@@ -9,10 +9,14 @@ from typing import List, Tuple, Iterator
 from extract_pfiles_python.readDB import load_config, DBReader, swap_speaker, read_conversations, load_config
 from tqdm import tqdm
 import functools
+import trainNN.evaluate
+from itertools import product
+
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
 
-def get_talking_segments(reader: DBReader, convid: str) -> Iterator[Tuple[float, float]]:
+
+def get_talking_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
     talk_start = 0
     talking = False
     utts = list(reader.get_utterances(convid))
@@ -22,7 +26,9 @@ def get_talking_segments(reader: DBReader, convid: str) -> Iterator[Tuple[float,
         if is_bc or is_empty:
             if talking:
                 talking = False
-                yield talk_start, float(uttInfo['from'])
+                talk_end = float(uttInfo['from'])
+                if min_talk_len is None or talk_end - talk_start >= min_talk_len:
+                    yield talk_start, talk_end
         else:
             if not talking:
                 talking = True
@@ -68,14 +74,33 @@ def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
     return output_audio
 
 
+def get_first_true_inx(bool_arr, start_inx: int):
+    inx = np.argmax(bool_arr[start_inx:]) + start_inx
+    if not bool_arr[inx]:
+        return None
+    return inx
+
+
+def get_first_false_inx(bool_arr, start_inx: int):
+    inx = np.argmin(bool_arr[start_inx:]) + start_inx
+    if bool_arr[inx]:
+        return None
+    return inx
+
+
 def get_larger_threshold(feat: NumFeature, reader: DBReader, threshold=0.5):
     begin = None
-    for index, [sample] in enumerate(feat):
-        if sample >= threshold and begin is None:
-            begin = index
-        elif sample < threshold and begin is not None:
-            yield reader.features.sample_index_to_time(feat, begin), reader.features.sample_index_to_time(feat, index)
-            begin = None
+    larger_threshold = feat.reshape((feat.size,)) >= threshold
+    inx = 0
+    while True:
+        start = get_first_true_inx(larger_threshold, inx)
+        if start is None:
+            return
+        end = get_first_false_inx(larger_threshold, start)
+        if end is None:
+            return
+        yield reader.features.sample_index_to_time(feat, start), reader.features.sample_index_to_time(feat, end)
+        inx = end + 1
 
 
 def normalize_audio(sampletrack_audio):
@@ -93,22 +118,44 @@ def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple
     return correct + margin[0] <= predicted <= correct + margin[1]
 
 
-def evaluate_conv(config_path: str, convid: str, margin: Tuple[float, float]):
+def filter_ranges(numbers: List[float], ranges: List[Tuple[float, float]]):
+    inx = 0
+    if len(numbers) == 0:
+        return
+    for start, end in ranges:
+        while numbers[inx] < start:
+            inx += 1
+            if inx >= len(numbers):
+                return
+        while numbers[inx] <= end:
+            yield numbers[inx]
+            inx += 1
+            if inx >= len(numbers):
+                return
+
+
+def evaluate_conv(config_path: str, convid: str, config: dict):
     reader = loadDBReader(config_path)
     bc_convid = swap_speaker(convid)
     correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
-    predicted_bcs = list(predict_bcs(reader, reader.features.get_net_output(convid, "best", smooth=True),
-                                     threshold=0.6))
+
+    net_output = reader.features.get_net_output(convid, config["epoch"], smooth=True)
+    predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
-    for correct_bc in correct_bcs:
-        while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
-                                                             predicted_bcs[predicted_inx], correct_bc):
-            predicted_inx += 1
-        if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc, margin):
-            predicted_bcs[predicted_inx] = correct_bc
+    if predicted_count > 0:
+        for correct_bc in correct_bcs:
+            while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
+                                                                 predicted_bcs[predicted_inx], correct_bc):
+                predicted_inx += 1
+            if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc, config['margin_of_error']):
+                predicted_bcs[predicted_inx] = correct_bc
 
+    if config['min_talk_len'] is not None:
+        segs = list(get_talking_segments(reader, convid, min_talk_len=config['min_talk_len']))
+        predicted_bcs = filter_ranges(predicted_bcs, segs)
+        correct_bcs = filter_ranges(correct_bcs, segs)
     # https://www.wikiwand.com/en/Precision_and_recall
     selected = set(predicted_bcs)
     relevant = set(correct_bcs)
@@ -136,20 +183,30 @@ def precision_recall(stats: dict):
     return dict(precision=precision, recall=recall, f1_score=f1_score)
 
 
-def evaluate_convs(parallel, config_path: str, convs: List[str], margin: Tuple[float, float]):
+def interesting_configs():
+    # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
+    interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
+    interesting_thresholds = [0.5, 0.6, 0.7]
+    interesting_talk_lens = [None, 5, 10]
+    for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
+        yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
+
+
+def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict):
     totals = {}
     results = {}
-
+    if "weights_file" not in eval_config and eval_config["epoch"] == "best":
+        _, eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
     convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
     for convid, result in parallel(
-            tqdm([delayed(evaluate_conv)(config_path, convid, margin) for convid in convids])):
+            tqdm([delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids])):
         results[convid] = result
         for k, v in result.items():
             totals[k] = totals.get(k, 0) + v
         result.update(precision_recall(result))
 
     totals.update(precision_recall(totals))
-    return dict(config=dict(margin_of_error=margin), totals=totals, details=results)
+    return dict(config=eval_config, totals=totals) # , details=results)
 
 
 def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_version: str, bc_sample_tracks):
@@ -173,11 +230,8 @@ def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_versi
         bc_audio = normalize_audio(bc_audio[0:minlen].reshape((minlen, 1)))
         audio = np.append(orig_audio, bc_audio, axis=1)
         # audio_cut = NumFeature(np.array([], dtype="float32").reshape((0, 2)))
-        for start, end in get_talking_segments(reader, convchannel):
+        for start, end in get_talking_segments(reader, convchannel, 15):
             end += 1
-            length = end - start
-            if length < 15:
-                continue
             start_inx = reader.features.time_to_sample_index(_orig_audio, start)
             end_inx = reader.features.time_to_sample_index(_orig_audio, end)
             soundfile.write(os.path.join(out_dir, "SPK={}{} @{:.1f}s BC={}.wav".format(conv, channel, start,
@@ -222,13 +276,12 @@ def main():
     # allconversations = [convid for convlist in conversations.values() for conv in convlist for convid in
     #                    [conv + "-" + channel for channel in ["A", "B"]]]
 
-    # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
-    interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
     res = []
-    with Parallel(n_jobs=1) as parallel:
-        for margins in interesting_margins:
-            eval_conversations = conversations['eval'] if 'eval' in conversations else conversations['test']
-            res.append(evaluate_convs(parallel, config_path, sorted(eval_conversations), margins))
+    eval_conversations = sorted(conversations['eval'] if 'eval' in conversations else conversations['test'])
+    with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
+        for eval_config in interesting_configs():
+            print(eval_config)
+            res.append(evaluate_convs(parallel, config_path, eval_conversations, eval_config))
 
     out_dir = os.path.join("evaluate", "out", version)
     os.makedirs(out_dir, exist_ok=True)

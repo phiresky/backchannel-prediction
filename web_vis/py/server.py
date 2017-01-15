@@ -90,8 +90,7 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = readDB.load_config(config_path)
     features = Features(config, config_path)
-    feature = features.get_net_output(convid, id, smooth)
-    return feature
+    return features.get_net_output(convid, id, smooth)
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -182,7 +181,8 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
-            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(feature, origReader, list(evaluate.get_bc_samples(origReader, "sw2249-A"))))
+            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(feature, origReader, list(
+                evaluate.get_bc_samples(origReader, "sw2249-A"))))
         else:
             feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, feature)

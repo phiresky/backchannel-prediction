@@ -11,6 +11,7 @@ import contextlib
 from .network_model import create_network
 import inspect
 import shutil
+from extract_pfiles_python.readDB import load_config
 
 BATCH_SIZE = 256
 NUM_EPOCHS = 10000
@@ -31,12 +32,6 @@ def load_numpy_file(fname):
     misc_func.myPrint("loading numpy file " + fname)
     data = numpy.load(fname)['data']
     return data
-
-
-def load_config(config_path: str):
-    misc_func.myPrint("loading config file " + config_path)
-    with open(config_path) as config_file:
-        return json.load(config_file)
 
 
 def train():
