@@ -1,9 +1,9 @@
 <style>
-#content {
+.gui {
     display: flex;
     flex-flow: wrap;
 }
-#content > div {
+.gui > div {
     margin: 1em;
     padding: 1ex;
     box-shadow: 5px 5px 20px rgba(0,0,0,0.3);
@@ -13,9 +13,19 @@
 * {
     box-sizing: border-box;
 }
+h3 {
+    margin-top: 0.5ex;
+    margin-bottom: 0.5ex;
+}
+.evalTable {
+    font-family: monospace;
+    font-size: 13px;
+}
+.evalTable tr.highlighted {
+    background-color: lightgreen;
+}
 </style>
 <div id="content">
 </div>
 
-<script src="node_modules/chart.js/dist/Chart.bundle.min.js"></script>
 <script src="dist/plot.js"></script>

@@ -1,3 +1,4 @@
+import json
 import sys
 import random
 import soundfile
@@ -6,7 +7,10 @@ import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
 from extract_pfiles_python.readDB import load_config, DBReader, swap_speaker, read_conversations, load_config
-
+from tqdm import tqdm
+import functools
+os.environ['JOBLIB_START_METHOD'] = 'forkserver'
+from joblib import Parallel, delayed
 
 def get_talking_segments(reader: DBReader, convid: str) -> Iterator[Tuple[float, float]]:
     talk_start = 0
@@ -85,58 +89,67 @@ def nearer(this: float, that: float, other):
     return abs(this - other) < abs(that - other)
 
 
-def bc_is_within_margin_of_error(predicted: float, correct: float):
-    return abs(predicted - correct) < 0.5
+def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple[float, float]):
+    return correct + margin[0] <= predicted <= correct + margin[1]
 
 
-def evaluate_convs(reader: DBReader, convs: List[str]):
-    selected_count = 0
-    relevant_count = 0
-    true_positives_count = 0
-    false_positives_count = 0
-    false_negatives_count = 0
+def evaluate_conv(config_path: str, convid: str, margin: Tuple[float, float]):
+    reader = loadDBReader(config_path)
+    bc_convid = swap_speaker(convid)
+    correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
+                   reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
+    predicted_bcs = list(predict_bcs(reader, reader.features.get_net_output(convid, "best", smooth=True),
+                                     threshold=0.6))
+    predicted_count = len(predicted_bcs)
+    predicted_inx = 0
+    for correct_bc in correct_bcs:
+        while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
+                                                             predicted_bcs[predicted_inx], correct_bc):
+            predicted_inx += 1
+        if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc, margin):
+            predicted_bcs[predicted_inx] = correct_bc
 
-    for conv in convs:
-        for channel in ["A", "B"]:
-            convid = "{}-{}".format(conv, channel)
-            bc_convid = swap_speaker(convid)
-            correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
-                           reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
-            predicted_bcs = list(predict_bcs(reader, reader.features.get_net_output(convid, "best", smooth=True),
-                                             threshold=0.6))
-            predicted_count = len(predicted_bcs)
-            predicted_inx = 0
-            for correct_bc in correct_bcs:
-                while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
-                                                                     predicted_bcs[predicted_inx], correct_bc):
-                    predicted_inx += 1
-                if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc):
-                    predicted_bcs[predicted_inx] = correct_bc
+    # https://www.wikiwand.com/en/Precision_and_recall
+    selected = set(predicted_bcs)
+    relevant = set(correct_bcs)
+    true_positives = selected & relevant
+    false_positives = selected - relevant
+    false_negatives = relevant - selected
 
-            # https://www.wikiwand.com/en/Precision_and_recall
-            selected = set(predicted_bcs)
-            relevant = set(correct_bcs)
-            true_positives = selected & relevant
-            false_positives = selected - relevant
-            false_negatives = relevant - selected
+    return convid, dict(selected=len(selected), relevant=len(relevant), true_positives=len(true_positives),
+                        false_positives=len(false_positives), false_negatives=len(false_negatives))
 
-            selected_count += len(selected)
-            relevant_count += len(relevant)
-            true_positives_count += len(true_positives)
-            false_positives_count += len(false_positives)
-            false_negatives_count += len(false_negatives)
 
-    precision = true_positives_count / selected_count
-    recall = true_positives_count / relevant_count
+def precision_recall(stats: dict):
+    if stats['true_positives'] == 0:
+        # http://stats.stackexchange.com/a/16242
+        recall = 1
+        precision = 0 if stats['false_positives'] > 0 else 1
+    else:
+        precision = stats['true_positives'] / stats['selected']
+        recall = stats['true_positives'] / stats['relevant']
 
-    # print(
-    #    f"{convid}: precision={precision}, recall={recall}, selected={predicted_bcs}, relevant={correct_bcs}, true_positives={true_positives}, false_positives={false_positives}, false_negatives={false_negatives}")
     if precision == 0 and recall == 0:
         f1_score = 0
     else:
         f1_score = 2 * (precision * recall) / (precision + recall)
-    print(f"{convid}: predicted bcs: {selected_count}, actual_bcs={relevant_count}")
-    print(f"{convid}: precision={precision:.3f}, recall={recall:.3f}, f1={f1_score:.3f}")
+    return dict(precision=precision, recall=recall, f1_score=f1_score)
+
+
+def evaluate_convs(parallel, config_path: str, convs: List[str], margin: Tuple[float, float]):
+    totals = {}
+    results = {}
+
+    convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
+    for convid, result in parallel(
+            tqdm([delayed(evaluate_conv)(config_path, convid, margin) for convid in convids])):
+        results[convid] = result
+        for k, v in result.items():
+            totals[k] = totals.get(k, 0) + v
+        result.update(precision_recall(result))
+
+    totals.update(precision_recall(totals))
+    return dict(config=dict(margin_of_error=margin), totals=totals, details=results)
 
 
 def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_version: str, bc_sample_tracks):
@@ -176,6 +189,12 @@ def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_versi
             # soundfile.write(os.path.join(out_dir, "{}--{}.wav".format(convchannel, bc_sampletrack)), audio_cut, 8000)
 
 
+@functools.lru_cache()
+def loadDBReader(config_path: str):
+    config = load_config(config_path)
+    return DBReader(config, config_path)
+
+
 def output_bc_samples(reader: DBReader, convs: List[str]):
     for conv in convs:
         adc = reader.features.get_adc(conv)
@@ -200,14 +219,21 @@ def main():
     config = load_config(config_path)
 
     conversations = read_conversations(config)
-    allconversations = [convid for convlist in conversations.values() for conv in convlist for convid in
-                        [conv + "-" + channel for channel in ["A", "B"]]]
+    # allconversations = [convid for convlist in conversations.values() for conv in convlist for convid in
+    #                    [conv + "-" + channel for channel in ["A", "B"]]]
 
-    reader = DBReader(config, config_path)
-    evaluate_convs(reader, sorted(conversations['eval']))
-    # output_convs(conversations['eval'])
-    # output_bc_samples(allconversations)
-    # print("\n".join(allconversations))
+    # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
+    interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
+    res = []
+    with Parallel(n_jobs=1) as parallel:
+        for margins in interesting_margins:
+            eval_conversations = conversations['eval'] if 'eval' in conversations else conversations['test']
+            res.append(evaluate_convs(parallel, config_path, sorted(eval_conversations), margins))
+
+    out_dir = os.path.join("evaluate", "out", version)
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "results.json"), "w") as f:
+        json.dump(res, f, indent='\t')
 
 
 if __name__ == "__main__":

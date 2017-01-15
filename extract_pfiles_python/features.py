@@ -13,6 +13,9 @@ import pickle
 import logging
 from typing import Iterable
 from trainNN.evaluate import get_network_outputter
+import hashlib
+import json
+import inspect
 
 
 def NumFeature_to_dict(n: NumFeature):
@@ -29,25 +32,31 @@ def NumFeature_from_dict(d: dict):
 
 def NumFeatureCache(f):
     @functools.wraps(f)
-    def wrap(featuresInstance, *args, **kwargs):
-        key = ".".join([featuresInstance.config_path.replace("/", "_"), f.__name__, *[str(arg) for arg in args], *["{}={}".format(arg, val) for arg, val in kwargs.items()]])
-        path = os.path.join(featuresInstance.config['paths']['cacheDirectory'], key)
+    def wrap(*args, **kwargs):
+        args_to_pickle = list(args)
+        if isinstance(args[0], Features):
+            args_to_pickle[0] = args_to_pickle[0].config_path
+        meta = dict(fnname=f.__name__, fnsource=inspect.getsourcelines(f)[0], args=args_to_pickle, kwargs=kwargs)
+        meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
+        digest = hashlib.sha256(meta_json).hexdigest()
+        path = os.path.join('data/cache', digest[0:2], digest[2:] + ".pickle")
         if os.path.exists(path):
             with open(path, 'rb') as file:
                 return NumFeature_from_dict(pickle.load(file))
         else:
-            logging.info("cache miss: " + path)
-            val = f(featuresInstance, *args, **kwargs)
+            val = f(*args, **kwargs)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:
                 pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
             os.rename(path + ".part", path)
+            with open(path + '.meta.json', 'wb') as file:
+                file.write(meta_json)
             return val
 
     return wrap
 
 
-filtr = Filter(-2, [1, 2, 3, 2, 1])
+power_filter_0 = Filter(-2, [1, 2, 3, 2, 1])
 
 
 def filter_power(power: NumFeature) -> NumFeature:
@@ -57,8 +66,8 @@ def filter_power(power: NumFeature) -> NumFeature:
         if val[i] <= 0:
             val[i] = 1
     power = np.log10(val)
-    power = power.applyFilter(filtr)
-    power = power.applyFilter(filtr)
+    power = power.applyFilter(power_filter_0)
+    power = power.applyFilter(power_filter_0)
     power = power.normalize(min=-1, max=1)
     return power
 
@@ -90,51 +99,70 @@ def adjacent(feat: NumFeature, offsets: Iterable[int]):
     return NumFeature(out_feat, shift=feat.shift, samplingRate=feat.samplingRate)
 
 
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_adc(adc_path: str, convid: str) -> NumFeature:
+    conv, channel = convid.split("-")
+    adcfile = os.path.join(adc_path, conv + ".wav")
+    if not os.path.exists(adcfile):
+        raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
+    res = readAudioFile(adcfile)
+    [ADC0A, ADC0B] = [x.substractMean() for x in res]  # type: NumFeature
+    if channel == "A":
+        return ADC0A
+    if channel == "B":
+        return ADC0B
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_pitch(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
+    return pitch_transform(pure_get_adc(adc_path, convid), sample_window_ms)
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
+    return power_transform(pure_get_adc(adc_path, convid), sample_window_ms)
+
+
+@functools.lru_cache(maxsize=16)
+@NumFeatureCache
+def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: float, stride: float, online: bool,
+                           convid: str) -> NumFeature:
+    pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
+    power = pure_get_power(adc_path, sample_window_ms, convid)
+    ms_shift = power.shift
+    context = int(context_ms / ms_shift)
+    if not online:
+        offsets = range(-context // 2, context // 2, stride)
+    else:
+        offsets = range(stride - context, 1, stride)
+    return adjacent(pitch.merge(power), offsets)
+
+
 class Features:
     def __init__(self, config: dict, config_path: str):
         self.config = config
         self.config_path = config_path
         self.sample_window_ms = config['extract_config']['sample_window_ms']  # type: float
 
-    @functools.lru_cache(maxsize=32)
-    @NumFeatureCache
-    def get_adc(self, convid: str) -> NumFeature:
-        conv, channel = convid.split("-")
-        adcfile = os.path.join(self.config['paths']['adc'], conv + ".wav")
-        if not os.path.exists(adcfile):
-            raise Exception("cannot find adc for {}, file {} does not exist".format(conv, adcfile))
-        res = readAudioFile(adcfile)
-        [ADC0A, ADC0B] = [x.substractMean() for x in res]  # type: NumFeature
-        if channel == "A":
-            return ADC0A
-        if channel == "B":
-            return ADC0B
+    def get_adc(self, convid: str):
+        return pure_get_adc(self.config['paths']['adc'], convid)
 
-    @functools.lru_cache(maxsize=32)
-    @NumFeatureCache
-    def get_power(self, convid: str) -> NumFeature:
-        return power_transform(self.get_adc(convid), self.sample_window_ms)
+    def get_power(self, convid: str):
+        return pure_get_power(self.config['paths']['adc'], self.sample_window_ms, convid)
 
-    @functools.lru_cache(maxsize=32)
-    @NumFeatureCache
-    def get_pitch(self, convid: str) -> NumFeature:
-        return pitch_transform(self.get_adc(convid), self.sample_window_ms)
+    def get_pitch(self, convid: str):
+        return pure_get_pitch(self.config['paths']['adc'], self.sample_window_ms, convid)
 
-    @functools.lru_cache(maxsize=16)
-    def get_combined_feat(self, convid: str) -> NumFeature:
-        pitch = self.get_pitch(convid)
-        power = self.get_power(convid)
+    def get_combined_feat(self, convid: str):
         ex_config = self.config['extract_config']
         context_ms = ex_config['context_ms']
-        ms_shift = power.shift
-        context = int(context_ms / ms_shift)
         stride = ex_config['context_stride']
-        online = ex_config['online'] if 'online' in ex_config else False
-        if not online:
-            offsets = range(-context // 2, context // 2, stride)
-        else:
-            offsets = range(stride - context, 1, stride)
-        return adjacent(pitch.merge(power), offsets)
+        online = ex_config.get('online', False)
+        return pure_get_combined_feat(self.config['paths']['adc'], self.sample_window_ms, context_ms, stride, online,
+                                      convid)
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache

@@ -1,7 +1,3 @@
-from .train import load_config
-from .markuslasagne.train_func import load_network_params
-import theano
-import lasagne.layers
 import numpy
 import os.path
 import functools
@@ -17,6 +13,11 @@ def load_module_from_path(path: str):
 
 @functools.lru_cache(maxsize=1)
 def get_network_outputter(config_path, key: str):
+    # load modules lazily to avoid startup delay when not needed
+    import theano
+    import lasagne.layers
+    from .train import load_config
+    from .markuslasagne.train_func import load_network_params
     config = load_config(config_path)
     model_file = os.path.join(os.path.dirname(config_path), config['train_output']['model'])
     stats = config['train_output']['stats']
