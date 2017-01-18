@@ -128,7 +128,7 @@ def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFe
 
 @functools.lru_cache(maxsize=16)
 @NumFeatureCache
-def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: float, stride: float, online: bool,
+def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: float, stride: int, online: bool,
                            convid: str) -> NumFeature:
     pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
     power = pure_get_power(adc_path, sample_window_ms, convid)
@@ -140,6 +140,12 @@ def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: f
         offsets = range(stride - context, 1, stride)
     return adjacent(pitch.merge(power), offsets)
 
+@functools.lru_cache(maxsize=16)
+@NumFeatureCache
+def pure_get_combined_feat_continous(adc_path: str, sample_window_ms: float, stride: int, convid: str):
+    pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
+    power = pure_get_power(adc_path, sample_window_ms, convid)
+    return pitch.merge(power)[::stride]
 
 class Features:
     def __init__(self, config: dict, config_path: str):
@@ -164,11 +170,38 @@ class Features:
         return pure_get_combined_feat(self.config['paths']['adc'], self.sample_window_ms, context_ms, stride, online,
                                       convid)
 
+    def get_combined_feat_continous(self, convid: str):
+        ex_config = self.config['extract_config']
+        context_ms = ex_config['context_ms']
+        stride = ex_config['context_stride']
+        online = ex_config.get('online', False)
+        return pure_get_combined_feat_continous(self.config['paths']['adc'], self.sample_window_ms, stride, convid)
+
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
     def get_net_output(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
         input = self.get_combined_feat(convid)
+        batchsize, *dims = layers[0].shape
+        framecount, *_ = input.shape
+        shape = (framecount, *dims)
+        output = fn(input.reshape(shape))
+        if output.shape[1] == 1:
+            feature = NumFeature(output)
+        else:
+            feature = NumFeature(output[:, [1]])
+        if smooth:
+            import scipy
+            res = scipy.ndimage.filters.gaussian_filter1d(feature, 300 / feature.shift, axis=0)
+            return NumFeature(res)
+        else:
+            return feature
+
+    @functools.lru_cache(maxsize=2)
+    @NumFeatureCache
+    def get_lstm_continous_output(self, convid: str, epoch: str, smooth: bool):
+        layers, fn = get_network_outputter(self.config_path, epoch)
+        input = self.get_combined_feat_continous(convid)
         batchsize, *dims = layers[0].shape
         framecount, *_ = input.shape
         shape = (framecount, *dims)

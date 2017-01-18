@@ -2,6 +2,8 @@ import { Line } from 'react-chartjs-2';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Table} from 'reactable';
+import {toJS, observable, action, computed} from 'mobx';
+import {observer} from 'mobx-react';
 
 // defined by webpack
 declare var VERSIONS: string[];
@@ -40,10 +42,10 @@ const titles = {
 const ignore = [
     "v036-online-lstm", "v036-online-lstm-dirty"
 ]
-const useMinMax = location.search.includes("fixed");
 
 type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: any };
 
+@observer
 class VersionGUI extends React.Component<VGProps, {}> {
     render() {
         const {evalInfo, version, data, options} = this.props;
@@ -53,11 +55,11 @@ class VersionGUI extends React.Component<VGProps, {}> {
         return (
             <div key={version}>
                 <h3>{version in titles ? `${titles[version]} (${version})` : `${version}`}</h3>
-                <Line data={data} options={options} />
+                <Line key={Math.random()} data={data} options={options} />
                 <p><a href={log(version)}>Training log</a><a href={model(version)}>Network model</a></p>
                 {evalInfo &&
                     <div>
-                    Eval Results for best epoch ({evalInfo[0].config.weights_file}):
+                    Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
                         defaultSort={{column: 'F1 Score', direction: 'desc'}} itemsPerPage={5} pageButtonLimit={1}
                         data={
@@ -77,11 +79,28 @@ class VersionGUI extends React.Component<VGProps, {}> {
         );
     }
 }
-class GUI extends React.Component<{}, { results: VGProps[], showUnevaluated: boolean }> {
+@observer
+class GUI extends React.Component<{}, {}> {
     constructor() {
         super();
-        this.state = { results: [], showUnevaluated: false };
         this.retrieveData();
+    }
+    @observable useMinMax = false;
+    @observable showUnevaluated = false;
+    @observable results: VGProps[] = [];
+    @computed get options() {
+        return {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom'
+                }],
+                yAxes: [
+                    { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: this.useMinMax ? { min: 0.5, max: 0.68 } : {} },
+                    { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: this.useMinMax ? { min: 0.2, max: 0.5 } : {} }
+                ]
+            }
+        };
     }
     async retrieveData() {
         const relevant = VERSIONS.filter(version => !ignore.includes(version)).map(version => ({ version }));
@@ -122,42 +141,33 @@ class GUI extends React.Component<{}, { results: VGProps[], showUnevaluated: boo
                 }))
             }));
             console.log(plotData);
-            const results = this.state.results.slice();
-            results.push({
+            this.results.push({
                 version,
                 evalInfo,
                 data: {
                     datasets: plotData
                 },
-                options: {
-                    scales: {
-                        xAxes: [{
-                            type: 'linear',
-                            position: 'bottom'
-                        }],
-                        yAxes: [
-                            { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: useMinMax ? { min: 0.5, max: 0.68 } : {} },
-                            { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: useMinMax ? { min: 0.2, max: 0.5 } : {} }
-                        ]
-                    }
-                }
+                options: {}
             });
-            this.setState({ results });
         }
     }
     render() {
-        let results = this.state.results;
-        if(!this.state.showUnevaluated) results = results.filter(res => res.evalInfo);
+        let results = this.results;
+        if(!this.showUnevaluated) results = results.filter(res => res.evalInfo);
         return (
             <div>
                 <div>
                     <label>Show unevaluated:
-                        <input type="checkbox" checked={this.state.showUnevaluated} onChange={x => this.setState({showUnevaluated: x.currentTarget.checked})}
+                        <input type="checkbox" checked={this.showUnevaluated} onChange={x => this.showUnevaluated = x.currentTarget.checked}
+                        />
+                    </label>
+                    <label>Use fixed min/max:
+                        <input type="checkbox" checked={this.useMinMax} onChange={x => this.useMinMax = x.currentTarget.checked}
                         />
                     </label>
                 </div>
                 <div className="gui">
-                    {results.map(info => <VersionGUI key={info.version} {...info} />)}
+                    {results.map(info => <VersionGUI key={info.version} {...info} options={this.options} />)}
                 </div>
             </div>
         );
