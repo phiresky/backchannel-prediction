@@ -125,6 +125,9 @@ class DBReader:
     def is_backchannel(self, uttInfo: dict, index: int, utts: List[Tuple[str, DBEntry]]):
         uttText = uttInfo['text']
         uttText = self.noise_filter(uttText)
+        if index == 0:
+            # first utterance can't be a backchannel
+            return False
         lastUttText = utts[index - 1][1]['text']
         lastUttText = self.noise_filter(lastUttText)
         return (uttText.lower() in self.backchannels and
@@ -301,6 +304,11 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
         frameCount += 1
 
 
+def read_conversations(config):
+    return {name: list(parse_conversations_file(path)) for name, path in
+            config['paths']['conversations'].items()}
+
+
 def parseConversations(speaker: str, reader: DBReader):
     global counter, lastTime
     utts = list(reader.get_utterances(speaker))
@@ -325,6 +333,7 @@ def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str]):
         yield from parseConversations(speaker, reader)
 
 
+@functools.lru_cache(maxsize=8)
 def load_config(path):
     with open(path) as config_file:
         return json.load(config_file, object_pairs_hook=OrderedDict)
@@ -437,8 +446,7 @@ def main():
             'num_labels': 2,
             'files': {}
         }
-        for setname, path in config['paths']['conversations'].items():
-            convIDs = parse_conversations_file(path)
+        for setname, convIDs in read_conversations(config):
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
             data = fromiter(parseConversationSet(reader, setname, convIDs),
                             dtype="float32", shape=(-1, input_dim + output_dim))

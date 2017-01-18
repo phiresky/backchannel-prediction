@@ -3,18 +3,16 @@ import asyncio
 import sys
 from jrtk.preprocessing import NumFeature
 from jrtk.features import FeatureType
-from typing import Tuple, Dict, Optional, List
+from typing import Tuple, Dict, Optional, List, Iterator
 import json
 from collections import OrderedDict
 from extract_pfiles_python import readDB
-import functools
+from extract_pfiles_python.readDB import DBReader
 import math
 import os.path
-from time import perf_counter
-import numpy as np
-import random
-from extract_pfiles_python.features import Features, NumFeatureCache
-import logging
+from evaluate import evaluate
+from extract_pfiles_python.features import Features
+
 
 # logging.getLogger().setLevel(logging.DEBUG)
 # for handler in logging.getLogger().handlers:
@@ -46,7 +44,7 @@ def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nod
     }
 
 
-def segsToJSON(reader: readDB.DBReader, spkr: str, name: str) -> Dict:
+def segsToJSON(reader: DBReader, spkr: str, name: str) -> Dict:
     utts = list(reader.get_utterances(spkr))
     return {
         'name': name,
@@ -76,22 +74,23 @@ def findAllNets():
             curList.append("best.smooth")
             curList.append("best.smooth.thres")
             for id, info in stats.items():
-                curList.append(info["weights"])
+                curList.append(id)
     return rootList
 
 
-config_path = sys.argv[1]
-config = readDB.load_config(config_path)
+def get_net_output(convid: str, path: List[str]):
+    if path[-1].endswith(".smooth"):
+        path[-1] = path[-1][:-len(".smooth")]
+        smooth = True
+    else:
+        smooth = False
 
-origReader = readDB.DBReader(config, config_path)
-config['extract_config']['useWordsTranscript'] = True
-wordsReader = readDB.DBReader(config, config_path)
-config['extract_config']['useWordsTranscript'] = False
-config['extract_config']['useOriginalDB'] = False
-islReader = readDB.DBReader(config, config_path)
-conversations = {name: list(readDB.parse_conversations_file(path)) for name, path in
-                 config['paths']['conversations'].items()}
-netsTree = findAllNets()
+    version, id = path
+    version_path = os.path.relpath(os.path.realpath(os.path.join("trainNN", "out", version)))
+    config_path = os.path.join(version_path, "config.json")
+    config = readDB.load_config(config_path)
+    features = Features(config, config_path)
+    return features.get_net_output(convid, id, smooth)
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -120,7 +119,7 @@ async def sendOtherFeature(ws, id, feat):
     }))
 
 
-def get_extracted_features(reader: readDB.DBReader):
+def get_extracted_features(reader: DBReader):
     return OrderedDict([
         ("adc", reader.features.get_adc),
         ("power", reader.features.get_power),
@@ -134,7 +133,7 @@ def get_features():
     feature_names = list(get_extracted_features(origReader))
     features = [
         dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
-                                          dict(name="Original", children="text,words,bc".split(","))]),
+                                          dict(name="Original", children="text,words,bc,is_talking".split(","))]),
         dict(name="extracted", children=feature_names),
         dict(name="NN outputs", children=netsTree),
     ]
@@ -146,74 +145,15 @@ def get_features():
     ]
 
 
-def get_net_output(convid: str, path: List[str]):
-    if path[-1].endswith(".smooth"):
-        path[-1] = path[-1][:-len(".smooth")]
-        smooth = True
-    else:
-        smooth = False
-
-    version, id = path
-    version_path = os.path.relpath(os.path.realpath(os.path.join("trainNN", "out", version)))
-    config_path = os.path.join(version_path, "config.json")
-    config = readDB.load_config(config_path)
-    features = Features(config, config_path)
-    feature = features.get_net_output(convid, id)
-
-    if smooth:
-        import scipy
-        res = scipy.ndimage.filters.gaussian_filter1d(feature, 300 / feature.shift, axis=0)
-        return NumFeature(res)
-    else:
-        return feature
-
-
-def get_larger_threshold(feat: NumFeature, name: str, threshold=0.5, color=[0, 255, 0]):
-    begin = None
+def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, threshold: float, color=[0, 255, 0]):
     ls = []
-    for index, [sample] in enumerate(feat):
-        if sample >= threshold and begin is None:
-            begin = index
-        elif sample < threshold and begin is not None:
-            ls.append({'from': origReader.features.sample_index_to_time(feat, begin),
-                       'to': origReader.features.sample_index_to_time(feat, index), 'text': 'T', 'color': color})
-            begin = None
-
+    for start, end in evaluate.get_larger_threshold(feat, reader, threshold):
+        ls.append({'from': start, 'to': end, 'text': 'T', 'color': color})
     return {
         'name': name,
         'typ': 'highlights',
         'data': ls
     }
-
-
-def get_bc_audio(feat: NumFeature):
-    sampletrack = "sw4687-B"  # ""sw2807-A"  # "sw3614-A"
-    reader = origReader
-    sampletrack_audio = reader.features.get_adc(sampletrack)
-    bcs = reader.get_backchannels(list(reader.get_utterances(sampletrack)))
-    larger_thresholds = get_larger_threshold(feat, "", threshold=0.6)['data']
-    total_length_s = reader.features.sample_index_to_time(feat, feat.shape[0])
-    total_length_audio_index = reader.features.time_to_sample_index(sampletrack_audio, total_length_s)
-    output_audio = NumFeature(np.zeros(total_length_audio_index, dtype='int16'),
-                              samplingRate=sampletrack_audio.samplingRate)
-
-    for range in larger_thresholds:
-        peak_s = reader.get_max_time(feat, range['from'], range['to']) - reader.BCcenter
-        bc_id, bc_info = random.choice(bcs)
-        bc_start_time = float(bc_info['from'])
-        bc_audio = reader.features.cut_range(sampletrack_audio, bc_start_time, float(bc_info['to']))
-        bc_real_start_time = reader.getBcRealStartTime(bc_id)
-        bc_start_offset = bc_real_start_time - bc_start_time
-        audio_len_samples = bc_audio.shape[0]
-        # audio_len_s = reader.features.sample_index_to_time(bc_audio, audio_len_samples)
-        start_s = peak_s - bc_start_offset - 0.1
-        start_index = reader.features.time_to_sample_index(bc_audio, start_s)
-        if start_index < 0:
-            continue
-        if start_index + audio_len_samples > output_audio.shape[0]:
-            audio_len_samples = output_audio.shape[0] - start_index
-        output_audio[start_index:start_index + audio_len_samples] += bc_audio[0: audio_len_samples]
-    return output_audio
 
 
 async def sendFeature(ws, id: str, conv: str, featFull: str):
@@ -227,6 +167,8 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         if featname == "bc":
             await sendOtherFeature(ws, id,
                                    {"typ": "highlights", "data": getHighlights(reader, conv, channel)})
+        elif featname == "is_talking":
+            await sendOtherFeature(ws, id, dict(typ="highlights", data=list(get_talking_feature(reader, convid))))
         elif featname == "text":
             await sendOtherFeature(ws, id, segsToJSON(reader, convid, featFull))
         elif featname == "words":
@@ -235,11 +177,12 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         if path[-1].endswith(".thres"):
             path[-1] = path[-1][:-len(".thres")]
             feature = get_net_output(convid, path)
-            await sendOtherFeature(ws, id, get_larger_threshold(feature, featFull, threshold=0.6))
+            await sendOtherFeature(ws, id, get_larger_threshold_feature(feature, origReader, featFull, threshold=0.6))
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
-            await sendNumFeature(ws, id, conv, featFull, get_bc_audio(feature))
+            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(feature, origReader, list(
+                evaluate.get_bc_samples(origReader, "sw2249-A"))))
         else:
             feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, feature)
@@ -253,7 +196,7 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         raise Exception("unknown category " + category)
 
 
-def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
+def getHighlights(reader: DBReader, conv: str, channel: str):
     if channel == "A":
         bcChannel = "B"
     elif channel == "B":
@@ -271,6 +214,11 @@ def getHighlights(reader: readDB.DBReader, conv: str, channel: str):
         (a, b) = reader.getNonBackchannelTrainingRange(bc)
         highlights.append({'from': a, 'to': b, 'color': (255, 0, 0), 'text': 'NBC'})
     return highlights
+
+
+def get_talking_feature(reader: DBReader, convid: str):
+    for start, end in evaluate.get_talking_segments(reader, convid):
+        yield {'from': start, 'to': end, 'text': 'talking', 'color': [255, 255, 0]}
 
 
 def sanitize_conversation(conv):
@@ -327,4 +275,15 @@ def start_server():
 
 
 if __name__ == '__main__':
+    config_path = sys.argv[1]
+    config = readDB.load_config(config_path)
+
+    origReader = DBReader(config, config_path)
+    config['extract_config']['useWordsTranscript'] = True
+    wordsReader = DBReader(config, config_path)
+    config['extract_config']['useWordsTranscript'] = False
+    config['extract_config']['useOriginalDB'] = False
+    islReader = DBReader(config, config_path)
+    conversations = readDB.read_conversations(config)
+    netsTree = findAllNets()
     start_server()

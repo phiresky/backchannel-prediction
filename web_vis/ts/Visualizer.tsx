@@ -109,7 +109,7 @@ class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
             <div className="left-bar" style={{ position: "relative", width: "100%", height: "100%" }}>
                 <div style={{ ...Styles.absoluteTopLeft, paddingLeft: "5px", paddingTop: "5px" }}>
                     {uiState.features.map(info =>
-                        <B.Popover key={info.uuid} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="change-visualizer"
+                        <B.Popover key={info.uuid} interactionKind={B.PopoverInteractionKind.HOVER} popoverClassName="withpadding"
                             content={<div>
                                 <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove" onClick={e => this.remove(info.uuid)}>Remove</button></label>
                                 {info.currentRange &&
