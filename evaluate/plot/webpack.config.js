@@ -5,12 +5,12 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new webpack.DefinePlugin({
-            "VERSIONS": JSON.stringify(fs.readdirSync("../out"))
+            "VERSIONS": JSON.stringify(fs.readdirSync("../../trainNN/out"))
         })
     ],
     output: {
         filename: 'dist/plot.js',
-        publicPath: "trainNN/plot"
+        publicPath: "evaluate/plot"
     },
     module: {
         rules: [

@@ -27,7 +27,7 @@ interface EvalResult {
     totals: SingleEvalResult,
     details: { [convid: string]: SingleEvalResult }
 }
-const config = (version: string) => `../out/${version}/config.json`;
+const config = (version: string) => `../../trainNN/out/${version}/config.json`;
 const evalResult = (version: string) => `../../evaluate/out/${version}/results.json`;
 const titles = {
     "v026-sgd-1": "sgd, learning rate=1",
