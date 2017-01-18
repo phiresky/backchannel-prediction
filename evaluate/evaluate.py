@@ -206,7 +206,7 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
         result.update(precision_recall(result))
 
     totals.update(precision_recall(totals))
-    return dict(config=eval_config, totals=totals) # , details=results)
+    return dict(config=eval_config, totals=totals)  # , details=results)
 
 
 def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_version: str, bc_sample_tracks):

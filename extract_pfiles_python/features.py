@@ -140,12 +140,14 @@ def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: f
         offsets = range(stride - context, 1, stride)
     return adjacent(pitch.merge(power), offsets)
 
+
 @functools.lru_cache(maxsize=16)
 @NumFeatureCache
-def pure_get_combined_feat_continous(adc_path: str, sample_window_ms: float, stride: int, convid: str):
+def pure_get_combined_feat_continous(adc_path: str, sample_window_ms: float, convid: str):
     pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
     power = pure_get_power(adc_path, sample_window_ms, convid)
-    return pitch.merge(power)[::stride]
+    return pitch.merge(power)
+
 
 class Features:
     def __init__(self, config: dict, config_path: str):
@@ -171,11 +173,7 @@ class Features:
                                       convid)
 
     def get_combined_feat_continous(self, convid: str):
-        ex_config = self.config['extract_config']
-        context_ms = ex_config['context_ms']
-        stride = ex_config['context_stride']
-        online = ex_config.get('online', False)
-        return pure_get_combined_feat_continous(self.config['paths']['adc'], self.sample_window_ms, stride, convid)
+        return pure_get_combined_feat_continous(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache

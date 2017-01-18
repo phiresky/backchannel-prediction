@@ -97,12 +97,9 @@ class DBReader:
     backchannels = None
 
     # BC prediction area relative to BC start
-    BCcenter = -0.3
-    BCbegin = BCcenter - 0.2
-    BCend = BCcenter + 0.2
+    BCend = -0.1
 
     # Non BC prediction area relative to BC start
-    NBCbegin = -2.3
     NBCend = -1.9
 
     noise_filter = None
@@ -120,8 +117,10 @@ class DBReader:
         self.sample_window_ms = self.extract_config['sample_window_ms']
         context_ms = self.extract_config['context_ms']
         self.input_dim = 2
-        self.BCbegin -= context_ms / 1000
-        self.NBCbegin -= context_ms / 1000
+        self.BCbegin = self.BCend - context_ms / 1000
+        self.NBCbegin = self.NBCend - context_ms / 1000
+        self.context_stride = self.extract_config['context_stride']
+        self.context_frames = (context_ms / 10) // self.context_stride
 
     def __enter__(self):
         return self
@@ -279,18 +278,21 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
                                                                               toTime))
         return
 
-    want_bc_length = round((cBCend - cBCbegin) * 100)
-    want_nbc_length = round((cNBCend - cNBCbegin) * 100)
-    if want_bc_length != want_nbc_length:
-        raise Exception(f"expected {want_bc_length} and {want_nbc_length} to be the same")
+    F = reader.features.get_combined_feat_continous(speaking_channel_convid)
+    FBC = reader.features.cut_range(F, cBCbegin, cBCend + 0.1)[
+          0:reader.context_frames * reader.context_stride:reader.context_stride]
+    FNBC = reader.features.cut_range(F, cNBCbegin, cNBCend + 0.1)[
+           0:reader.context_frames * reader.context_stride:reader.context_stride]
+    bc_frames, bc_dim = FBC.shape
+    nbc_frames, nbc_dim = FNBC.shape
+    if bc_frames < reader.context_frames:
+        raise Exception(f"FBC too small: {bc_frames}")
+    if nbc_frames < reader.context_frames:
+        raise Exception(f"FBC too small: {nbc_frames}")
 
-    F = reader.features.get_pitch(speaking_channel_convid).merge(reader.features.get_power(speaking_channel_convid))
-    FBC = reader.features.cut_range(F, cBCbegin, cBCend + 0.1)[0:want_bc_length]
-    FNBC = reader.features.cut_range(F, cNBCbegin, cNBCend + 0.1)[0:want_nbc_length]
-
-    if FBC.shape[1] != reader.input_dim:
+    if bc_dim != reader.input_dim:
         raise Exception("coeff={} and dim={} don't match".format(FBC.shape[1], reader.input_dim))
-    if FNBC.shape[1] != reader.input_dim:
+    if nbc_dim != reader.input_dim:
         raise Exception("coeff={} and dim={} don't match".format(FNBC.shape[1], reader.input_dim))
 
     for frame in FNBC:
@@ -444,7 +446,8 @@ def main():
         output_dim = 1
 
         nnConfig = {
-            'input_dim': int(reader.input_dim),
+            'input_dim': reader.input_dim,
+            'context_frames': reader.context_frames,
             'output_dim': output_dim,
             'num_labels': 2,
             'files': {}
