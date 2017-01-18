@@ -120,7 +120,7 @@ class DBReader:
         self.BCbegin = self.BCend - context_ms / 1000
         self.NBCbegin = self.NBCend - context_ms / 1000
         self.context_stride = self.extract_config['context_stride']
-        self.context_frames = (context_ms / 10) // self.context_stride
+        self.context_frames = int(context_ms / 10 / self.context_stride)
 
     def __enter__(self):
         return self
