@@ -177,7 +177,7 @@ class Features:
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
-    def get_net_output(self, convid: str, epoch: str, smooth: bool):
+    def get_net_output_old(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
         input = self.get_combined_feat(convid)
         batchsize, *dims = layers[0].shape
@@ -197,13 +197,10 @@ class Features:
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
-    def get_lstm_continous_output(self, convid: str, epoch: str, smooth: bool):
+    def get_net_output(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
         input = self.get_combined_feat_continous(convid)
-        batchsize, *dims = layers[0].shape
-        framecount, *_ = input.shape
-        shape = (framecount, *dims)
-        output = fn(input.reshape(shape))
+        output = fn([input])
         if output.shape[1] == 1:
             feature = NumFeature(output)
         else:

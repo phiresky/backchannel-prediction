@@ -49,7 +49,7 @@ def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
-        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) - reader.BCcenter
+        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) - ((reader.BCend + reader.BCbegin) / 2)
         yield peak_prediction_s
 
 
