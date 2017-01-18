@@ -6,7 +6,7 @@ import os
 import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
-from extract_pfiles_python.readDB import load_config, DBReader, swap_speaker, read_conversations, load_config
+from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, load_config
 from tqdm import tqdm
 import functools
 import trainNN.evaluate
@@ -241,12 +241,6 @@ def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_versi
             # audio_cut = np.append(audio_cut, audio[start_inx:end_inx])
 
             # soundfile.write(os.path.join(out_dir, "{}--{}.wav".format(convchannel, bc_sampletrack)), audio_cut, 8000)
-
-
-@functools.lru_cache()
-def loadDBReader(config_path: str):
-    config = load_config(config_path)
-    return DBReader(config, config_path)
 
 
 def output_bc_samples(reader: DBReader, convs: List[str]):

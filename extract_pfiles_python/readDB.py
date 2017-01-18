@@ -21,6 +21,10 @@ import os.path
 import re
 import functools
 from .features import Features
+from tqdm import tqdm
+
+os.environ['JOBLIB_START_METHOD'] = 'forkserver'
+from joblib import Parallel, delayed
 
 MAX_TIME = 100 * 60 * 60  # 100 hours
 # these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
@@ -114,6 +118,10 @@ class DBReader:
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.sample_window_ms = self.extract_config['sample_window_ms']
+        context_ms = self.extract_config['context_ms']
+        self.input_dim = 2 * context_ms // 10 / self.extract_config['context_stride']
+        if not self.input_dim.is_integer():
+            raise Exception("input dim is not integer: " + str(self.input_dim))
 
     def __enter__(self):
         return self
@@ -224,11 +232,6 @@ class DBReader:
         return len(l)
 
 
-counter = 0
-lastTime = time.clock()
-input_dim = None
-
-
 def load_backchannels(path):
     with open(path) as f:
         bcs = set([line.strip() for line in f.readlines()])
@@ -241,6 +244,7 @@ def swap_speaker(convid: str):
     return conv + "-" + other_channel
 
 
+# todo: adjust to new output format
 def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     back_channel_convid = uttInfo['convid']
     speaking_channel_convid = swap_speaker(back_channel_convid)
@@ -252,7 +256,7 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
 
     output = reader.get_gauss_bc_feature(back_channel_convid)
 
-    if coeffN != input_dim:
+    if coeffN != reader.input_dim:
         raise Exception("coeff and dim don't match")
 
     left_bound = reader.features.time_to_sample_index(input, peak - radius_sec)
@@ -279,8 +283,8 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
     F = reader.features.cut_range(F, fromTime, toTime)
     (frameN, coeffN) = F.shape
 
-    if coeffN != input_dim:
-        raise Exception("coeff={} and dim={} don't match".format(coeffN, input_dim))
+    if coeffN != reader.input_dim:
+        raise Exception("coeff={} and dim={} don't match".format(coeffN, reader.input_dim))
 
     expectedNumOfFrames = (toTime - fromTime) * 100
     deltaFrames = abs(expectedNumOfFrames - frameN)
@@ -295,12 +299,12 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
     BCframeEnd = int((cBCend - fromTime) * 100)
     frameCount = 0
     for frameX in range(NBCframeStart, NBCframeEnd):
-        yield np.append(F[frameX], [0], axis=0)
+        yield (utt, "NBC"), F[frameX], [0]
         frameCount += 1
 
     frameCount = 0
     for frameX in range(BCframeStart, BCframeEnd):
-        yield np.append(F[frameX], [1], axis=0)
+        yield (utt, "BC"), F[frameX], [1]
         frameCount += 1
 
 
@@ -310,7 +314,6 @@ def read_conversations(config):
 
 
 def parseConversations(speaker: str, reader: DBReader):
-    global counter, lastTime
     utts = list(reader.get_utterances(speaker))
     for index, (utt, uttInfo) in enumerate(utts):
         if not reader.is_backchannel(uttInfo, index, utts):
@@ -318,19 +321,24 @@ def parseConversations(speaker: str, reader: DBReader):
 
         yield from outputBackchannelDiscrete(reader, utt, uttInfo)
 
-        counter += 1
-        if counter % 100 == 0:
-            took = time.clock() - lastTime
-            lastTime = time.clock()
-            logging.info("Written elements: %d (%.3fs per element)", counter, took / 100)
+
+def parseConversationsList(speaker: str, config_path: str):
+    reader = loadDBReader(config_path)
+    return list(parseConversations(speaker, reader))
 
 
-def parseConversationSet(reader: DBReader, setname: str, convIDs: Set[str]):
+def parseConversationSet(parallel, config_path: str, setname: str, convIDs: Set[str]):
     logging.debug("parseConversationSet(" + setname + ")")
+    reader = loadDBReader(config_path)
     speakers = list(speaker for speaker in reader.spkDB if speakerFilter(convIDs, speaker))
-    for (i, speaker) in enumerate(speakers):
-        logging.debug("parseConversations({}, {}) [{}/{}]".format(setname, speaker, i, len(speakers)))
-        yield from parseConversations(speaker, reader)
+    for x in parallel(tqdm([delayed(parseConversationsList)(speaker, config_path) for speaker in speakers])):
+        yield from x
+
+
+@functools.lru_cache(maxsize=1)
+def loadDBReader(config_path: str):
+    config = load_config(config_path)
+    return DBReader(config, config_path)
 
 
 @functools.lru_cache(maxsize=8)
@@ -415,14 +423,12 @@ def parse_conversations_file(path: str):
 
 
 def main():
-    global input_dim
     np.seterr(all='raise')
     logging.debug("loading config file {}".format(sys.argv[1]))
     config_path = sys.argv[1]
     config = load_config(config_path)
 
     extract_config = config['extract_config']
-    context_ms = extract_config['context_ms']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
     outputDir = os.path.join(extract_config['outputDirectory'], "{}".format(version))
     if os.path.isdir(outputDir):
@@ -433,26 +439,41 @@ def main():
 
     jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
 
-    with DBReader(config, config_path) as reader:
+    with loadDBReader(config_path) as reader, Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
 
-        input_dim = 2 * context_ms // 10 / extract_config['context_stride']
-        if not input_dim.is_integer():
-            raise Exception("input dim is not integer: " + str(input_dim))
         output_dim = 1
 
         nnConfig = {
-            'input_dim': int(input_dim),
+            'input_dim': int(reader.input_dim),
             'output_dim': output_dim,
             'num_labels': 2,
             'files': {}
         }
-        for setname, convIDs in read_conversations(config):
+        for setname, convIDs in read_conversations(config).items():
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
-            data = fromiter(parseConversationSet(reader, setname, convIDs),
-                            dtype="float32", shape=(-1, input_dim + output_dim))
-            fname = os.path.join(outputDir, setname + ".npz")
-            np.savez_compressed(fname, data=data)
-            nnConfig['files'][setname] = os.path.relpath(os.path.abspath(fname), outputDir)
+            seqids = []
+            inputs = []
+            outputs = []
+            for seqid, input, output in parseConversationSet(parallel, config_path, setname, convIDs):
+                seqids.append(seqid)
+                inputs.append(input)
+                outputs.append(output)
+            inputs = np.stack(inputs, axis=0)
+            outputs = np.stack(outputs, axis=0)
+            idname = os.path.join(outputDir, setname + ".meta.json")
+            inname = os.path.join(outputDir, setname + ".input.npz")
+            outname = os.path.join(outputDir, setname + ".output.npz")
+
+            with open(idname, 'w') as f:
+                json.dump({"ids": seqids}, f, indent='\t')
+            np.savez_compressed(inname, data=inputs)
+            np.savez_compressed(outname, data=outputs)
+
+            nnConfig['files'][setname] = {
+                'ids': os.path.relpath(os.path.abspath(idname), outputDir),
+                'input': os.path.relpath(os.path.abspath(inname), outputDir),
+                'output': os.path.relpath(os.path.abspath(outname), outputDir)
+            }
 
         jsonPath = os.path.join(outputDir, "config.json")
         with open(jsonPath, "w") as f:
