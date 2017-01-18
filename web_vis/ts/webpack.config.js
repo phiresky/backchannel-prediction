@@ -5,7 +5,7 @@ const autoprefixer = require('autoprefixer');
 
 module.exports = {
   context: __dirname,
-  devtool: 'eval',
+  devtool: 'source-map',
   entry: [
     './client'
   ],

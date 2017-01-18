@@ -12,7 +12,7 @@ import * as B from "@blueprintjs/core";
 import * as Data from "./Data";
 import * as v from "./Visualizer";
 import { Feature, NumFeature, NumFeatureSVector, FeatureID, ConversationID } from "./features";
-import { AudioPlayer, PlaybackPosition, AudioRecorder, microphoneFeature } from "./Audio";
+import { AudioPlayer, PlaybackPosition, AudioRecorder, microphoneFeature, RegionSelector } from "./Audio";
 import * as queryString from "query-string";
 
 export const globalConfig = mobx.observable({
@@ -206,6 +206,8 @@ export class GUI extends React.Component<{}, {}> {
 
     @mobx.observable windowWidth = window.innerWidth;
     @mobx.observable playbackPosition = 0;
+    @mobx.observable selectionStart = NaN;
+    @mobx.observable selectionEnd = NaN;
     @mobx.observable followPlayback = false;
 
     @mobx.observable conversation: ConversationID;
@@ -436,12 +438,13 @@ export class GUI extends React.Component<{}, {}> {
         return (
             <div>
                 <div style={{ margin: "10px" }} className="headerBar">
-                    <ConversationSelector gui={this} />
+                    <p><ConversationSelector gui={this} />
                     <label>Follow playback:
                         <input type="checkbox" checked={this.followPlayback}
                             onChange={mobx.action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
                     </label>
-                    <span>Playback position: <PlaybackPosition gui={this} /></span>
+                    <span>Playback position: <PlaybackPosition gui={this} /></span></p>
+                    <RegionSelector gui={this} />
                     <MaybeAudioRecorder gui={this} />
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>
                     <ProgressIndicator />
@@ -450,7 +453,7 @@ export class GUI extends React.Component<{}, {}> {
                     }
                     <NNExample gui={this} />
                 </div>
-                <div ref={this.setUisDiv}>
+                <div ref={this.setUisDiv} style={{overflowX: "hidden"}}>
                     <div style={{ display: "flex", visibility: "hidden" }}>
                         <div style={Styles.leftBarCSS} />
                         <div style={{ flexGrow: 1 }} ref={this.setWidthCalcDiv} />
