@@ -80,7 +80,7 @@ def train():
         network=model['output_layer'],
         scheduling_method=None,
         # scheduling_params=(0.8, 0.000001),
-        update_method="sgd",
+        update_method="adadelta",
         num_epochs=1000,
         learning_rate_num=1,
         iterate_minibatches_train=batchers['train'],
