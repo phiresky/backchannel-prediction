@@ -1,15 +1,17 @@
 import lasagne
-from lasagne.layers import InputLayer, DenseLayer, DropoutLayer, LSTMLayer
+from lasagne.layers import *
 
 
 def create_network(config, BATCH_SIZE):
-    input_dim = config['input_dim']
+    sequence_length = 1200 // 10
     num_labels = config['num_labels']
-    input_layer = InputLayer(shape=(BATCH_SIZE, input_dim // 2, 2))
+    input_layer = InputLayer(shape=(BATCH_SIZE, sequence_length, 2))
     input_var = input_layer.input_var
     hidden_layer_1 = LSTMLayer(input_layer, 100)
-    hidden_layer_2 = LSTMLayer(hidden_layer_1, 50, only_return_final=True)
-    output_layer = DenseLayer(hidden_layer_2,
+    hidden_layer_2 = LSTMLayer(hidden_layer_1, 50)
+    reshape_layer = ReshapeLayer(hidden_layer_2, (BATCH_SIZE * sequence_length, 50))
+    almost_output_layer = DenseLayer(reshape_layer,
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax)
+    output_layer = ReshapeLayer(almost_output_layer, (BATCH_SIZE * sequence_length, 2))
     return locals()

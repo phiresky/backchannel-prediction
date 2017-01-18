@@ -4,7 +4,7 @@
 # /project/dialog/backchanneler/workspace/lars_context/extract_pfiles/readDB.tcl
 # (sha1sum 0e05e903997432917d5ef5b2ef4d799e196f3ffc)
 # on 2016-11-06
-
+import itertools
 import jrtk
 from jrtk.preprocessing import NumFeature
 from typing import Set, Dict, List, Iterable, Tuple
@@ -279,33 +279,25 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
                                                                               toTime))
         return
 
+    want_bc_length = round((cBCend - cBCbegin) * 100)
+    want_nbc_length = round((cNBCend - cNBCbegin) * 100)
+    if want_bc_length != want_nbc_length:
+        raise Exception(f"expected {want_bc_length} and {want_nbc_length} to be the same")
+
     F = reader.features.get_pitch(speaking_channel_convid).merge(reader.features.get_power(speaking_channel_convid))
-    F = reader.features.cut_range(F, fromTime, toTime)
-    (frameN, coeffN) = F.shape
+    FBC = reader.features.cut_range(F, cBCbegin, cBCend + 0.1)[0:want_bc_length]
+    FNBC = reader.features.cut_range(F, cNBCbegin, cNBCend + 0.1)[0:want_nbc_length]
 
-    if coeffN != reader.input_dim:
-        raise Exception("coeff={} and dim={} don't match".format(coeffN, reader.input_dim))
+    if FBC.shape[1] != reader.input_dim:
+        raise Exception("coeff={} and dim={} don't match".format(FBC.shape[1], reader.input_dim))
+    if FNBC.shape[1] != reader.input_dim:
+        raise Exception("coeff={} and dim={} don't match".format(FNBC.shape[1], reader.input_dim))
 
-    expectedNumOfFrames = (toTime - fromTime) * 100
-    deltaFrames = abs(expectedNumOfFrames - frameN)
-    # logging.debug("deltaFrames %d", deltaFrames)
-    if deltaFrames > 10:
-        logging.warning("Frame deviation too big! expected {}, got {}".format(expectedNumOfFrames, frameN))
-        return
+    for frame in FNBC:
+        yield (utt, "NBC"), frame, np.array([0], dtype="int32")
 
-    NBCframeStart = int((cNBCbegin - fromTime) * 100)
-    NBCframeEnd = int((cNBCend - fromTime) * 100)
-    BCframeStart = int((cBCbegin - fromTime) * 100)
-    BCframeEnd = int((cBCend - fromTime) * 100)
-    frameCount = 0
-    for frameX in range(NBCframeStart, NBCframeEnd):
-        yield (utt, "NBC"), F[frameX], [0]
-        frameCount += 1
-
-    frameCount = 0
-    for frameX in range(BCframeStart, BCframeEnd):
-        yield (utt, "BC"), F[frameX], [1]
-        frameCount += 1
+    for frame in FBC:
+        yield (utt, "BC"), frame, np.array([1], dtype="int32")
 
 
 def read_conversations(config):
@@ -422,6 +414,14 @@ def parse_conversations_file(path: str):
         return set([line.strip() for line in f.readlines()])
 
 
+def group(ids):
+    for k, v in itertools.groupby(enumerate(ids), lambda x: x[1]):
+        v2 = list(v)
+        start = v2[0][0]
+        end = v2[-1][0] + 1
+        yield start, end
+
+
 def main():
     np.seterr(all='raise')
     logging.debug("loading config file {}".format(sys.argv[1]))
@@ -465,7 +465,7 @@ def main():
             outname = os.path.join(outputDir, setname + ".output.npz")
 
             with open(idname, 'w') as f:
-                json.dump({"ids": seqids}, f, indent='\t')
+                json.dump({"ranges": list(group(seqids))}, f, indent='\t')
             np.savez_compressed(inname, data=inputs)
             np.savez_compressed(outname, data=outputs)
 

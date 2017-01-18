@@ -12,20 +12,21 @@ from .network_model import create_network
 import inspect
 import shutil
 from extract_pfiles_python.readDB import load_config
+import itertools
+from typing import List, Tuple
 
 BATCH_SIZE = 256
 NUM_EPOCHS = 10000
 
 
-def iterate_minibatches(batchsize, inputs, outputs):
-    frames, dim = inputs.shape
-    sequence_length = dim // 2
-    input_dim_single = 2
-    indices = numpy.arange(len(inputs))
-    numpy.random.shuffle(indices)
-    for i in range(0, frames // batchsize):
-        elements = indices[i * batchsize:(i + 1) * batchsize]
-        yield inputs[elements].reshape((batchsize, sequence_length, input_dim_single)), outputs[elements]
+def iterate_minibatches(batchsize, groups: List[Tuple[int, int]], inputs, outputs):
+    sequence_length = groups[0].stop - groups[0].start
+    group_count = len(groups)
+    numpy.random.shuffle(groups)
+    for i in range(0, group_count // batchsize):
+        ranges = groups[i * batchsize:(i + 1) * batchsize]
+        yield [inputs[range] for range in ranges], numpy.array([outputs[range] for range in ranges]).reshape(
+            (batchsize * sequence_length,))
 
 
 def load_numpy_file(fname):
@@ -63,14 +64,17 @@ def train():
         train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim]
         validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim]
     else:
-        with open(train_config['files']['train']['meta']) as f:
-            train_meta = json.load(f)
-        train_inputs = load_numpy_file(train_config['files']['train']['input'])
-        train_outputs = load_numpy_file(train_config['files']['train']['output'])
-        with open(train_config['files']['validate']['meta']) as f:
-            validate_meta = json.load(f)
-        validate_inputs = load_numpy_file(train_config['files']['validate']['input'])
-        validate_outputs = load_numpy_file(train_config['files']['validate']['output'])
+        groups = {}
+        inputs = {}
+        outputs = {}
+        batchers = {}
+        for t in 'train', 'validate':
+            with open(os.path.join(dir, train_config['files'][t]['ids'])) as f:
+                meta = json.load(f)
+            groups[t] = [slice(begin, end) for begin, end in meta['ranges']]
+            inputs[t] = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
+            outputs[t] = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
+            batchers[t] = partial(iterate_minibatches, BATCH_SIZE, groups[t], inputs[t], outputs[t])
 
     stats_generator = train_func.train_network(
         network=model['output_layer'],
@@ -79,8 +83,8 @@ def train():
         update_method="sgd",
         num_epochs=150,
         learning_rate_num=1,
-        iterate_minibatches_train=partial(iterate_minibatches, BATCH_SIZE, train_inputs, train_outputs),
-        iterate_minibatches_validate=partial(iterate_minibatches, BATCH_SIZE, validate_inputs, validate_outputs),
+        iterate_minibatches_train=batchers['train'],
+        iterate_minibatches_validate=batchers['validate'],
         categorical_output=not gaussian,
         output_prefix=os.path.join(out_dir, "epoch")
     )

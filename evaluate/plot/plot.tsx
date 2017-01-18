@@ -28,6 +28,8 @@ interface EvalResult {
     details: { [convid: string]: SingleEvalResult }
 }
 const config = (version: string) => `../../trainNN/out/${version}/config.json`;
+const log = (version: string) => `../../trainNN/out/${version}/train.log`;
+const model = (version: string) => `../../trainNN/out/${version}/network_model.py`;
 const evalResult = (version: string) => `../../evaluate/out/${version}/results.json`;
 const titles = {
     "v026-sgd-1": "sgd, learning rate=1",
@@ -52,6 +54,7 @@ class VersionGUI extends React.Component<VGProps, {}> {
             <div key={version}>
                 <h3>{version in titles ? `${titles[version]} (${version})` : `${version}`}</h3>
                 <Line data={data} options={options} />
+                <p><a href={log(version)}>Training log</a><a href={model(version)}>Network model</a></p>
                 {evalInfo &&
                     <div>
                     Eval Results for best epoch ({evalInfo[0].config.weights_file}):
