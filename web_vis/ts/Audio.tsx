@@ -128,7 +128,6 @@ export class RegionSelector extends React.Component<{gui: GUI}, {}> {
     @autobind @mobx.action
     onMouseDown(event: MouseEvent) {
         if (event.clientX < this.props.gui.left) return;
-        event.preventDefault();
         const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
         this.props.gui.selectionStart = x;
         this.props.gui.selectionEnd = x;

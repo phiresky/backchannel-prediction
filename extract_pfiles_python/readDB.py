@@ -119,9 +119,9 @@ class DBReader:
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.sample_window_ms = self.extract_config['sample_window_ms']
         context_ms = self.extract_config['context_ms']
-        self.input_dim = 2 * context_ms // 10 / self.extract_config['context_stride']
-        if not self.input_dim.is_integer():
-            raise Exception("input dim is not integer: " + str(self.input_dim))
+        self.input_dim = 2
+        self.BCbegin -= context_ms / 1000
+        self.NBCbegin -= context_ms / 1000
 
     def __enter__(self):
         return self
@@ -279,7 +279,7 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
                                                                               toTime))
         return
 
-    F = reader.features.get_combined_feat(speaking_channel_convid)
+    F = reader.features.get_pitch(speaking_channel_convid).merge(reader.features.get_power(speaking_channel_convid))
     F = reader.features.cut_range(F, fromTime, toTime)
     (frameN, coeffN) = F.shape
 

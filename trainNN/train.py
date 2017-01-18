@@ -56,15 +56,21 @@ def train():
     dir = os.path.dirname(config_path)
     model = create_network(train_config, BATCH_SIZE)
     input_dim = train_config['input_dim']
-    train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
-    validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
     gaussian = False
     if gaussian:
+        train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
+        validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
         train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim]
         validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim]
     else:
-        train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim].astype("int32")
-        validate_inputs, validate_outputs = validate_data[:, :input_dim], validate_data[:, input_dim].astype("int32")
+        with open(train_config['files']['train']['meta']) as f:
+            train_meta = json.load(f)
+        train_inputs = load_numpy_file(train_config['files']['train']['input'])
+        train_outputs = load_numpy_file(train_config['files']['train']['output'])
+        with open(train_config['files']['validate']['meta']) as f:
+            validate_meta = json.load(f)
+        validate_inputs = load_numpy_file(train_config['files']['validate']['input'])
+        validate_outputs = load_numpy_file(train_config['files']['validate']['output'])
 
     stats_generator = train_func.train_network(
         network=model['output_layer'],
