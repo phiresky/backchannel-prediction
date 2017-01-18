@@ -6,7 +6,7 @@ from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional, List, Iterator
 import json
 from collections import OrderedDict
-from extract_pfiles_python import readDB
+from extract_pfiles_python import readDB, util
 from extract_pfiles_python.readDB import DBReader
 import math
 import os.path
@@ -68,7 +68,7 @@ def findAllNets():
         if isfile(net_conf_path):
             curList = []
             rootList.append({'name': netversion, 'children': curList})
-            net_conf = readDB.load_config(net_conf_path)
+            net_conf = util.load_config(net_conf_path)
             stats = net_conf['train_output']['stats']
             curList.append("best")
             curList.append("best.smooth")
@@ -88,7 +88,7 @@ def get_net_output(convid: str, path: List[str]):
     version, id = path
     version_path = os.path.relpath(os.path.realpath(os.path.join("trainNN", "out", version)))
     config_path = os.path.join(version_path, "config.json")
-    config = readDB.load_config(config_path)
+    config = util.load_config(config_path)
     features = Features(config, config_path)
     return features.get_net_output(convid, id, smooth)
 
@@ -276,7 +276,7 @@ def start_server():
 
 if __name__ == '__main__':
     config_path = sys.argv[1]
-    config = readDB.load_config(config_path)
+    config = util.load_config(config_path)
 
     origReader = DBReader(config, config_path)
     config['extract_config']['useWordsTranscript'] = True

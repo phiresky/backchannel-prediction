@@ -11,7 +11,7 @@ import contextlib
 from .network_model import create_network
 import inspect
 import shutil
-from extract_pfiles_python.readDB import load_config
+from extract_pfiles_python.util import load_config
 import itertools
 from typing import List, Tuple
 

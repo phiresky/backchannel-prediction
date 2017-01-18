@@ -22,6 +22,7 @@ import re
 import functools
 from .features import Features
 from tqdm import tqdm
+from . import util
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
@@ -331,14 +332,8 @@ def parseConversationSet(parallel, config_path: str, setname: str, convIDs: Set[
 
 @functools.lru_cache(maxsize=1)
 def loadDBReader(config_path: str):
-    config = load_config(config_path)
+    config = util.load_config(config_path)
     return DBReader(config, config_path)
-
-
-@functools.lru_cache(maxsize=8)
-def load_config(path):
-    with open(path) as config_file:
-        return json.load(config_file, object_pairs_hook=OrderedDict)
 
 
 class FakeUttDB:
@@ -428,7 +423,7 @@ def main():
     np.seterr(all='raise')
     logging.debug("loading config file {}".format(sys.argv[1]))
     config_path = sys.argv[1]
-    config = load_config(config_path)
+    config = util.load_config(config_path)
 
     extract_config = config['extract_config']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()

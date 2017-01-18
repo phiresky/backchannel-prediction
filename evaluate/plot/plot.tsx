@@ -55,7 +55,7 @@ class VersionGUI extends React.Component<VGProps, {}> {
         return (
             <div key={version}>
                 <h3>{version in titles ? `${titles[version]} (${version})` : `${version}`}</h3>
-                <Line key={Math.random()} data={data} options={options} />
+                <Line key={Math.random()} data={toJS(data)} options={options} />
                 <p><a href={log(version)}>Training log</a><a href={model(version)}>Network model</a></p>
                 {evalInfo &&
                     <div>

@@ -6,7 +6,8 @@ import os
 import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
-from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, load_config
+from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations
+from extract_pfiles_python.util import load_config
 from tqdm import tqdm
 import functools
 import trainNN.evaluate
