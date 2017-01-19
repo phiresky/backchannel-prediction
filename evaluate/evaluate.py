@@ -261,6 +261,10 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
+good_bc_sample_tracks = "sw2249-A,sw2254-A,sw2258-B,sw2297-A,sw2411-A,sw2432-A,sw2463-A,sw2485-A,sw2603-A,sw2606-B,sw2709-A,sw2735-B,sw2762-A,sw2836-B,sw4193-A".split(
+    ",")
+
+
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
@@ -273,6 +277,10 @@ def main():
 
     res = []
     eval_conversations = sorted(conversations['eval'] if 'eval' in conversations else conversations['test'])
+
+    # reader = loadDBReader(config_path)
+    # write_wavs(reader, eval_conversations, 10, version, good_bc_sample_tracks)
+    # return
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
         for eval_config in interesting_configs():
             print(eval_config)
