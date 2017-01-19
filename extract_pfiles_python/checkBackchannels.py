@@ -1,4 +1,5 @@
 from . import readDB
+from . import util
 import sys
 
 
@@ -24,7 +25,7 @@ def levenshtein(s1, s2):
     return previous_row[-1]
 
 
-config = readDB.load_config(sys.argv[1])
+config = util.load_config(sys.argv[1])
 
 
 def check_transcript_differences():

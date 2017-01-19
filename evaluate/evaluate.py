@@ -6,7 +6,8 @@ import os
 import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
-from extract_pfiles_python.readDB import load_config, DBReader, swap_speaker, read_conversations, load_config
+from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations
+from extract_pfiles_python.util import load_config
 from tqdm import tqdm
 import functools
 import trainNN.evaluate
@@ -49,7 +50,7 @@ def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
-        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) - reader.BCcenter
+        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) - ((reader.BCend + reader.BCbegin) / 2)
         yield peak_prediction_s
 
 
@@ -206,7 +207,7 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
         result.update(precision_recall(result))
 
     totals.update(precision_recall(totals))
-    return dict(config=eval_config, totals=totals) # , details=results)
+    return dict(config=eval_config, totals=totals)  # , details=results)
 
 
 def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_version: str, bc_sample_tracks):
@@ -243,12 +244,6 @@ def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_versi
             # soundfile.write(os.path.join(out_dir, "{}--{}.wav".format(convchannel, bc_sampletrack)), audio_cut, 8000)
 
 
-@functools.lru_cache()
-def loadDBReader(config_path: str):
-    config = load_config(config_path)
-    return DBReader(config, config_path)
-
-
 def output_bc_samples(reader: DBReader, convs: List[str]):
     for conv in convs:
         adc = reader.features.get_adc(conv)
@@ -266,6 +261,10 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
+good_bc_sample_tracks = "sw2249-A,sw2254-A,sw2258-B,sw2297-A,sw2411-A,sw2432-A,sw2463-A,sw2485-A,sw2603-A,sw2606-B,sw2709-A,sw2735-B,sw2762-A,sw2836-B,sw4193-A".split(
+    ",")
+
+
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
@@ -278,6 +277,10 @@ def main():
 
     res = []
     eval_conversations = sorted(conversations['eval'] if 'eval' in conversations else conversations['test'])
+
+    # reader = loadDBReader(config_path)
+    # write_wavs(reader, eval_conversations, 10, version, good_bc_sample_tracks)
+    # return
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
         for eval_config in interesting_configs():
             print(eval_config)

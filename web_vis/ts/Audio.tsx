@@ -32,7 +32,13 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     @autobind @mobx.action
     updatePlaybackPosition() {
         if (!this.playing) return;
-        this.props.gui.playbackPosition = (audioContext.currentTime - this.startedAt) / this.duration;
+        const newPos = (audioContext.currentTime - this.startedAt) / this.duration;
+        if(newPos > this.props.gui.selectionEnd) {
+            this.props.gui.playbackPosition = this.props.gui.selectionEnd;
+            this.stopPlaying();
+            return;
+        }
+        this.props.gui.playbackPosition = newPos;
         if (this.props.gui.followPlayback) this.center();
         if (this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
@@ -52,6 +58,8 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     @mobx.action
     startPlaying() {
         this.playing = true;
+        if(this.props.gui.playbackPosition === this.props.gui.selectionEnd)
+            this.props.gui.playbackPosition = this.props.gui.selectionStart;
         for (const feature of this.props.features) {
             const buffer = getAudioBuffer(feature);
             const audioSource = this.toAudioSource(buffer);
@@ -89,9 +97,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     onClick(event: MouseEvent) {
         if (event.clientX < this.props.gui.left) return;
         event.preventDefault();
-        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
         if (this.playing) this.stopPlaying();
-        mobx.runInAction("clickSetPlaybackPosition", () => this.props.gui.playbackPosition = Math.max(x, 0));
     }
 
     componentDidMount() {
@@ -109,7 +115,68 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     }
     render() {
         return (
-            <div ref={this.setPlayerBar} style={{ position: "fixed", width: "2px", height: "100vh", top: 0, left: 0, transform: this.xTranslation, backgroundColor: "gray" }} />
+            <div ref={this.setPlayerBar} style={{ position: "fixed", width: "2px", height: "100vh", top: 0, left: 0, transform: this.xTranslation, backgroundColor: "black" }} />
+        );
+    }
+}
+
+@observer
+export class RegionSelector extends React.Component<{gui: GUI}, {}> {
+    div: HTMLDivElement; setDiv = (p: HTMLDivElement) => this.div = p;
+    disposers: (() => void)[] = [];
+
+    @autobind @mobx.action
+    onMouseDown(event: MouseEvent) {
+        if (event.clientX < this.props.gui.left) return;
+        const x = util.getPositionFromPixel(event.clientX, this.props.gui.left, this.props.gui.width, this.props.gui.zoom) !;
+        this.props.gui.selectionStart = x;
+        this.props.gui.selectionEnd = x;
+        window.addEventListener("mousemove", this.onMouseMove);
+    }
+
+    @autobind @mobx.action
+    onMouseMove(event: MouseEvent) {
+        const gui = this.props.gui;
+        event.preventDefault();
+        const x = util.getPositionFromPixel(event.clientX, gui.left, gui.width, gui.zoom) !;
+        if(x < gui.selectionStart) {
+            gui.selectionStart = x;
+        } else {
+            gui.selectionEnd = x;
+        }
+    }
+
+    @autobind @mobx.action
+    onMouseUp(event: MouseEvent) {
+        window.removeEventListener("mousemove", this.onMouseMove);
+        const gui = this.props.gui;
+        gui.playbackPosition = gui.selectionStart;
+        const diff = util.getPixelFromPosition(Math.abs(gui.selectionStart - gui.selectionEnd), 0, this.props.gui.width, {left: 0, right: gui.zoom.right - gui.zoom.left});
+        if(diff < 5) {
+            gui.selectionStart = NaN;
+            gui.selectionEnd = NaN;
+        }
+    }
+
+    componentDidMount() {
+        const uisDiv = this.props.gui.uisDiv;
+        window.addEventListener("mousedown", this.onMouseDown);
+        window.addEventListener("mouseup", this.onMouseUp);
+        this.disposers.push(() => uisDiv.removeEventListener("mousedown", this.onMouseDown));
+        this.disposers.push(() => window.removeEventListener("mouseup", this.onMouseUp));
+    }
+    componentWillUnmount() {
+        for (const disposer of this.disposers) disposer();
+    }
+
+    render() {
+        let a = this.props.gui.selectionStart;
+        let b = this.props.gui.selectionEnd;
+        if(isNaN(a) || isNaN(b)) return <div/>;
+        const left = util.getPixelFromPosition(a, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
+        const right = util.getPixelFromPosition(b, this.props.gui.left, this.props.gui.width, this.props.gui.zoom);
+        return (
+            <div ref={this.setDiv} style={{ position: "fixed", height: "100vh", top: 0, left, width: right - left, backgroundColor: "rgba(0,0,0,0.2)" }} />
         );
     }
 }
@@ -117,8 +184,13 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
 @observer
 export class PlaybackPosition extends React.Component<{ gui: GUI }, {}> {
     render() {
+        const fix = (x: number) => (x * gui.totalTimeSeconds).toFixed(4);
         const gui = this.props.gui;
-        return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>;
+        if(!isNaN(gui.selectionStart) && !isNaN(gui.selectionEnd) && Math.abs(gui.selectionEnd - gui.selectionStart) > 1e-6)
+            return <span>[{fix(gui.selectionStart)}s — {fix(gui.playbackPosition)}s — {fix(gui.selectionEnd)}]
+                Duration: {fix(gui.selectionEnd - gui.selectionStart)}s</span>;
+        else
+            return <span>{(gui.playbackPosition * gui.totalTimeSeconds).toFixed(4)}</span>;
     }
 }
 
