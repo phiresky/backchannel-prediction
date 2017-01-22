@@ -431,6 +431,7 @@ def main():
         output_dim = 1
 
         train_config = {
+            **config['train_config'],
             'output_dim': output_dim,
             'num_labels': 2,
             'files': {}
