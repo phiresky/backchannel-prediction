@@ -79,6 +79,10 @@ def power_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
     return filter_power(adc.adc2pow("{}ms".format(sample_window_ms)))
 
 
+def ffv_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
+    return adc.intonation("{}ms".format(sample_window_ms))
+
+
 def pitch_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
     return adc.applyPitchTracker(tracker, window="{}ms".format(sample_window_ms)).normalize(min=-1, max=1)
 
@@ -126,6 +130,12 @@ def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFe
     return power_transform(pure_get_adc(adc_path, convid), sample_window_ms)
 
 
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
+    return ffv_transform(pure_get_adc(adc_path, convid), sample_window_ms)
+
+
 @functools.lru_cache(maxsize=16)
 @NumFeatureCache
 def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: float, stride: int, online: bool,
@@ -163,6 +173,9 @@ class Features:
 
     def get_pitch(self, convid: str):
         return pure_get_pitch(self.config['paths']['adc'], self.sample_window_ms, convid)
+
+    def get_ffv(self, convid: str):
+        return pure_get_ffv(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     def get_combined_feat(self, convid: str):
         ex_config = self.config['extract_config']
