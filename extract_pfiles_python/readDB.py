@@ -417,7 +417,7 @@ def main():
 
     extract_config = config['extract_config']
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
-    outputDir = os.path.join(extract_config['outputDirectory'], "{}".format(version))
+    outputDir = os.path.join(extract_config['outputDirectory'], f"{version}:{config['name']}")
     if os.path.isdir(outputDir):
         print("Output directory {} already exists, aborting".format(outputDir))
         sys.exit(1)
