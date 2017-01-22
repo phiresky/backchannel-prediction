@@ -120,13 +120,8 @@ async def sendOtherFeature(ws, id, feat):
 
 
 def get_extracted_features(reader: DBReader):
-    return OrderedDict([
-        ("adc", reader.features.get_adc),
-        ("power", reader.features.get_power),
-        ("pitch", reader.features.get_pitch),
-        ("gaussbc", reader.get_gauss_bc_feature),
-        ("combined_feat", reader.features.get_combined_feat)
-    ])
+    return OrderedDict([(name, getattr(reader.features, f"get_{name}")) for name in
+                        "adc,power,ffv,pitch,combined_feature".split(",")])
 
 
 def get_features():
@@ -207,8 +202,8 @@ def getHighlights(reader: DBReader, conv: str, channel: str):
     bcs = reader.get_backchannels(utts)
     highlights = []
     for bc, bcInfo in bcs:
-        t = reader.getBCMaxTime(bc)
-        highlights.append({'from': t - 0.01, 'to': t + 0.01, 'color': (0, 0, 255), 'text': 'power max'})
+        t = reader.getBcRealStartTime(bc)
+        highlights.append({'from': t - 0.01, 'to': t + 0.01, 'color': (0, 0, 255), 'text': 'real BC start'})
         (a, b) = reader.getBackchannelTrainingRange(bc)
         highlights.append({'from': a, 'to': b, 'color': (0, 255, 0), 'text': 'BC'})
         (a, b) = reader.getNonBackchannelTrainingRange(bc)
@@ -240,7 +235,8 @@ async def handler(websocket, path):
                     if msg['type'] == "getFeatures":
                         cats = [s.split(" & ") for s in
                                 ["/extracted/adc & /transcript/Original/bc",
-                                 "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
+                                 "/transcript/Original/text", "/extracted/pitch", "/extracted/power",
+                                 "/extracted/combined_feature"]]
                         conv = sanitize_conversation(msg['conversation'])
                         await websocket.send(json.dumps({"id": id, "data": {
                             'categories': get_features(),

@@ -97,15 +97,10 @@ def speakerFilter(convIDs: Set[str], speaker: str) -> bool:
 class DBReader:
     backchannels = None
 
-    # BC prediction area relative to BC start
-    BCend = -0.1
-
-    # Non BC prediction area relative to BC start
-    NBCend = -1.9
-
     noise_filter = None
     spkDB = None
     uttDB = None
+    method = None
 
     def __init__(self, config: Dict, config_path: str):
         self.config = config
@@ -117,11 +112,9 @@ class DBReader:
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.sample_window_ms = self.extract_config['sample_window_ms']
         context_ms = self.extract_config['context_ms']
-        self.input_dim = 2
-        self.BCbegin = self.BCend - context_ms / 1000
-        self.NBCbegin = self.NBCend - context_ms / 1000
         self.context_stride = self.extract_config['context_stride']
-        self.context_frames = int(context_ms / 10 / self.context_stride)
+        self.context_range_frames = int(context_ms / 10 / self.context_stride)
+        self.method = self.extract_config['extraction_method']
 
     def __enter__(self):
         return self
@@ -170,11 +163,13 @@ class DBReader:
 
     def getBackchannelTrainingRange(self, utt: str):
         bc_start_time = self.getBcRealStartTime(utt)
-        return bc_start_time + self.BCbegin, bc_start_time + self.BCend
+        start, end = self.method['bc']
+        return bc_start_time + start, bc_start_time + end
 
     def getNonBackchannelTrainingRange(self, utt: str):
         bc_start_time = self.getBcRealStartTime(utt)
-        return bc_start_time + self.NBCbegin, bc_start_time + self.NBCend
+        start, end = self.method['nbc']
+        return bc_start_time + start, bc_start_time + end
 
     def load_db(self) -> (DBase, DBase):
         if self.use_original_db:
@@ -200,13 +195,13 @@ class DBReader:
                 ]
 
     def get_gauss_bc_array(self, power: NumFeature, utt: str) -> Tuple[float, np.array]:
-        middle = self.getBCMaxTime(utt) + self.BCcenter
-        width = 1.8
-        times = np.arange(-width, width, power.shift / 1000, dtype="float32")
+        middle = self.getBcRealStartTime(utt) + self.method['peak']
+        stddev = self.method['stddev']
+        radius = self.method['radius']
+        times = np.arange(-radius, radius, power.shift / 1000, dtype="float32")
         mean = 0
-        stddev = 0.3
         variance = stddev ** 2
-        return middle - width, (1 / np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean) ** 2) / (2 * variance))
+        return middle - radius, (1 / np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean) ** 2) / (2 * variance))
 
     def get_gauss_bcs(self, power_feature: np.array, spkr: str):
         arr = np.zeros_like(power_feature)
@@ -251,13 +246,10 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     radius_sec = 1
     peak = reader.getBCMaxTime(utt)
 
-    input = reader.features.get_combined_feat(speaking_channel_convid)
+    input = reader.features.get_combined_feature(speaking_channel_convid)
     (frameN, coeffN) = input.shape
 
     output = reader.get_gauss_bc_feature(back_channel_convid)
-
-    if coeffN != reader.input_dim:
-        raise Exception("coeff and dim don't match")
 
     left_bound = reader.features.time_to_sample_index(input, peak - radius_sec)
     right_bound = reader.features.time_to_sample_index(input, peak + radius_sec)
@@ -265,7 +257,8 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
 
 
-def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
+def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry) ->\
+        Iterable[Tuple[Tuple[str, str], NumFeature, np.array]]:
     back_channel_convid = uttInfo['convid']
     speaking_channel_convid = swap_speaker(back_channel_convid)
     cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
@@ -279,22 +272,19 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry):
                                                                               toTime))
         return
 
-    F = reader.features.get_combined_feat_continous(speaking_channel_convid)
+    F = reader.features.get_combined_feature(speaking_channel_convid)
+    bc_range_frames = int((cBCend - cBCbegin) * 1000 / F.shift)
+    nbc_range_frames = int((cNBCend - cNBCbegin) * 1000 / F.shift)
     FBC = reader.features.cut_range(F, cBCbegin, cBCend + 0.1)[
-          0:reader.context_frames * reader.context_stride:reader.context_stride]
+          0:bc_range_frames:reader.context_stride]
     FNBC = reader.features.cut_range(F, cNBCbegin, cNBCend + 0.1)[
-           0:reader.context_frames * reader.context_stride:reader.context_stride]
+           0:nbc_range_frames * reader.context_stride:reader.context_stride]
     bc_frames, bc_dim = FBC.shape
     nbc_frames, nbc_dim = FNBC.shape
-    if bc_frames < reader.context_frames:
+    if bc_frames < bc_range_frames / reader.context_stride:
         raise Exception(f"FBC too small: {bc_frames}")
-    if nbc_frames < reader.context_frames:
-        raise Exception(f"FBC too small: {nbc_frames}")
-
-    if bc_dim != reader.input_dim:
-        raise Exception("coeff={} and dim={} don't match".format(FBC.shape[1], reader.input_dim))
-    if nbc_dim != reader.input_dim:
-        raise Exception("coeff={} and dim={} don't match".format(FNBC.shape[1], reader.input_dim))
+    if nbc_frames < nbc_range_frames / reader.context_stride:
+        raise Exception(f"FNBC too small: {nbc_frames}")
 
     for frame in FNBC:
         yield (utt, "NBC"), frame, np.array([0], dtype="int32")
@@ -414,9 +404,9 @@ def parse_conversations_file(path: str):
 def group(ids):
     for k, v in itertools.groupby(enumerate(ids), lambda x: x[1]):
         v2 = list(v)
-        start = v2[0][0]
-        end = v2[-1][0] + 1
-        yield start, end
+        start_index, _ = v2[0]
+        end_index, _ = v2[-1]
+        yield start_index, k, end_index + 1
 
 
 def main():
@@ -440,13 +430,12 @@ def main():
 
         output_dim = 1
 
-        nnConfig = {
-            'input_dim': reader.input_dim,
-            'context_frames': reader.context_frames,
+        train_config = {
             'output_dim': output_dim,
             'num_labels': 2,
             'files': {}
         }
+        input_dim = None
         for setname, convIDs in read_conversations(config).items():
             # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
             seqids = []
@@ -457,6 +446,7 @@ def main():
                 inputs.append(input)
                 outputs.append(output)
             inputs = np.stack(inputs, axis=0)
+            input_dim = inputs.shape[1]
             outputs = np.stack(outputs, axis=0)
             idname = os.path.join(outputDir, setname + ".meta.json")
             inname = os.path.join(outputDir, setname + ".input.npz")
@@ -467,15 +457,15 @@ def main():
             np.savez_compressed(inname, data=inputs)
             np.savez_compressed(outname, data=outputs)
 
-            nnConfig['files'][setname] = {
+            train_config['files'][setname] = {
                 'ids': os.path.relpath(os.path.abspath(idname), outputDir),
                 'input': os.path.relpath(os.path.abspath(inname), outputDir),
                 'output': os.path.relpath(os.path.abspath(outname), outputDir)
             }
-
+        train_config['input_dim'] = input_dim
         jsonPath = os.path.join(outputDir, "config.json")
         with open(jsonPath, "w") as f:
-            json.dump({**config, 'train_config': nnConfig}, f, indent='\t')
+            json.dump({**config, 'train_config': train_config}, f, indent='\t')
         logging.info("Wrote training config to " + os.path.abspath(jsonPath))
 
 

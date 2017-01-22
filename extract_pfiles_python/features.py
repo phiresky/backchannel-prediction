@@ -80,7 +80,7 @@ def power_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
 
 
 def ffv_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
-    return adc.intonation("{}ms".format(sample_window_ms))
+    return adc.intonation(window="{}ms".format(sample_window_ms))
 
 
 def pitch_transform(adc: NumFeature, sample_window_ms: float) -> NumFeature:
@@ -132,32 +132,8 @@ def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFe
 
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
-def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
+def pure_get_ffv(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
     return ffv_transform(pure_get_adc(adc_path, convid), sample_window_ms)
-
-
-@functools.lru_cache(maxsize=16)
-@NumFeatureCache
-def pure_get_combined_feat(adc_path: str, sample_window_ms: float, context_ms: float, stride: int, online: bool,
-                           convid: str) -> NumFeature:
-    pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
-    power = pure_get_power(adc_path, sample_window_ms, convid)
-    ms_shift = power.shift
-    context = int(context_ms / ms_shift)
-    if not online:
-        offsets = range(-context // 2, context // 2, stride)
-    else:
-        offsets = range(stride - context, 1, stride)
-    return adjacent(pitch.merge(power), offsets)
-
-
-@functools.lru_cache(maxsize=16)
-@NumFeatureCache
-def pure_get_combined_feat_continous(adc_path: str, sample_window_ms: float, convid: str):
-    pitch = pure_get_pitch(adc_path, sample_window_ms, convid)
-    power = pure_get_power(adc_path, sample_window_ms, convid)
-    return pitch.merge(power)
-
 
 class Features:
     def __init__(self, config: dict, config_path: str):
@@ -177,16 +153,9 @@ class Features:
     def get_ffv(self, convid: str):
         return pure_get_ffv(self.config['paths']['adc'], self.sample_window_ms, convid)
 
-    def get_combined_feat(self, convid: str):
-        ex_config = self.config['extract_config']
-        context_ms = ex_config['context_ms']
-        stride = ex_config['context_stride']
-        online = ex_config.get('online', False)
-        return pure_get_combined_feat(self.config['paths']['adc'], self.sample_window_ms, context_ms, stride, online,
-                                      convid)
-
-    def get_combined_feat_continous(self, convid: str):
-        return pure_get_combined_feat_continous(self.config['paths']['adc'], self.sample_window_ms, convid)
+    def get_combined_feature(self, convid: str):
+        feats = [getattr(self, feature)(convid) for feature in self.config['extract_config']['input_features']]
+        return NumFeature.merge(*feats)
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
