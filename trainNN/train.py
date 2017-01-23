@@ -117,7 +117,7 @@ def train():
 
     dir = os.path.dirname(config_path)
     convos = readDB.read_conversations(config)
-    gaussian = False
+    gaussian = train_config['gaussian']
     if gaussian:
         pass
         # train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
@@ -159,10 +159,11 @@ def train():
     stats_generator = train_func.train_network(
         network=model['output_layer'],
         scheduling_method=None,
+        resume=train_config['resume_parameters'],
         # scheduling_params=(0.8, 0.000001),
-        update_method="adadelta",
+        update_method=train_config['update_method'],
         num_epochs=1000,
-        learning_rate_num=1,
+        learning_rate_num=train_config['learning_rate'],
         iterate_minibatches_train=batchers['train'],
         iterate_minibatches_validate=batchers['validate'],
         categorical_output=not gaussian,

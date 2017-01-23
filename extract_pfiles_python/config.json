@@ -14,8 +14,7 @@
   "extract_config": {
     "input_features": [
       "get_power",
-      "get_pitch",
-      "get_ffv"
+      "get_pitch"
     ],
     "extraction_method": {
       "type": "discrete",
@@ -29,11 +28,14 @@
   },
   "train_config": {
     "model_function": "feedforward_simple",
-    "time_dimension_seperate": false,
+    "resume_parameters": null,
     "context_ms": 800,
     "context_stride": 2,
+    "update_method": "sgd",
+    "learning_rate": 1,
     "num_labels": 2,
     "batch_size": 250,
+    "gaussian": false,
     "layer_sizes": [100, 50],
     "output_type": "single"
   }
