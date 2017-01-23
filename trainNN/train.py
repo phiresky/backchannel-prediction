@@ -24,21 +24,20 @@ from joblib import Parallel, delayed
 
 NUM_EPOCHS = 10000
 
-
-UttID = TypeVar('UttID')
 reader = None
 backchannels = None
+config_path = None
 
 
-@functools.lru_cache(maxsize=None)
-def extract(utterance_id: UttID):
-    uttId, bc = utterance_id
-    return readDB.outputBackchannelDiscrete(reader, uttId, reader.uttDB[uttId], bc)
+def extract(utterance: Tuple[str, bool]):
+    return readDB.extract(config_path)[utterance]
 
 
-def extract_batch(batch: List[Tuple[UttID, List[int]]], context_frames: int, input_dim: int, output_all: bool):
+def extract_batch(batch: List[Tuple[Tuple[str, bool], List[int]]], context_frames: int, input_dim: int,
+                  output_all: bool):
     inputs = np.empty((len(batch), context_frames, input_dim), dtype='float32')
-    outputs = np.empty((len(batch),), dtype='int32') if not output_all else np.empty((len(batch), context_frames, 1), dtype='int32')
+    outputs = np.empty((len(batch),), dtype='int32') if not output_all else np.empty((len(batch), context_frames, 1),
+                                                                                     dtype='int32')
     for index, (utterance_id, indices) in enumerate(batch):
         cur_inputs, cur_outputs = extract(utterance_id)
         inputs[index] = cur_inputs[indices]
@@ -63,18 +62,10 @@ def load_numpy_file(fname):
     return data
 
 
-def all_uttids(convos: List[str]):
-    for convo in convos:
-        for channel in ["A", "B"]:
-            convid = f"{convo}-{channel}"
-            for (uttId, uttInfo) in reader.get_backchannels(list(reader.get_utterances(convid))):
-                yield uttId, False
-                yield uttId, True
-
-
 def train():
     global reader
     global backchannels
+    global config_path
 
     config_path = sys.argv[1]
     config = load_config(config_path)
@@ -119,9 +110,9 @@ def train():
             # groups = [slice(begin, end) for begin, end in meta['ranges']]
             # inputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
-            backchannels = list(all_uttids(convos[t]))
-            inputs, _ = extract(backchannels[0])
-            input_dim = inputs.shape[1]
+            backchannels = list(readDB.all_uttids(reader, convos[t]))
+            input_dim = extract(backchannels[0])[0].shape[1]
+            logging.debug(f"set input dim to {input_dim}")
             train_config['input_dim'] = input_dim
             out_all = {'all': True, 'single': False}[train_config['output_type']]
             logging.debug(f"input dim = {input_dim}")

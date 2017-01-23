@@ -194,7 +194,7 @@ def train_network(network,
         elapsed = endTime - beginTime
         beginTime = endTime
         logging.info(
-            "epoch: {} took {:.3f}s ({:.3fs} in batching)\ntraining loss:\t{:.6f}\nvalidation loss:\t{:.6f}\nvalidation error:\t{:.6f}".format(
+            "epoch: {} took {:.3f}s ({:.3f}s in batching)\ntraining loss:\t{:.6f}\nvalidation loss:\t{:.6f}\nvalidation error:\t{:.6f}".format(
                 epoch, elapsed, time_spent_batching, training_loss, validation_loss, validation_error))
 
         stats[epoch] = {

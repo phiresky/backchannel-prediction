@@ -9,16 +9,23 @@ def lstm_simple(train_config):
     num_labels = train_config['num_labels']
     batch_size = train_config.get('batch_size', None)
     layer_sizes = train_config['layer_sizes']
+    out_all = {'all': True, 'single': False}[train_config['output_type']]
 
     input_layer = InputLayer(shape=(batch_size, sequence_length, input_dim))
     input_var = input_layer.input_var
 
     cur_input = input_layer
-    for size in layer_sizes:
+    [*hidden_layers, last_hidden_layer] = layer_sizes
+    for size in hidden_layers:
         cur_input = LSTMLayer(incoming=cur_input, num_units=size)
 
-    reshape_layer = ReshapeLayer(cur_input, (batch_size * sequence_length if batch_size else -1, 50))
-    output_layer = DenseLayer(reshape_layer,
+    if out_all:
+        cur_input = LSTMLayer(incoming=cur_input, num_units=last_hidden_layer)
+        cur_input = ReshapeLayer(cur_input, (batch_size * sequence_length if batch_size else -1, 50))
+    else:
+        cur_input = LSTMLayer(incoming=cur_input, num_units=last_hidden_layer, only_return_final=True)
+
+    output_layer = DenseLayer(cur_input,
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax)
     # output_layer = ReshapeLayer(almost_output_layer, (batch_size * sequence_length if batch_size else -1, 2))

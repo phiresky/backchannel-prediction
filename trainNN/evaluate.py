@@ -10,7 +10,7 @@ def get_best_epoch(config: dict):
 
 
 @functools.lru_cache(maxsize=1)
-def get_network_outputter(config_path: str, key: str):
+def get_network_outputter(config_path: str, key: str, batch_size):
     # load modules lazily to avoid startup delay when not needed
     import theano
     import lasagne.layers
@@ -21,6 +21,7 @@ def get_network_outputter(config_path: str, key: str):
     if key == "best":
         key, _ = get_best_epoch(config)
     weights_file = os.path.join(os.path.dirname(config_path), stats[key]['weights'])
+    config['train_config']['batch_size'] = batch_size
     model = getattr(network_model, config['train_config']['model_function'])(config['train_config'])
     out_layer = model['output_layer']
     load_network_params(out_layer, weights_file)

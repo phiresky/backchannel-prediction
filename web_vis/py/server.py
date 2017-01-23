@@ -44,8 +44,16 @@ def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nod
     }
 
 
-def segsToJSON(reader: DBReader, spkr: str, name: str) -> Dict:
-    utts = list(reader.get_utterances(spkr))
+def segsToJSON(reader: DBReader, spkr: str, name: str, words=False) -> Dict:
+    id = 0
+    utts = []
+    if words:
+        for utt, uttInfo in reader.uttDB.get_utterances(spkr):
+            for word in reader.uttDB.get_words_for_utterance(utt, uttInfo):
+                id += 1
+                utts.append((id, word))
+    else:
+        utts = list(reader.get_utterances(spkr))
     return {
         'name': name,
         'typ': 'utterances',
@@ -128,7 +136,8 @@ def get_features():
     feature_names = list(get_extracted_features(origReader))
     features = [
         dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
-                                          dict(name="Original", children="text,words,bc,is_talking".split(","))]),
+                                          dict(name="Original",
+                                               children="text,words,bc,is_talking,is_silent,is_monologuing".split(","))]),
         dict(name="extracted", children=feature_names),
         dict(name="NN outputs", children=netsTree),
     ]
@@ -164,10 +173,16 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
                                    {"typ": "highlights", "data": getHighlights(reader, conv, channel)})
         elif featname == "is_talking":
             await sendOtherFeature(ws, id, dict(typ="highlights", data=list(get_talking_feature(reader, convid))))
+        elif featname == "is_silent":
+            await sendOtherFeature(ws, id, dict(typ="highlights", data=list(get_silent_feature(reader, convid))))
+        elif featname == "is_monologuing":
+            await sendOtherFeature(ws, id, dict(typ="highlights", data=list(get_monologuing_feature(reader, convid))))
         elif featname == "text":
             await sendOtherFeature(ws, id, segsToJSON(reader, convid, featFull))
         elif featname == "words":
-            await sendOtherFeature(ws, id, segsToJSON(wordsReader, convid, featFull))
+            await sendOtherFeature(ws, id, segsToJSON(origReader, convid, featFull, words=True))
+        else:
+            raise Exception("unknown trans feature: " + featname)
     elif category == "NN outputs":
         if path[-1].endswith(".thres"):
             path[-1] = path[-1][:-len(".thres")]
@@ -212,8 +227,18 @@ def getHighlights(reader: DBReader, conv: str, channel: str):
 
 
 def get_talking_feature(reader: DBReader, convid: str):
-    for start, end in evaluate.get_talking_segments(reader, convid):
+    for start, end in evaluate.get_talking_segments(reader, convid, invert=False):
         yield {'from': start, 'to': end, 'text': 'talking', 'color': [255, 255, 0]}
+
+
+def get_silent_feature(reader: DBReader, convid: str):
+    for start, end in evaluate.get_talking_segments(reader, convid, invert=True):
+        yield {'from': start, 'to': end, 'text': 'listening', 'color': [176, 224, 230]}
+
+
+def get_monologuing_feature(reader: DBReader, convid: str):
+    for start, end in evaluate.get_monologuing_segments(reader, convid):
+        yield {'from': start, 'to': end, 'text': 'monologuing', 'color': [255, 165, 0]}
 
 
 def sanitize_conversation(conv):
@@ -234,9 +259,9 @@ async def handler(websocket, path):
                 try:
                     if msg['type'] == "getFeatures":
                         cats = [s.split(" & ") for s in
-                                ["/extracted/adc & /transcript/Original/bc",
-                                 "/transcript/Original/text", "/extracted/pitch", "/extracted/power",
-                                 "/extracted/combined_feature"]]
+                                [
+                                    "/extracted/adc & /transcript/Original/is_talking & /transcript/Original/is_silent & /transcript/Original/bc",
+                                    "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
                         conv = sanitize_conversation(msg['conversation'])
                         await websocket.send(json.dumps({"id": id, "data": {
                             'categories': get_features(),
@@ -275,9 +300,6 @@ if __name__ == '__main__':
     config = util.load_config(config_path)
 
     origReader = DBReader(config, config_path)
-    config['extract_config']['useWordsTranscript'] = True
-    wordsReader = DBReader(config, config_path)
-    config['extract_config']['useWordsTranscript'] = False
     config['extract_config']['useOriginalDB'] = False
     islReader = DBReader(config, config_path)
     conversations = readDB.read_conversations(config)

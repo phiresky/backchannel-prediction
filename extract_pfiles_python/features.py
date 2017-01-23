@@ -16,6 +16,7 @@ from trainNN.evaluate import get_network_outputter
 import hashlib
 import json
 import inspect
+from tqdm import tqdm, trange
 from . import util
 
 def NumFeature_to_dict(n: NumFeature):
@@ -195,20 +196,34 @@ class Features:
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
     def get_net_output(self, convid: str, epoch: str, smooth: bool):
-        layers, fn = get_network_outputter(self.config_path, epoch)
+        layers, fn = get_network_outputter(self.config_path, epoch, batch_size=None)
         input = self.get_combined_feature(convid)
-        util.windowed_indices(input.shape[0], self.config['train_config']['context_frames'], self.config['train_config']['context_stride'])
-        output = fn([input])
-        if output.shape[1] == 1:
-            feature = NumFeature(output)
+        total_frames = input.shape[0]
+        context_frames = self.config['train_config']['context_frames']
+        context_stride = self.config['train_config']['context_stride']
+        output = np.zeros(shape=(total_frames, 1), dtype=np.float32)
+        context_range = context_frames * context_stride
+        def stacker():
+            for frame in range(0, total_frames):
+                if frame < context_range:
+                    # this is shitty / incorrect
+                    yield input[range(0, context_range, context_stride)]
+                else:
+                    yield input[range(frame - context_range, frame, context_stride)]
+        inp = np.stack(stacker())
+        output = fn(inp)
+        output = output[:, [1]]
+        """if out.shape[1] == 1:
+            output[frame] = out
         else:
-            feature = NumFeature(output[:, [1]])
+            output[frame] = out[:, [1]]"""
         if smooth:
             import scipy
-            res = scipy.ndimage.filters.gaussian_filter1d(feature, 300 / feature.shift, axis=0)
+            res = scipy.ndimage.filters.gaussian_filter1d(output, 300 / 10, axis=0)
             return NumFeature(res)
         else:
-            return feature
+            return NumFeature(output)
+
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:

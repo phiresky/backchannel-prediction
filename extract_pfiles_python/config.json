@@ -1,5 +1,5 @@
 {
-  "name": "sgd-reproduce-test",
+  "name": "lstm-single-pre-test",
   "paths": {
     "databasePrefix": "data/db/all240302",
     "adc": "data/adc",
@@ -27,16 +27,19 @@
     "outputDirectory": "extract_pfiles_python/out"
   },
   "train_config": {
-    "model_function": "feedforward_simple",
+    "model_function": "lstm_simple",
     "resume_parameters": null,
     "context_ms": 800,
     "context_stride": 2,
-    "update_method": "sgd",
-    "learning_rate": 1,
+    "update_method": "adam",
+    "learning_rate": 0.001,
     "num_labels": 2,
     "batch_size": 250,
     "gaussian": false,
     "layer_sizes": [100, 50],
     "output_type": "single"
+  },
+  "eval_config": {
+    "prediction_offset": 0.1
   }
 }

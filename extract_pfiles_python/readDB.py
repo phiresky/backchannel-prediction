@@ -23,9 +23,11 @@ import functools
 from .features import Features
 from tqdm import tqdm
 from . import util
+import hashlib
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
+import pickle
 
 MAX_TIME = 100 * 60 * 60  # 100 hours
 # these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
@@ -132,9 +134,7 @@ class DBReader:
         lastUttText = utts[index - 1][1]['text']
         lastUttText = self.noise_filter(lastUttText)
         return (uttText.lower() in self.backchannels and
-                index > 0 and
-                len(lastUttText) == 0
-                )
+                (len(lastUttText) == 0 or self.is_backchannel(utts[index - 1][1], index - 1, utts)))
 
     def get_gauss_bc_feature(self, convid: str):
         return self.get_gauss_bcs(self.features.get_power(convid), convid)
@@ -219,14 +219,6 @@ class DBReader:
             feat[start:start + len(gauss)] += gauss
         return feat
 
-    def get_filtered_speakers(self, convIDs):
-        return [spkr for spkr in self.spkDB if speakerFilter(convIDs, spkr)]
-
-    def count_total(self, convIDs):
-        l = list(bc for spkr in self.get_filtered_speakers(convIDs) for bc in
-                 self.get_backchannels(list(self.get_utterances(spkr))))
-        return len(l)
-
 
 def load_backchannels(path):
     with open(path) as f:
@@ -258,8 +250,8 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
 
 
-def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry, bc: bool) -> Iterable[
-    Tuple[np.array, np.array]]:
+def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.array, np.array]:
+    uttInfo = reader.uttDB[utt]
     back_channel_convid = uttInfo['convid']
     speaking_channel_convid = swap_speaker(back_channel_convid)
     begin, end = reader.getBackchannelTrainingRange(utt) if bc else reader.getNonBackchannelTrainingRange(utt)
@@ -421,6 +413,46 @@ def group(ids):
         yield start_index, k, end_index + 1
 
 
+def all_uttids(reader: DBReader, convos: List[str]):
+    for convo in convos:
+        for channel in ["A", "B"]:
+            convid = f"{convo}-{channel}"
+            for (uttId, uttInfo) in reader.get_backchannels(list(reader.get_utterances(convid))):
+                yield uttId, False
+                yield uttId, True
+
+
+@functools.lru_cache(maxsize=1)
+def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array]]:
+    config = util.load_config(config_path)
+    extract_config = config['extract_config']
+    meta = dict(extract_config=extract_config)
+    meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
+    digest = hashlib.sha256(meta_json).hexdigest()
+    path = os.path.join('data/cache', f"extract-{digest}.pickle")
+    if os.path.exists(path):
+        logging.debug(f"loading cached extracted data from {path}")
+        with open(path, 'rb') as file:
+            return pickle.load(file)
+    else:
+        logging.debug("extracting...")
+        reader = DBReader(config, config_path)
+        convos = read_conversations(config)
+        c = [convo for convos in convos.values() for convo in convos]
+        out_dict = {}
+        for uttId, is_bc in tqdm(list(all_uttids(reader, c))):
+            out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
+        val = out_dict
+
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path + ".part", 'wb') as file:
+            pickle.dump(val, file, protocol=pickle.HIGHEST_PROTOCOL)
+        os.rename(path + ".part", path)
+        with open(path + '.meta.json', 'wb') as file:
+            file.write(meta_json)
+        return val
+
+
 def main():
     np.seterr(all='raise')
     logging.debug("loading config file {}".format(sys.argv[1]))
@@ -435,9 +467,15 @@ def main():
         sys.exit(1)
     logging.debug("outputting to " + outputDir)
     mkpath(outputDir)
-
-    jrtk.core.setupLogging(os.path.join(outputDir, "extractBackchannels.log"), logging.DEBUG, logging.DEBUG)
-
+    LOGFILE = os.path.join(outputDir, "extractBackchannels.log")
+    jrtk.core.setupLogging(LOGFILE, logging.DEBUG, logging.DEBUG)
+    logging.root.handlers.clear()
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        handlers=[
+                            logging.FileHandler(LOGFILE),
+                            logging.StreamHandler()
+                        ])
     with loadDBReader(config_path) as reader, Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
 
         output_dim = 1

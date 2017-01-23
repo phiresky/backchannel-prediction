@@ -18,14 +18,14 @@ os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
 
 
-def get_talking_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
+def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_len=None) -> Iterator[Tuple[float, float]]:
     talk_start = 0
     talking = False
     utts = list(reader.get_utterances(convid))
     for index, (utt, uttInfo) in enumerate(utts):
         is_bc = reader.is_backchannel(uttInfo, index, utts)
         is_empty = len(reader.noise_filter(uttInfo['text'])) == 0
-        if is_bc or is_empty:
+        if (is_bc or is_empty) != invert:
             if talking:
                 talking = False
                 talk_end = float(uttInfo['from'])
@@ -35,6 +35,48 @@ def get_talking_segments(reader: DBReader, convid: str, min_talk_len=None) -> It
             if not talking:
                 talking = True
                 talk_start = float(uttInfo['from'])
+    if talking:
+        talk_end = float(utts[-1][1]['to'])
+        if min_talk_len is None or talk_end - talk_start >= min_talk_len:
+            yield talk_start, talk_end
+
+def get_monologuing_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
+    bc_convid = convid[:-1] + dict(A="B", B="A")[convid[-1]]
+    talking_segs = get_talking_segments(reader, convid, False)
+    listening_segs = get_talking_segments(reader, bc_convid, True)
+    all = []
+    for start, end in talking_segs:
+        all.append((start, "start", "talking"))
+        all.append((end, "end", "talking"))
+    for start, end in listening_segs:
+        all.append((start, "start", "listening"))
+        all.append((end, "end", "listening"))
+    all.sort(key=lambda x: x[0])
+    talking = False
+    listening = False
+    monologuing = False
+    monologuing_start = 0
+    for time, type, mode in all:
+        is_starting = type == "start"
+        if mode == "talking":
+            talking = is_starting
+        if mode == "listening":
+            listening = is_starting
+        if talking and listening:
+            if not monologuing:
+                monologuing = True
+                monologuing_start = time
+        else:
+            if monologuing:
+                monologuing = False
+                monologuing_end = time
+                if min_talk_len is None or monologuing_end - monologuing_start >= min_talk_len:
+                    yield monologuing_start, monologuing_end
+    if monologuing:
+        monologuing_end = float(all[-1][0])
+        if min_talk_len is None or monologuing_end - monologuing_start >= min_talk_len:
+            yield monologuing_start, monologuing_end
+
 
 
 def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
@@ -42,7 +84,7 @@ def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
     bcs = reader.get_backchannels(list(reader.get_utterances(sampletrack)))
     for bc_id, bc_info in bcs:
         bc_start_time = float(bc_info['from'])
-        bc_audio = reader.features.cut_range(sampletrack_audio, bc_start_time, float(bc_info['to']))
+        bc_audio = sampletrack_audio[f"{bc_start_time}s":f"{bc_info['to']}s"]
         bc_real_start_time = reader.getBcRealStartTime(bc_id)
         bc_start_offset = bc_real_start_time - bc_start_time
         yield bc_start_offset, bc_audio
@@ -51,7 +93,8 @@ def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
-        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) - ((reader.BCend + reader.BCbegin) / 2)
+        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) #- np.average(reader.method['bc'])
+        peak_prediction_s += reader.config['eval_config']['prediction_offset']
         yield peak_prediction_s
 
 
@@ -155,7 +198,7 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
                 predicted_bcs[predicted_inx] = correct_bc
 
     if config['min_talk_len'] is not None:
-        segs = list(get_talking_segments(reader, convid, min_talk_len=config['min_talk_len']))
+        segs = list(get_monologuing_segments(reader, convid, min_talk_len=config['min_talk_len']))
         predicted_bcs = filter_ranges(predicted_bcs, segs)
         correct_bcs = filter_ranges(correct_bcs, segs)
     # https://www.wikiwand.com/en/Precision_and_recall
@@ -198,7 +241,7 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
     totals = {}
     results = {}
     if "weights_file" not in eval_config and eval_config["epoch"] == "best":
-        _, eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
+        eval_config["epoch"], eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
     convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
     for convid, result in parallel(
             tqdm([delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids])):
@@ -278,15 +321,17 @@ def main():
     #                    [conv + "-" + channel for channel in ["A", "B"]]]
 
     res = []
-    eval_conversations = sorted(conversations['eval'] if 'eval' in conversations else conversations['test'])
-
+    eval_conversations = sorted(conversations['eval'])
+    valid_conversations = sorted(conversations['validate'])
     # reader = loadDBReader(config_path)
     # write_wavs(reader, eval_conversations, 10, version, good_bc_sample_tracks)
     # return
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
         for eval_config in interesting_configs():
             print(eval_config)
-            res.append(evaluate_convs(parallel, config_path, eval_conversations, eval_config))
+            ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
+            va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
+            res.append(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']}))
 
     out_dir = os.path.join("evaluate", "out", version)
     os.makedirs(out_dir, exist_ok=True)
