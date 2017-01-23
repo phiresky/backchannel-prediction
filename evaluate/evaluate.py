@@ -11,6 +11,7 @@ from extract_pfiles_python.util import load_config
 from tqdm import tqdm
 import functools
 import trainNN.evaluate
+from trainNN import train
 from itertools import product
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
@@ -271,6 +272,7 @@ def main():
 
     config = load_config(config_path)
 
+    config['train_config']['batch_size'] = None
     conversations = read_conversations(config)
     # allconversations = [convid for convlist in conversations.values() for conv in convlist for convid in
     #                    [conv + "-" + channel for channel in ["A", "B"]]]

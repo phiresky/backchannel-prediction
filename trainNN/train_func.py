@@ -151,9 +151,14 @@ def train_network(network,
         # Part 1: Train network
         train_err = 0
         train_batches = 0
+
+        time_spent_batching = 0
+        before = timer()
         for inputs, outputs in iterate_minibatches_train():
+            time_spent_batching += timer() - before
             train_err += train_fn(inputs, outputs, learning_rate_num)
             train_batches += 1
+            before = timer()
 
         training_loss = train_err / train_batches
 
@@ -189,8 +194,8 @@ def train_network(network,
         elapsed = endTime - beginTime
         beginTime = endTime
         logging.info(
-            "epoch: {} took {:.3f}s\ntraining loss:\t{:.6f}\nvalidation loss:\t{:.6f}\nvalidation error:\t{:.6f}".format(
-                epoch, elapsed, training_loss, validation_loss, validation_error))
+            "epoch: {} took {:.3f}s ({:.3fs} in batching)\ntraining loss:\t{:.6f}\nvalidation loss:\t{:.6f}\nvalidation error:\t{:.6f}".format(
+                epoch, elapsed, time_spent_batching, training_loss, validation_loss, validation_error))
 
         stats[epoch] = {
             'validation_error': validation_error,

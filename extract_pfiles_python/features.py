@@ -16,7 +16,7 @@ from trainNN.evaluate import get_network_outputter
 import hashlib
 import json
 import inspect
-
+from . import util
 
 def NumFeature_to_dict(n: NumFeature):
     return {
@@ -140,7 +140,6 @@ def pure_get_ffv(adc_path: str, sample_window_ms: float, convid: str) -> NumFeat
 
 
 @functools.lru_cache(maxsize=32)
-@NumFeatureCache
 def pure_cut_range(start_time: float, end_time: float, feat_fn: str, *args, **kwargs):
     return globals()[feat_fn](*args, **kwargs)[f"{start_time}s":f"{end_time}s"]
 
@@ -198,6 +197,7 @@ class Features:
     def get_net_output(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
         input = self.get_combined_feature(convid)
+        util.windowed_indices(input.shape[0], self.config['train_config']['context_frames'], self.config['train_config']['context_stride'])
         output = fn([input])
         if output.shape[1] == 1:
             feature = NumFeature(output)

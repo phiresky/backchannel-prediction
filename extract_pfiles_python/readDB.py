@@ -146,7 +146,8 @@ class DBReader:
                 if len(text) > 0:
                     return float(word['from'])
         else:
-            return self.getBCMaxTime(utt) - 0.3
+            raise Exception("use original db")
+            # return self.getBCMaxTime(utt) - 0.3
 
     def get_max_time(self, feat: NumFeature, fromTime: float, toTime: float):
         powerrange = self.features.cut_range_old(feat, fromTime, toTime)
@@ -322,7 +323,6 @@ class FakeUttDB:
         self.root = paths_config['originalSwbTranscriptions']
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
         self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
-        self.single_words = single_words
         if os.path.isfile("data/uttdbcache.json"):
             with open("data/uttdbcache.json", "r") as f:
                 x = json.load(f)
@@ -343,20 +343,21 @@ class FakeUttDB:
 
         return FakeSpkDB()
 
-    def load_utterances(self, convid: str):
+    @functools.lru_cache()
+    def load_utterances(self, convid: str, single_words=False):
         utts = OrderedDict()
         track = convid[2:6]
         speaker = convid[-1]
-        if convid in self.uttsCache:
+        if not single_words and convid in self.uttsCache:
             return self.uttsCache[convid]
-        type = "word" if self.single_words else "trans"
+        type = "word" if single_words else "trans"
         id_counter = 0
         last_id = None
         with open(os.path.join(self.root, track[:2], track,
                                "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
                 id, _from, to, text = line.split(maxsplit=3)
-                if self.single_words:
+                if single_words:
                     if id == last_id:
                         id_counter += 1
                     else:
@@ -366,7 +367,8 @@ class FakeUttDB:
                 utts[id] = {
                     'from': _from, 'to': to, 'text': text.strip(), 'convid': convid
                 }
-        self.uttsCache[convid] = utts
+        if not single_words:
+            self.uttsCache[convid] = utts
         return utts
 
     def get_speakers(self):
@@ -376,15 +378,11 @@ class FakeUttDB:
         return self.load_utterances(id).items()
 
     def get_words_for_utterance(self, uttid: str, utt: DBEntry) -> List[DBEntry]:
-        if self.single_words:
-            raise Exception("run this on the utts instance")
         if uttid in self.wordsCache:
             return self.wordsCache[uttid]
-        if not self.alignment_db:
-            self.alignment_db = FakeUttDB(self.paths_config, True)
         fromTime = float(utt['from'])
         toTime = float(utt['to'])
-        words = self.alignment_db.get_utterances(utt['convid'])
+        words = self.load_utterances(utt['convid'], True).items()
         list = [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
         self.wordsCache[uttid] = list
         return list

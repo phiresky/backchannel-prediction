@@ -13,7 +13,7 @@ import itertools
 import numpy
 import numpy as np
 from typing import TypeVar
-from extract_pfiles_python.util import load_config
+from extract_pfiles_python.util import load_config, batch_list, windowed_indices
 from trainNN import train_func
 from . import network_model
 from extract_pfiles_python import readDB
@@ -23,20 +23,6 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 
 NUM_EPOCHS = 10000
-
-
-def batch_list(list: List, n: int, include_last_partial: bool):
-    l = len(list)
-    for ndx in range(0, l, n):
-        if not include_last_partial and ndx + n > l:
-            continue
-        yield list[ndx:min(ndx + n, l)]
-
-
-def indices(total_frames: int, context_frames: int, context_stride: int):
-    max_start_index = total_frames - context_frames * context_stride
-    for i in range(0, max_start_index):
-        yield range(i, i + context_frames * context_stride, context_stride)
 
 
 UttID = TypeVar('UttID')
@@ -89,9 +75,12 @@ def all_uttids(convos: List[str]):
 def train():
     global reader
     global backchannels
+
+    config_path = sys.argv[1]
+    config = load_config(config_path)
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
 
-    out_dir = os.path.join("trainNN", "out", version)
+    out_dir = os.path.join("trainNN", "out", version + ":" + config['name'])
     if os.path.isdir(out_dir):
         print("Output directory {} already exists, aborting".format(out_dir))
         sys.exit(1)
@@ -105,9 +94,7 @@ def train():
                             logging.StreamHandler()
                         ])
 
-    logging.debug("version={}".format(version))
-    config_path = sys.argv[1]
-    config = load_config(config_path)
+    logging.debug("version={}:{}".format(version, config['name']))
     reader = readDB.DBReader(config, config_path)
     train_config = config['train_config']
     context_stride = train_config['context_stride']
@@ -141,7 +128,7 @@ def train():
             context_stride = train_config['context_stride']
             context_length = int(train_config['context_ms'] / 10 / context_stride)
             sequence_length = int((reader.method['nbc'][1] - reader.method['nbc'][0]) * 1000 / 10)
-            inner_indices = indices(sequence_length, context_length, context_stride)
+            inner_indices = windowed_indices(sequence_length, context_length, context_stride)
             all_elements = list(itertools.product(backchannels, inner_indices))
             batchers[t] = partial(iterate_minibatches, train_config, all_elements, out_all)
             before = time.perf_counter()

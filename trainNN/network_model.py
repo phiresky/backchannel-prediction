@@ -36,7 +36,8 @@ def feedforward_simple(train_config):
     input_layer = InputLayer(shape=(batch_size, sequence_length, input_dim))
     input_var = input_layer.input_var
 
-    input_layer_reshaped = ReshapeLayer(incoming=input_layer, shape=(batch_size, sequence_length * input_dim))
+    input_layer_reshaped = ReshapeLayer(incoming=input_layer,
+                                        shape=(-1 if batch_size is None else batch_size, sequence_length * input_dim))
     cur_input = input_layer_reshaped
     for size in layer_sizes:
         cur_input = DenseLayer(incoming=cur_input, num_units=size)
