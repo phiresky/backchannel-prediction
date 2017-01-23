@@ -29,6 +29,9 @@ def NumFeature_to_dict(n: NumFeature):
 def NumFeature_from_dict(d: dict):
     return NumFeature(d['data'], samplingRate=d['samplingRate'], shift=d['shift'])
 
+@functools.lru_cache()
+def getsourcelines_cached(f):
+    return inspect.getsourcelines(f)[0]
 
 def NumFeatureCache(f):
     @functools.wraps(f)
@@ -36,7 +39,7 @@ def NumFeatureCache(f):
         args_to_pickle = list(args)
         if isinstance(args[0], Features):
             args_to_pickle[0] = args_to_pickle[0].config_path
-        meta = dict(fnname=f.__name__, fnsource=inspect.getsourcelines(f)[0], args=args_to_pickle, kwargs=kwargs)
+        meta = dict(fnname=f.__name__, fnsource=getsourcelines_cached(f), args=args_to_pickle, kwargs=kwargs)
         meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
         digest = hashlib.sha256(meta_json).hexdigest()
         path = os.path.join('data/cache', digest[0:2], digest[2:] + ".pickle")
@@ -135,6 +138,13 @@ def pure_get_power(adc_path: str, sample_window_ms: float, convid: str) -> NumFe
 def pure_get_ffv(adc_path: str, sample_window_ms: float, convid: str) -> NumFeature:
     return ffv_transform(pure_get_adc(adc_path, convid), sample_window_ms)
 
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_cut_range(start_time: float, end_time: float, feat_fn: str, *args, **kwargs):
+    return globals()[feat_fn](*args, **kwargs)[f"{start_time}s":f"{end_time}s"]
+
+
 class Features:
     def __init__(self, config: dict, config_path: str):
         self.config = config
@@ -153,15 +163,21 @@ class Features:
     def get_ffv(self, convid: str):
         return pure_get_ffv(self.config['paths']['adc'], self.sample_window_ms, convid)
 
-    def get_combined_feature(self, convid: str):
-        feats = [getattr(self, feature)(convid) for feature in self.config['extract_config']['input_features']]
+    def get_combined_feature(self, convid: str, start_time: float = None, end_time: float = None):
+        adc_path = self.config['paths']['adc']
+        if start_time is None and end_time is None:
+            feats = [globals()["pure_" + feature](adc_path, self.sample_window_ms, convid)
+                     for feature in self.config['extract_config']['input_features']]
+        else:
+            feats = [pure_cut_range(start_time, end_time, "pure_" + feature, adc_path, self.sample_window_ms, convid)
+                     for feature in self.config['extract_config']['input_features']]
         return NumFeature.merge(*feats)
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
     def get_net_output_old(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
-        input = self.get_combined_feat(convid)
+        input = self.get_combined_feature(convid)
         batchsize, *dims = layers[0].shape
         framecount, *_ = input.shape
         shape = (framecount, *dims)
@@ -181,7 +197,7 @@ class Features:
     @NumFeatureCache
     def get_net_output(self, convid: str, epoch: str, smooth: bool):
         layers, fn = get_network_outputter(self.config_path, epoch)
-        input = self.get_combined_feat_continous(convid)
+        input = self.get_combined_feature(convid)
         output = fn([input])
         if output.shape[1] == 1:
             feature = NumFeature(output)
@@ -208,7 +224,7 @@ class Features:
             return int(round(1000 * feat.samplingRate * time_sec))
         raise Exception("Unknown feature type")
 
-    def cut_range(self, feat: NumFeature, from_time: float, to_time: float):
+    def cut_range_old(self, feat: NumFeature, from_time: float, to_time: float):
         if feat.typ == FeatureType.SVector:
             return feat[str(from_time) + "s":str(to_time) + "s"]
         else:

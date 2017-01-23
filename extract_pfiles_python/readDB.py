@@ -52,7 +52,7 @@ def isl_noise_filter(text):
     return " ".join(words)
 
 
-def orig_noise_filter(text):
+def orig_noise_filter(text: str):
     words = []
     for word in text.split(" "):
         if word.startswith("[laughter-"):  # e.g. [laughter-um-hum]
@@ -111,9 +111,6 @@ class DBReader:
         self.load_db()
         self.backchannels = load_backchannels(self.paths_config['backchannels'])
         self.sample_window_ms = self.extract_config['sample_window_ms']
-        context_ms = self.extract_config['context_ms']
-        self.context_stride = self.extract_config['context_stride']
-        self.context_range_frames = int(context_ms / 10 / self.context_stride)
         self.method = self.extract_config['extraction_method']
 
     def __enter__(self):
@@ -129,6 +126,9 @@ class DBReader:
         if index == 0:
             # first utterance can't be a backchannel
             return False
+        fromTime = float(uttInfo['from'])
+        if fromTime + self.method['nbc'][0] < 0:
+            return False
         lastUttText = utts[index - 1][1]['text']
         lastUttText = self.noise_filter(lastUttText)
         return (uttText.lower() in self.backchannels and
@@ -141,7 +141,7 @@ class DBReader:
 
     def getBcRealStartTime(self, utt: str):
         if self.use_original_db:
-            for word in self.uttDB.get_words_for_utterance(self.uttDB[utt]):
+            for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
                 text = self.noise_filter(word['text'])
                 if len(text) > 0:
                     return float(word['from'])
@@ -149,7 +149,7 @@ class DBReader:
             return self.getBCMaxTime(utt) - 0.3
 
     def get_max_time(self, feat: NumFeature, fromTime: float, toTime: float):
-        powerrange = self.features.cut_range(feat, fromTime, toTime)
+        powerrange = self.features.cut_range_old(feat, fromTime, toTime)
         maxIndex = powerrange.argmax()
         maxTime = fromTime + self.features.sample_index_to_time(powerrange, maxIndex)
         return maxTime
@@ -257,40 +257,26 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
 
 
-def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry) ->\
-        Iterable[Tuple[Tuple[str, str], NumFeature, np.array]]:
+def outputBackchannelDiscrete(reader: DBReader, utt: str, uttInfo: DBEntry, bc: bool) -> Iterable[
+    Tuple[np.array, np.array]]:
     back_channel_convid = uttInfo['convid']
     speaking_channel_convid = swap_speaker(back_channel_convid)
-    cBCbegin, cBCend = reader.getBackchannelTrainingRange(utt)
-    cNBCbegin, cNBCend = reader.getNonBackchannelTrainingRange(utt)
+    begin, end = reader.getBackchannelTrainingRange(utt) if bc else reader.getNonBackchannelTrainingRange(utt)
 
-    fromTime = cNBCbegin - 1
-    toTime = cBCend + 1
-    if fromTime < 0:
+    if begin < 0:
         logging.debug(
-            "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], fromTime,
-                                                                              toTime))
+            "DEBUG: Skipping utt {}({})-, not enough data ({}s - {}s)".format(utt, uttInfo['text'], begin, end))
         return
 
-    F = reader.features.get_combined_feature(speaking_channel_convid)
-    bc_range_frames = int((cBCend - cBCbegin) * 1000 / F.shift)
-    nbc_range_frames = int((cNBCend - cNBCbegin) * 1000 / F.shift)
-    FBC = reader.features.cut_range(F, cBCbegin, cBCend + 0.1)[
-          0:bc_range_frames:reader.context_stride]
-    FNBC = reader.features.cut_range(F, cNBCbegin, cNBCend + 0.1)[
-           0:nbc_range_frames * reader.context_stride:reader.context_stride]
-    bc_frames, bc_dim = FBC.shape
-    nbc_frames, nbc_dim = FNBC.shape
-    if bc_frames < bc_range_frames / reader.context_stride:
+    F = reader.features.get_combined_feature(speaking_channel_convid, begin, end + 0.1)
+    range_frames = int((end - begin) * 1000 / F.shift)
+    F = F[0:range_frames]
+    frames, dim = F.shape
+    if frames < range_frames:
         raise Exception(f"FBC too small: {bc_frames}")
-    if nbc_frames < nbc_range_frames / reader.context_stride:
-        raise Exception(f"FNBC too small: {nbc_frames}")
 
-    for frame in FNBC:
-        yield (utt, "NBC"), frame, np.array([0], dtype="int32")
-
-    for frame in FBC:
-        yield (utt, "BC"), frame, np.array([1], dtype="int32")
+    out = np.array([[1 if bc else 0]], dtype=np.int32)
+    return np.copy(F), np.repeat(out, frames, axis=0)
 
 
 def read_conversations(config):
@@ -328,6 +314,8 @@ def loadDBReader(config_path: str):
 
 class FakeUttDB:
     alignment_db = None
+    uttsCache = {}
+    wordsCache = {}
 
     def __init__(self, paths_config, single_words=False):
         self.paths_config = paths_config
@@ -335,6 +323,13 @@ class FakeUttDB:
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
         self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
         self.single_words = single_words
+        if os.path.isfile("data/uttdbcache.json"):
+            with open("data/uttdbcache.json", "r") as f:
+                x = json.load(f)
+                self.uttsCache = x['uttsCache']
+                self.wordsCache = x['wordsCache']
+        else:
+            logging.warning("uttdbcache does not exist, run create_uttdb_cache for speedup")
 
     def makeSpkDB(self):
         class FakeSpkDB():
@@ -348,17 +343,19 @@ class FakeUttDB:
 
         return FakeSpkDB()
 
-    @functools.lru_cache(maxsize=10)
-    def load_utterances(self, track: str, speaker: str):
+    def load_utterances(self, convid: str):
         utts = OrderedDict()
-        convid = 'sw{}-{}'.format(track, speaker)
+        track = convid[2:6]
+        speaker = convid[-1]
+        if convid in self.uttsCache:
+            return self.uttsCache[convid]
         type = "word" if self.single_words else "trans"
         id_counter = 0
         last_id = None
         with open(os.path.join(self.root, track[:2], track,
                                "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
-                id, _from, to, text = re.split("\s+", line, maxsplit=3)
+                id, _from, to, text = line.split(maxsplit=3)
                 if self.single_words:
                     if id == last_id:
                         id_counter += 1
@@ -369,31 +366,48 @@ class FakeUttDB:
                 utts[id] = {
                     'from': _from, 'to': to, 'text': text.strip(), 'convid': convid
                 }
+        self.uttsCache[convid] = utts
         return utts
 
     def get_speakers(self):
         yield from self.spkDB
 
     def get_utterances(self, id: str):
-        return self.load_utterances(id[2:6], id[-1]).items()
+        return self.load_utterances(id).items()
 
-    def get_words_for_utterance(self, utt: DBEntry) -> List[DBEntry]:
+    def get_words_for_utterance(self, uttid: str, utt: DBEntry) -> List[DBEntry]:
         if self.single_words:
             raise Exception("run this on the utts instance")
+        if uttid in self.wordsCache:
+            return self.wordsCache[uttid]
         if not self.alignment_db:
             self.alignment_db = FakeUttDB(self.paths_config, True)
         fromTime = float(utt['from'])
         toTime = float(utt['to'])
         words = self.alignment_db.get_utterances(utt['convid'])
-        return [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
+        list = [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
+        self.wordsCache[uttid] = list
+        return list
 
     def __getitem__(self, id):
         track, speaker, uttid = self.extractname.fullmatch(id).groups()
-        utts = self.load_utterances(track, speaker)
+        utts = self.load_utterances(f"sw{track}-{speaker}")
         return utts[id]
 
     def close(self):
         self.spkDB.close()
+
+
+def create_uttdb_cache(config_path: str):
+    config = util.load_config(config_path)
+    db = FakeUttDB(config['paths'])
+    for spk in db.get_speakers():
+        if not spk[0:2] == "sw":
+            continue
+        for utt, uttInfo in db.get_utterances(spk):
+            db.get_words_for_utterance(utt, uttInfo)
+    with open("data/uttdbcache.json", "w") as f:
+        json.dump({"uttsCache": db.uttsCache, "wordsCache": db.wordsCache}, f)
 
 
 def parse_conversations_file(path: str):

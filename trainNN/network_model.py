@@ -2,16 +2,46 @@ import lasagne
 from lasagne.layers import *
 
 
-def create_network(config, BATCH_SIZE):
-    sequence_length = config['context_frames']
-    num_labels = config['num_labels']
-    input_layer = InputLayer(shape=(BATCH_SIZE, sequence_length, 2))
+def lstm_simple(train_config):
+    sequence_length = train_config['context_frames']
+    input_dim = train_config['input_dim']
+
+    num_labels = train_config['num_labels']
+    batch_size = train_config.get('batch_size', None)
+    layer_sizes = train_config['layer_sizes']
+
+    input_layer = InputLayer(shape=(batch_size, sequence_length, input_dim))
     input_var = input_layer.input_var
-    hidden_layer_1 = LSTMLayer(input_layer, 100)
-    hidden_layer_2 = LSTMLayer(hidden_layer_1, 50)
-    reshape_layer = ReshapeLayer(hidden_layer_2, (BATCH_SIZE * sequence_length if BATCH_SIZE else -1, 50))
-    almost_output_layer = DenseLayer(reshape_layer,
-                                     num_units=num_labels,
-                                     nonlinearity=lasagne.nonlinearities.softmax)
-    output_layer = ReshapeLayer(almost_output_layer, (BATCH_SIZE * sequence_length if BATCH_SIZE else -1, 2))
+
+    cur_input = input_layer
+    for size in layer_sizes:
+        cur_input = LSTMLayer(incoming=cur_input, num_units=size)
+
+    reshape_layer = ReshapeLayer(cur_input, (batch_size * sequence_length if batch_size else -1, 50))
+    output_layer = DenseLayer(reshape_layer,
+                              num_units=num_labels,
+                              nonlinearity=lasagne.nonlinearities.softmax)
+    # output_layer = ReshapeLayer(almost_output_layer, (batch_size * sequence_length if batch_size else -1, 2))
+    return locals()
+
+
+def feedforward_simple(train_config):
+    sequence_length = train_config['context_frames']
+    input_dim = train_config['input_dim']
+
+    num_labels = train_config['num_labels']
+    batch_size = train_config.get('batch_size', None)
+    layer_sizes = train_config['layer_sizes']
+
+    input_layer = InputLayer(shape=(batch_size, sequence_length, input_dim))
+    input_var = input_layer.input_var
+
+    input_layer_reshaped = ReshapeLayer(incoming=input_layer, shape=(batch_size, sequence_length * input_dim))
+    cur_input = input_layer_reshaped
+    for size in layer_sizes:
+        cur_input = DenseLayer(incoming=cur_input, num_units=size)
+
+    output_layer = DenseLayer(cur_input,
+                              num_units=num_labels,
+                              nonlinearity=lasagne.nonlinearities.softmax)
     return locals()

@@ -17,18 +17,24 @@
       "get_pitch",
       "get_ffv"
     ],
-    "context_ms": 800,
     "extraction_method": {
       "type": "discrete",
       "bc": [-1.1, -0.1],
       "nbc": [-2.9, -1.9]
     },
-    "context_stride": 2,
     "useOriginalDB": true,
     "useWordsTranscript": false,
     "sample_window_ms": 32,
     "outputDirectory": "extract_pfiles_python/out"
   },
   "train_config": {
+    "model_function": "feedforward_simple",
+    "time_dimension_seperate": false,
+    "context_ms": 800,
+    "context_stride": 2,
+    "num_labels": 2,
+    "batch_size": 250,
+    "layer_sizes": [100, 50],
+    "output_type": "single"
   }
 }

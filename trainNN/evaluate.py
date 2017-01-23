@@ -1,6 +1,5 @@
-import numpy
-import os.path
 import functools
+import os.path
 
 
 def load_module_from_path(path: str):
@@ -23,7 +22,7 @@ def get_network_outputter(config_path: str, key: str):
     import theano
     import lasagne.layers
     from .train import load_config
-    from .markuslasagne.train_func import load_network_params
+    from trainNN.train_func import load_network_params
     config = load_config(config_path)
     model_file = os.path.join(os.path.dirname(config_path), config['train_output']['model'])
     stats = config['train_output']['stats']
