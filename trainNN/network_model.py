@@ -21,7 +21,7 @@ def lstm_simple(train_config):
 
     if out_all:
         cur_input = LSTMLayer(incoming=cur_input, num_units=last_hidden_layer)
-        cur_input = ReshapeLayer(cur_input, (batch_size * sequence_length if batch_size else -1, last_hidden_layer))
+        cur_input = ReshapeLayer(cur_input, (batch_size if batch_size else -1, sequence_length * last_hidden_layer))
     else:
         cur_input = LSTMLayer(incoming=cur_input, num_units=last_hidden_layer, only_return_final=True)
 

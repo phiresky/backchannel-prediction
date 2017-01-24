@@ -36,12 +36,12 @@ def extract(utterance: Tuple[str, bool]):
 def extract_batch(batch: List[Tuple[Tuple[str, bool], List[int]]], context_frames: int, input_dim: int,
                   output_all: bool):
     inputs = np.empty((len(batch), context_frames, input_dim), dtype='float32')
-    outputs = np.empty((len(batch),), dtype='int32') if not output_all else np.empty((len(batch), context_frames, 1),
-                                                                                     dtype='int32')
+    outputs = np.empty((len(batch),), dtype='int32')  # if not output_all else np.empty((len(batch), context_frames),
+    #                                 dtype='int32')
     for index, (utterance_id, indices) in enumerate(batch):
         cur_inputs, cur_outputs = extract(utterance_id)
         inputs[index] = cur_inputs[indices]
-        outputs[index] = cur_outputs[indices][0] if not output_all else cur_outputs[indices]
+        outputs[index] = cur_outputs[indices][0]  # if not output_all else cur_outputs[indices][:, 0]
     return inputs, outputs
 
 
@@ -96,6 +96,7 @@ def train():
     dir = os.path.dirname(config_path)
     convos = readDB.read_conversations(config)
     gaussian = train_config['gaussian']
+    out_all = {'all': True, 'single': False}[train_config['output_type']]
     if gaussian:
         pass
         # train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
@@ -114,7 +115,6 @@ def train():
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             train_config['input_dim'] = input_dim
-            out_all = {'all': True, 'single': False}[train_config['output_type']]
             logging.debug(f"input dim = {input_dim}")
             context_stride = train_config['context_stride']
             context_length = int(train_config['context_ms'] / 10 / context_stride)
@@ -136,6 +136,7 @@ def train():
 
     stats_generator = train_func.train_network(
         network=model['output_layer'],
+        twodimensional_output=False,
         scheduling_method=None,
         resume=train_config['resume_parameters'],
         # scheduling_params=(0.8, 0.000001),

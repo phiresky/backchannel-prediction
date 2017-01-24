@@ -37,6 +37,7 @@ def train_network(network,
                   iterate_minibatches_train,
                   iterate_minibatches_validate,
                   categorical_output,
+                  twodimensional_output,
                   num_epochs,
                   output_prefix=None,
                   learning_rate_num=None,
@@ -64,7 +65,10 @@ def train_network(network,
         load_network_params(network, resume)
 
     if categorical_output:
-        target_var = T.ivector('targets')
+        if twodimensional_output:
+            target_var = T.imatrix('targets')
+        else:
+            target_var = T.ivector('targets')
     else:
         target_var = T.fvector('targets')
     learning_rate = T.fscalar('learning_rate')
