@@ -30,9 +30,8 @@ interface EvalResult {
     totals: SingleEvalResult | { eval: SingleEvalResult, valid: SingleEvalResult },
     details: { [convid: string]: SingleEvalResult }
 }
+const path = (version: string, file: string) => `../../trainNN/out/${version}/${file}`;
 const config = (version: string) => `../../trainNN/out/${version}/config.json`;
-const log = (version: string) => `../../trainNN/out/${version}/train.log`;
-const model = (version: string) => `../../trainNN/out/${version}/network_model.py`;
 const evalResult = (version: string) => `../../evaluate/out/${version}/results.json`;
 const titles = {
     "v026-sgd-1": "sgd, learning rate=1",
@@ -53,16 +52,30 @@ class VersionGUI extends React.Component<VGProps, {}> {
         /*if(evalInfo)
             var [bestIndex, bestValue] = evalInfo.map(res => res.totals.eval !== null ? res.totals.eval.precision : res.totals.precision)
                 .reduce(([maxInx, max], cur, curInx) => cur > max ? [curInx, cur] : [maxInx, max], [-1, -Infinity]);*/
+        const isNewerVersion = +version.slice(1, 4) >= 42;
+        if (isNewerVersion) {
+            var defaultSort = { column: 'Valid: F1 Score', direction: 'desc' };
+            var [gitversion, title] = version.split(":");
+        } else {
+            var defaultSort = { column: 'Eval: F1 Score', direction: 'decs' };
+            var gitversion = version;
+            var title = titles[version];
+        }
         return (
             <div key={version}>
-                <h3>{version in titles ? `${titles[version]} (${version})` : `${version}`}</h3>
+                <h3>{title ? `${title}` : `${version}`}</h3>
+                <p>Git version: {gitversion}</p>
                 <Line key={Math.random()} data={toJS(data)} options={options} />
-                <p><a href={log(version)}>Training log</a><a href={model(version)}>Network model</a></p>
+                <p>
+                    <a href={path(version, "config.json")}>Complete configuration</a>
+                    <a href={path(version, "train.log")}>Training log</a>
+                    {isNewerVersion || <a href={path(version, "network_model.py")}>Network model</a>}
+                </p>
                 {evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
-                    /*defaultSort={[{column: 'Valid:F1 Score', direction: 'desc'}]}*/ itemsPerPage={6} pageButtonLimit={1}
+                            defaultSort={defaultSort} itemsPerPage={6} pageButtonLimit={1}
                             data={
                                 evalInfo.map((v, k) => {
                                     const evalTotals = (v.totals.eval ? v.totals.eval : v.totals) as SingleEvalResult;
