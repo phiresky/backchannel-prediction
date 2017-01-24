@@ -21,6 +21,7 @@ import functools
 import time
 from tqdm import tqdm
 from joblib import Parallel, delayed
+import random
 
 NUM_EPOCHS = 10000
 
@@ -35,8 +36,8 @@ def extract(utterance: Tuple[str, bool]):
 
 def extract_batch(batch: List[Tuple[Tuple[str, bool], List[int]]], context_frames: int, input_dim: int,
                   output_all: bool):
-    inputs = np.empty((len(batch), context_frames, input_dim), dtype='float32')
-    outputs = np.empty((len(batch),), dtype='int32')  # if not output_all else np.empty((len(batch), context_frames),
+    inputs = np.zeros((len(batch), context_frames, input_dim), dtype='float32')
+    outputs = np.zeros((len(batch),), dtype='int32')  # if not output_all else np.empty((len(batch), context_frames),
     #                                 dtype='int32')
     for index, (utterance_id, indices) in enumerate(batch):
         cur_inputs, cur_outputs = extract(utterance_id)
@@ -56,6 +57,17 @@ def iterate_minibatches(train_config, all_elements, output_all, random=True):
         yield extract_batch(batch, context_frames, input_dim, output_all)
 
 
+# randomize once
+def iterate_faster_minibatches(train_config, all_elements, output_all):
+    logging.debug("shuffling batches")
+    batches = list(tqdm(iterate_minibatches(train_config, all_elements, output_all)))
+    logging.debug("shuffling done")
+    def iter():
+        random.shuffle(batches)
+        return batches
+    return iter
+
+
 def load_numpy_file(fname):
     logging.info("loading numpy file " + fname)
     data = numpy.load(fname)['data']
@@ -65,7 +77,7 @@ def load_numpy_file(fname):
 def benchmark_batcher(batcher):
     print("benchmarking batcher")
     before = time.perf_counter()
-    for batch in batcher():
+    for batch in tqdm(batcher()):
         pass
     after = time.perf_counter()
     print(f"batching took {after-before:.2f}s")
@@ -130,7 +142,7 @@ def train():
             sequence_length = int((reader.method['nbc'][1] - reader.method['nbc'][0]) * 1000 / 10)
             inner_indices = windowed_indices(sequence_length, context_length, context_stride)
             all_elements = list(itertools.product(backchannels, inner_indices))
-            batchers[t] = partial(iterate_minibatches, train_config, all_elements, out_all)
+            batchers[t] = iterate_faster_minibatches(train_config, all_elements, out_all)
             before = time.perf_counter()
             before_cpu = time.process_time()
             logging.debug("loading data into ram")
@@ -138,7 +150,7 @@ def train():
             for backchannel in tqdm(backchannels):
                 extract(backchannel)
             logging.debug(
-                f"loading data took {time.perf_counter () - before:.3f}s (cpu: {time.process_time()-before_cpu:.3f}s")
+                f"loading data took {time.perf_counter () - before:.3f}s (cpu: {time.process_time()-before_cpu:.3f}s)")
 
     create_network = getattr(network_model, train_config['model_function'])
     model = create_network(train_config)
