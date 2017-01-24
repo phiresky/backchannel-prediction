@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Table } from 'reactable';
 import { toJS, observable, action, computed } from 'mobx';
-import { observer } from 'mobx-react';
+import { observer, Observer } from 'mobx-react';
 
 // defined by webpack
 declare var VERSIONS: string[];
@@ -57,7 +57,7 @@ class VersionGUI extends React.Component<VGProps, {}> {
             var defaultSort = { column: 'Valid: F1 Score', direction: 'desc' };
             var [gitversion, title] = version.split(":");
         } else {
-            var defaultSort = { column: 'Eval: F1 Score', direction: 'decs' };
+            var defaultSort = { column: 'Eval: F1 Score', direction: 'desc' };
             var gitversion = version;
             var title = titles[version];
         }
@@ -111,6 +111,7 @@ class GUI extends React.Component<{}, {}> {
     @observable showUnevaluated = true;
     @observable onlyNew = true;
     @observable results: VGProps[] = [];
+    @observable isLoading = true;
     @computed get options() {
         return {
             scales: {
@@ -173,6 +174,7 @@ class GUI extends React.Component<{}, {}> {
                 options: {}
             });
         }
+        this.isLoading = false;
     }
     render() {
         let results = this.results;
@@ -194,6 +196,9 @@ class GUI extends React.Component<{}, {}> {
                         />
                     </label>
                 </div>
+                <Observer>
+                    {() => this.isLoading ? <h3>Loading...</h3> : <h3>Loading complete</h3>}
+                </Observer>
                 <div className="gui">
                     {results.map(info => <VersionGUI key={info.version} {...info} options={this.options} />)}
                 </div>

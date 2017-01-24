@@ -9,9 +9,12 @@ a {
 .gui > div {
     margin: 1em;
     padding: 1ex;
+    flex: 1;
+    flex-basis: auto;
     box-shadow: 5px 5px 20px rgba(0,0,0,0.3);
     border-radius: 1ex;
-    width: calc(50% - 2em);
+    max-width: 800px;
+    min-width: 500px;
 }
 * {
     box-sizing: border-box;
@@ -19,6 +22,9 @@ a {
 h3 {
     margin-top: 0.5ex;
     margin-bottom: 0.5ex;
+}
+label {
+    margin-right: 1em;
 }
 .evalTable {
     font-family: monospace;
