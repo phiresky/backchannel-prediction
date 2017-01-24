@@ -45,6 +45,20 @@ const ignore = [
 
 type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: any };
 
+function persist<T>({initial, prefix = "roulette:"}: {initial: T, prefix?: string}) {
+    return (prototype: Object, name: string) => {
+        const stored = localStorage.getItem(prefix + name);
+        const value = observable(stored === null ? initial : JSON.parse(stored));
+        Object.defineProperty(prototype, name, {
+            get: () => value.get(),
+            set: (v) => {
+                value.set(v);
+                localStorage.setItem(prefix + name, JSON.stringify(v));
+            }
+        });
+    };
+}
+
 @observer
 class VersionGUI extends React.Component<VGProps, {}> {
     render() {
@@ -112,7 +126,7 @@ class GUI extends React.Component<{}, {}> {
     @observable onlyNew = true;
     @observable results: VGProps[] = [];
     @observable isLoading = true;
-    @observable filter = ".*";
+    @persist({initial: ".*"}) filter: string;
     @computed get options() {
         return {
             scales: {
