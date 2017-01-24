@@ -62,6 +62,15 @@ def load_numpy_file(fname):
     return data
 
 
+def benchmark_batcher(batcher):
+    print("benchmarking batcher")
+    before = time.perf_counter()
+    for batch in batcher():
+        pass
+    after = time.perf_counter()
+    print(f"batching took {after-before:.2f}s")
+
+
 def train():
     global reader
     global backchannels
