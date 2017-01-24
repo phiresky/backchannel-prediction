@@ -1,9 +1,9 @@
 import { Line } from 'react-chartjs-2';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Table} from 'reactable';
-import {toJS, observable, action, computed} from 'mobx';
-import {observer} from 'mobx-react';
+import { Table } from 'reactable';
+import { toJS, observable, action, computed } from 'mobx';
+import { observer } from 'mobx-react';
 
 // defined by webpack
 declare var VERSIONS: string[];
@@ -27,7 +27,7 @@ interface EvalResult {
         epoch: string,
         weights_file: string
     },
-    totals: SingleEvalResult | {eval: SingleEvalResult, valid: SingleEvalResult},
+    totals: SingleEvalResult | { eval: SingleEvalResult, valid: SingleEvalResult },
     details: { [convid: string]: SingleEvalResult }
 }
 const config = (version: string) => `../../trainNN/out/${version}/config.json`;
@@ -49,7 +49,7 @@ type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: a
 @observer
 class VersionGUI extends React.Component<VGProps, {}> {
     render() {
-        const {evalInfo, version, data, options} = this.props;
+        const { evalInfo, version, data, options } = this.props;
         /*if(evalInfo)
             var [bestIndex, bestValue] = evalInfo.map(res => res.totals.eval !== null ? res.totals.eval.precision : res.totals.precision)
                 .reduce(([maxInx, max], cur, curInx) => cur > max ? [curInx, cur] : [maxInx, max], [-1, -Infinity]);*/
@@ -60,28 +60,28 @@ class VersionGUI extends React.Component<VGProps, {}> {
                 <p><a href={log(version)}>Training log</a><a href={model(version)}>Network model</a></p>
                 {evalInfo &&
                     <div>
-                    Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
+                        Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
                     /*defaultSort={[{column: 'Valid:F1 Score', direction: 'desc'}]}*/ itemsPerPage={6} pageButtonLimit={1}
-                        data={
-                            evalInfo.map((v, k) => {
-                                const evalTotals = (v.totals.eval ? v.totals.eval : v.totals) as SingleEvalResult;
-                                const validTotals = (v.totals.eval ? (v.totals as any).valid : undefined) as SingleEvalResult | undefined;
-                                return {
-                                    "Margin of Error": v.config.margin_of_error.map(s => `${s}s`).join(", "),
-                                    "Threshold": v.config.threshold,
-                                    "Min Talk Len": v.config.min_talk_len,
-                                    "Valid: Precision": validTotals && validTotals.precision.toFixed(3),
-                                    "Valid: Recall": validTotals && validTotals.recall.toFixed(3),
-                                    "Valid: F1 Score": validTotals && validTotals.f1_score.toFixed(3),
-                                    "Eval: Precision": evalTotals.precision.toFixed(3),
-                                    "Eval: Recall": evalTotals.recall.toFixed(3),
-                                    "Eval: F1 Score": evalTotals.f1_score.toFixed(3),
+                            data={
+                                evalInfo.map((v, k) => {
+                                    const evalTotals = (v.totals.eval ? v.totals.eval : v.totals) as SingleEvalResult;
+                                    const validTotals = (v.totals.eval ? (v.totals as any).valid : undefined) as SingleEvalResult | undefined;
+                                    return {
+                                        "Margin of Error": v.config.margin_of_error.map(s => `${s}s`).join(", "),
+                                        "Threshold": v.config.threshold,
+                                        "Min Talk Len": v.config.min_talk_len,
+                                        "Valid: Precision": validTotals && validTotals.precision.toFixed(3),
+                                        "Valid: Recall": validTotals && validTotals.recall.toFixed(3),
+                                        "Valid: F1 Score": validTotals && validTotals.f1_score.toFixed(3),
+                                        "Eval: Precision": evalTotals.precision.toFixed(3),
+                                        "Eval: Recall": evalTotals.recall.toFixed(3),
+                                        "Eval: F1 Score": evalTotals.f1_score.toFixed(3),
 
-                                }
-                            })
-                        }
-                    />
+                                    }
+                                })
+                            }
+                        />
                     </div>
                 }
             </div>
@@ -95,7 +95,8 @@ class GUI extends React.Component<{}, {}> {
         this.retrieveData();
     }
     @observable useMinMax = false;
-    @observable showUnevaluated = false;
+    @observable showUnevaluated = true;
+    @observable onlyNew = true;
     @observable results: VGProps[] = [];
     @computed get options() {
         return {
@@ -126,7 +127,7 @@ class GUI extends React.Component<{}, {}> {
             color: "green",
             axis: "Error"
         }];
-        for (const {version} of relevant) {
+        for (const { version } of relevant) {
             const resp = await fetch(config(version));
             if (!resp.ok) continue;
             const data = await resp.json();
@@ -162,7 +163,8 @@ class GUI extends React.Component<{}, {}> {
     }
     render() {
         let results = this.results;
-        if(!this.showUnevaluated) results = results.filter(res => res.evalInfo);
+        if (!this.showUnevaluated) results = results.filter(res => res.evalInfo);
+        if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
         return (
             <div>
                 <div>
@@ -172,6 +174,10 @@ class GUI extends React.Component<{}, {}> {
                     </label>
                     <label>Use fixed min/max:
                         <input type="checkbox" checked={this.useMinMax} onChange={x => this.useMinMax = x.currentTarget.checked}
+                        />
+                    </label>
+                    <label>Only unified:
+                        <input type="checkbox" checked={this.onlyNew} onChange={x => this.onlyNew = x.currentTarget.checked}
                         />
                     </label>
                 </div>
