@@ -112,6 +112,7 @@ class GUI extends React.Component<{}, {}> {
     @observable onlyNew = true;
     @observable results: VGProps[] = [];
     @observable isLoading = true;
+    @observable filter = ".*";
     @computed get options() {
         return {
             scales: {
@@ -185,6 +186,12 @@ class GUI extends React.Component<{}, {}> {
         let results = this.results;
         if (!this.showUnevaluated) results = results.filter(res => res.evalInfo);
         if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
+        try {
+            const fltr = RegExp(this.filter);
+            results = results.filter(res => res.version.search(fltr) >= 0);
+        } catch(e) {
+            console.log("invalid regex", this.filter);
+        }
         return (
             <div>
                 <div>
@@ -201,6 +208,9 @@ class GUI extends React.Component<{}, {}> {
                         />
                     </label>
                 </div>
+                <label>Filter:
+                    <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />
+                </label>
                 <Observer>
                     {() => this.isLoading ? <h3>Loading...</h3> : <h3>Loading complete</h3>}
                 </Observer>
