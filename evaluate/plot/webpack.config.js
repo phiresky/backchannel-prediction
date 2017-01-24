@@ -1,6 +1,8 @@
 const webpack = require('webpack');
 const fs = require('fs');
 const path = require('path');
+const Html = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 class WatchDirPlugin {
     constructor(paths) {
@@ -30,14 +32,20 @@ module.exports = {
         new WatchDirPlugin([
             "../../trainNN/out"
         ]),
+        new Html({
+            title: 'Backchanneler NN evaluation'
+        }),
+        new ExtractTextPlugin("styles.[hash].css")
     ],
     output: {
-        filename: 'dist/plot.js',
-        publicPath: "evaluate/plot"
+        path: path.resolve('./dist'),
+        filename: 'plot.[hash].js',
+        publicPath: "./"
     },
     module: {
         rules: [
-            { test: /\.tsx?$/, loader: 'awesome-typescript-loader' }
+            { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
+            { test: /\.css$/, loader: ExtractTextPlugin.extract('css-loader') }
         ]
     }
 }

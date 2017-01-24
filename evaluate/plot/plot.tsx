@@ -4,6 +4,7 @@ import * as ReactDOM from 'react-dom';
 import { Table } from 'reactable';
 import { toJS, observable, action, computed } from 'mobx';
 import { observer, Observer } from 'mobx-react';
+import './style.css';
 
 // defined by webpack
 declare var VERSIONS: string[];
@@ -30,9 +31,8 @@ interface EvalResult {
     totals: SingleEvalResult | { eval: SingleEvalResult, valid: SingleEvalResult },
     details: { [convid: string]: SingleEvalResult }
 }
-const path = (version: string, file: string) => `../../trainNN/out/${version}/${file}`;
-const config = (version: string) => `../../trainNN/out/${version}/config.json`;
-const evalResult = (version: string) => `../../evaluate/out/${version}/results.json`;
+const path = (version: string, file: string) => `../../../trainNN/out/${version}/${file}`;
+const evalResult = (version: string) => `../../../evaluate/out/${version}/results.json`;
 const titles = {
     "v026-sgd-1": "sgd, learning rate=1",
     "v027-momentum-1": "momentum, learning rate=1",
@@ -142,7 +142,7 @@ class GUI extends React.Component<{}, {}> {
             axis: "Error"
         }];
         for (const { version } of relevant) {
-            const resp = await fetch(config(version));
+            const resp = await fetch(path(version, "config.json"));
             if (!resp.ok) continue;
             const data = await resp.json();
             const evalResp = await fetch(evalResult(version));
@@ -208,5 +208,7 @@ class GUI extends React.Component<{}, {}> {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    ReactDOM.render(<GUI />, document.getElementById("content"));
+    const div = document.createElement("div");
+    document.body.appendChild(div);
+    ReactDOM.render(<GUI />, div);
 });
