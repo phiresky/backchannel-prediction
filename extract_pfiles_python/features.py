@@ -19,6 +19,7 @@ import inspect
 from tqdm import tqdm, trange
 from . import util
 
+
 def NumFeature_to_dict(n: NumFeature):
     return {
         'samplingRate': n.samplingRate,
@@ -30,9 +31,11 @@ def NumFeature_to_dict(n: NumFeature):
 def NumFeature_from_dict(d: dict):
     return NumFeature(d['data'], samplingRate=d['samplingRate'], shift=d['shift'])
 
+
 @functools.lru_cache()
 def getsourcelines_cached(f):
     return inspect.getsourcelines(f)[0]
+
 
 def NumFeatureCache(f):
     @functools.wraps(f)
@@ -193,6 +196,13 @@ class Features:
         else:
             return feature
 
+    def batched_eval(self, inputs, mapper, batchsize=2000):
+        total_frames = inputs.shape[0]
+        output = np.zeros(shape=(total_frames, 1), dtype=np.float32)
+        for ndx, batch in util.batch_list(inputs, batchsize, True):
+            output[ndx:ndx + batch.shape[0]] = mapper(batch)
+        return output
+
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
     def get_net_output(self, convid: str, epoch: str, smooth: bool):
@@ -201,8 +211,8 @@ class Features:
         total_frames = input.shape[0]
         context_frames = self.config['train_config']['context_frames']
         context_stride = self.config['train_config']['context_stride']
-        output = np.zeros(shape=(total_frames, 1), dtype=np.float32)
         context_range = context_frames * context_stride
+
         def stacker():
             for frame in range(0, total_frames):
                 if frame < context_range:
@@ -210,20 +220,24 @@ class Features:
                     yield input[range(0, context_range, context_stride)]
                 else:
                     yield input[range(frame - context_range, frame, context_stride)]
+
+        def mapper(inp):
+            oup = fn(inp)
+            if oup.shape[1] == 1:
+                return oup
+            elif oup.shape[1] == 2:
+                return oup[:, [1]]
+            else:
+                raise Exception(f"got unknown output shape from NN: {oup.shape}")
+
         inp = np.stack(stacker())
-        output = fn(inp)
-        output = output[:, [1]]
-        """if out.shape[1] == 1:
-            output[frame] = out
-        else:
-            output[frame] = out[:, [1]]"""
+        output = self.batched_eval(inp, mapper)
         if smooth:
             import scipy
             res = scipy.ndimage.filters.gaussian_filter1d(output, 300 / 10, axis=0)
             return NumFeature(res)
         else:
             return NumFeature(output)
-
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:

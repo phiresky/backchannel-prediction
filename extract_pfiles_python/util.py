@@ -15,7 +15,7 @@ def batch_list(list: List, n: int, include_last_partial: bool):
     for ndx in range(0, l, n):
         if not include_last_partial and ndx + n > l:
             continue
-        yield list[ndx:min(ndx + n, l)]
+        yield ndx, list[ndx:min(ndx + n, l)]
 
 
 def windowed_indices(total_frames: int, context_frames: int, context_stride: int):

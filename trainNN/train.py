@@ -52,7 +52,7 @@ def iterate_minibatches(train_config, all_elements, output_all, random=True):
 
     if random:
         numpy.random.shuffle(all_elements)
-    for batch in batch_list(all_elements, batchsize, include_last_partial=False):
+    for _, batch in batch_list(all_elements, batchsize, include_last_partial=False):
         yield extract_batch(batch, context_frames, input_dim, output_all)
 
 
