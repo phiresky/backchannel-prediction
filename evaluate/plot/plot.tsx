@@ -144,7 +144,13 @@ class GUI extends React.Component<{}, {}> {
         for (const { version } of relevant) {
             const resp = await fetch(path(version, "config.json"));
             if (!resp.ok) continue;
-            const data = await resp.json();
+            let data;
+            try {
+                data = await resp.json();
+            } catch(e) {
+                console.error("error parsing", version, "skipping:", e);
+                continue;
+            }
             const evalResp = await fetch(evalResult(version));
             let evalInfo: EvalResult[] | undefined;
             if (evalResp.ok) evalInfo = await (evalResp.json());
@@ -164,7 +170,6 @@ class GUI extends React.Component<{}, {}> {
                     y: stat[info.key]
                 }))
             }));
-            console.log(plotData);
             this.results.push({
                 version,
                 evalInfo,
