@@ -69,12 +69,12 @@ const interesting_layers = [
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
 for (const layers of interesting_layers) {
-    const categoryname = "simple-ff-ffv";
+    const categoryname = "simple-ff-ffv-adam";
     const name = `${categoryname}-${layers.join("-")}`;
     const config = make_config({
         name,
         extract_config: make_extract_config({input_features: features_ffv}),
-        train_config: make_train_config({layer_sizes: layers})
+        train_config: {...make_train_config({layer_sizes: layers}), update_method: "adam", "learning_rate": 0.001},
     });
     const outdir = `configs/${categoryname}`;
     if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
