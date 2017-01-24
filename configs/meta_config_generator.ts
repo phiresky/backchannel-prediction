@@ -68,8 +68,15 @@ const interesting_layers = [
     [50, 20], [35, 35],
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
-for(const layers of interesting_layers) {
-    const name = `simple-ff-${layers.join("-")}`;
-    const config = make_config({name, train_config: make_train_config({layer_sizes: layers})});
-    fs.writeFileSync(`configs/simple-ff/${name}.json`, JSON.stringify(config, null, '\t'));
+for (const layers of interesting_layers) {
+    const categoryname = "simple-ff-ffv";
+    const name = `${categoryname}-${layers.join("-")}`;
+    const config = make_config({
+        name,
+        extract_config: make_extract_config({input_features: features_ffv}),
+        train_config: make_train_config({layer_sizes: layers})
+    });
+    const outdir = `configs/${categoryname}`;
+    if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
+    fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
 }
