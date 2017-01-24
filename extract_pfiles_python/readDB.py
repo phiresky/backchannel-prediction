@@ -435,7 +435,7 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
         with open(path, 'rb') as file:
             return pickle.load(file)
     else:
-        logging.debug("extracting...")
+        logging.debug(f"extracting and saving data to {path}")
         reader = DBReader(config, config_path)
         convos = read_conversations(config)
         c = [convo for convos in convos.values() for convo in convos]
@@ -454,70 +454,15 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
 
 
 def main():
-    np.seterr(all='raise')
-    logging.debug("loading config file {}".format(sys.argv[1]))
     config_path = sys.argv[1]
-    config = util.load_config(config_path)
-
-    extract_config = config['extract_config']
-    version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
-    outputDir = os.path.join(extract_config['outputDirectory'], f"{version}:{config['name']}")
-    if os.path.isdir(outputDir):
-        print("Output directory {} already exists, aborting".format(outputDir))
-        sys.exit(1)
-    logging.debug("outputting to " + outputDir)
-    mkpath(outputDir)
-    LOGFILE = os.path.join(outputDir, "extractBackchannels.log")
-    jrtk.core.setupLogging(LOGFILE, logging.DEBUG, logging.DEBUG)
+    jrtk.core.setupLogging(None, logging.DEBUG, logging.DEBUG)
     logging.root.handlers.clear()
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)-8s %(message)s',
                         handlers=[
-                            logging.FileHandler(LOGFILE),
                             logging.StreamHandler()
                         ])
-    with loadDBReader(config_path) as reader, Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
-
-        output_dim = 1
-
-        train_config = {
-            **config['train_config'],
-            'output_dim': output_dim,
-            'num_labels': 2,
-            'files': {}
-        }
-        input_dim = None
-        for setname, convIDs in read_conversations(config).items():
-            # print("bc counts for {}: {}".format(setname, reader.count_total(convIDs)))
-            seqids = []
-            inputs = []
-            outputs = []
-            for seqid, input, output in parseConversationSet(parallel, config_path, setname, convIDs):
-                seqids.append(seqid)
-                inputs.append(input)
-                outputs.append(output)
-            inputs = np.stack(inputs, axis=0)
-            input_dim = inputs.shape[1]
-            outputs = np.stack(outputs, axis=0)
-            idname = os.path.join(outputDir, setname + ".meta.json")
-            inname = os.path.join(outputDir, setname + ".input.npz")
-            outname = os.path.join(outputDir, setname + ".output.npz")
-
-            with open(idname, 'w') as f:
-                json.dump({"ranges": list(group(seqids))}, f, indent='\t')
-            np.savez_compressed(inname, data=inputs)
-            np.savez_compressed(outname, data=outputs)
-
-            train_config['files'][setname] = {
-                'ids': os.path.relpath(os.path.abspath(idname), outputDir),
-                'input': os.path.relpath(os.path.abspath(inname), outputDir),
-                'output': os.path.relpath(os.path.abspath(outname), outputDir)
-            }
-        train_config['input_dim'] = input_dim
-        jsonPath = os.path.join(outputDir, "config.json")
-        with open(jsonPath, "w") as f:
-            json.dump({**config, 'train_config': train_config}, f, indent='\t')
-        logging.info("Wrote training config to " + os.path.abspath(jsonPath))
+    extract(config_path)
 
 
 if __name__ == "__main__":
