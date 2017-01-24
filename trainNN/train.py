@@ -140,7 +140,7 @@ def train():
         resume=train_config['resume_parameters'],
         # scheduling_params=(0.8, 0.000001),
         update_method=train_config['update_method'],
-        num_epochs=1000,
+        num_epochs=train_config['epochs'],
         learning_rate_num=train_config['learning_rate'],
         iterate_minibatches_train=batchers['train'],
         iterate_minibatches_validate=batchers['validate'],

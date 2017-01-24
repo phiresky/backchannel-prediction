@@ -22,3 +22,7 @@ def windowed_indices(total_frames: int, context_frames: int, context_stride: int
     max_start_index = total_frames - context_frames * context_stride
     for i in range(0, max_start_index):
         yield range(i, i + context_frames * context_stride, context_stride)
+
+
+def invert_channel(channel: str):
+    return dict(A="B", B="A")[channel]

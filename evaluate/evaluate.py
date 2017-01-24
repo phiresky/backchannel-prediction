@@ -18,7 +18,8 @@ os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
 
 
-def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_len=None) -> Iterator[Tuple[float, float]]:
+def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_len=None) -> Iterator[
+    Tuple[float, float]]:
     talk_start = 0
     talking = False
     utts = list(reader.get_utterances(convid))
@@ -39,6 +40,7 @@ def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_l
         talk_end = float(utts[-1][1]['to'])
         if min_talk_len is None or talk_end - talk_start >= min_talk_len:
             yield talk_start, talk_end
+
 
 def get_monologuing_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
     bc_convid = convid[:-1] + dict(A="B", B="A")[convid[-1]]
@@ -78,11 +80,12 @@ def get_monologuing_segments(reader: DBReader, convid: str, min_talk_len=None) -
             yield monologuing_start, monologuing_end
 
 
-
-def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
+def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
     sampletrack_audio = reader.features.get_adc(sampletrack)
     bcs = reader.get_backchannels(list(reader.get_utterances(sampletrack)))
     for bc_id, bc_info in bcs:
+        if bc_filter and not bc_filter(bc_info):
+            continue
         bc_start_time = float(bc_info['from'])
         bc_audio = sampletrack_audio[f"{bc_start_time}s":f"{bc_info['to']}s"]
         bc_real_start_time = reader.getBcRealStartTime(bc_id)
@@ -93,7 +96,7 @@ def get_bc_samples(reader: DBReader, sampletrack="sw4687-B"):
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
-        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end) #- np.average(reader.method['bc'])
+        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end)  # - np.average(reader.method['bc'])
         peak_prediction_s += reader.config['eval_config']['prediction_offset']
         yield peak_prediction_s
 
@@ -102,10 +105,15 @@ def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
                  bcs: List[Tuple[int, NumFeature]]):
     total_length_s = reader.features.sample_index_to_time(smoothed_net_output, smoothed_net_output.shape[0])
     total_length_audio_index = reader.features.time_to_sample_index(bcs[0][1], total_length_s)
+    return get_bc_audio2(reader, total_length_audio_index, bcs, predict_bcs(reader, smoothed_net_output, threshold=0.6))
+
+
+def get_bc_audio2(reader: DBReader, total_length_audio_index: float, bcs: List[Tuple[int, NumFeature]],
+                  predictions: Iterator[float]):
     output_audio = NumFeature(np.zeros(total_length_audio_index, dtype='int16'),
                               samplingRate=bcs[0][1].samplingRate)
 
-    for peak_s in predict_bcs(reader, smoothed_net_output, threshold=0.6):
+    for peak_s in predictions:
         bc_start_offset, bc_audio = random.choice(bcs)
         audio_len_samples = bc_audio.shape[0]
         # audio_len_s = reader.features.sample_index_to_time(bc_audio, audio_len_samples)
@@ -120,7 +128,10 @@ def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
 
 
 def get_first_true_inx(bool_arr, start_inx: int):
-    inx = np.argmax(bool_arr[start_inx:]) + start_inx
+    search_arr = bool_arr[start_inx:]
+    if len(search_arr) == 0:
+        return None
+    inx = np.argmax(search_arr) + start_inx
     if not bool_arr[inx]:
         return None
     return inx
@@ -148,9 +159,13 @@ def get_larger_threshold(feat: NumFeature, reader: DBReader, threshold=0.5):
         inx = end + 1
 
 
-def normalize_audio(sampletrack_audio):
-    max_amplitude = max(abs(sampletrack_audio.max()), abs(sampletrack_audio.min()))
-    multi = 32767 / max_amplitude
+def normalize_audio(sampletrack_audio, maxamplitude=1.0):
+    max_amplitude = max(float(abs(sampletrack_audio.max())), float(abs(sampletrack_audio.min())))
+    if max_amplitude == 0:
+        return sampletrack_audio
+    multi = (32767 * maxamplitude) / max_amplitude
+    if multi < 1:
+        return sampletrack_audio
     return (sampletrack_audio * multi).astype("int16")
 
 
@@ -231,7 +246,7 @@ def precision_recall(stats: dict):
 def interesting_configs():
     # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
     interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
-    interesting_thresholds = [0.5, 0.6, 0.7]
+    interesting_thresholds = [0.5, 0.6, 0.65, 0.7]
     interesting_talk_lens = [None, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
         yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
@@ -254,40 +269,6 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
     return dict(config=eval_config, totals=totals)  # , details=results)
 
 
-def write_wavs(reader: DBReader, convs: List[str], count_per_set: int, net_version: str, bc_sample_tracks):
-    random.shuffle(convs)
-    for conv in convs[0:count_per_set]:
-        channel = random.choice(["A", "B"])
-        convchannel = f"{conv}-{channel}"
-        smoothed = reader.features.get_net_output(convchannel, "best", smooth=True)
-        bcs = []
-        bc_sampletrack = None
-        while len(bcs) < 5:
-            bc_sampletrack = random.choice(bc_sample_tracks)
-            bcs = list(get_bc_samples(reader, bc_sampletrack))
-        bc_audio = get_bc_audio(smoothed, reader, bcs)
-        print("evaluating conv {} with bc samples from {}".format(convchannel, bc_sampletrack))
-        _orig_audio = reader.features.get_adc(convchannel)
-        out_dir = os.path.join("evaluate", "out", net_version)
-        os.makedirs(out_dir, exist_ok=True)
-        minlen = min(_orig_audio.size, bc_audio.size)
-        orig_audio = normalize_audio(_orig_audio[0:minlen].reshape((minlen, 1)))
-        bc_audio = normalize_audio(bc_audio[0:minlen].reshape((minlen, 1)))
-        audio = np.append(orig_audio, bc_audio, axis=1)
-        # audio_cut = NumFeature(np.array([], dtype="float32").reshape((0, 2)))
-        for start, end in get_talking_segments(reader, convchannel, 15):
-            end += 1
-            start_inx = reader.features.time_to_sample_index(_orig_audio, start)
-            end_inx = reader.features.time_to_sample_index(_orig_audio, end)
-            soundfile.write(os.path.join(out_dir, "SPK={}{} @{:.1f}s BC={}.wav".format(conv, channel, start,
-                                                                                       bc_sampletrack.replace("-",
-                                                                                                              ""))),
-                            audio[start_inx:end_inx], 8000)
-            # audio_cut = np.append(audio_cut, audio[start_inx:end_inx])
-
-            # soundfile.write(os.path.join(out_dir, "{}--{}.wav".format(convchannel, bc_sampletrack)), audio_cut, 8000)
-
-
 def output_bc_samples(reader: DBReader, convs: List[str]):
     for conv in convs:
         adc = reader.features.get_adc(conv)
@@ -305,27 +286,17 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
-good_bc_sample_tracks = "sw2249-A,sw2254-A,sw2258-B,sw2297-A,sw2411-A,sw2432-A,sw2463-A,sw2485-A,sw2603-A,sw2606-B,sw2709-A,sw2735-B,sw2762-A,sw2836-B,sw4193-A".split(
-    ",")
-
-
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
 
     config = load_config(config_path)
 
-    config['train_config']['batch_size'] = None
     conversations = read_conversations(config)
-    # allconversations = [convid for convlist in conversations.values() for conv in convlist for convid in
-    #                    [conv + "-" + channel for channel in ["A", "B"]]]
 
     res = []
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
-    # reader = loadDBReader(config_path)
-    # write_wavs(reader, eval_conversations, 10, version, good_bc_sample_tracks)
-    # return
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
         for eval_config in interesting_configs():
             print(eval_config)

@@ -222,7 +222,7 @@ class DBReader:
 
 def load_backchannels(path):
     with open(path) as f:
-        bcs = set([line.strip() for line in f.readlines()])
+        bcs = set([line.strip() for line in f.readlines() if line[0] != '#'])
     return backchannels_hardcoded | bcs
 
 

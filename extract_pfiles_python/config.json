@@ -1,5 +1,5 @@
 {
-  "name": "lstm-single-pre-test",
+  "name": "lstm-continued-sgd",
   "paths": {
     "databasePrefix": "data/db/all240302",
     "adc": "data/adc",
@@ -28,13 +28,14 @@
   },
   "train_config": {
     "model_function": "lstm_simple",
-    "resume_parameters": null,
+    "resume_parameters": "trainNN/out/v042-unified-dirty:sgd-reproduce-test/epoch-002.pkl",
     "context_ms": 800,
     "context_stride": 2,
-    "update_method": "adam",
-    "learning_rate": 0.001,
+    "update_method": "sgd",
+    "learning_rate": 0.5,
     "num_labels": 2,
     "batch_size": 250,
+    "epochs": 100,
     "gaussian": false,
     "layer_sizes": [100, 50],
     "output_type": "single"

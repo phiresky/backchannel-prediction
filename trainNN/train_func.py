@@ -59,6 +59,7 @@ def train_network(network,
         logging.info("Using {} as schedulung method.".format(scheduling_method))
 
     if resume is not None:
+        logging.info(f"resuming from file {resume}")
         outputFiles.append(resume)
         load_network_params(network, resume)
 
