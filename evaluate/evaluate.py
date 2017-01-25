@@ -243,13 +243,54 @@ def precision_recall(stats: dict):
     return dict(precision=precision, recall=recall, f1_score=f1_score)
 
 
-def interesting_configs():
+def moving_margins(margin: Tuple[float, float], count=50, span=2):
+    arr = np.array(margin)
+    for offset in np.linspace(-span / 2, span / 2, count):
+        yield tuple(arr + offset)
+
+
+default_config = dict(margin_of_error=(-0.5, 0.5), threshold=0.6, epoch="best", min_talk_len=10)
+
+
+def general_interesting_configs(config):
     # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
     interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
     interesting_thresholds = [0.5, 0.6, 0.65, 0.7]
     interesting_talk_lens = [None, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
         yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
+
+
+def margin_test_configs(config):
+    for margin in moving_margins((-0.2, 0.2)):
+        yield {**default_config, **dict(margin_of_error=margin)}
+
+
+def epoch_test_configs(config):
+    epochs = config['train_output']['stats'].keys()
+    for i, epoch in enumerate(epochs):
+        if i > 100:
+            continue
+        if i % 3 == 0:
+            yield {**default_config, **dict(epoch=epoch)}
+
+
+def threshold_test_configs(config):
+    for threshold in np.linspace(0.55, 0.65, 30):
+        yield {**default_config, **dict(threshold=threshold)}
+
+
+def min_talk_len_configs(config):
+    for talk_len in [None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+        yield {**default_config, **dict(min_talk_len=talk_len)}
+
+
+def detailed_analysis(config):
+    yield from min_talk_len_configs(config)
+    yield from epoch_test_configs(config)
+    yield from general_interesting_configs(config)
+    yield from margin_test_configs(config)
+    yield from threshold_test_configs(config)
 
 
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict):
@@ -302,15 +343,15 @@ def main():
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
-        confs = list(interesting_configs())
+        confs = list(general_interesting_configs(config))
         for inx, eval_config in enumerate(confs):
             print(f"\n{inx}/{len(confs)}: {eval_config}\n")
             ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
             va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
             res.append(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']}))
 
-    with open(os.path.join(out_dir, "results.json"), "w") as f:
-        json.dump(res, f, indent='\t')
+            with open(os.path.join(out_dir, "results.json"), "w") as f:
+                json.dump(res, f, indent='\t')
 
 
 if __name__ == "__main__":

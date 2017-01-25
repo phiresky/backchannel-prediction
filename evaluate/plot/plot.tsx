@@ -45,7 +45,7 @@ const ignore = [
 
 type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: any };
 
-function persist<T>({initial, prefix = "roulette:"}: {initial: T, prefix?: string}) {
+function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
         const stored = localStorage.getItem(prefix + name);
         const value = observable(stored === null ? initial : JSON.parse(stored));
@@ -89,7 +89,8 @@ class VersionGUI extends React.Component<VGProps, {}> {
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
-                            defaultSort={defaultSort} itemsPerPage={6} pageButtonLimit={1}
+                            defaultSort={defaultSort} itemsPerPage={6}
+                            filterable={"Margin of Error,Threshold,Min Talk Len".split(",")}
                             data={
                                 evalInfo.map((v, k) => {
                                     const evalTotals = (v.totals.eval ? v.totals.eval : v.totals) as SingleEvalResult;
@@ -126,7 +127,7 @@ class GUI extends React.Component<{}, {}> {
     @observable onlyNew = true;
     @observable results: VGProps[] = [];
     @observable isLoading = true;
-    @persist({initial: ".*"}) filter: string;
+    @persist({ initial: ".*" }) filter: string;
     @computed get options() {
         return {
             scales: {
@@ -162,7 +163,7 @@ class GUI extends React.Component<{}, {}> {
             let data;
             try {
                 data = await resp.json();
-            } catch(e) {
+            } catch (e) {
                 console.error("error parsing", version, "skipping:", e);
                 continue;
             }
@@ -203,7 +204,7 @@ class GUI extends React.Component<{}, {}> {
         try {
             const fltr = RegExp(this.filter);
             results = results.filter(res => res.version.search(fltr) >= 0);
-        } catch(e) {
+        } catch (e) {
             console.log("invalid regex", this.filter);
         }
         return (
