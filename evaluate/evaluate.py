@@ -302,8 +302,9 @@ def main():
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
     with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
-        for eval_config in interesting_configs():
-            print(eval_config)
+        confs = list(interesting_configs())
+        for inx, eval_config in enumerate(confs):
+            print(f"\n{inx}/{len(confs)}: {eval_config}\n")
             ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
             va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
             res.append(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']}))
