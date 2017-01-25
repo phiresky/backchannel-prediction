@@ -289,7 +289,11 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
-
+    out_dir = os.path.join("evaluate", "out", version)
+    if os.path.isdir(out_dir):
+        print("Output directory {} already exists, aborting".format(out_dir))
+        sys.exit(1)
+    os.makedirs(out_dir, exist_ok=True)
     config = load_config(config_path)
 
     conversations = read_conversations(config)
@@ -304,8 +308,6 @@ def main():
             va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
             res.append(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']}))
 
-    out_dir = os.path.join("evaluate", "out", version)
-    os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "results.json"), "w") as f:
         json.dump(res, f, indent='\t')
 
