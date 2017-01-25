@@ -27,11 +27,12 @@ const features_std = [
 ];
 const features_ffv = [...features_std, "get_ffv"];
 
+const rangeround = (x: number) => +x.toFixed(3);
 
-const method_std = ({bcend = -0.1, nbcend = -1.9, span = 1} = {}) => ({
+const method_std = ({bcend = -0.1, nbcend = bcend - 1.8, span = 1} = {}) => ({
     "type": "discrete",
-    "bc": [bcend - span, bcend],
-    "nbc": [nbcend - span, nbcend]
+    "bc": [bcend - span, bcend].map(rangeround),
+    "nbc": [nbcend - span, nbcend].map(rangeround)
 });
 
 const method_close = ({span = 1}) => method_std({nbcend: -0.1 - span - 0.1, span});
@@ -46,8 +47,8 @@ const make_extract_config = ({input_features = features_std, extraction_method =
     "outputDirectory": "extract_pfiles_python/out"
 });
 
-const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50]} = {}) => ({
-    "model_function": "feedforward_simple",
+const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50], model_function = "feedforward_simple"} = {}) => ({
+    model_function,
     "resume_parameters": null,
     context_ms,
     context_stride,
@@ -69,12 +70,16 @@ const interesting_layers = [
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
 for (const layers of interesting_layers) {
-    const categoryname = "simple-ff-ffv-adam";
+    const categoryname = "lstm-adam";
     const name = `${categoryname}-${layers.join("-")}`;
     const config = make_config({
         name,
-        extract_config: make_extract_config({input_features: features_ffv}),
-        train_config: {...make_train_config({layer_sizes: layers}), update_method: "adam", "learning_rate": 0.001},
+        extract_config: make_extract_config({input_features: features_std, extraction_method: method_std()}),
+        train_config: {
+            ...make_train_config({layer_sizes: layers, model_function: "lstm_simple"}),
+            update_method: "adam",
+            learning_rate: 0.001
+        },
     });
     const outdir = `configs/${categoryname}`;
     if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);

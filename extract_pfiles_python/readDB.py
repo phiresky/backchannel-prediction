@@ -453,6 +453,28 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
         return val
 
 
+def count(config_path):
+    reader = loadDBReader(config_path)
+    allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
+    uttcount = 0
+    uttwords = 0
+    bccount = 0
+    bcwords = 0
+    def word_count(utts):
+        return len([word for (utt, uttInfo) in utts for word in orig_noise_filter(uttInfo['text']).split(" ")])
+    for conv in allconvs:
+        for channel in ["A", "B"]:
+            convid = f"{conv}-{channel}"
+            utts = list(reader.get_utterances(convid))
+            uttwords += word_count(utts)
+            bcs = list(reader.get_backchannels(utts))
+            bcwords += word_count(bcs)
+            uttcount += len(utts)
+            bccount += len(bcs)
+    print(f"{bccount} backchannels out of a total of {uttcount} utterances ({bccount/uttcount*100:.3g}%) or " +
+          f"{bcwords} words out of {uttwords} ({bcwords/uttwords*100:.3g}%)")
+
+
 def main():
     config_path = sys.argv[1]
     jrtk.core.setupLogging(None, logging.DEBUG, logging.DEBUG)
