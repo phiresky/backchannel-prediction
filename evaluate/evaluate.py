@@ -230,7 +230,7 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
 def precision_recall(stats: dict):
     if stats['true_positives'] == 0:
         # http://stats.stackexchange.com/a/16242
-        recall = 1
+        recall = 0 if stats['false_negatives'] > 0 else 1
         precision = 0 if stats['false_positives'] > 0 else 1
     else:
         precision = stats['true_positives'] / stats['selected']
