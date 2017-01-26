@@ -236,7 +236,7 @@ class GUI extends React.Component<{}, {}> {
     @observable showUnevaluated = true;
     @observable onlyNew = true;
     @observable results: VGProps[] = [];
-    @observable isLoading = true;
+    @observable loaded = 0; @observable total = 1;
     @persist({ initial: ".*" }) filter: string;
     @computed get options() {
         return {
@@ -267,7 +267,9 @@ class GUI extends React.Component<{}, {}> {
             color: "green",
             axis: "Error"
         }];
+        this.total = relevant.length + 1;
         for (const { version } of relevant) {
+            this.loaded++;
             const resp = await fetch(path(version, "config.json"));
             if (!resp.ok) continue;
             let data;
@@ -309,7 +311,7 @@ class GUI extends React.Component<{}, {}> {
                 options: {}
             });
         }
-        this.isLoading = false;
+        this.loaded = this.total;
     }
     render() {
         let results = this.results;
@@ -341,7 +343,7 @@ class GUI extends React.Component<{}, {}> {
                     <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />
                 </label>
                 <Observer>
-                    {() => this.isLoading ? <h3>Loading...</h3> : <h3>Loading complete</h3>}
+                    {() => this.loaded < this.total ? <h3>Loading ({this.loaded}/{this.total})...</h3> : <h3>Loading complete</h3>}
                 </Observer>
                 <div className="gui">
                     {results.map(info => <VersionGUI key={info.version} {...info} options={this.options} />)}
