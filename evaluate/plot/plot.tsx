@@ -308,7 +308,7 @@ class GUI extends React.Component<{}, {}> {
     axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {
         const arr = results.filter(result => this.resultVisible(result, filter))
             .map(arr => !arr.ok ? []: arr.data.datasets.filter(dataset => dataset.yAxisID === axisId).map(dataset => dataset.data.map(data => data.y)));
-        const data = arr.reduce((a, b) => a.concat(b.reduce((a, b) => a.concat(b))), [] as number[]);
+        const data = arr.reduce((a, b) => a.concat(b.reduce((a, b) => a.concat(b)), [] as number[]), [] as number[]);
         const min = Math.min(...data);
         const max = Math.max(...data);
         return {min, max};

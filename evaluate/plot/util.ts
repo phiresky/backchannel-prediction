@@ -8,7 +8,7 @@ export function throttleGet<T>(time: number, getter: () => T): T {
         return tcache.get(getter)!.current;
     }
     const ob = Rx.Observable.from<T>(mu.toStream(getter));
-    const ob2 = ob.debounceTime(time).merge(ob.delay(time).sampleTime(time));
+    const ob2 = ob.debounceTime(time); //.merge(ob.delay(time).sampleTime(time));
     const v = mu.fromStream<T>(ob2, mobx.untracked(getter));
     tcache.set(getter, v);
     return v.current;
