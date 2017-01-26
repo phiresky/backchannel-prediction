@@ -4,8 +4,10 @@ import * as ReactDOM from 'react-dom';
 import { Table } from 'reactable';
 import { toJS, observable, action, computed } from 'mobx';
 import { observer, Observer } from 'mobx-react';
+import 'react-select/dist/react-select.css';
 import './style.css';
-
+import * as Select from 'react-select';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 // defined by webpack
 declare var VERSIONS: string[];
 
@@ -18,9 +20,9 @@ interface SingleEvalResult {
     "precision": number,
     "recall": number,
     "f1_score": number,
-    eval: null
 }
 interface EvalResult {
+    shown?: true,
     config: {
         margin_of_error: [number, number],
         min_talk_len: number | null,
@@ -28,8 +30,7 @@ interface EvalResult {
         epoch: string,
         weights_file: string
     },
-    totals: SingleEvalResult | { eval: SingleEvalResult, valid: SingleEvalResult },
-    details: { [convid: string]: SingleEvalResult }
+    totals: { eval: SingleEvalResult, valid: SingleEvalResult }
 }
 const path = (version: string, file: string) => `../../../trainNN/out/${version}/${file}`;
 const evalResult = (version: string) => `../../../evaluate/out/${version}/results.json`;
@@ -59,8 +60,111 @@ function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: st
     };
 }
 
+function StringEnum<T extends string>(...values: T[]): {[x in T]: x} {
+    return Object.assign({}, ...values.map(value => ({ [value as any]: value })));
+}
+const xextractors: { [xaxis: string]: (r: EvalResult) => number } = {
+    "Epoch": r => +r.config.epoch,
+    "Margin of Error Center": r => r.config.margin_of_error.reduce((a, b) => (a + b) / 2),
+    "Margin of Error Width": r => r.config.margin_of_error.reduce((a, b) => +(b - a).toFixed(3)),
+    "Min Talk Len": r => r.config.min_talk_len === null ? -1 : r.config.min_talk_len,
+    "Threshold": r => r.config.threshold,
+};
+const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {
+    "Valid: Precision": r => r.totals.valid.precision,
+    "Valid: Recall": r => r.totals.valid.recall,
+    "Valid: F1 Score": r => r.totals.valid.f1_score,
+    "Eval: Precision": r => r.totals.eval.precision,
+    "Eval: Recall": r => r.totals.eval.recall,
+    "Eval: F1 Score": r => r.totals.eval.f1_score
+}
+const colors = "#3366CC,#DC3912,#FF9900,#109618,#990099,#3B3EAC,#0099C6,#DD4477,#66AA00,#B82E2E,#316395,#994499,#22AA99,#AAAA11,#6633CC,#E67300,#8B0707,#329262,#5574A6,#3B3EAC".split(",");
+function toTableData(v: EvalResult) {
+    return {
+        ...Object.assign({}, ...Object.keys(xextractors).map(name => ({ [name]: xextractors[name](v).toPrecision(3) }))),
+        ...Object.assign({}, ...Object.keys(yextractors).map(name => ({ [name]: yextractors[name](v).toPrecision(3) }))),
+    }
+}
 @observer
-class VersionGUI extends React.Component<VGProps, {}> {
+class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
+    validXaxes = Object.keys(xextractors);
+    @observable config = {
+        xaxis: "Margin of Error Center",
+        yaxes: ["Valid: F1 Score", "Valid: Precision", "Valid: Recall"]
+    }
+    render() {
+        const { xaxis, yaxes } = this.config;
+        if (!this.props.evalInfo) return <div>no evaluation data</div>;
+        const options = {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom',
+                    scaleLabel: {
+                        visible: true,
+                        labelString: xaxis
+                    }
+                }],
+                yAxes: [
+                    { position: "left", id: "rating", ticks: { min: 0 } },
+                    /*{ position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: {} }*/
+                ]
+            }
+        };
+        const _ = this.validXaxes; type XAxis = keyof typeof _;
+        const map = new Map<string, EvalResult[]>();
+
+        const extractor = xextractors[xaxis];
+        const { [xaxis]: mine, ...otherso } = xextractors;
+        const others = Object.keys(otherso).sort().map(x => xextractors[x]);
+        for (const evalInfo of this.props.evalInfo) {
+            const myValue = mine(evalInfo);
+            const otherValues = others.map(extractor => extractor(evalInfo)).join(",");
+            if (!map.has(otherValues)) map.set(otherValues, []);
+            map.get(otherValues)!.push(evalInfo);
+        }
+        const relevants = Array.from(map.values()).reduce((a, b) => a.length > b.length ? a : b);
+        console.log(map);
+        const datasets = yaxes.map((yaxis, i) => {
+            const data = relevants.map(ele => ({ x: extractor(ele), y: yextractors[yaxis](ele) }));
+            data.sort((a, b) => a.x - b.x);
+            console.log(data);
+            return {
+                label: yaxis,
+                borderColor: colors[i],
+                fill: false,
+                yAxisID: "rating",
+                lineTension: 0.2,
+                pointRadius: 2,
+                data
+            };
+        });
+        console.log(yaxes);
+        return (
+            <div>
+                x-axis: <Select searchable={false} clearable={false}
+                    value={xaxis}
+                    options={Object.keys(xextractors).map(value => ({ value, label: value }))}
+                    onChange={v => this.config.xaxis = (v as any).value} />
+                y-axis: <Select searchable={false} clearable={false}
+                    value={toJS(yaxes)}
+                    options={Object.keys(yextractors).map(value => ({ value, label: value }))}
+                    multi
+                    onChange={x => this.config.yaxes = (x as any[]).map(x => x.value)} />
+                <Line data={{ datasets }} options={options} redraw />
+                <Table className="evalTable" sortable
+                    itemsPerPage={6}
+                    filterable={"Margin of Error Width,Threshold,Min Talk Len".split(",")}
+                    data={relevants.map(v => toTableData(v))}
+                />
+            </div>
+        )
+    }
+}
+
+
+@observer
+class VersionEpochsGUI extends React.Component<VGProps, {}> {
     render() {
         const { evalInfo, version, data, options } = this.props;
         /*if(evalInfo)
@@ -69,16 +173,11 @@ class VersionGUI extends React.Component<VGProps, {}> {
         const isNewerVersion = +version.slice(1, 4) >= 42;
         if (isNewerVersion) {
             var defaultSort = { column: 'Valid: F1 Score', direction: 'desc' };
-            var [gitversion, title] = version.split(":");
         } else {
             var defaultSort = { column: 'Eval: F1 Score', direction: 'desc' };
-            var gitversion = version;
-            var title = titles[version];
         }
         return (
             <div key={version}>
-                <h3>{title ? `${title}` : `${version}`}</h3>
-                <p>Git version: {gitversion}</p>
                 <Line key={Math.random()} data={toJS(data)} options={options} />
                 <p>
                     <a href={path(version, "config.json")}>Complete configuration</a>
@@ -90,28 +189,39 @@ class VersionGUI extends React.Component<VGProps, {}> {
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
                             defaultSort={defaultSort} itemsPerPage={6}
-                            filterable={"Margin of Error,Threshold,Min Talk Len".split(",")}
-                            data={
-                                evalInfo.map((v, k) => {
-                                    const evalTotals = (v.totals.eval ? v.totals.eval : v.totals) as SingleEvalResult;
-                                    const validTotals = (v.totals.eval ? (v.totals as any).valid : undefined) as SingleEvalResult | undefined;
-                                    return {
-                                        "Margin of Error": v.config.margin_of_error.map(s => `${s}s`).join(", "),
-                                        "Threshold": v.config.threshold,
-                                        "Min Talk Len": v.config.min_talk_len,
-                                        "Valid: Precision": validTotals && validTotals.precision.toFixed(3),
-                                        "Valid: Recall": validTotals && validTotals.recall.toFixed(3),
-                                        "Valid: F1 Score": validTotals && validTotals.f1_score.toFixed(3),
-                                        "Eval: Precision": evalTotals.precision.toFixed(3),
-                                        "Eval: Recall": evalTotals.recall.toFixed(3),
-                                        "Eval: F1 Score": evalTotals.f1_score.toFixed(3),
-
-                                    }
-                                })
-                            }
+                            filterable={"Margin of Error Width,Threshold,Min Talk Len".split(",")}
+                            data={evalInfo.map(v => toTableData(v))}
                         />
                     </div>
                 }
+            </div>
+        );
+    }
+}
+@observer
+class VersionGUI extends React.Component<VGProps, {}> {
+    @observable tab = 0;
+    render() {
+        const { evalInfo, version, data, options } = this.props;
+        const isNewerVersion = +version.slice(1, 4) >= 42;
+        if (isNewerVersion) {
+            var [gitversion, title] = version.split(":");
+        } else {
+            var gitversion = version;
+            var title = titles[version];
+        }
+        return (
+            <div key={version}>
+                <h3>{title ? `${title}` : `${version}`}</h3>
+                <p>Git version: {gitversion}</p>
+                <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
+                    <TabList>
+                        <Tab>Training Graph</Tab>
+                        {evalInfo && <Tab>Eval Detail Graphs ({evalInfo.length} evaluations) </Tab>}
+                    </TabList>
+                    <TabPanel><VersionEpochsGUI {...this.props} /></TabPanel>
+                    {evalInfo && <TabPanel><VersionEvalDetailGUI {...this.props} /></TabPanel>}
+                </Tabs>
             </div>
         );
     }
@@ -170,13 +280,17 @@ class GUI extends React.Component<{}, {}> {
             const evalResp = await fetch(evalResult(version));
             let evalInfo: EvalResult[] | undefined;
             if (evalResp.ok) evalInfo = await (evalResp.json());
+            if (evalInfo) {
+                // upgrade
+                evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: null } } as any)
+            }
             const stats = data.train_output.stats;
             if (Object.keys(stats).length < 3) continue;
 
             if (!stats["0"]["validation_loss"]) continue;
-            const plotData = keys.map(info => ({
+            const plotData = keys.map((info, i) => ({
                 label: info.key,
-                borderColor: info.color,
+                borderColor: colors[i],
                 fill: false,
                 yAxisID: info.axis,
                 lineTension: 0.2,
