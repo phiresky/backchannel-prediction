@@ -271,8 +271,7 @@ def epoch_test_configs(config):
     for i, epoch in enumerate(epochs):
         if i > 100:
             continue
-        if i % 3 == 0:
-            yield {**default_config, **dict(epoch=epoch)}
+        yield {**default_config, **dict(epoch=epoch)}
 
 
 def threshold_test_configs(config):
@@ -342,7 +341,7 @@ def main():
     res = []
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
-    with Parallel(n_jobs=int(os.environ["JOBS"])) as parallel:
+    with Parallel(n_jobs=int(os.environ["JOBS"]), batch_size=1) as parallel:
         confs = list(general_interesting_configs(config))
         for inx, eval_config in enumerate(confs):
             print(f"\n{inx}/{len(confs)}: {eval_config}\n")
