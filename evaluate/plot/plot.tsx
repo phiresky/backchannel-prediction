@@ -356,7 +356,8 @@ class GUI extends React.Component<{}, {}> {
         if (evalResp.ok) evalInfo = await (evalResp.json());
         if (evalInfo) {
             // upgrade
-            evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: null } } as any)
+            evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: {} } } as any);
+            evalInfo.forEach(i => i.totals.valid.f1_score === 1 && (i.totals.valid.f1_score = 0));
         }
         const stats = data.train_output.stats;
 
