@@ -199,12 +199,14 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         );
     }
 }
+
+const logStyle = {maxHeight: "400px", overflow: "scroll"};
 function LogGui(p: VGProps) {
     let res = observable({txt: "Loading..."});
     (async() => {
         res.txt = await (await fetch(path(p.version, "train.log"))).text();
     })();
-    return <Observer>{() => <pre style={{maxHeight: "400px", overflow: "scroll"}}>{res.txt}</pre>}</Observer>;
+    return <Observer>{() => <pre style={logStyle}>{res.txt}</pre>}</Observer>;
 }
 @observer
 class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
@@ -236,7 +238,7 @@ class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
         } else {
             inner = (
                 <div><p>Error: <pre>{p.error}</pre></p>
-                    {p.log ? <div>Log: <pre>{p.log}</pre></div>:<div>(Log file could not be loaded)</div>}
+                    {p.log ? <div>Log: <pre style={logStyle}>{p.log}</pre></div>:<div>(Log file could not be loaded)</div>}
                 </div>
             );
         }
