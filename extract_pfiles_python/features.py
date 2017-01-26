@@ -17,7 +17,6 @@ import hashlib
 import json
 import inspect
 from tqdm import tqdm, trange
-from . import util
 
 
 def NumFeature_to_dict(n: NumFeature):
@@ -197,6 +196,7 @@ class Features:
             return feature
 
     def batched_eval(self, inputs, mapper, batchsize=2000):
+        from . import util
         total_frames = inputs.shape[0]
         output = np.zeros(shape=(total_frames, 1), dtype=np.float32)
         for ndx, batch in util.batch_list(inputs, batchsize, True):

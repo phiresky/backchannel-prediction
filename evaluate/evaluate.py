@@ -7,7 +7,7 @@ import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
 from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations
-from extract_pfiles_python.util import load_config
+from extract_pfiles_python.util import load_config, filter_ranges, get_talking_segments, get_monologuing_segments
 from tqdm import tqdm
 import functools
 import trainNN.evaluate
@@ -16,68 +16,6 @@ from itertools import product
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
-
-
-def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_len=None) -> Iterator[
-    Tuple[float, float]]:
-    talk_start = 0
-    talking = False
-    utts = list(reader.get_utterances(convid))
-    for index, (utt, uttInfo) in enumerate(utts):
-        is_bc = reader.is_backchannel(uttInfo, index, utts)
-        is_empty = len(reader.noise_filter(uttInfo['text'])) == 0
-        if (is_bc or is_empty) != invert:
-            if talking:
-                talking = False
-                talk_end = float(uttInfo['from'])
-                if min_talk_len is None or talk_end - talk_start >= min_talk_len:
-                    yield talk_start, talk_end
-        else:
-            if not talking:
-                talking = True
-                talk_start = float(uttInfo['from'])
-    if talking:
-        talk_end = float(utts[-1][1]['to'])
-        if min_talk_len is None or talk_end - talk_start >= min_talk_len:
-            yield talk_start, talk_end
-
-
-def get_monologuing_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
-    bc_convid = convid[:-1] + dict(A="B", B="A")[convid[-1]]
-    talking_segs = get_talking_segments(reader, convid, False)
-    listening_segs = get_talking_segments(reader, bc_convid, True)
-    all = []
-    for start, end in talking_segs:
-        all.append((start, "start", "talking"))
-        all.append((end, "end", "talking"))
-    for start, end in listening_segs:
-        all.append((start, "start", "listening"))
-        all.append((end, "end", "listening"))
-    all.sort(key=lambda x: x[0])
-    talking = False
-    listening = False
-    monologuing = False
-    monologuing_start = 0
-    for time, type, mode in all:
-        is_starting = type == "start"
-        if mode == "talking":
-            talking = is_starting
-        if mode == "listening":
-            listening = is_starting
-        if talking and listening:
-            if not monologuing:
-                monologuing = True
-                monologuing_start = time
-        else:
-            if monologuing:
-                monologuing = False
-                monologuing_end = time
-                if min_talk_len is None or monologuing_end - monologuing_start >= min_talk_len:
-                    yield monologuing_start, monologuing_end
-    if monologuing:
-        monologuing_end = float(all[-1][0])
-        if min_talk_len is None or monologuing_end - monologuing_start >= min_talk_len:
-            yield monologuing_start, monologuing_end
 
 
 def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
@@ -176,22 +114,6 @@ def nearer(this: float, that: float, other):
 
 def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple[float, float]):
     return correct + margin[0] <= predicted <= correct + margin[1]
-
-
-def filter_ranges(numbers: List[float], ranges: List[Tuple[float, float]]):
-    inx = 0
-    if len(numbers) == 0:
-        return
-    for start, end in ranges:
-        while numbers[inx] < start:
-            inx += 1
-            if inx >= len(numbers):
-                return
-        while numbers[inx] <= end:
-            yield numbers[inx]
-            inx += 1
-            if inx >= len(numbers):
-                return
 
 
 def evaluate_conv(config_path: str, convid: str, config: dict):

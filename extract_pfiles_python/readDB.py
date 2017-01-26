@@ -5,6 +5,8 @@
 # (sha1sum 0e05e903997432917d5ef5b2ef4d799e196f3ffc)
 # on 2016-11-06
 import itertools
+from pprint import pprint
+
 import jrtk
 from jrtk.preprocessing import NumFeature
 from typing import Set, Dict, List, Iterable, Tuple
@@ -221,9 +223,29 @@ class DBReader:
 
 
 def load_backchannels(path):
+    categories = {}
+    catnames = {}
+    bcs = set()
     with open(path) as f:
-        bcs = set([line.strip() for line in f.readlines() if line[0] != '#'])
-    return backchannels_hardcoded | bcs
+        for line in f.readlines():
+            line = line.strip()
+            if line[0] == '#':
+                continue
+            line = line.split(":")
+            if len(line) == 2:
+                category = line[0]
+                category = catnames.setdefault(category[0], category)
+                line = line[1]
+            elif len(line) == 1:
+                category = "unknown"
+                line = line[0]
+            else:
+                raise Exception(f"could not parse line {line}")
+            bcs.add(line)
+            categoryset = categories.setdefault(category, set())
+            categoryset.add(line)
+    pprint(categories)
+    return backchannels_hardcoded | set(bcs)
 
 
 def swap_speaker(convid: str):
@@ -412,14 +434,29 @@ def group(ids):
         end_index, _ = v2[-1]
         yield start_index, k, end_index + 1
 
+def is_while_monologuing(reader: DBReader, uttId, uttInfo):
+    fromTime = float(uttInfo['from'])
+    toTime = float(uttInfo['to'])
+    min_talk_len = reader.extract_config.get('min_talk_len', None)
+    if min_talk_len is not None:
+        middle = (toTime - fromTime) / 2
+        filtered = list(util.filter_ranges([middle],
+                                      list(util.get_monologuing_segments(reader, uttInfo['convid'], min_talk_len))))
+        if filtered != [middle]:
+            return False
+        else:
+            return True
+    else:
+        return True
 
 def all_uttids(reader: DBReader, convos: List[str]):
     for convo in convos:
         for channel in ["A", "B"]:
             convid = f"{convo}-{channel}"
             for (uttId, uttInfo) in reader.get_backchannels(list(reader.get_utterances(convid))):
-                yield uttId, False
-                yield uttId, True
+                if is_while_monologuing(reader, uttId, uttInfo):
+                    yield uttId, False
+                    yield uttId, True
 
 
 @functools.lru_cache(maxsize=1)
@@ -460,8 +497,10 @@ def count(config_path):
     uttwords = 0
     bccount = 0
     bcwords = 0
+
     def word_count(utts):
         return len([word for (utt, uttInfo) in utts for word in orig_noise_filter(uttInfo['text']).split(" ")])
+
     for conv in allconvs:
         for channel in ["A", "B"]:
             convid = f"{conv}-{channel}"
