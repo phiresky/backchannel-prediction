@@ -49,8 +49,8 @@ const ignore = [
     "v036-online-lstm", "v036-online-lstm-dirty"
 ]
 
-type VGPropsMaybe = {ok: false, error: string, version: string, log: string | null} | VGProps;
-type VGProps = {ok: true, evalInfo?: EvalResult[], version: string, data: any, options: any };
+type VGPropsMaybe = { ok: false, error: string, version: string, log: string | null } | VGProps;
+type VGProps = { ok: true, evalInfo?: EvalResult[], version: string, data: {datasets: {label: string, yAxisID: string, data: {x: number, y: number}[]}[]}, options: any };
 
 function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
@@ -200,16 +200,16 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
     }
 }
 
-const logStyle = {maxHeight: "400px", overflow: "scroll"};
+const logStyle = { maxHeight: "400px", overflow: "scroll" };
 function LogGui(p: VGProps) {
-    let res = observable({txt: "Loading..."});
-    (async() => {
+    let res = observable({ txt: "Loading..." });
+    (async () => {
         res.txt = await (await fetch(path(p.version, "train.log"))).text();
     })();
     return <Observer>{() => <pre style={logStyle}>{res.txt}</pre>}</Observer>;
 }
 @observer
-class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
+class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
     @observable tab = 0;
     render() {
         const p = this.props.p;
@@ -221,8 +221,8 @@ class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
             var gitversion = version;
             var title = titles[version];
         }
-        if(p.ok) {
-            const {  evalInfo } = p;
+        if (p.ok) {
+            const { evalInfo } = p;
             var inner = (
                 <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
                     <TabList>
@@ -238,12 +238,13 @@ class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
         } else {
             inner = (
                 <div><p>Error: <pre>{p.error}</pre></p>
-                    {p.log ? <div>Log: <pre style={logStyle}>{p.log}</pre></div>:<div>(Log file could not be loaded)</div>}
+                    {p.log ? <div>Log: <pre style={logStyle}>{p.log}</pre></div> : <div>(Log file could not be loaded)</div>}
                 </div>
             );
         }
         return (
             <div key={version}>
+                <button style={{ float: "right" }} onClick={() => this.props.gui.load(version)}>reload</button>
                 <h3>{title ? `${title}` : `${version}`}</h3>
                 <p>
                     Git version: {gitversion}
@@ -258,7 +259,19 @@ class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
     }
 }
 
-
+const axis_keys = [{
+    key: "training_loss",
+    color: "blue",
+    axis: "Loss"
+}, {
+    key: "validation_loss",
+    color: "red",
+    axis: "Loss"
+}, {
+    key: "validation_error",
+    color: "green",
+    axis: "Error"
+}];
 @observer
 class GUI extends React.Component<{}, {}> {
     constructor() {
@@ -268,9 +281,17 @@ class GUI extends React.Component<{}, {}> {
     @observable useMinMax = false;
     @observable showUnevaluated = true;
     @observable onlyNew = true;
-    @observable results: VGPropsMaybe[] = [];
+    @observable results = observable.map() as any as Map<string, VGPropsMaybe>;
     @observable loaded = 0; @observable total = 1;
-    @computed get options() {
+    axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {
+        const arr = results.filter(result => this.resultVisible(result, filter))
+            .map(arr => !arr.ok ? []: arr.data.datasets.filter(dataset => dataset.yAxisID === axisId).map(dataset => dataset.data.map(data => data.y)));
+        const data = arr.reduce((a, b) => a.concat(b.reduce((a, b) => a.concat(b))), [] as number[]);
+        const min = Math.min(...data);
+        const max = Math.max(...data);
+        return {min, max};
+    }
+    options(results: VGPropsMaybe[], filter: string) {
         return {
             scales: {
                 xAxes: [{
@@ -278,101 +299,99 @@ class GUI extends React.Component<{}, {}> {
                     position: 'bottom'
                 }],
                 yAxes: [
-                    { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: this.useMinMax ? { min: 0.5, max: 0.68 } : {} },
-                    { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: this.useMinMax ? { min: 0.2, max: 0.5 } : {} }
+                    { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: this.useMinMax ? this.axisMinMax(results, filter, "Loss") : {} },
+                    { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: this.useMinMax ? this.axisMinMax(results, filter, "Error") : {} }
                 ],
             },
-            animation: {duration: 0}
+            animation: { duration: 0 }
         };
     }
-    async errorTryGetLog(version: string, error: string) {
+    async errorTryGetLog(version: string, error: string): Promise<VGPropsMaybe> {
         const resp = await fetch(path(version, "train.log"));
         let log = null;
-        if(resp.ok) {
+        if (resp.ok) {
             log = await resp.text();
         }
-        this.results.push({
-            ok: false, version, error, log
-        })
+        return { ok: false, version, error, log };
+    }
+    async load(version: string) {
+        const res = await this.retrieveDataFor(version);
+        if (res) this.results.set(version, res);
+    }
+    async retrieveDataFor(version: string): Promise<VGPropsMaybe | null> {
+        const resp = await fetch(path(version, "config.json"));
+        if (!resp.ok) {
+            return await this.errorTryGetLog(version, `${path(version, "config.json")} could not be found`);
+        }
+        let data;
+        try {
+            data = await resp.json();
+        } catch (e) {
+            return await this.errorTryGetLog(version, `Error parsing ${version}/config.json: ${e}`);
+        }
+        const evalResp = await fetch(evalResult(version));
+        let evalInfo: EvalResult[] | undefined;
+        if (evalResp.ok) evalInfo = await (evalResp.json());
+        if (evalInfo) {
+            // upgrade
+            evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: null } } as any)
+        }
+        const stats = data.train_output.stats;
+
+        if (!stats["0"]["validation_loss"]) return null;
+        const plotData = axis_keys.map((info, i) => ({
+            label: info.key,
+            borderColor: colors[i],
+            fill: false,
+            yAxisID: info.axis,
+            lineTension: 0.2,
+            pointRadius: 2,
+            data: Object.entries(stats).map(([x, stat]) => ({
+                x: +x,
+                y: stat[info.key]
+            }))
+        }));
+        return {
+            ok: true,
+            version,
+            evalInfo,
+            data: {
+                datasets: plotData
+            },
+            options: {}
+        };
     }
     async retrieveData() {
         const relevant = VERSIONS.filter(version => !ignore.includes(version)).map(version => ({ version }));
-        const keys = [{
-            key: "training_loss",
-            color: "blue",
-            axis: "Loss"
-        }, {
-            key: "validation_loss",
-            color: "red",
-            axis: "Loss"
-        }, {
-            key: "validation_error",
-            color: "green",
-            axis: "Error"
-        }];
         this.total = relevant.length + 1;
         for (const { version } of relevant) {
             this.loaded++;
-            const resp = await fetch(path(version, "config.json"));
-            if (!resp.ok) {
-                await this.errorTryGetLog(version, `${path(version, "config.json")} could not be found`);
-                continue;
-            }
-            let data;
-            try {
-                data = await resp.json();
-            } catch (e) {
-                await this.errorTryGetLog(version, `Error parsing ${version}/config.json: ${e}`);
-                continue;
-            }
-            const evalResp = await fetch(evalResult(version));
-            let evalInfo: EvalResult[] | undefined;
-            if (evalResp.ok) evalInfo = await (evalResp.json());
-            if (evalInfo) {
-                // upgrade
-                evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: null } } as any)
-            }
-            const stats = data.train_output.stats;
-
-            if (!stats["0"]["validation_loss"]) continue;
-            const plotData = keys.map((info, i) => ({
-                label: info.key,
-                borderColor: colors[i],
-                fill: false,
-                yAxisID: info.axis,
-                lineTension: 0.2,
-                pointRadius: 2,
-                data: Object.entries(stats).map(([x, stat]) => ({
-                    x: +x,
-                    y: stat[info.key]
-                }))
-            }));
-            this.results.push({
-                ok: true,
-                version,
-                evalInfo,
-                data: {
-                    datasets: plotData
-                },
-                options: {}
-            });
+            await this.load(version);
         }
         this.loaded = this.total;
     }
-    @persist({initial: ".*"}) filter: string;
+    @persist({ initial: ".*" }) filter: string;
     getFilter = () => this.filter;
     getResults = () => this.results;
-    render() {
-        const throttledFilter = util.throttleGet(500, this.getFilter);
-        let results = util.throttleGet(500, this.getResults);
+    resultVisible(result: VGPropsMaybe, filter: string) {
+        let results = [result];
         if (!this.showUnevaluated) results = results.filter(res => res.ok && res.evalInfo);
         if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
         try {
-            const fltr = RegExp(throttledFilter);
+            const fltr = RegExp(filter);
             results = results.filter(res => res.version.search(fltr) >= 0);
         } catch (e) {
-            console.log("invalid regex", throttledFilter);
+            console.log("invalid regex", filter);
+            return false;
         }
+        return !!results[0];
+    }
+    render() {
+        const throttledFilter = util.throttleGet(500, this.getFilter);
+        let results = Array.from(util.throttleGet(500, this.getResults).values());
+        results = results.sort((a, b) => a.version.localeCompare(b.version));
+        results = results.filter(result => this.resultVisible(result, throttledFilter));
+        const options = this.options(results, throttledFilter);
         return (
             <div>
                 <div>
@@ -391,14 +410,14 @@ class GUI extends React.Component<{}, {}> {
                 </div>
                 <label>Filter:
                     <Observer>
-                    {() => <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />}
+                        {() => <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />}
                     </Observer>
                 </label>
                 <Observer>
                     {() => this.loaded < this.total ? <h3>Loading ({this.loaded}/{this.total})...</h3> : <h3>Loading complete</h3>}
                 </Observer>
                 <div className="gui">
-                    {results.map(info => <VersionGUI key={info.version} p={{...info, options:this.options}} />)}
+                    {results.map(info => <VersionGUI key={info.version} gui={this} p={{ ...info, options }} />)}
                 </div>
             </div>
         );
@@ -412,4 +431,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 declare var module: any;
-Object.assign(window, {plot: module.exports, mu, Rx, mobx})
+Object.assign(window, { plot: module.exports, mu, Rx, mobx })
