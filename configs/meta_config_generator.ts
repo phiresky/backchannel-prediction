@@ -47,18 +47,21 @@ const make_extract_config = ({input_features = features_std, extraction_method =
     "outputDirectory": "extract_pfiles_python/out"
 });
 
-const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50], model_function = "feedforward_simple"} = {}) => ({
+const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50],
+    model_function = "feedforward_simple",
+    epochs = 200
+} = {}) => ({
     model_function,
-    "resume_parameters": null,
+    epochs,
     context_ms,
     context_stride,
+    layer_sizes,
+    "resume_parameters": null,
     "update_method": "sgd",
     "learning_rate": 0.7,
     "num_labels": 2,
     "batch_size": 250,
-    "epochs": 200,
     "gaussian": false,
-    layer_sizes,
     "output_type": "single"
 });
 
@@ -70,13 +73,13 @@ const interesting_layers = [
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
 for (const layers of interesting_layers) {
-    const categoryname = "lstm-adam";
+    const categoryname = "lstm-adam-ffv";
     const name = `${categoryname}-${layers.join("-")}`;
     const config = make_config({
         name,
-        extract_config: make_extract_config({input_features: features_std, extraction_method: method_std()}),
+        extract_config: make_extract_config({input_features: features_ffv, extraction_method: method_std()}),
         train_config: {
-            ...make_train_config({layer_sizes: layers, model_function: "lstm_simple"}),
+            ...make_train_config({layer_sizes: layers, model_function: "lstm_simple", epochs: 50}),
             update_method: "adam",
             learning_rate: 0.001
         },
