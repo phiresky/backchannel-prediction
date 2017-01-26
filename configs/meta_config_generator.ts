@@ -65,21 +65,27 @@ const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = 
     "output_type": "single"
 });
 
-const interesting_layers = [
+const interesting_layers_normal = [
     [200], [50],
     [100, 50], [75, 75], [50, 100],
     [75, 40], [60, 60],
     [50, 20], [35, 35],
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
-for (const layers of interesting_layers) {
-    const categoryname = "lstm-adam-ffv";
-    const name = `${categoryname}-${layers.join("-")}`;
+const interesting_layers_dropout = [
+    [[null, 0.2], [75, 0.5], [40, 0.5]],
+    [[null, 0.2], [100, 0.5], [50, 0.5]],
+    [[null, 0.2], [100, 0.5], [50, 0.5], [25, 0.5]],
+    [[null, 0.2], [100, 0.5], [70, 0.4], [50, 0.3], [40, 0.2]]
+]
+for (const layers of interesting_layers_dropout) {
+    const categoryname = "ff-ffv-dropout";
+    const name = `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize||"inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
     const config = make_config({
         name,
         extract_config: make_extract_config({input_features: features_ffv, extraction_method: method_std()}),
         train_config: {
-            ...make_train_config({layer_sizes: layers, model_function: "lstm_simple", epochs: 50}),
+            ...make_train_config({layer_sizes: layers, model_function: "feedforward_dropout", epochs: 200}),
             update_method: "adam",
             learning_rate: 0.001
         },

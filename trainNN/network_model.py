@@ -53,3 +53,32 @@ def feedforward_simple(train_config):
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax)
     return locals()
+
+
+def feedforward_dropout(train_config):
+    sequence_length = train_config['context_frames']
+    input_dim = train_config['input_dim']
+
+    num_labels = train_config['num_labels']
+    batch_size = train_config.get('batch_size', None)
+    layer_sizes = train_config['layer_sizes']
+
+    input_layer = InputLayer(shape=(batch_size, sequence_length, input_dim))
+    input_var = input_layer.input_var
+
+    input_layer_reshaped = ReshapeLayer(incoming=input_layer,
+                                        shape=(-1 if batch_size is None else batch_size, sequence_length * input_dim))
+    cur_input = input_layer_reshaped
+
+    [*[shouldnull, input_dropout], *hidden_layers] = layer_sizes
+    if shouldnull is not None:
+        raise Exception("first should be null for dropout")
+    cur_input = DropoutLayer(cur_input, input_dropout)
+    for size, dropout in hidden_layers:
+        cur_input = DenseLayer(incoming=cur_input, num_units=size)
+        cur_input = DropoutLayer(incoming=cur_input, p=dropout)
+
+    output_layer = DenseLayer(cur_input,
+                              num_units=num_labels,
+                              nonlinearity=lasagne.nonlinearities.softmax)
+    return locals()
