@@ -3,11 +3,16 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Table } from 'reactable';
 import { toJS, observable, action, computed } from 'mobx';
+import * as mobx from 'mobx';
 import { observer, Observer } from 'mobx-react';
 import 'react-select/dist/react-select.css';
 import './style.css';
 import * as Select from 'react-select';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import * as util from './util';
+import * as mu from 'mobx-utils';
+import * as Rx from 'rxjs';
+
 // defined by webpack
 declare var VERSIONS: string[];
 
@@ -44,7 +49,8 @@ const ignore = [
     "v036-online-lstm", "v036-online-lstm-dirty"
 ]
 
-type VGProps = { evalInfo?: EvalResult[], version: string, data: any, options: any };
+type VGPropsMaybe = {ok: false, error: string, version: string} | VGProps;
+type VGProps = {ok: true, evalInfo?: EvalResult[], version: string, data: any, options: any };
 
 function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
@@ -178,12 +184,7 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         }
         return (
             <div key={version}>
-                <Line key={Math.random()} data={toJS(data)} options={options} />
-                <p>
-                    <a href={path(version, "config.json")}>Complete configuration</a>
-                    <a href={path(version, "train.log")}>Training log</a>
-                    {isNewerVersion || <a href={path(version, "network_model.py")}>Network model</a>}
-                </p>
+                <Line redraw data={toJS(data)} options={options} />
                 {evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
@@ -199,10 +200,11 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
     }
 }
 @observer
-class VersionGUI extends React.Component<VGProps, {}> {
+class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
     @observable tab = 0;
     render() {
-        const { evalInfo, version, data, options } = this.props;
+        const p = this.props.p;
+        const version = p.version;
         const isNewerVersion = +version.slice(1, 4) >= 42;
         if (isNewerVersion) {
             var [gitversion, title] = version.split(":");
@@ -210,22 +212,38 @@ class VersionGUI extends React.Component<VGProps, {}> {
             var gitversion = version;
             var title = titles[version];
         }
-        return (
-            <div key={version}>
-                <h3>{title ? `${title}` : `${version}`}</h3>
-                <p>Git version: {gitversion}</p>
+        if(p.ok) {
+            const {  evalInfo } = p;
+            var inner = (
                 <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
                     <TabList>
                         <Tab>Training Graph</Tab>
                         {evalInfo && <Tab>Eval Detail Graphs ({evalInfo.length} evaluations) </Tab>}
                     </TabList>
-                    <TabPanel><VersionEpochsGUI {...this.props} /></TabPanel>
-                    {evalInfo && <TabPanel><VersionEvalDetailGUI {...this.props} /></TabPanel>}
+                    <TabPanel><VersionEpochsGUI {...p} /></TabPanel>
+                    {evalInfo && <TabPanel><VersionEvalDetailGUI {...p} /></TabPanel>}
                 </Tabs>
+            );
+        } else {
+            inner = <div>Error: {p.error}</div>;
+        }
+        return (
+            <div key={version}>
+                <h3>{title ? `${title}` : `${version}`}</h3>
+                <p>
+                    Git version: {gitversion}
+                    <a href={path(version, "config.json")}>Complete configuration json</a>
+                    <a href={path(version, "train.log")}>Training log</a>
+                    {isNewerVersion || <a href={path(version, "network_model.py")}>Network model</a>}
+                    {p.ok && p.evalInfo && <a href={evalResult(version)}>Eval Result json</a>}
+                </p>
+                {inner}
             </div>
         );
     }
 }
+
+
 @observer
 class GUI extends React.Component<{}, {}> {
     constructor() {
@@ -235,9 +253,8 @@ class GUI extends React.Component<{}, {}> {
     @observable useMinMax = false;
     @observable showUnevaluated = true;
     @observable onlyNew = true;
-    @observable results: VGProps[] = [];
+    @observable results: VGPropsMaybe[] = [];
     @observable loaded = 0; @observable total = 1;
-    @persist({ initial: ".*" }) filter: string;
     @computed get options() {
         return {
             scales: {
@@ -248,8 +265,9 @@ class GUI extends React.Component<{}, {}> {
                 yAxes: [
                     { position: "left", id: "Loss", scaleLabel: { display: true, labelString: "Loss" }, ticks: this.useMinMax ? { min: 0.5, max: 0.68 } : {} },
                     { position: "right", id: "Error", scaleLabel: { display: true, labelString: "Error" }, ticks: this.useMinMax ? { min: 0.2, max: 0.5 } : {} }
-                ]
-            }
+                ],
+            },
+            animation: {duration: 0}
         };
     }
     async retrieveData() {
@@ -271,12 +289,23 @@ class GUI extends React.Component<{}, {}> {
         for (const { version } of relevant) {
             this.loaded++;
             const resp = await fetch(path(version, "config.json"));
-            if (!resp.ok) continue;
+            if (!resp.ok) {
+                this.results.push({
+                    ok: false,
+                    version: version, 
+                    error: `${path(version, "config.json")} could not be found`,
+                })
+                continue;
+            }
             let data;
             try {
                 data = await resp.json();
             } catch (e) {
-                console.error("error parsing", version, "skipping:", e);
+                this.results.push({
+                    ok: false,
+                    version: version, 
+                    error: `Error parsing ${version}/config.json: ${e}`,
+                });
                 continue;
             }
             const evalResp = await fetch(evalResult(version));
@@ -287,7 +316,6 @@ class GUI extends React.Component<{}, {}> {
                 evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: null } } as any)
             }
             const stats = data.train_output.stats;
-            if (Object.keys(stats).length < 3) continue;
 
             if (!stats["0"]["validation_loss"]) continue;
             const plotData = keys.map((info, i) => ({
@@ -303,6 +331,7 @@ class GUI extends React.Component<{}, {}> {
                 }))
             }));
             this.results.push({
+                ok: true,
                 version,
                 evalInfo,
                 data: {
@@ -313,15 +342,19 @@ class GUI extends React.Component<{}, {}> {
         }
         this.loaded = this.total;
     }
+    @persist({initial: ".*"}) filter: string;
+    getFilter = () => this.filter;
+    getResults = () => this.results;
     render() {
-        let results = this.results;
-        if (!this.showUnevaluated) results = results.filter(res => res.evalInfo);
+        const throttledFilter = util.throttleGet(500, this.getFilter);
+        let results = util.throttleGet(500, this.getResults);
+        if (!this.showUnevaluated) results = results.filter(res => res.ok && res.evalInfo);
         if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
         try {
-            const fltr = RegExp(this.filter);
+            const fltr = RegExp(throttledFilter);
             results = results.filter(res => res.version.search(fltr) >= 0);
         } catch (e) {
-            console.log("invalid regex", this.filter);
+            console.log("invalid regex", throttledFilter);
         }
         return (
             <div>
@@ -340,21 +373,26 @@ class GUI extends React.Component<{}, {}> {
                     </label>
                 </div>
                 <label>Filter:
-                    <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />
+                    <Observer>
+                    {() => <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />}
+                    </Observer>
                 </label>
                 <Observer>
                     {() => this.loaded < this.total ? <h3>Loading ({this.loaded}/{this.total})...</h3> : <h3>Loading complete</h3>}
                 </Observer>
                 <div className="gui">
-                    {results.map(info => <VersionGUI key={info.version} {...info} options={this.options} />)}
+                    {results.map(info => <VersionGUI key={info.version} p={{...info, options:this.options}} />)}
                 </div>
             </div>
         );
     }
 }
-
+export let gui: any;
 document.addEventListener("DOMContentLoaded", () => {
     const div = document.createElement("div");
     document.body.appendChild(div);
-    ReactDOM.render(<GUI />, div);
+    gui = ReactDOM.render(<GUI />, div);
 });
+
+declare var module: any;
+Object.assign(window, {plot: module.exports, mu, Rx, mobx})

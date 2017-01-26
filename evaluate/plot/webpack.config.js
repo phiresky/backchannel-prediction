@@ -26,7 +26,7 @@ class WatchDirPlugin {
 };
 
 module.exports = {
-    entry: './plot.tsx',
+    entry: './plot',
     devtool: 'source-map',
     plugins: [
         new WatchDirPlugin([
@@ -42,6 +42,7 @@ module.exports = {
         filename: 'plot.[hash].js',
         publicPath: "./"
     },
+    resolve: {extensions: [".js", ".json", ".ts", ".tsx"]},
     module: {
         rules: [
             { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
