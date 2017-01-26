@@ -49,7 +49,7 @@ const ignore = [
     "v036-online-lstm", "v036-online-lstm-dirty"
 ]
 
-type VGPropsMaybe = {ok: false, error: string, version: string} | VGProps;
+type VGPropsMaybe = {ok: false, error: string, version: string, log: string | null} | VGProps;
 type VGProps = {ok: true, evalInfo?: EvalResult[], version: string, data: any, options: any };
 
 function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
@@ -199,6 +199,13 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         );
     }
 }
+function LogGui(p: VGProps) {
+    let res = observable({txt: "Loading..."});
+    (async() => {
+        res.txt = await (await fetch(path(p.version, "train.log"))).text();
+    })();
+    return <Observer>{() => <pre style={{maxHeight: "400px", overflow: "scroll"}}>{res.txt}</pre>}</Observer>;
+}
 @observer
 class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
     @observable tab = 0;
@@ -218,14 +225,20 @@ class VersionGUI extends React.Component<{p: VGPropsMaybe}, {}> {
                 <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
                     <TabList>
                         <Tab>Training Graph</Tab>
+                        <Tab>Training Log</Tab>
                         {evalInfo && <Tab>Eval Detail Graphs ({evalInfo.length} evaluations) </Tab>}
                     </TabList>
                     <TabPanel><VersionEpochsGUI {...p} /></TabPanel>
+                    <TabPanel><LogGui {...p} /></TabPanel>
                     {evalInfo && <TabPanel><VersionEvalDetailGUI {...p} /></TabPanel>}
                 </Tabs>
             );
         } else {
-            inner = <div>Error: {p.error}</div>;
+            inner = (
+                <div><p>Error: <pre>{p.error}</pre></p>
+                    {p.log ? <div>Log: <pre>{p.log}</pre></div>:<div>(Log file could not be loaded)</div>}
+                </div>
+            );
         }
         return (
             <div key={version}>
@@ -270,6 +283,16 @@ class GUI extends React.Component<{}, {}> {
             animation: {duration: 0}
         };
     }
+    async errorTryGetLog(version: string, error: string) {
+        const resp = await fetch(path(version, "train.log"));
+        let log = null;
+        if(resp.ok) {
+            log = await resp.text();
+        }
+        this.results.push({
+            ok: false, version, error, log
+        })
+    }
     async retrieveData() {
         const relevant = VERSIONS.filter(version => !ignore.includes(version)).map(version => ({ version }));
         const keys = [{
@@ -290,22 +313,14 @@ class GUI extends React.Component<{}, {}> {
             this.loaded++;
             const resp = await fetch(path(version, "config.json"));
             if (!resp.ok) {
-                this.results.push({
-                    ok: false,
-                    version: version, 
-                    error: `${path(version, "config.json")} could not be found`,
-                })
+                await this.errorTryGetLog(version, `${path(version, "config.json")} could not be found`);
                 continue;
             }
             let data;
             try {
                 data = await resp.json();
             } catch (e) {
-                this.results.push({
-                    ok: false,
-                    version: version, 
-                    error: `Error parsing ${version}/config.json: ${e}`,
-                });
+                await this.errorTryGetLog(version, `Error parsing ${version}/config.json: ${e}`);
                 continue;
             }
             const evalResp = await fetch(evalResult(version));
