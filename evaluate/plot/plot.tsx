@@ -185,7 +185,7 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         }
         return (
             <div>
-                <Line data={toJS(data)} options={options} />
+                <Line data={toJS(data)} options={toJS(options)} />
                 {evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
