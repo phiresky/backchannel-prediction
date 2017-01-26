@@ -70,7 +70,7 @@ def feedforward_dropout(train_config):
                                         shape=(-1 if batch_size is None else batch_size, sequence_length * input_dim))
     cur_input = input_layer_reshaped
 
-    [*[shouldnull, input_dropout], *hidden_layers] = layer_sizes
+    [[shouldnull, input_dropout], *hidden_layers] = layer_sizes
     if shouldnull is not None:
         raise Exception("first should be null for dropout")
     cur_input = DropoutLayer(cur_input, input_dropout)
