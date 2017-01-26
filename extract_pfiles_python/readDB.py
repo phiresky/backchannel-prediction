@@ -222,6 +222,7 @@ class DBReader:
         return feat
 
 
+@functools.lru_cache(1)
 def load_backchannels(path):
     categories = {}
     catnames = {}
@@ -321,7 +322,7 @@ def parseConversationSet(parallel, config_path: str, setname: str, convIDs: Set[
         yield from x
 
 
-@functools.lru_cache(maxsize=1)
+@functools.lru_cache(maxsize=8)
 def loadDBReader(config_path: str):
     config = util.load_config(config_path)
     return DBReader(config, config_path)
@@ -434,14 +435,18 @@ def group(ids):
         end_index, _ = v2[-1]
         yield start_index, k, end_index + 1
 
-def is_while_monologuing(reader: DBReader, uttId, uttInfo):
+
+def bc_is_while_monologuing(reader: DBReader, uttInfo):
     fromTime = float(uttInfo['from'])
     toTime = float(uttInfo['to'])
     min_talk_len = reader.extract_config.get('min_talk_len', None)
     if min_talk_len is not None:
         middle = (toTime - fromTime) / 2
+        bc_convid = uttInfo['convid']
+        talking_convid = bc_convid[:-1] + dict(A="B", B="A")[bc_convid[-1]]
         filtered = list(util.filter_ranges([middle],
-                                      list(util.get_monologuing_segments(reader, uttInfo['convid'], min_talk_len))))
+                                           list(
+                                               util.get_monologuing_segments(reader, talking_convid, min_talk_len))))
         if filtered != [middle]:
             return False
         else:
@@ -449,14 +454,23 @@ def is_while_monologuing(reader: DBReader, uttId, uttInfo):
     else:
         return True
 
-def all_uttids(reader: DBReader, convos: List[str]):
+
+def all_uttids_(config_path: str, convset: str):
+    logging.debug(f"getting all bc uttids...{config_path}, {convset}")
+    reader = loadDBReader(config_path)
+    convos = read_conversations(reader.config)[convset]
     for convo in convos:
         for channel in ["A", "B"]:
             convid = f"{convo}-{channel}"
             for (uttId, uttInfo) in reader.get_backchannels(list(reader.get_utterances(convid))):
-                if is_while_monologuing(reader, uttId, uttInfo):
+                if bc_is_while_monologuing(reader, uttInfo):
                     yield uttId, False
                     yield uttId, True
+
+
+@functools.lru_cache(maxsize=8)
+def all_uttids(config_path: str, convset: str):
+    return list(all_uttids_(config_path, convset))
 
 
 @functools.lru_cache(maxsize=1)
@@ -473,11 +487,11 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
             return pickle.load(file)
     else:
         logging.debug(f"extracting and saving data to {path}")
-        reader = DBReader(config, config_path)
+        reader = loadDBReader(config_path)
         convos = read_conversations(config)
-        c = [convo for convos in convos.values() for convo in convos]
+        utts = [utt for convoset in convos.keys() for utt in all_uttids(config_path, convoset)]
         out_dict = {}
-        for uttId, is_bc in tqdm(list(all_uttids(reader, c))):
+        for uttId, is_bc in tqdm(utts):
             out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
         val = out_dict
 

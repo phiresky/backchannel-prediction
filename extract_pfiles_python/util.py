@@ -2,7 +2,6 @@ import functools
 import json
 from collections import OrderedDict
 from typing import List, Tuple, Iterator
-from .readDB import DBReader
 
 
 @functools.lru_cache(maxsize=8)
@@ -45,7 +44,7 @@ def filter_ranges(numbers: List[float], ranges: List[Tuple[float, float]]):
                 return
 
 
-def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_len=None) -> Iterator[
+def get_talking_segments(reader, convid: str, invert: bool, min_talk_len=None) -> Iterator[
     Tuple[float, float]]:
     talk_start = 0
     talking = False
@@ -69,7 +68,7 @@ def get_talking_segments(reader: DBReader, convid: str, invert: bool, min_talk_l
             yield talk_start, talk_end
 
 
-def get_monologuing_segments(reader: DBReader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
+def get_monologuing_segments(reader, convid: str, min_talk_len=None) -> Iterator[Tuple[float, float]]:
     bc_convid = convid[:-1] + dict(A="B", B="A")[convid[-1]]
     talking_segs = get_talking_segments(reader, convid, False)
     listening_segs = get_talking_segments(reader, bc_convid, True)

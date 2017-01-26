@@ -115,7 +115,6 @@ def train():
     train_config['context_frames'] = context_frames
 
     dir = os.path.dirname(config_path)
-    convos = readDB.read_conversations(config)
     gaussian = train_config['gaussian']
     out_all = {'all': True, 'single': False}[train_config['output_type']]
     if gaussian:
@@ -132,7 +131,7 @@ def train():
             # groups = [slice(begin, end) for begin, end in meta['ranges']]
             # inputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
-            backchannels = list(readDB.all_uttids(reader, convos[t]))
+            backchannels = list(readDB.all_uttids(config_path, t))
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             train_config['input_dim'] = input_dim
