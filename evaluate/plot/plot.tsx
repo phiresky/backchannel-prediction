@@ -237,7 +237,7 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
             );
         } else {
             inner = (
-                <div><p>Error: <pre>{p.error}</pre></p>
+                <div><p>Error: {p.error}</p>
                     {p.log ? <div>Log: <pre style={logStyle}>{p.log}</pre></div> : <div>(Log file could not be loaded)</div>}
                 </div>
             );

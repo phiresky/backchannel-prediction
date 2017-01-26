@@ -468,7 +468,7 @@ def all_uttids_(config_path: str, convset: str):
                     yield uttId, True
 
 
-@functools.lru_cache(maxsize=8)
+# @functools.lru_cache(maxsize=8)
 def all_uttids(config_path: str, convset: str):
     return list(all_uttids_(config_path, convset))
 
