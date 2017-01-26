@@ -2,7 +2,7 @@ import { Line } from 'react-chartjs-2';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Table } from 'reactable';
-import { toJS, observable, action, computed } from 'mobx';
+import { observable, action, computed } from 'mobx';
 import * as mobx from 'mobx';
 import { observer, Observer } from 'mobx-react';
 import 'react-select/dist/react-select.css';
@@ -85,12 +85,13 @@ const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {
     "Eval: F1 Score": r => r.totals.eval.f1_score
 }
 const colors = "#3366CC,#DC3912,#FF9900,#109618,#990099,#3B3EAC,#0099C6,#DD4477,#66AA00,#B82E2E,#316395,#994499,#22AA99,#AAAA11,#6633CC,#E67300,#8B0707,#329262,#5574A6,#3B3EAC".split(",");
-function toTableData(v: EvalResult) {
+const toTableData = mobx.createTransformer(function toTableData(v: EvalResult) {
     return {
         ...Object.assign({}, ...Object.keys(xextractors).map(name => ({ [name]: xextractors[name](v).toPrecision(3) }))),
         ...Object.assign({}, ...Object.keys(yextractors).map(name => ({ [name]: yextractors[name](v).toPrecision(3) }))),
     }
-}
+});
+const toJS = mobx.createTransformer(x => mobx.toJS(x));
 @observer
 class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
     validXaxes = Object.keys(xextractors);
@@ -157,7 +158,7 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
                     options={Object.keys(yextractors).map(value => ({ value, label: value }))}
                     multi
                     onChange={x => this.config.yaxes = (x as any[]).map(x => x.value)} />
-                <Line data={{ datasets }} options={options} redraw />
+                <Line data={{ datasets }} options={options} />
                 <Table className="evalTable" sortable
                     itemsPerPage={6}
                     filterable={"Margin of Error Width,Threshold,Min Talk Len".split(",")}
@@ -183,8 +184,8 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
             var defaultSort = { column: 'Eval: F1 Score', direction: 'desc' };
         }
         return (
-            <div key={version}>
-                <Line redraw data={toJS(data)} options={options} />
+            <div>
+                <Line data={toJS(data)} options={options} />
                 {evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
@@ -243,7 +244,7 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
             );
         }
         return (
-            <div key={version}>
+            <div>
                 <button style={{ float: "right" }} onClick={() => this.props.gui.load(version)}>reload</button>
                 <h3>{title ? `${title}` : `${version}`}</h3>
                 <p>
@@ -272,6 +273,27 @@ const axis_keys = [{
     color: "green",
     axis: "Error"
 }];
+function maxByKey<T>(data: T[], extractor: (t: T) => number) {
+    return data.reduce((curMax, ele) => extractor(curMax) > extractor(ele) ? curMax : ele);
+}
+
+@observer class OverviewStats extends React.Component<{results: VGPropsMaybe[]}, {}> {
+    bestResult = mobx.createTransformer((data: EvalResult[]) => {
+        return maxByKey(data, info => info.totals.valid.f1_score);
+    });
+    render() {
+        const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({version: res.version, info: this.bestResult((res as VGProps).evalInfo!)}));
+        return (
+            <div>
+                <h4>Best for each</h4>
+                <Table className="evalTable"
+                    defaultSort={{ column: 'Valid: F1 Score', direction: 'desc' }}
+                    data={results.map(result => ({Git:result.version.split(":")[0], Version: result.version.split(":")[1], ...toTableData(result.info)}))}
+                    sortable filterable/>
+            </div>
+        );
+    }
+}
 @observer
 class GUI extends React.Component<{}, {}> {
     constructor() {
@@ -364,10 +386,16 @@ class GUI extends React.Component<{}, {}> {
     async retrieveData() {
         const relevant = VERSIONS.filter(version => !ignore.includes(version)).map(version => ({ version }));
         this.total = relevant.length + 1;
+        const promi: Promise<any>[] = [];
         for (const { version } of relevant) {
-            this.loaded++;
-            await this.load(version);
+            (async() => {
+                const prom = this.load(version);
+                promi.push(prom);
+                await prom;
+                this.loaded++;
+            })();
         }
+        await Promise.all(promi);
         this.loaded = this.total;
     }
     @persist({ initial: ".*" }) filter: string;
@@ -416,6 +444,7 @@ class GUI extends React.Component<{}, {}> {
                 <Observer>
                     {() => this.loaded < this.total ? <h3>Loading ({this.loaded}/{this.total})...</h3> : <h3>Loading complete</h3>}
                 </Observer>
+                <OverviewStats results={results} />
                 <div className="gui">
                     {results.map(info => <VersionGUI key={info.version} gui={this} p={{ ...info, options }} />)}
                 </div>
