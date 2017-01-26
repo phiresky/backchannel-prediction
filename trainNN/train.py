@@ -176,6 +176,7 @@ def train():
             json.dump({**config, 'train_output': {
                 'stats': stats,
                 'source': config_path,
+                'environment': dict(os.environ)
             }}, f, indent='\t')
         logging.info("Wrote output to " + config_out)
     latest_path = os.path.join("trainNN", "out", "latest")
