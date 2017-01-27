@@ -17,11 +17,11 @@ class WatchDirPlugin {
                 }));
             }
         });
-        compiler.plugin("after-compile", (compilation, cb) => {
+        /*compiler.plugin("after-compile", (compilation, cb) => {
             compilation.contextDependencies.push(...this.paths);
             compilation.fileDependencies.push(...this.paths);
             cb();
-        });
+        });*/
     }
 };
 

@@ -122,7 +122,8 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
     correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
 
-    net_output = reader.features.get_net_output(convid, config["epoch"], smooth=True)
+    net_output = reader.features.get_multidim_net_output(convid, config["epoch"], smooth=True)
+    net_output = 1 - net_output[:, [0]]
     predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0

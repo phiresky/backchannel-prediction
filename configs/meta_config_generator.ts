@@ -73,6 +73,7 @@ const interesting_layers_normal = [
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
 const interesting_layers_dropout: [number|null, number][][] = [
+    [[null, 0.2], [50, 0.5], [20, 0.5]],
     [[null, 0.2], [75, 0.5], [40, 0.5]],
     [[null, 0.2], [100, 0.5], [50, 0.5]],
     [[null, 0.2], [125, 0.5], [80, 0.5]],
