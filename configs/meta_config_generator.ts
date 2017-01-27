@@ -80,13 +80,13 @@ const interesting_layers_dropout = [
     [[null, 0.2], [100, 0.5], [70, 0.4], [50, 0.3], [40, 0.2]]
 ]
 for (const layers of interesting_layers_dropout) {
-    const categoryname = "ff-ffv-dropout";
+    const categoryname = "lstm-ffv-dropout";
     const name = `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize||"inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
     const config = make_config({
         name,
         extract_config: make_extract_config({input_features: features_ffv, extraction_method: method_std()}),
         train_config: {
-            ...make_train_config({layer_sizes: layers, model_function: "feedforward_dropout", epochs: 200}),
+            ...make_train_config({layer_sizes: layers, model_function: "lstm_dropout", epochs: 100}),
             update_method: "adam",
             learning_rate: 0.001
         },
