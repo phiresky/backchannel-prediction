@@ -1,4 +1,4 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
 const make_config = ({name, extract_config = make_extract_config(), train_config = make_train_config()}) => ({
     name,
