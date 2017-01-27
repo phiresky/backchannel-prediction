@@ -32,12 +32,6 @@ from joblib import Parallel, delayed
 import pickle
 
 MAX_TIME = 100 * 60 * 60  # 100 hours
-# these do not appear in the switchboard dialog act corpus but are very common in the sw98 transcriptions
-# (counted with checkBackchannels.count_utterances)
-backchannels_hardcoded = {'hum', 'um-hum', 'hm', 'yeah yeah', 'um-hum um-hum', 'uh-huh uh-huh',
-                          'right right', 'right yeah', "yeah that's true", 'uh-huh yeah', 'um-hum yeah', 'okay_1',
-                          'yeah right', 'yeah uh-huh', 'yeah well', 'yes yes', 'absolutely', 'right uh-huh',
-                          }
 noise_isl = ['<SIL>', '<NOISE>', 'LAUGHTER']
 noise_orig = ['[silence]', '[laughter]', '[noise]', '[vocalized-noise]']
 
@@ -113,7 +107,9 @@ class DBReader:
         self.use_original_db = self.extract_config['useOriginalDB']
         self.features = Features(config, config_path)
         self.load_db()
-        self.backchannels = load_backchannels(self.paths_config['backchannels'])
+        self.backchannels, self.categories = load_backchannels(self.paths_config['backchannels'])
+        self.category_to_index = {category: (index + 1) for index, category in enumerate(self.categories)}
+        self.bc_to_category = {bc: category for category, bcs in self.categories.items() for bc in bcs}
         self.sample_window_ms = self.extract_config['sample_window_ms']
         self.method = self.extract_config['extraction_method']
 
@@ -230,7 +226,7 @@ def load_backchannels(path):
     with open(path) as f:
         for line in f.readlines():
             line = line.strip()
-            if line[0] == '#':
+            if len(line) == 0 or line[0] == '#':
                 continue
             line = line.split(":")
             if len(line) == 2:
@@ -245,8 +241,7 @@ def load_backchannels(path):
             bcs.add(line)
             categoryset = categories.setdefault(category, set())
             categoryset.add(line)
-    pprint(categories)
-    return backchannels_hardcoded | set(bcs)
+    return set(bcs), categories
 
 
 def swap_speaker(convid: str):
@@ -289,9 +284,19 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.
     F = F[0:range_frames]
     frames, dim = F.shape
     if frames < range_frames:
-        raise Exception(f"FBC too small: {bc_frames}")
+        raise Exception(f"FBC too small: {frames}")
 
-    out = np.array([[1 if bc else 0]], dtype=np.int32)
+    if bc:
+        if reader.extract_config.get("categories", None) is not None:
+            txt = reader.noise_filter(uttInfo['text'].lower())
+            outnum = reader.category_to_index[reader.bc_to_category[txt]]
+            if outnum == 0:
+                raise Exception("new phone who dis")
+        else:
+            outnum = 1
+    else:
+        outnum = 0
+    out = np.array([[outnum]], dtype=np.int32)
     return np.copy(F), np.repeat(out, frames, axis=0)
 
 

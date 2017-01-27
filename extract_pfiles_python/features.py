@@ -195,10 +195,10 @@ class Features:
         else:
             return feature
 
-    def batched_eval(self, inputs, mapper, batchsize=2000):
+    def batched_eval(self, inputs, mapper, out_dim=1, batchsize=2000):
         from . import util
         total_frames = inputs.shape[0]
-        output = np.zeros(shape=(total_frames, 1), dtype=np.float32)
+        output = np.zeros(shape=(total_frames, out_dim), dtype=np.float32)
         for ndx, batch in util.batch_list(inputs, batchsize, True):
             output[ndx:ndx + batch.shape[0]] = mapper(batch)
         return output
@@ -232,6 +232,33 @@ class Features:
 
         inp = np.stack(stacker())
         output = self.batched_eval(inp, mapper)
+        if smooth:
+            import scipy
+            res = scipy.ndimage.filters.gaussian_filter1d(output, 300 / 10, axis=0)
+            return NumFeature(res)
+        else:
+            return NumFeature(output)
+
+    @functools.lru_cache(maxsize=2)
+    @NumFeatureCache
+    def get_multidim_net_output(self, convid: str, epoch: str, smooth: bool):
+        layers, fn = get_network_outputter(self.config_path, epoch, batch_size=None)
+        input = self.get_combined_feature(convid)
+        total_frames = input.shape[0]
+        context_frames = self.config['train_config']['context_frames']
+        context_stride = self.config['train_config']['context_stride']
+        context_range = context_frames * context_stride
+
+        def stacker():
+            for frame in range(0, total_frames):
+                if frame < context_range:
+                    # this is shitty / incorrect
+                    yield input[range(0, context_range, context_stride)]
+                else:
+                    yield input[range(frame - context_range, frame, context_stride)]
+
+        inp = np.stack(stacker())
+        output = self.batched_eval(inp, fn, out_dim=self.config['train_config']['num_labels'])
         if smooth:
             import scipy
             res = scipy.ndimage.filters.gaussian_filter1d(output, 300 / 10, axis=0)

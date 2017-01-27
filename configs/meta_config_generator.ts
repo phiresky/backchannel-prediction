@@ -47,7 +47,7 @@ const make_extract_config = ({input_features = features_std, extraction_method =
     "outputDirectory": "extract_pfiles_python/out"
 });
 
-const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50],
+const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50] as number[]|[number|null, number][],
     model_function = "feedforward_simple",
     epochs = 200
 } = {}) => ({
@@ -72,13 +72,13 @@ const interesting_layers_normal = [
     [50, 20], [35, 35],
     [100, 50, 25], [100, 50, 50], [100, 20, 100], [70, 50, 40, 30]
 ];
-const interesting_layers_dropout = [
+const interesting_layers_dropout: [number|null, number][][] = [
     [[null, 0.2], [75, 0.5], [40, 0.5]],
     [[null, 0.2], [100, 0.5], [50, 0.5]],
     [[null, 0.2], [125, 0.5], [80, 0.5]],
     [[null, 0.2], [100, 0.5], [50, 0.5], [25, 0.5]],
     [[null, 0.2], [100, 0.5], [70, 0.4], [50, 0.3], [40, 0.2]]
-]
+];
 for (const layers of interesting_layers_dropout) {
     const categoryname = "lstm-ffv-dropout";
     const name = `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize||"inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;

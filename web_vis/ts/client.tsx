@@ -131,6 +131,18 @@ class NNExample extends React.Component<{gui: GUI}, {}> {
     render() {
         if(!this.props.gui.conversation) return <span/>;
         const fes = this.props.gui.getFeatures().data;
+        let c3 = null, c4 = null, c5;
+        if(fes) {
+            const c1 = fes.categories
+                .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] };
+            const c2 = c1.children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] };
+            if(c2) {
+                c3 = c2.children.map(x => typeof x !== "string"? x.name:x );
+                c4 = c2.children.find(x => typeof x !== "string" && x.name === this.version)! as { name: string, children: s.CategoryTreeElement[] };
+                if(c4) c5 = c4.children.map(x => typeof x !== "string"? x.name:x )
+            }
+                                
+        }
         return (
         <B.Popover popoverClassName="withpadding" position={B.Position.BOTTOM}
             content={<div>
@@ -144,10 +156,7 @@ class NNExample extends React.Component<{gui: GUI}, {}> {
                     <label className="pt-label pt-inline">NN version
                         <div className="pt-select">
                             <select value={this.version} onChange={mobx.action("set nn version", (e: React.SyntheticEvent<HTMLSelectElement>) => this.version = e.currentTarget.value)}>
-                                {fes && (((fes.categories
-                                    .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] })
-                                    .children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] }))
-                                    .children.map(x => typeof x !== "string"? x.name:x ).map(version =>
+                                {c3 && c3.map(version =>
                                         <option key={version} value={version}>{version}</option>)
                                 }
                             </select>
@@ -156,13 +165,8 @@ class NNExample extends React.Component<{gui: GUI}, {}> {
                     <label className="pt-label pt-inline">epoch
                         <div className="pt-select">
                             <select value={this.epoch} onChange={mobx.action("set nn epoch", (e: React.SyntheticEvent<HTMLSelectElement>) => this.epoch = e.currentTarget.value)}>
-                                {fes && (((((fes.categories
-                                    .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] })
-                                    .children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] }))
-                                    .children.find(x => typeof x !== "string" && x.name === this.version)! as { name: string, children: s.CategoryTreeElement[] }))
-                                    .children.map(x => typeof x !== "string"? x.name:x ).map(epoch =>
-                                        <option key={epoch} value={epoch}>{epoch}</option>)
-                                }
+                                {c5 && c5.map(epoch =>
+                                        <option key={epoch} value={epoch}>{epoch}</option>)}
                             </select>
                         </div>
                     </label>
@@ -438,12 +442,14 @@ export class GUI extends React.Component<{}, {}> {
         return (
             <div>
                 <div style={{ margin: "10px" }} className="headerBar">
-                    <p><ConversationSelector gui={this} />
-                    <label>Follow playback:
-                        <input type="checkbox" checked={this.followPlayback}
-                            onChange={mobx.action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
-                    </label>
-                    <span>Playback position: <PlaybackPosition gui={this} /></span></p>
+                    <div>
+                        <ConversationSelector gui={this} />
+                        <label>Follow playback:
+                            <input type="checkbox" checked={this.followPlayback}
+                                onChange={mobx.action("changeFollowPlayback", (e: React.SyntheticEvent<HTMLInputElement>) => this.followPlayback = e.currentTarget.checked)} />
+                        </label>
+                        <span>Playback position: <PlaybackPosition gui={this} /></span>
+                    </div>
                     <RegionSelector gui={this} />
                     <MaybeAudioRecorder gui={this} />
                     <button onClick={() => location.hash = "#" + this.serialize()}>Serialize → URL</button>

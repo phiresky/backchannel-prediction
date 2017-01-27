@@ -98,7 +98,7 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
-    return features.get_net_output(convid, id, smooth)
+    return features.get_multidim_net_output(convid, id, smooth)
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):

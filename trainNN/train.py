@@ -62,9 +62,11 @@ def iterate_faster_minibatches(train_config, all_elements, output_all):
     logging.debug("shuffling batches")
     batches = list(tqdm(iterate_minibatches(train_config, all_elements, output_all)))
     logging.debug("shuffling done")
+
     def iter():
         random.shuffle(batches)
         return batches
+
     return iter
 
 
@@ -118,7 +120,7 @@ def train():
     gaussian = train_config['gaussian']
     out_all = {'all': True, 'single': False}[train_config['output_type']]
     if gaussian:
-        pass
+        raise Exception("not implemented")
         # train_data = load_numpy_file(os.path.join(dir, train_config['files']['train']))
         # validate_data = load_numpy_file(os.path.join(dir, train_config['files']['validate']))
         # train_inputs, train_outputs = train_data[:, :input_dim], train_data[:, input_dim]
@@ -134,7 +136,12 @@ def train():
             backchannels = list(readDB.all_uttids(config_path, t))
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
+            inxtoname = {**{v: k for k, v in reader.category_to_index.items()}, 0: None}
+            category_names = [inxtoname[inx] for inx in range(len(reader.categories) + 1)]
+
             train_config['input_dim'] = input_dim
+            train_config['category_names'] = category_names
+            train_config['num_labels'] = len(category_names)
             logging.debug(f"input dim = {input_dim}")
             context_stride = train_config['context_stride']
             context_length = int(train_config['context_ms'] / 10 / context_stride)

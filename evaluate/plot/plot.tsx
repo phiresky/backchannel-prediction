@@ -85,10 +85,11 @@ const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {
     "Eval: F1 Score": r => r.totals.eval.f1_score
 }
 const colors = "#3366CC,#DC3912,#FF9900,#109618,#990099,#3B3EAC,#0099C6,#DD4477,#66AA00,#B82E2E,#316395,#994499,#22AA99,#AAAA11,#6633CC,#E67300,#8B0707,#329262,#5574A6,#3B3EAC".split(",");
+const toPrecision = (x: number | null) => typeof x === "number" ? x.toPrecision(3) : NaN;
 const toTableData = mobx.createTransformer(function toTableData(v: EvalResult) {
     return {
-        ...Object.assign({}, ...Object.keys(xextractors).map(name => ({ [name]: xextractors[name](v).toPrecision(3) }))),
-        ...Object.assign({}, ...Object.keys(yextractors).map(name => ({ [name]: yextractors[name](v).toPrecision(3) }))),
+        ...Object.assign({}, ...Object.keys(xextractors).map(name => ({ [name]: toPrecision(xextractors[name](v)) }))),
+        ...Object.assign({}, ...Object.keys(yextractors).map(name => ({ [name]: toPrecision(yextractors[name](v)) }))),
     }
 });
 const toJS = mobx.createTransformer(x => mobx.toJS(x));
