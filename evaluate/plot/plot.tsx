@@ -389,12 +389,7 @@ class GUI extends React.Component<{}, {}> {
         this.total = relevant.length + 1;
         const promi: Promise<any>[] = [];
         for (const { version } of relevant) {
-            (async() => {
-                const prom = this.load(version);
-                promi.push(prom);
-                await prom;
-                this.loaded++;
-            })();
+            promi.push(this.load(version).then(() => this.loaded++));
         }
         await Promise.all(promi);
         this.loaded = this.total;
