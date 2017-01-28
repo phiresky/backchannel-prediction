@@ -47,7 +47,8 @@ const make_extract_config = ({input_features = features_std, extraction_method =
     "outputDirectory": "extract_pfiles_python/out"
 });
 
-const make_train_config = ({context_ms = 800, context_stride = 2, layer_sizes = [100, 50] as number[]|[number|null, number][],
+const make_train_config = ({
+    context_ms = 800, context_stride = 2, layer_sizes = [100, 50] as number[]|[number|null, number][],
     model_function = "feedforward_simple",
     epochs = 200
 } = {}) => ({
@@ -80,19 +81,45 @@ const interesting_layers_dropout: [number|null, number][][] = [
     [[null, 0.2], [100, 0.5], [50, 0.5], [25, 0.5]],
     [[null, 0.2], [100, 0.5], [70, 0.4], [50, 0.3], [40, 0.2]]
 ];
-for (const layers of interesting_layers_dropout) {
-    const categoryname = "lstm-ffv-dropout";
-    const name = `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize||"inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
-    const config = make_config({
-        name,
-        extract_config: make_extract_config({input_features: features_ffv, extraction_method: method_std()}),
-        train_config: {
-            ...make_train_config({layer_sizes: layers, model_function: "lstm_dropout", epochs: 100}),
-            update_method: "adam",
-            learning_rate: 0.001
-        },
-    });
-    const outdir = `configs/${categoryname}`;
-    if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
-    fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
+
+
+const best_layers = model_function => ({
+    "ff_simple": [
+        [75, 40],
+        [100, 50, 25],
+    ],
+    "lstm_simple": [
+        [50, 20],
+        [100, 20, 100]
+    ]
+})[model_function];
+
+const mfcc_combos = [
+    [...features_std, "get_ffv", "get_mfcc"],
+    [...features_std, "get_mfcc"],
+    ["get_power", "get_ffv", "get_mfcc"],
+    ["get_power", "get_mfcc"]
+];
+const dropout_name = categoryname => `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize || "inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
+
+for (const model_function of ["lstm_simple", "ff_simple"]) {
+    const categoryname0 = model_function.split("_")[0];
+    for (const input_features of mfcc_combos) {
+        const categoryname = categoryname0 + "-" + input_features.map(feat => feat.split("_")[1]);
+        for (const layer_sizes of best_layers(model_function)) {
+            const name = `${categoryname}-${layer_sizes.join("-")}`;
+            const config = make_config({
+                name,
+                extract_config: make_extract_config({input_features, extraction_method: method_std()}),
+                train_config: {
+                    ...make_train_config({layer_sizes, model_function, epochs: 100}),
+                    update_method: "adam",
+                    learning_rate: 0.001
+                },
+            });
+            const outdir = `configs/${categoryname}`;
+            if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
+            fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
+        }
+    }
 }
