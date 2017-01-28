@@ -74,6 +74,7 @@ def filter_power(power: NumFeature) -> NumFeature:
     power = np.log10(val)
     power = power.applyFilter(power_filter_0)
     power = power.applyFilter(power_filter_0)
+    # normalize. warning: this is not actually possible in realtime because we don't yet know global min/max!
     power = power.normalize(min=-1, max=1)
     return power
 
@@ -147,6 +148,36 @@ def pure_cut_range(start_time: float, end_time: float, feat_fn: str, *args, **kw
     return globals()[feat_fn](*args, **kwargs)[f"{start_time}s":f"{end_time}s"]
 
 
+melMatrix = None
+
+
+def fbmatrixCosine(m: float, n: float):
+    x, y = np.meshgrid(range(n), range(m))
+    D = np.cos(np.pi * (2 * x + 1) * y / (2 * n))
+
+
+# adapted from /project/iwslt2016/DE/sys2016/B-systems/B-02-samples-MFCC+MVDR+T/featDesc
+# https://bitbucket.org/jrtk/janus/wiki/Python/Preprocessing
+def pure_get_mfcc(adc_path: str, sample_windows_ms: float, convid: str):
+    import scipy.fftpack
+    import sklearn.preprocessing
+    global melMatrix
+    adc = pure_get_adc(adc_path, convid)
+
+    fft0 = adc.spectrum(window=f"{sample_windows_ms}ms")
+    fft = fft0.vtln(ratio=1.0, edge=0.8, mod='lin')
+    if melMatrix is None:
+        melMatrix = AbstractStep._getMelMatrix(None, filters=30, points=fft.shape[1], samplingRate=fft.samplingRate)
+    mel = fft.filterbank(melMatrix)
+    lMEL = np.log10(mel + 1)
+
+    cepN = 20
+    MFCC_MCEP = scipy.fftpack.dct(x=lMEL, type=2, n=cepN, norm="ortho")
+    # normalize. warning: this is not actually possible in realtime because we don't yet know global min/max!
+    MFCC_MCEP = sklearn.preprocessing.normalize(MFCC_MCEP, axis=0, norm='max')
+    return NumFeature(MFCC_MCEP)
+
+
 class Features:
     def __init__(self, config: dict, config_path: str):
         self.config = config
@@ -164,6 +195,9 @@ class Features:
 
     def get_ffv(self, convid: str):
         return pure_get_ffv(self.config['paths']['adc'], self.sample_window_ms, convid)
+
+    def get_mfcc(self, convid: str):
+        return pure_get_mfcc(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     def get_combined_feature(self, convid: str, start_time: float = None, end_time: float = None):
         adc_path = self.config['paths']['adc']

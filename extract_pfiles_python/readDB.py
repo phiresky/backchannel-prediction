@@ -460,10 +460,9 @@ def bc_is_while_monologuing(reader: DBReader, uttInfo):
         return True
 
 
-def all_uttids_(config_path: str, convset: str):
-    logging.debug(f"getting all bc uttids...{config_path}, {convset}")
+def all_uttids_(config_path: str, convos: List[str]):
+    logging.debug(f"getting all bc uttids...{config_path}, {convos}")
     reader = loadDBReader(config_path)
-    convos = read_conversations(reader.config)[convset]
     for convo in convos:
         for channel in ["A", "B"]:
             convid = f"{convo}-{channel}"
@@ -474,8 +473,16 @@ def all_uttids_(config_path: str, convset: str):
 
 
 # @functools.lru_cache(maxsize=8)
-def all_uttids(config_path: str, convset: str):
-    return list(all_uttids_(config_path, convset))
+def all_uttids(config_path: str, convos: List[str]):
+    return list(all_uttids_(config_path, convos))
+
+
+def extract_convo(config_path: str, convo: str):
+    reader = loadDBReader(config_path)
+    out_dict = {}
+    for uttId, is_bc in all_uttids_(config_path, [convo]):
+        out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
+    return out_dict
 
 
 @functools.lru_cache(maxsize=1)
@@ -493,11 +500,14 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
     else:
         logging.debug(f"extracting and saving data to {path}")
         reader = loadDBReader(config_path)
-        convos = read_conversations(config)
-        utts = [utt for convoset in convos.keys() for utt in all_uttids(config_path, convoset)]
+        convo_map = read_conversations(config)
+        allconvos = [convo for convos in convo_map.values() for convo in convos]
         out_dict = {}
-        for uttId, is_bc in tqdm(utts):
-            out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
+        for out in Parallel(n_jobs=4)(tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
+            out_dict.update(out)
+
+        # for uttId, is_bc in tqdm(utts):
+        #    out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
         val = out_dict
 
         os.makedirs(os.path.dirname(path), exist_ok=True)

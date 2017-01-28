@@ -14,12 +14,20 @@
   "extract_config": {
     "input_features": [
       "get_power",
-      "get_pitch"
+      "get_pitch",
+      "get_ffv",
+      "get_mfcc"
     ],
     "extraction_method": {
       "type": "discrete",
-      "bc": [-1.1, -0.1],
-      "nbc": [-2.9, -1.9]
+      "bc": [
+        -1.1,
+        -0.1
+      ],
+      "nbc": [
+        -2.9,
+        -1.9
+      ]
     },
     "useOriginalDB": true,
     "useWordsTranscript": false,
@@ -37,7 +45,10 @@
     "batch_size": 250,
     "epochs": 100,
     "gaussian": false,
-    "layer_sizes": [40, 40],
+    "layer_sizes": [
+      40,
+      40
+    ],
     "output_type": "all"
   },
   "eval_config": {

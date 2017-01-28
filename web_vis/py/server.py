@@ -129,7 +129,7 @@ async def sendOtherFeature(ws, id, feat):
 
 def get_extracted_features(reader: DBReader):
     return OrderedDict([(name, getattr(reader.features, f"get_{name}")) for name in
-                        "adc,power,ffv,pitch,combined_feature".split(",")])
+                        "adc,power,ffv,mfcc,pitch,combined_feature".split(",")])
 
 
 def get_features():
