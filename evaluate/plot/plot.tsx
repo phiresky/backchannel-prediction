@@ -302,10 +302,10 @@ class GUI extends React.Component<{}, {}> {
         this.retrieveData();
     }
     @observable useMinMax = false;
-    @observable showUnevaluated = true;
+    @observable onlyEvaluated = true; @observable onlyUnevaluated = false;
     @observable onlyNew = true;
     @observable onlyFailed = false;
-    @observable onlyOk = false;
+    @observable onlyOk = true;
     @observable results = observable.map() as any as Map<string, VGPropsMaybe>;
     @observable loaded = 0; @observable total = 1;
     axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {
@@ -402,7 +402,8 @@ class GUI extends React.Component<{}, {}> {
     getResults = () => this.results;
     resultVisible(result: VGPropsMaybe, filter: string) {
         let results = [result];
-        if (!this.showUnevaluated) results = results.filter(res => res.ok && res.evalInfo);
+        if (this.onlyEvaluated) results = results.filter(res => res.ok && res.evalInfo);
+        if (this.onlyUnevaluated) results = results.filter(res => !(res.ok && res.evalInfo));
         if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
         if (this.onlyFailed) results = results.filter(res => !res.ok);
         if (this.onlyOk) results = results.filter(res => res.ok);
@@ -424,8 +425,12 @@ class GUI extends React.Component<{}, {}> {
         return (
             <div>
                 <div>
-                    <label>Show unevaluated:
-                        <input type="checkbox" checked={this.showUnevaluated} onChange={x => this.showUnevaluated = x.currentTarget.checked}
+                    <label>Only evaluated:
+                        <input type="checkbox" checked={this.onlyEvaluated} onChange={x => this.onlyEvaluated = x.currentTarget.checked}
+                        />
+                    </label>
+                    <label>Only unevaluated:
+                        <input type="checkbox" checked={this.onlyUnevaluated} onChange={x => this.onlyUnevaluated = x.currentTarget.checked}
                         />
                     </label>
                     <label>Use fixed min/max:
