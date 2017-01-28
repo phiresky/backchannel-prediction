@@ -116,15 +116,29 @@ def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple
     return correct + margin[0] <= predicted <= correct + margin[1]
 
 
+def random_predictor(reader: DBReader, convid: str, random_config: dict):
+    # random.seed(convid)
+    utts = list(reader.get_utterances(convid))
+    mintime = float(utts[0][1]['from'])
+    maxtime = float(utts[-1][1]['to'])
+    bcount = len(reader.get_backchannels(utts))
+    predicted = [random.uniform(mintime, maxtime) for _ in range(bcount)]
+    predicted.sort()
+    return predicted
+
+
 def evaluate_conv(config_path: str, convid: str, config: dict):
     reader = loadDBReader(config_path)
     bc_convid = swap_speaker(convid)
     correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
 
-    net_output = reader.features.get_multidim_net_output(convid, config["epoch"], smooth=True)
-    net_output = 1 - net_output[:, [0]]
-    predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
+    if 'random_baseline' in config:
+        predicted_bcs = random_predictor(reader, convid, config['random_baseline'])
+    else:
+        net_output = reader.features.get_multidim_net_output(convid, config["epoch"], smooth=True)
+        net_output = 1 - net_output[:, [0]]
+        predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
     if predicted_count > 0:
@@ -218,7 +232,7 @@ def detailed_analysis(config):
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict):
     totals = {}
     results = {}
-    if "weights_file" not in eval_config and eval_config["epoch"] == "best":
+    if "weights_file" not in eval_config and 'random_baseline' not in eval_config and eval_config["epoch"] == "best":
         eval_config["epoch"], eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
     convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
     for convid, result in parallel(
@@ -264,9 +278,12 @@ def main():
     res = []
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
-    with Parallel(n_jobs=int(os.environ["JOBS"]), batch_size=1) as parallel:
+    do_baseline = config['eval_config']['do_random_baseline']
+    with Parallel(n_jobs=1) as parallel:
         confs = list(general_interesting_configs(config))
         for inx, eval_config in enumerate(confs):
+            if do_baseline is not None:
+                eval_config['random_baseline'] = do_baseline
             print(f"\n{inx}/{len(confs)}: {eval_config}\n")
             ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
             va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)

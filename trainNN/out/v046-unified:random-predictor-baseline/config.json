@@ -1,5 +1,5 @@
 {
-	"name": "multicat-lstm-ffv-dropout-30-15-a",
+	"name": "random-predictor-baseline",
 	"paths": {
 		"databasePrefix": "data/db/all240302",
 		"adc": "data/adc",
@@ -34,33 +34,14 @@
 		"useOriginalDB": true,
 		"useWordsTranscript": false,
 		"sample_window_ms": 32,
-		"categories": "v1",
+		"min_talk_len": 5,
 		"outputDirectory": "extract_pfiles_python/out"
 	},
-	"train_config": {
-		"model_function": "lstm_dropout",
-		"resume_parameters": null,
-		"context_ms": 800,
-		"context_stride": 2,
-		"update_method": "adam",
-		"learning_rate": 0.001,
-		"batch_size": 250,
-		"epochs": 200,
-		"gaussian": false,
-		"layer_sizes": [
-			[
-				null,
-				0.4
-			],
-			[
-				30,
-				0.5
-			],
-			[
-				15,
-				0.5
-			]
-		],
-		"output_type": "single"
+	"train_config": {},
+	"train_output": {
+	    "stats": {"0": {"validation_loss": 1}}
+	},
+	"eval_config": {
+	    "do_random_baseline": {}
 	}
 }

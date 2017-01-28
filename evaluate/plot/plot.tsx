@@ -250,10 +250,10 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
                 <h3>{title ? `${title}` : `${version}`}</h3>
                 <p>
                     Git version: {gitversion}
-                    <a href={path(version, "config.json")}>Complete configuration json</a>
-                    <a href={path(version, "train.log")}>Training log</a>
-                    {isNewerVersion || <a href={path(version, "network_model.py")}>Network model</a>}
-                    {p.ok && p.evalInfo && <a href={evalResult(version)}>Eval Result json</a>}
+                    <a target="_blank" href={path(version, "config.json")}>Complete configuration json</a>
+                    <a target="_blank" href={path(version, "train.log")}>Training log</a>
+                    {isNewerVersion || <a target="_blank" href={path(version, "network_model.py")}>Network model</a>}
+                    {p.ok && p.evalInfo && <a target="_blank" href={evalResult(version)}>Eval Result json</a>}
                 </p>
                 {inner}
             </div>
@@ -418,7 +418,7 @@ class GUI extends React.Component<{}, {}> {
     }
     render() {
         const throttledFilter = util.throttleGet(500, this.getFilter);
-        let results = Array.from(util.throttleGet(500, this.getResults).values());
+        let results = Array.from(util.throttleGet(2000, this.getResults).values());
         results = results.sort((a, b) => a.version.localeCompare(b.version));
         results = results.filter(result => this.resultVisible(result, throttledFilter));
         const options = this.options(results, throttledFilter);
