@@ -1,0 +1,226 @@
+{
+	"name": "lstm-adam-70-50-40-30",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 2,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			70,
+			50,
+			40,
+			30
+		],
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 2
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.30945229153650844,
+				"training_loss": 0.6097832284643596,
+				"validation_loss": 0.5820207291523911,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3025130122863079,
+				"training_loss": 0.5715721816311271,
+				"validation_loss": 0.5764711042392948,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.3053828986751693,
+				"training_loss": 0.5527991849719109,
+				"validation_loss": 0.5827021846983955,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.30919950469275836,
+				"training_loss": 0.5321906650006354,
+				"validation_loss": 0.5969080187869633,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.317923172108155,
+				"training_loss": 0.5086919104022328,
+				"validation_loss": 0.6182480741758477,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3247137540187387,
+				"training_loss": 0.4854415603385545,
+				"validation_loss": 0.6403554194921898,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.32904584907096857,
+				"training_loss": 0.4645213363549201,
+				"validation_loss": 0.669109990827213,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.33210904543580033,
+				"training_loss": 0.4460130629654556,
+				"validation_loss": 0.6921743045213645,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.33390830137768057,
+				"training_loss": 0.4297110427806437,
+				"validation_loss": 0.7114145135347728,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.340029739240436,
+				"training_loss": 0.41540243545709304,
+				"validation_loss": 0.7329202307644387,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.33931598499361915,
+				"training_loss": 0.4023134783651471,
+				"validation_loss": 0.7568715565562101,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.34093184512491714,
+				"training_loss": 0.3905636409489042,
+				"validation_loss": 0.7870502629244638,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.34582403948463625,
+				"training_loss": 0.37970223779117945,
+				"validation_loss": 0.8029179352219072,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.34756877305634704,
+				"training_loss": 0.37035612212810826,
+				"validation_loss": 0.8117734637697686,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.3501214365829175,
+				"training_loss": 0.3607958923880275,
+				"validation_loss": 0.8488322544422883,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.3524213128225806,
+				"training_loss": 0.35283664606916926,
+				"validation_loss": 0.8423500340962794,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.35494423695508726,
+				"training_loss": 0.34504235638061936,
+				"validation_loss": 0.8640176151617162,
+				"weights": "epoch-016.pkl"
+			},
+			"17": {
+				"validation_error": 0.3540966529976184,
+				"training_loss": 0.33838544271581666,
+				"validation_loss": 0.8792108956175075,
+				"weights": "epoch-017.pkl"
+			},
+			"18": {
+				"validation_error": 0.35665427397618066,
+				"training_loss": 0.3320483877956611,
+				"validation_loss": 0.9044568301576664,
+				"weights": "epoch-018.pkl"
+			},
+			"19": {
+				"validation_error": 0.3552912011317899,
+				"training_loss": 0.3259203348312919,
+				"validation_loss": 0.9138283937098516,
+				"weights": "epoch-019.pkl"
+			},
+			"20": {
+				"validation_error": 0.3597075588345675,
+				"training_loss": 0.3203979781075688,
+				"validation_loss": 0.9195331105364595,
+				"weights": "epoch-020.pkl"
+			},
+			"21": {
+				"validation_error": 0.3590978923931145,
+				"training_loss": 0.3151710393657764,
+				"validation_loss": 0.9347022503725215,
+				"weights": "epoch-021.pkl"
+			},
+			"22": {
+				"validation_error": 0.36073853815946144,
+				"training_loss": 0.30998135766811163,
+				"validation_loss": 0.9510027871846857,
+				"weights": "epoch-022.pkl"
+			},
+			"23": {
+				"validation_error": 0.36189838833968435,
+				"training_loss": 0.30553874474814374,
+				"validation_loss": 0.9598149369935859,
+				"weights": "epoch-023.pkl"
+			},
+			"24": {
+				"validation_error": 0.3616555126330814,
+				"training_loss": 0.30085680993274083,
+				"validation_loss": 0.9579257167404912,
+				"weights": "epoch-024.pkl"
+			},
+			"25": {
+				"validation_error": 0.360183393275723,
+				"training_loss": 0.29689927010663264,
+				"validation_loss": 0.9658326366281569,
+				"weights": "epoch-025.pkl"
+			},
+			"26": {
+				"validation_error": 0.3605551405023908,
+				"training_loss": 0.29279593281044386,
+				"validation_loss": 0.9851422873423741,
+				"weights": "epoch-026.pkl"
+			}
+		},
+		"source": "configs/lstm-adam/lstm-adam-70-50-40-30.json"
+	}
+}

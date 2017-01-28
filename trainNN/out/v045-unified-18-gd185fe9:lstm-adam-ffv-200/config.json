@@ -1,0 +1,164 @@
+{
+	"name": "lstm-adam-ffv-200",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch",
+			"get_ffv"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"epochs": 50,
+		"context_ms": 800,
+		"context_stride": 2,
+		"layer_sizes": [
+			200
+		],
+		"resume_parameters": null,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"gaussian": false,
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 9
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.31379925584261303,
+				"training_loss": 0.6014842092551637,
+				"validation_loss": 0.5878600260286674,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3174076833689523,
+				"training_loss": 0.5567874196807924,
+				"validation_loss": 0.600121720203532,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.32457496848100476,
+				"training_loss": 0.5116380108893284,
+				"validation_loss": 0.6349266640463431,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.3294969010530351,
+				"training_loss": 0.45853661265735746,
+				"validation_loss": 0.6806303829951801,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.3417447337135211,
+				"training_loss": 0.4088676556143237,
+				"validation_loss": 0.7646488031046984,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3494175970185054,
+				"training_loss": 0.36745687233738455,
+				"validation_loss": 0.8425589449786786,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.3489566288029837,
+				"training_loss": 0.3332503404192859,
+				"validation_loss": 0.9061883908813032,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.35226765729237663,
+				"training_loss": 0.3043664295150384,
+				"validation_loss": 0.9661168600103669,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.3591970248884132,
+				"training_loss": 0.280779854735134,
+				"validation_loss": 1.0627236926865844,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.35423543920008815,
+				"training_loss": 0.26156230216872867,
+				"validation_loss": 1.0629802592181805,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.3574374224321254,
+				"training_loss": 0.2452451745379882,
+				"validation_loss": 1.144693533505649,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.3577843854270756,
+				"training_loss": 0.23147355079709445,
+				"validation_loss": 1.1274359470701867,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.35908798044351253,
+				"training_loss": 0.21959482382198744,
+				"validation_loss": 1.1935906730767667,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.3553903339963863,
+				"training_loss": 0.2094541795998336,
+				"validation_loss": 1.1985005850833292,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.3619033455700975,
+				"training_loss": 0.2009586918530828,
+				"validation_loss": 1.2510950766974664,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.3612639394391425,
+				"training_loss": 0.1938387432737993,
+				"validation_loss": 1.3074016201008651,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.36014869738984134,
+				"training_loss": 0.18737657583226913,
+				"validation_loss": 1.2945190355680245,
+				"weights": "epoch-016.pkl"
+			}
+		},
+		"source": "configs/lstm-adam-ffv/lstm-adam-ffv-200.json"
+	}
+}
