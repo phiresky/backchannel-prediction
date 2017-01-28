@@ -50,7 +50,7 @@ const ignore = [
 ]
 
 type VGPropsMaybe = { ok: false, error: string, version: string, log: string | null } | VGProps;
-type VGProps = { ok: true, evalInfo?: EvalResult[], version: string, data: {datasets: {label: string, yAxisID: string, data: {x: number, y: number}[]}[]}, options: any };
+type VGProps = { ok: true, evalInfo?: EvalResult[], version: string, data: { datasets: { label: string, yAxisID: string, data: { x: number, y: number }[] }[] }, options: any };
 
 function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
@@ -278,19 +278,19 @@ function maxByKey<T>(data: T[], extractor: (t: T) => number) {
     return data.reduce((curMax, ele) => extractor(curMax) > extractor(ele) ? curMax : ele);
 }
 
-@observer class OverviewStats extends React.Component<{results: VGPropsMaybe[]}, {}> {
+@observer class OverviewStats extends React.Component<{ results: VGPropsMaybe[] }, {}> {
     bestResult = mobx.createTransformer((data: EvalResult[]) => {
         return maxByKey(data, info => info.totals.valid.f1_score);
     });
     render() {
-        const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({version: res.version, info: this.bestResult((res as VGProps).evalInfo!)}));
+        const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({ version: res.version, info: this.bestResult((res as VGProps).evalInfo!) }));
         return (
             <div>
                 <h4>Best for each</h4>
                 <Table className="evalTable"
                     defaultSort={{ column: 'Valid: F1 Score', direction: 'desc' }}
-                    data={results.map(result => ({Git:result.version.split(":")[0], Version: result.version.split(":")[1], ...toTableData(result.info)}))}
-                    sortable filterable/>
+                    data={results.map(result => ({ Git: result.version.split(":")[0], Version: result.version.split(":")[1], ...toTableData(result.info) }))}
+                    sortable filterable />
             </div>
         );
     }
@@ -304,15 +304,17 @@ class GUI extends React.Component<{}, {}> {
     @observable useMinMax = false;
     @observable showUnevaluated = true;
     @observable onlyNew = true;
+    @observable onlyFailed = false;
+    @observable onlyOk = false;
     @observable results = observable.map() as any as Map<string, VGPropsMaybe>;
     @observable loaded = 0; @observable total = 1;
     axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {
         const arr = results.filter(result => this.resultVisible(result, filter))
-            .map(arr => !arr.ok ? []: arr.data.datasets.filter(dataset => dataset.yAxisID === axisId).map(dataset => dataset.data.map(data => data.y)));
+            .map(arr => !arr.ok ? [] : arr.data.datasets.filter(dataset => dataset.yAxisID === axisId).map(dataset => dataset.data.map(data => data.y)));
         const data = arr.reduce((a, b) => a.concat(b.reduce((a, b) => a.concat(b)), [] as number[]), [] as number[]);
         const min = Math.min(...data);
         const max = Math.max(...data);
-        return {min, max};
+        return { min, max };
     }
     options(results: VGPropsMaybe[], filter: string) {
         return {
@@ -402,6 +404,8 @@ class GUI extends React.Component<{}, {}> {
         let results = [result];
         if (!this.showUnevaluated) results = results.filter(res => res.ok && res.evalInfo);
         if (this.onlyNew) results = results.filter(res => res.version.indexOf("unified") >= 0);
+        if (this.onlyFailed) results = results.filter(res => !res.ok);
+        if (this.onlyOk) results = results.filter(res => res.ok);
         try {
             const fltr = RegExp(filter);
             results = results.filter(res => res.version.search(fltr) >= 0);
@@ -430,6 +434,14 @@ class GUI extends React.Component<{}, {}> {
                     </label>
                     <label>Only unified:
                         <input type="checkbox" checked={this.onlyNew} onChange={x => this.onlyNew = x.currentTarget.checked}
+                        />
+                    </label>
+                    <label>Only failed:
+                        <input type="checkbox" checked={this.onlyFailed} onChange={x => this.onlyFailed = x.currentTarget.checked}
+                        />
+                    </label>
+                    <label>Only ok:
+                        <input type="checkbox" checked={this.onlyOk} onChange={x => this.onlyOk = x.currentTarget.checked}
                         />
                     </label>
                 </div>

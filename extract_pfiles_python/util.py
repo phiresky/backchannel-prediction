@@ -20,7 +20,7 @@ def batch_list(list: List, n: int, include_last_partial: bool):
 
 def windowed_indices(total_frames: int, context_frames: int, context_stride: int):
     max_start_index = total_frames - context_frames * context_stride
-    for i in range(0, max_start_index):
+    for i in range(0, max_start_index + 1):
         yield range(i, i + context_frames * context_stride, context_stride)
 
 
