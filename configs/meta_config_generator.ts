@@ -84,7 +84,7 @@ const interesting_layers_dropout: [number|null, number][][] = [
 
 
 const best_layers = model_function => ({
-    "ff_simple": [
+    "feedforward_simple": [
         [75, 40],
         [100, 50, 25],
     ],
@@ -102,8 +102,8 @@ const mfcc_combos = [
 ];
 const dropout_name = categoryname => `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize || "inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
 
-for (const model_function of ["lstm_simple", "ff_simple"]) {
-    const categoryname0 = model_function.split("_")[0];
+for (const model_function of ["lstm_simple", "feedforward_simple"]) {
+    const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];
     for (const input_features of mfcc_combos) {
         const categoryname = categoryname0 + "-" + input_features.map(feat => feat.split("_")[1]);
         for (const layer_sizes of best_layers(model_function)) {
