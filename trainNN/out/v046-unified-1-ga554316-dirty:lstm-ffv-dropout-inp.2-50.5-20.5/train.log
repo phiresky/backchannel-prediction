@@ -1,0 +1,81 @@
+2017-01-27 04:49:59,204 DEBUG    version=v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5
+2017-01-27 04:49:59,204 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-27 04:50:03,499 DEBUG    getting all bc uttids...configs/lstm-ffv-dropout/lstm-ffv-dropout-inp.2-50.5-20.5.json, train
+2017-01-27 04:50:03,500 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-27 04:50:10,462 DEBUG    loading cached extracted data from data/cache/extract-17095dffdd75068299ccb5dd895af8ecaa0fbe1575b09b5b1ad4e4febf4d84ae.pickle
+2017-01-27 04:50:14,873 DEBUG    set input dim to 9
+2017-01-27 04:50:14,873 DEBUG    input dim = 9
+2017-01-27 04:50:14,960 DEBUG    shuffling batches
+2017-01-27 04:50:54,932 DEBUG    shuffling done
+2017-01-27 04:50:54,932 DEBUG    loading data into ram
+2017-01-27 04:50:55,017 DEBUG    loading data took 0.084s (cpu: 0.084s)
+2017-01-27 04:50:55,017 DEBUG    getting all bc uttids...configs/lstm-ffv-dropout/lstm-ffv-dropout-inp.2-50.5-20.5.json, validate
+2017-01-27 04:50:55,342 DEBUG    set input dim to 9
+2017-01-27 04:50:55,345 DEBUG    input dim = 9
+2017-01-27 04:50:55,844 DEBUG    shuffling batches
+2017-01-27 04:50:59,653 DEBUG    shuffling done
+2017-01-27 04:50:59,654 DEBUG    loading data into ram
+2017-01-27 04:50:59,660 DEBUG    loading data took 0.006s (cpu: 0.006s)
+2017-01-27 04:51:00,619 INFO     Training network with 18016 trainable out of 18156 total params.
+2017-01-27 04:51:01,670 DEBUG    Using adam with learning_rate=0.001000
+2017-01-27 04:51:19,973 DEBUG    Starting training...
+2017-01-27 05:04:44,811 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-000.pkl
+2017-01-27 05:05:12,468 INFO     epoch: 0 took 832.494s (0.014s in batching)
+training loss:	0.659108
+validation loss:	0.635134
+validation error:	0.368496
+2017-01-27 05:05:12,520 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:18:45,371 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-001.pkl
+2017-01-27 05:18:53,971 INFO     epoch: 1 took 821.504s (1.032s in batching)
+training loss:	0.631706
+validation loss:	0.625513
+validation error:	0.353318
+2017-01-27 05:18:53,980 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:25:02,808 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-002.pkl
+2017-01-27 05:25:24,967 INFO     epoch: 2 took 390.997s (0.011s in batching)
+training loss:	0.619134
+validation loss:	0.613248
+validation error:	0.339014
+2017-01-27 05:25:24,969 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:37:03,779 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-003.pkl
+2017-01-27 05:37:26,078 INFO     epoch: 3 took 721.111s (0.012s in batching)
+training loss:	0.610889
+validation loss:	0.605776
+validation error:	0.331430
+2017-01-27 05:37:26,081 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:44:43,415 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-004.pkl
+2017-01-27 05:44:50,202 INFO     epoch: 4 took 444.124s (0.011s in batching)
+training loss:	0.604686
+validation loss:	0.607567
+validation error:	0.337224
+2017-01-27 05:44:50,204 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:50:22,820 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-005.pkl
+2017-01-27 05:50:29,552 INFO     epoch: 5 took 339.349s (0.010s in batching)
+training loss:	0.599777
+validation loss:	0.599651
+validation error:	0.326533
+2017-01-27 05:50:29,554 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 05:57:03,655 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-006.pkl
+2017-01-27 05:57:10,452 INFO     epoch: 6 took 400.900s (0.011s in batching)
+training loss:	0.595921
+validation loss:	0.596720
+validation error:	0.323980
+2017-01-27 05:57:10,454 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 06:02:42,444 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-007.pkl
+2017-01-27 06:02:49,418 INFO     epoch: 7 took 338.966s (0.011s in batching)
+training loss:	0.592894
+validation loss:	0.595780
+validation error:	0.321705
+2017-01-27 06:02:49,603 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 06:08:21,456 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-008.pkl
+2017-01-27 06:08:28,160 INFO     epoch: 8 took 338.743s (0.028s in batching)
+training loss:	0.590126
+validation loss:	0.598561
+validation error:	0.328258
+2017-01-27 06:08:28,161 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json
+2017-01-27 06:13:59,881 INFO     Saving network params to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/epoch-009.pkl
+2017-01-27 06:14:06,613 INFO     epoch: 9 took 338.453s (0.011s in batching)
+training loss:	0.588395
+validation loss:	0.594276
+validation error:	0.322741
+2017-01-27 06:14:06,615 INFO     Wrote output to trainNN/out/v046-unified-1-ga554316-dirty:lstm-ffv-dropout-inp.2-50.5-20.5/config.json

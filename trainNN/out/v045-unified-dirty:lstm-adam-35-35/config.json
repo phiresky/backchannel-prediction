@@ -1,0 +1,122 @@
+{
+	"name": "lstm-adam-35-35",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 2,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			35,
+			35
+		],
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 2
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.3286889710981754,
+				"training_loss": 0.6195900265786655,
+				"validation_loss": 0.6035357178956308,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3099529117604318,
+				"training_loss": 0.5911109221884854,
+				"validation_loss": 0.5832129583556708,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.307216853235734,
+				"training_loss": 0.5765430362558652,
+				"validation_loss": 0.5799200203560542,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.30620569854863955,
+				"training_loss": 0.5680754254223834,
+				"validation_loss": 0.5799000080781059,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.3078513016931186,
+				"training_loss": 0.5607801799426921,
+				"validation_loss": 0.582106752466535,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3099727378015624,
+				"training_loss": 0.5545430919630118,
+				"validation_loss": 0.5845261944787948,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.30825774406707274,
+				"training_loss": 0.5488148917843548,
+				"validation_loss": 0.588153755576194,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.3092143724694424,
+				"training_loss": 0.5435670386305843,
+				"validation_loss": 0.5883940901824237,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.31234696378199733,
+				"training_loss": 0.538479741215779,
+				"validation_loss": 0.5950944758259231,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.3110285012843145,
+				"training_loss": 0.5340273268653503,
+				"validation_loss": 0.5990872348772992,
+				"weights": "epoch-009.pkl"
+			}
+		},
+		"source": "configs/lstm-adam/lstm-adam-35-35.json"
+	}
+}

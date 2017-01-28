@@ -1,0 +1,61 @@
+{
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.test"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"extract_config": {
+		"context_ms": 800,
+		"context_stride": 1,
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"input_dim": 2,
+		"output_dim": 1,
+		"num_labels": 2,
+		"files": {
+			"validate": {
+				"ids": "validate.meta.json",
+				"input": "validate.input.npz",
+				"output": "validate.output.npz"
+			},
+			"train": {
+				"ids": "train.meta.json",
+				"input": "train.input.npz",
+				"output": "train.output.npz"
+			},
+			"eval": {
+				"ids": "eval.meta.json",
+				"input": "eval.input.npz",
+				"output": "eval.output.npz"
+			}
+		}
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.47129275883947097,
+				"training_loss": 0.6929115383855758,
+				"validation_loss": 0.6903618863650731,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.44545104503631594,
+				"training_loss": 0.6881597431436661,
+				"validation_loss": 0.683662680217198,
+				"weights": "epoch-001.pkl"
+			}
+		},
+		"source": "extract_pfiles_python/out/v038-lstm-online-sgd-1-14-g3e63d2d-dirty/config.json",
+		"model": "network_model.py"
+	}
+}

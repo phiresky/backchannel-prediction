@@ -1,0 +1,189 @@
+2017-01-28 01:46:09,860 DEBUG    version=v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15
+2017-01-28 01:46:09,861 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-28 01:46:34,408 DEBUG    getting all bc uttids...configs/multicat-2.json, train
+2017-01-28 01:46:34,408 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-28 01:46:41,303 DEBUG    loading cached extracted data from data/cache/extract-61257001baf8c6e4f4e7fa4b7259fa27f2c269393523253e76d279cc26b5612a.pickle
+2017-01-28 01:46:46,056 DEBUG    set input dim to 9
+2017-01-28 01:46:46,056 DEBUG    input dim = 9
+2017-01-28 01:46:46,146 DEBUG    shuffling batches
+2017-01-28 01:47:22,853 DEBUG    shuffling done
+2017-01-28 01:47:22,853 DEBUG    loading data into ram
+2017-01-28 01:47:22,923 DEBUG    loading data took 0.070s (cpu: 0.070s)
+2017-01-28 01:47:22,923 DEBUG    getting all bc uttids...configs/multicat-2.json, validate
+2017-01-28 01:47:23,362 DEBUG    set input dim to 9
+2017-01-28 01:47:23,362 DEBUG    input dim = 9
+2017-01-28 01:47:23,823 DEBUG    shuffling batches
+2017-01-28 01:47:27,363 DEBUG    shuffling done
+2017-01-28 01:47:27,363 DEBUG    loading data into ram
+2017-01-28 01:47:27,370 DEBUG    loading data took 0.007s (cpu: 0.007s)
+2017-01-28 01:47:28,941 INFO     Training network with 7791 trainable out of 7881 total params.
+2017-01-28 01:47:29,975 DEBUG    Using adam with learning_rate=0.001000
+2017-01-28 01:47:48,483 DEBUG    Starting training...
+2017-01-28 01:53:21,427 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-000.pkl
+2017-01-28 01:53:28,127 INFO     epoch: 0 took 339.643s (0.014s in batching)
+training loss:	1.033932
+validation loss:	1.022637
+validation error:	0.434250
+2017-01-28 01:53:28,129 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 01:59:00,867 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-001.pkl
+2017-01-28 01:59:07,664 INFO     epoch: 1 took 339.538s (0.013s in batching)
+training loss:	1.000007
+validation loss:	1.000379
+validation error:	0.418924
+2017-01-28 01:59:07,665 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:04:40,812 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-002.pkl
+2017-01-28 02:04:47,416 INFO     epoch: 2 took 339.752s (0.013s in batching)
+training loss:	0.992139
+validation loss:	0.993462
+validation error:	0.402563
+2017-01-28 02:04:47,554 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:10:25,869 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-003.pkl
+2017-01-28 02:10:32,643 INFO     epoch: 3 took 345.227s (0.030s in batching)
+training loss:	0.987337
+validation loss:	0.983822
+validation error:	0.397968
+2017-01-28 02:10:32,658 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:16:06,846 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-004.pkl
+2017-01-28 02:16:13,470 INFO     epoch: 4 took 340.827s (0.012s in batching)
+training loss:	0.983872
+validation loss:	0.989551
+validation error:	0.405150
+2017-01-28 02:16:13,471 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:21:48,387 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-005.pkl
+2017-01-28 02:21:55,006 INFO     epoch: 5 took 341.536s (0.013s in batching)
+training loss:	0.980816
+validation loss:	0.983065
+validation error:	0.399499
+2017-01-28 02:21:55,689 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:28:57,849 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-006.pkl
+2017-01-28 02:29:06,204 INFO     epoch: 6 took 431.198s (0.097s in batching)
+training loss:	0.978347
+validation loss:	0.980362
+validation error:	0.397978
+2017-01-28 02:29:06,206 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:36:02,728 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-007.pkl
+2017-01-28 02:36:22,483 INFO     epoch: 7 took 436.279s (0.013s in batching)
+training loss:	0.975680
+validation loss:	0.980033
+validation error:	0.396867
+2017-01-28 02:36:22,490 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:46:30,563 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-008.pkl
+2017-01-28 02:46:50,583 INFO     epoch: 8 took 628.101s (0.012s in batching)
+training loss:	0.973290
+validation loss:	0.975473
+validation error:	0.390498
+2017-01-28 02:46:50,598 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 02:57:00,734 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-009.pkl
+2017-01-28 02:57:20,463 INFO     epoch: 9 took 629.880s (0.014s in batching)
+training loss:	0.971400
+validation loss:	0.976837
+validation error:	0.392848
+2017-01-28 02:57:20,465 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:06:56,105 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-010.pkl
+2017-01-28 03:07:15,484 INFO     epoch: 10 took 595.021s (0.012s in batching)
+training loss:	0.969752
+validation loss:	0.971538
+validation error:	0.387098
+2017-01-28 03:07:26,604 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:16:42,472 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-011.pkl
+2017-01-28 03:17:11,773 INFO     epoch: 11 took 596.289s (0.026s in batching)
+training loss:	0.968201
+validation loss:	0.976156
+validation error:	0.389527
+2017-01-28 03:17:12,010 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:27:04,586 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-012.pkl
+2017-01-28 03:27:26,749 INFO     epoch: 12 took 614.976s (0.015s in batching)
+training loss:	0.966894
+validation loss:	0.975879
+validation error:	0.389700
+2017-01-28 03:27:26,854 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:37:12,674 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-013.pkl
+2017-01-28 03:37:32,331 INFO     epoch: 13 took 605.582s (0.014s in batching)
+training loss:	0.966117
+validation loss:	0.969747
+validation error:	0.382518
+2017-01-28 03:37:32,333 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:47:45,369 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-014.pkl
+2017-01-28 03:48:04,930 INFO     epoch: 14 took 632.600s (0.017s in batching)
+training loss:	0.964751
+validation loss:	0.974133
+validation error:	0.388530
+2017-01-28 03:48:04,933 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 03:58:44,240 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-015.pkl
+2017-01-28 03:58:59,732 INFO     epoch: 15 took 654.801s (0.013s in batching)
+training loss:	0.963902
+validation loss:	0.981385
+validation error:	0.393888
+2017-01-28 03:58:59,733 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:08:42,341 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-016.pkl
+2017-01-28 04:09:01,984 INFO     epoch: 16 took 602.253s (0.012s in batching)
+training loss:	0.962768
+validation loss:	0.977817
+validation error:	0.391346
+2017-01-28 04:09:01,985 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:19:09,456 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-017.pkl
+2017-01-28 04:19:29,347 INFO     epoch: 17 took 627.363s (0.011s in batching)
+training loss:	0.962282
+validation loss:	0.972323
+validation error:	0.386890
+2017-01-28 04:19:29,348 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:29:40,264 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-018.pkl
+2017-01-28 04:29:59,881 INFO     epoch: 18 took 630.534s (0.012s in batching)
+training loss:	0.961720
+validation loss:	0.971579
+validation error:	0.384887
+2017-01-28 04:29:59,882 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:36:23,728 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-019.pkl
+2017-01-28 04:36:30,083 INFO     epoch: 19 took 390.202s (0.013s in batching)
+training loss:	0.961167
+validation loss:	0.974985
+validation error:	0.387663
+2017-01-28 04:36:30,084 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:41:48,471 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-020.pkl
+2017-01-28 04:41:54,782 INFO     epoch: 20 took 324.699s (0.011s in batching)
+training loss:	0.960552
+validation loss:	0.971404
+validation error:	0.388397
+2017-01-28 04:41:54,785 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:47:11,978 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-021.pkl
+2017-01-28 04:47:18,232 INFO     epoch: 21 took 323.450s (0.010s in batching)
+training loss:	0.959860
+validation loss:	0.977969
+validation error:	0.390825
+2017-01-28 04:47:18,233 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:52:37,768 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-022.pkl
+2017-01-28 04:52:43,987 INFO     epoch: 22 took 325.755s (0.012s in batching)
+training loss:	0.959493
+validation loss:	0.974488
+validation error:	0.391128
+2017-01-28 04:52:43,989 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 04:58:01,500 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-023.pkl
+2017-01-28 04:58:08,025 INFO     epoch: 23 took 324.038s (0.012s in batching)
+training loss:	0.959059
+validation loss:	0.976196
+validation error:	0.391901
+2017-01-28 04:58:08,026 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 05:03:28,299 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-024.pkl
+2017-01-28 05:03:34,696 INFO     epoch: 24 took 326.671s (0.011s in batching)
+training loss:	0.958247
+validation loss:	0.972778
+validation error:	0.391346
+2017-01-28 05:03:34,870 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 05:08:53,187 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-025.pkl
+2017-01-28 05:08:59,469 INFO     epoch: 25 took 324.773s (0.021s in batching)
+training loss:	0.957933
+validation loss:	0.977706
+validation error:	0.391678
+2017-01-28 05:08:59,470 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 05:15:47,669 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-026.pkl
+2017-01-28 05:15:54,373 INFO     epoch: 26 took 414.904s (0.468s in batching)
+training loss:	0.957423
+validation loss:	0.970406
+validation error:	0.391058
+2017-01-28 05:15:54,375 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json
+2017-01-28 05:26:14,835 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/epoch-027.pkl
+2017-01-28 05:26:23,463 INFO     epoch: 27 took 629.088s (0.311s in batching)
+training loss:	0.957200
+validation loss:	0.980548
+validation error:	0.397616
+2017-01-28 05:26:24,055 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:multicat-lstm-ffv-dropout-30-15/config.json

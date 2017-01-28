@@ -1,0 +1,91 @@
+{
+	"name": "lstm-single-pre-test",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 2,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"gaussian": false,
+		"layer_sizes": [
+			100,
+			50
+		],
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 2
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.31323420188979445,
+				"training_loss": 0.6095312159418342,
+				"validation_loss": 0.5881171865386443,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.30936307350203596,
+				"training_loss": 0.5739265636101879,
+				"validation_loss": 0.58228654670154,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.30886741050852573,
+				"training_loss": 0.555905789210084,
+				"validation_loss": 0.5858722115685653,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.31141016090374163,
+				"training_loss": 0.5351817299974766,
+				"validation_loss": 0.6000183443302263,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.31862701337133637,
+				"training_loss": 0.5118945040669735,
+				"validation_loss": 0.6171682565628818,
+				"weights": "epoch-004.pkl"
+			}
+		},
+		"source": "extract_pfiles_python/config.json"
+	}
+}
