@@ -503,7 +503,7 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
         convo_map = read_conversations(config)
         allconvos = [convo for convos in convo_map.values() for convo in convos]
         out_dict = {}
-        for out in Parallel(n_jobs=os.environ.get('JOBS', -1))(tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
+        for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
             out_dict.update(out)
 
         # for uttId, is_bc in tqdm(utts):
