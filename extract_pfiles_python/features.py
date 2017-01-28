@@ -158,6 +158,8 @@ def fbmatrixCosine(m: float, n: float):
 
 # adapted from /project/iwslt2016/DE/sys2016/B-systems/B-02-samples-MFCC+MVDR+T/featDesc
 # https://bitbucket.org/jrtk/janus/wiki/Python/Preprocessing
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
 def pure_get_mfcc(adc_path: str, sample_windows_ms: float, convid: str):
     import scipy.fftpack
     import sklearn.preprocessing
