@@ -278,7 +278,7 @@ def main():
     res = []
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
-    do_baseline = config['eval_config']['do_random_baseline']
+    do_baseline = config['eval_config'].get('do_random_baseline', None)
     with Parallel(n_jobs=1) as parallel:
         confs = list(general_interesting_configs(config))
         for inx, eval_config in enumerate(confs):
