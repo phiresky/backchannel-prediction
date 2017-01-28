@@ -499,7 +499,6 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
             return pickle.load(file)
     else:
         logging.debug(f"extracting and saving data to {path}")
-        reader = loadDBReader(config_path)
         convo_map = read_conversations(config)
         allconvos = [convo for convos in convo_map.values() for convo in convos]
         out_dict = {}

@@ -361,6 +361,7 @@ class GUI extends React.Component<{}, {}> {
             // upgrade
             evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: {} } } as any);
             evalInfo.forEach(i => i.totals.valid.f1_score === 1 && (i.totals.valid.f1_score = 0));
+            evalInfo.forEach(i => i.totals.eval.f1_score === 1 && (i.totals.eval.f1_score = 0));
         }
         const stats = data.train_output.stats;
 
