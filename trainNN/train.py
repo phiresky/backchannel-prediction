@@ -133,7 +133,8 @@ def train():
             # groups = [slice(begin, end) for begin, end in meta['ranges']]
             # inputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
-            backchannels = list(readDB.all_uttids(config_path, t))
+            convos = readDB.read_conversations(config)
+            backchannels = list(readDB.all_uttids(config_path, convos[t]))
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             inxtoname = {**{v: k for k, v in reader.category_to_index.items()}, 0: None}
