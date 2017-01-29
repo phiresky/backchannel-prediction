@@ -138,11 +138,14 @@ def train():
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             inxtoname = {**{v: k for k, v in reader.category_to_index.items()}, 0: None}
-            category_names = [inxtoname[inx] for inx in range(len(reader.categories) + 1)]
 
             train_config['input_dim'] = input_dim
-            train_config['category_names'] = category_names
-            train_config['num_labels'] = len(category_names)
+            if config['extract_config'].get('categories', None) is not None:
+                category_names = [inxtoname[inx] for inx in range(len(reader.categories) + 1)]
+                train_config['category_names'] = category_names
+                train_config['num_labels'] = len(category_names)
+            else:
+                train_config['num_labels'] = 2
             logging.debug(f"input dim = {input_dim}")
             context_stride = train_config['context_stride']
             context_length = int(train_config['context_ms'] / 10 / context_stride)

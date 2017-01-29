@@ -1,5 +1,5 @@
 {
-	"name": "ff-power,ffv,mfcc-75-40",
+	"name": "ff-power,ffv,mfcc-75-40-l2reg",
 	"paths": {
 		"databasePrefix": "data/db/all240302",
 		"adc": "data/adc",
@@ -51,6 +51,7 @@
 		"num_labels": 2,
 		"batch_size": 250,
 		"gaussian": false,
-		"output_type": "single"
+		"output_type": "single",
+		"l2_regularization": 0.0001
 	}
 }
