@@ -167,6 +167,7 @@ def train():
         twodimensional_output=False,
         scheduling_method=None,
         resume=train_config['resume_parameters'],
+        l2_regularization=train_config.get("l2_regularization", None),
         # scheduling_params=(0.8, 0.000001),
         update_method=train_config['update_method'],
         num_epochs=train_config['epochs'],

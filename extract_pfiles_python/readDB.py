@@ -461,7 +461,7 @@ def bc_is_while_monologuing(reader: DBReader, uttInfo):
 
 
 def all_uttids_(config_path: str, convos: List[str]):
-    logging.debug(f"getting all bc uttids...{config_path}, {convos}")
+    logging.debug(f"getting all bc uttids...{config_path}")
     reader = loadDBReader(config_path)
     for convo in convos:
         for channel in ["A", "B"]:
