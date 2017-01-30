@@ -246,10 +246,11 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
         }
         return (
             <div>
+                <button style={{ float: "right" }} onClick={() => util.copyToClipboard(`trainNN/out/${version}/config.json`)}>copy config path</button>
                 <button style={{ float: "right" }} onClick={() => this.props.gui.load(version)}>reload</button>
                 <h3>{title ? `${title}` : `${version}`}</h3>
                 <p>
-                    Git version: {gitversion}
+                    Git version: {gitversion}{" "}
                     <a target="_blank" href={path(version, "config.json")}>Complete configuration json</a>
                     <a target="_blank" href={path(version, "train.log")}>Training log</a>
                     {isNewerVersion || <a target="_blank" href={path(version, "network_model.py")}>Network model</a>}

@@ -43,6 +43,7 @@ def train_network(network,
                   learning_rate_num=None,
                   update_method='nesterov',
                   scheduling_method=None,
+                  start_epoch=0,
                   scheduling_params=[0.005, 0.0001, 0.5],
                   max_norm=None,
                   momentum=0.9,
@@ -150,7 +151,7 @@ def train_network(network,
 
     oldLearningRate = learning_rate_num
     beginTime = timer()
-    for epoch in range(num_epochs):
+    for epoch in range(start_epoch, num_epochs):
         if sigterm_received:
             break
         # Part 1: Train network

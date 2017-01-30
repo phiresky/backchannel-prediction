@@ -94,11 +94,23 @@ def train():
     config = load_config(config_path)
     version = subprocess.check_output("git describe --dirty", shell=True).decode('ascii').strip()
 
-    out_dir = os.path.join("trainNN", "out", version + ":" + config['name'])
-    if os.path.isdir(out_dir):
-        print("Output directory {} already exists, aborting".format(out_dir))
-        sys.exit(1)
-    os.makedirs(out_dir, exist_ok=True)
+    if config_path.startswith("trainNN/out"):
+        out_dir = os.path.dirname(config_path)
+        print("Continuing training from folder " + out_dir)
+        load_stats = config['train_output']['stats']
+        load_epoch = max([int(epoch) for epoch in load_stats.keys()])
+        load_params = os.path.join(out_dir, config['train_output']['stats'][str(load_epoch)]['weights'])
+        print(f"Continuing training from folder {out_dir}, epoch={load_epoch}, params={load_params}")
+        config.setdefault('train_output_old', {})[load_epoch] = config['train_output']
+    else:
+        load_epoch = -1
+        load_stats = {}
+        load_params = None
+        out_dir = os.path.join("trainNN", "out", version + ":" + config['name'])
+        if os.path.isdir(out_dir):
+            print("Output directory {} already exists, aborting".format(out_dir))
+            sys.exit(1)
+        os.makedirs(out_dir, exist_ok=True)
     LOGFILE = os.path.join(out_dir, "train.log")
     logging.root.handlers.clear()
     logging.basicConfig(level=logging.DEBUG,
@@ -112,11 +124,9 @@ def train():
     reader = readDB.DBReader(config, config_path)
     train_config = config['train_config']
     context_stride = train_config['context_stride']
-    batch_size = train_config['batch_size']
     context_frames = int(train_config['context_ms'] / 10 / context_stride)
     train_config['context_frames'] = context_frames
 
-    dir = os.path.dirname(config_path)
     gaussian = train_config['gaussian']
     out_all = {'all': True, 'single': False}[train_config['output_type']]
     if gaussian:
@@ -169,7 +179,8 @@ def train():
         network=model['output_layer'],
         twodimensional_output=False,
         scheduling_method=None,
-        resume=train_config['resume_parameters'],
+        start_epoch=load_epoch + 1,
+        resume=load_params if load_params is not None else train_config['resume_parameters'],
         l2_regularization=train_config.get("l2_regularization", None),
         # scheduling_params=(0.8, 0.000001),
         update_method=train_config['update_method'],
@@ -186,7 +197,7 @@ def train():
             v['weights'] = os.path.basename(v['weights'])
         with open(config_out, "w") as f:
             json.dump({**config, 'train_output': {
-                'stats': stats,
+                'stats': {**load_stats, **stats},
                 'source': config_path,
                 'environment': dict(os.environ)
             }}, f, indent='\t')

@@ -342,7 +342,10 @@ class FakeUttDB:
         self.paths_config = paths_config
         self.root = paths_config['originalSwbTranscriptions']
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
-        self.spkDB = jrtk.base.DBase(baseFilename=paths_config['databasePrefix'] + "-spk", mode="r")
+        base = paths_config['databasePrefix'] + "-spk"
+        if not os.path.isfile(base + ".idx"):
+            raise Exception(f"could not find {base}")
+        self.spkDB = jrtk.base.DBase(baseFilename=base, mode="r")
         if os.path.isfile("data/uttdbcache.json"):
             with open("data/uttdbcache.json", "r") as f:
                 x = json.load(f)
