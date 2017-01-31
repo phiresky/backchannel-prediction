@@ -44,7 +44,7 @@ interface ConfigJSON {
     train_output: {
         stats: {[epoch: string]: {[attribute: string]: number}},
         source: string,
-        environment: {
+        environment?: {
             SLURM_JOB_ID?: string
         }
     },
@@ -268,7 +268,9 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
                     <a target="_blank" href={path(version, "train.log")}>Training log</a>
                     {isNewerVersion || <a target="_blank" href={path(version, "network_model.py")}>Network model</a>}
                     {p.ok && p.evalInfo && <a target="_blank" href={evalResult(version)}>Eval Result json</a>}
-                    {p.ok && p.config.train_output.environment.SLURM_JOB_ID && "Slurm ID " + p.config.train_output.environment.SLURM_JOB_ID}
+                    {p.ok && p.config.train_output.environment
+                        && p.config.train_output.environment.SLURM_JOB_ID
+                        && "Slurm ID " + p.config.train_output.environment.SLURM_JOB_ID}
                 </p>
                 {inner}
             </div>
