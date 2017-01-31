@@ -38,6 +38,17 @@ interface EvalResult {
     },
     totals: { eval: SingleEvalResult, valid: SingleEvalResult }
 }
+interface ConfigJSON {
+    extract_config: any,
+    train_config: any,
+    train_output: {
+        stats: {[epoch: string]: {[attribute: string]: number}},
+        source: string,
+        environment: {
+            SLURM_JOB_ID?: string
+        }
+    },
+}
 const path = (version: string, file: string) => `../../../trainNN/out/${version}/${file}`;
 const evalResult = (version: string) => `../../../evaluate/out/${version}/results.json`;
 const titles = {
@@ -51,7 +62,7 @@ const ignore = [
 ]
 
 type VGPropsMaybe = { ok: false, error: string, version: string, log: string | null } | VGProps;
-type VGProps = { ok: true, evalInfo?: EvalResult[], version: string, data: { datasets: { label: string, yAxisID: string, data: { x: number, y: number }[] }[] }, options: any };
+type VGProps = { ok: true, evalInfo?: EvalResult[], config: ConfigJSON, version: string, data: { datasets: { label: string, yAxisID: string, data: { x: number, y: number }[] }[] }, options: any };
 
 function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
@@ -257,6 +268,7 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
                     <a target="_blank" href={path(version, "train.log")}>Training log</a>
                     {isNewerVersion || <a target="_blank" href={path(version, "network_model.py")}>Network model</a>}
                     {p.ok && p.evalInfo && <a target="_blank" href={evalResult(version)}>Eval Result json</a>}
+                    {p.ok && p.config.train_output.environment.SLURM_JOB_ID && "Slurm ID " + p.config.train_output.environment.SLURM_JOB_ID}
                 </p>
                 {inner}
             </div>
@@ -353,7 +365,7 @@ class GUI extends React.Component<{}, {}> {
         }
         let data;
         try {
-            data = await resp.json();
+            data = await resp.json() as ConfigJSON;
         } catch (e) {
             return await this.errorTryGetLog(version, `Error parsing ${version}/config.json: ${e}`);
         }
@@ -388,6 +400,7 @@ class GUI extends React.Component<{}, {}> {
             data: {
                 datasets: plotData
             },
+            config: data,
             options: {}
         };
     }
