@@ -180,6 +180,33 @@ def pure_get_mfcc(adc_path: str, sample_windows_ms: float, convid: str):
     return NumFeature(MFCC_MCEP)
 
 
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_v1(adc_path: str, sample_window_ms: float, convid: str):
+    import word2vec, bisect
+    from extract_pfiles_python import readDB
+    feat_dim = 5
+    model = word2vec.load(f"data/word2vec/noisefiltered-{feat_dim}.bin")
+    # for dimensions
+    pow = pure_get_power(adc_path, sample_window_ms, convid)
+    frames, _ = pow.shape
+    w2v = np.zeros((frames, feat_dim), dtype=np.float32)
+    reader = readDB.loadDBReader("extract_pfiles_python/config.json")
+    words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
+             readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
+    inx = 0
+
+    def inxtotime(sample_index):
+        return (sample_window_ms / 2 + sample_index * pow.shift) / 1000
+
+    for frame in range(frames):
+        time = inxtotime(frame)
+        if inx < len(words) - 1 and words[inx + 1][0] <= time:
+            inx += 1
+        w2v[frame] = model[words[inx][1]]
+    return NumFeature(w2v)
+
+
 class Features:
     def __init__(self, config: dict, config_path: str):
         self.config = config
@@ -200,6 +227,32 @@ class Features:
 
     def get_mfcc(self, convid: str):
         return pure_get_mfcc(self.config['paths']['adc'], self.sample_window_ms, convid)
+
+    """   def word2vec_hist(self, convid: str):
+       import word2vec, bisect
+from extract_pfiles_python import readDB
+# (incomplete)
+# get last hist_len words ending before time
+vecs = []
+
+inx = bisect.bisect_left(keys, time)
+if inx == previnx:
+   vecs = prevvecs
+else:
+   previnx = inx
+   prevvecs = vecs
+    while len(vecs) < hist_len:
+       inx -= 1
+       if inx >= 0 and float(all_words[inx]['to']) >= time - max_lookback_s:
+           word = all_words[inx]
+           txt = reader.noise_filter(word['text'])
+           if txt in model:
+               vecs.append(model[txt])
+       else:
+           vecs.append(np.repeat(np.array([0], dtype=np.float32), feat_dim))"""
+
+    def get_word2vec_v1(self, convid: str):
+        return pure_get_word2vec_v1(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     def get_combined_feature(self, convid: str, start_time: float = None, end_time: float = None):
         adc_path = self.config['paths']['adc']

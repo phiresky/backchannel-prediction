@@ -49,7 +49,7 @@ def isl_noise_filter(text):
 
     return " ".join(words)
 
-
+@functools.lru_cache()
 def orig_noise_filter(text: str):
     words = []
     for word in text.split(" "):
@@ -536,12 +536,22 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
 def get_all_nonsilent_words(reader, convid):
     utts = list(reader.get_utterances(convid))
     return [word for utt, uttInfo in utts for word in reader.uttDB.get_words_for_utterance(utt, uttInfo) if
-            len(reader.noise_filter(word['text'])) >= 0]
+            len(reader.noise_filter(word['text'])) > 0]
+
+
+def get_utterance_before(reader: DBReader, convid: str, time: float):
+    import bisect
+    words = get_all_nonsilent_words(reader, convid)
+    keys = [float(word['to']) for word in words]
+    inx = bisect.bisect_left(keys, time)
+    if inx == 0:
+        print(f"warning: no utt before {time} in {convid}")
+        return words[0]
+    return words[inx - 1]
 
 
 def count(config_path):
     print(f"running frequency analysis")
-    import bisect
     reader = loadDBReader(config_path)
     allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
     uttcount = 0
@@ -554,15 +564,6 @@ def count(config_path):
     def word_count(utts):
         return len([word for (utt, uttInfo) in utts for word in orig_noise_filter(uttInfo['text']).split(" ")])
 
-    def get_utterance_before(convid: str, time: float):
-        words = get_all_nonsilent_words(reader, convid)
-        keys = [float(word['to']) for word in words]
-        inx = bisect.bisect_left(keys, time)
-        if inx == 0:
-            print(f"warning: no utt before {time} in {convid}")
-            return words[0]
-        return words[inx - 1]
-
     for conv in allconvs:
         for channel in ["A", "B"]:
             convid = f"{conv}-{channel}"
@@ -572,7 +573,7 @@ def count(config_path):
             bcs = list(reader.get_backchannels(utts))
             for bc, bcInfo in bcs:
                 fromTime = reader.getBcRealFirstEndTime(bc)
-                uttInfo = get_utterance_before(speaker_convid, fromTime)
+                uttInfo = get_utterance_before(reader, speaker_convid, fromTime)
                 lastTime = float(uttInfo['to'])
                 bcdelays.append((bc, fromTime - lastTime))
                 alltexts.append(reader.noise_filter(bcInfo['text']))
@@ -582,13 +583,39 @@ def count(config_path):
     print(f"{bccount} backchannels out of a total of {uttcount} utterances ({bccount/uttcount*100:.3g}%) or " +
           f"{bcwords} words out of {uttwords} ({bcwords/uttwords*100:.3g}%)")
     print(f"most common: {Counter(alltexts).most_common(10)}")
-    #print(f"\ndelays are")
+    # print(f"\ndelays are")
     bcdelays.sort(key=lambda x: x[1])
-    #with open("x", "w") as f:
+    # with open("x", "w") as f:
     #    f.writelines([str(delay)+"\n" for utt, delay in bcdelays])
 
     import scipy.stats
     print(f"delay stats: {scipy.stats.describe([delay for uttid, delay in bcdelays])}")
+
+
+def to_vec(config_path: str):
+    import word2vec
+    reader = loadDBReader(config_path)
+    allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
+
+    def gen():
+        for conv in tqdm(allconvs):
+            for channel in ["A", "B"]:
+                convid = f"{conv}-{channel}"
+                for utt, uttInfo in reader.get_utterances(convid):
+                    for word in reader.uttDB.get_words_for_utterance(utt, uttInfo):
+                        txt = reader.noise_filter(word['text'])
+                        if len(txt) > 0:
+                            yield word['text'] + " "
+
+    folder = "data/word2vec"
+    words_file = os.path.join(folder, "words-noisefiltered")
+    phrases_file = os.path.join(folder, "phrases-noisefiltered")
+    dimension = 5
+    w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
+    with open(words_file, "w") as f:
+        f.writelines(gen())
+    word2vec.word2phrase(words_file, phrases_file, verbose=True)
+    word2vec.word2vec(phrases_file, w2v_file, size=dimension)
 
 
 def main():
