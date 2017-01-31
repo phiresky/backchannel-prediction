@@ -6,12 +6,14 @@ import { observable, action, computed } from 'mobx';
 import * as mobx from 'mobx';
 import { observer, Observer } from 'mobx-react';
 import 'react-select/dist/react-select.css';
-import './style.css';
+import './style.less';
 import * as Select from 'react-select';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import * as util from './util';
 import * as mu from 'mobx-utils';
 import * as Rx from 'rxjs';
+import * as T from './table';
+import 'babel-polyfill';
 
 // defined by webpack
 declare var VERSIONS: string[];
@@ -64,7 +66,7 @@ const ignore = [
 type VGPropsMaybe = { ok: false, error: string, version: string, log: string | null } | VGProps;
 type VGProps = { ok: true, evalInfo?: EvalResult[], config: ConfigJSON, version: string, data: { datasets: { label: string, yAxisID: string, data: { x: number, y: number }[] }[] }, options: any };
 
-function persist<T>({ initial, prefix = "roulette:" }: { initial: T, prefix?: string }) {
+function persist<T>({ initial, prefix = "plot:" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
         const stored = localStorage.getItem(prefix + name);
         const value = observable(stored === null ? initial : JSON.parse(stored));
@@ -294,6 +296,13 @@ const axis_keys = [{
 function maxByKey<T>(data: T[], extractor: (t: T) => number) {
     return data.reduce((curMax, ele) => extractor(curMax) > extractor(ele) ? curMax : ele);
 }
+function mapObject<A, K extends keyof A, B>(obj: A, mapper: (x: A[K], k: K) => B): {[x in keyof A]: B} {
+    const result = {} as any;
+    for(const [key, entry] of Object.entries(obj)) {
+        result[key] = mapper(entry, key as K);
+    }
+    return result;
+}
 
 @observer class OverviewStats extends React.Component<{ results: VGPropsMaybe[] }, {}> {
     bestResult = mobx.createTransformer((data: EvalResult[]) => {
@@ -318,11 +327,12 @@ class GUI extends React.Component<{}, {}> {
         super();
         this.retrieveData();
     }
-    @observable useMinMax = false;
-    @observable onlyEvaluated = true; @observable onlyUnevaluated = false;
-    @observable onlyNew = true;
-    @observable onlyFailed = false;
-    @observable onlyOk = true;
+    @persist({ initial: false }) useMinMax: boolean;
+    @persist({ initial: true }) onlyEvaluated: boolean;
+    @persist({ initial: false }) onlyUnevaluated: boolean;
+    @persist({ initial: true }) onlyNew: boolean;
+    @persist({ initial: false }) onlyFailed: boolean;
+    @persist({ initial: true }) onlyOk: boolean;
     @observable results = observable.map() as any as Map<string, VGPropsMaybe>;
     @observable loaded = 0; @observable total = 1;
     axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {

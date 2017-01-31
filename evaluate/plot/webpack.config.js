@@ -45,8 +45,9 @@ module.exports = {
     resolve: {extensions: [".js", ".json", ".ts", ".tsx"]},
     module: {
         rules: [
-            { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
-            { test: /\.css$/, loader: ExtractTextPlugin.extract('css-loader') }
+            { test: /\.tsx?$/, loader: 'babel-loader?presets=es2015!awesome-typescript-loader' },
+            { test: /\.css$/, loader: ExtractTextPlugin.extract('css-loader') },
+            { test: /\.less$/, loader: ExtractTextPlugin.extract('css-loader!less-loader')}
         ]
     }
 }
