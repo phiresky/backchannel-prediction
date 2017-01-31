@@ -100,11 +100,12 @@ class DBReader:
     uttDB = None
     method = None
 
-    def __init__(self, config: Dict, config_path: str):
+    def __init__(self, config_path: str, originalDb=None):
+        config = util.load_config(config_path)
         self.config = config
         self.extract_config = self.config['extract_config']
         self.paths_config = self.config['paths']
-        self.use_original_db = self.extract_config['useOriginalDB']
+        self.use_original_db = originalDb if originalDb is not None else self.extract_config['useOriginalDB']
         self.features = Features(config, config_path)
         self.load_db()
         self.backchannels, self.categories = load_backchannels(self.paths_config['backchannels'])

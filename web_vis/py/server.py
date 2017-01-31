@@ -303,9 +303,8 @@ if __name__ == '__main__':
     config_path = sys.argv[1]
     config = util.load_config(config_path)
 
-    origReader = DBReader(config, config_path)
-    config['extract_config']['useOriginalDB'] = False
-    islReader = DBReader(config, config_path)
+    origReader = DBReader(config_path, originalDb=True)
+    islReader = DBReader(config_path, originalDb=False)
     conversations = readDB.read_conversations(config)
     netsTree = findAllNets()
     start_server()

@@ -121,7 +121,7 @@ def train():
                         ])
 
     logging.debug("version={}:{}".format(version, config['name']))
-    reader = readDB.DBReader(config, config_path)
+    reader = readDB.loadDBReader(config_path)
     train_config = config['train_config']
     context_stride = train_config['context_stride']
     context_frames = int(train_config['context_ms'] / 10 / context_stride)
