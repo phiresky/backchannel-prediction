@@ -340,8 +340,7 @@ def parseConversationSet(parallel, config_path: str, setname: str, convIDs: Set[
 
 @functools.lru_cache(maxsize=8)
 def loadDBReader(config_path: str):
-    config = util.load_config(config_path)
-    return DBReader(config, config_path)
+    return DBReader(config_path)
 
 
 class FakeUttDB:
