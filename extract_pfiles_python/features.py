@@ -277,7 +277,7 @@ class Features:
 
     @functools.lru_cache(maxsize=2)
     @NumFeatureCache
-    def get_multidim_net_output(self, convid: str, epoch: str, smooth: bool):
+    def get_multidim_net_output(self, convid: str, epoch: str):
         layers, fn = get_network_outputter(self.config_path, epoch, batch_size=None)
         input = self.get_combined_feature(convid)
         total_frames = input.shape[0]
@@ -295,12 +295,15 @@ class Features:
 
         inp = np.stack(stacker())
         output = self.batched_eval(inp, fn, out_dim=self.config['train_config']['num_labels'])
-        if smooth:
-            import scipy
-            res = scipy.ndimage.filters.gaussian_filter1d(output, 300 / 10, axis=0)
+        return NumFeature(output)
+
+    def gaussian_blur(self, feature: NumFeature, sigma: float):
+        if sigma > 0:
+            import scipy.ndimage
+            res = scipy.ndimage.filters.gaussian_filter1d(feature, sigma / feature.shift, axis=0)
             return NumFeature(res)
         else:
-            return NumFeature(output)
+            return feature
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:

@@ -18,7 +18,7 @@ import time
 import sys
 import json
 import subprocess
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 import os.path
 import re
 import functools
@@ -143,6 +143,16 @@ class DBReader:
                 text = self.noise_filter(word['text'])
                 if len(text) > 0:
                     return float(word['from'])
+        else:
+            raise Exception("use original db")
+            # return self.getBCMaxTime(utt) - 0.3
+
+    def getBcRealFirstEndTime(self, utt: str):
+        if self.use_original_db:
+            for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
+                text = self.noise_filter(word['text'])
+                if len(text) > 0:
+                    return float(word['to'])
         else:
             raise Exception("use original db")
             # return self.getBCMaxTime(utt) - 0.3
@@ -505,7 +515,8 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
         convo_map = read_conversations(config)
         allconvos = [convo for convos in convo_map.values() for convo in convos]
         out_dict = {}
-        for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
+        for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(
+                tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
             out_dict.update(out)
 
         # for uttId, is_bc in tqdm(utts):
@@ -521,28 +532,63 @@ def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array
         return val
 
 
+@functools.lru_cache(maxsize=10)
+def get_all_nonsilent_words(reader, convid):
+    utts = list(reader.get_utterances(convid))
+    return [word for utt, uttInfo in utts for word in reader.uttDB.get_words_for_utterance(utt, uttInfo) if
+            len(reader.noise_filter(word['text'])) >= 0]
+
+
 def count(config_path):
+    print(f"running frequency analysis")
+    import bisect
     reader = loadDBReader(config_path)
     allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
     uttcount = 0
     uttwords = 0
     bccount = 0
     bcwords = 0
+    bcdelays = []
+    alltexts = []
 
     def word_count(utts):
         return len([word for (utt, uttInfo) in utts for word in orig_noise_filter(uttInfo['text']).split(" ")])
 
+    def get_utterance_before(convid: str, time: float):
+        words = get_all_nonsilent_words(reader, convid)
+        keys = [float(word['to']) for word in words]
+        inx = bisect.bisect_left(keys, time)
+        if inx == 0:
+            print(f"warning: no utt before {time} in {convid}")
+            return words[0]
+        return words[inx - 1]
+
     for conv in allconvs:
         for channel in ["A", "B"]:
             convid = f"{conv}-{channel}"
+            speaker_convid = f"{conv}-{util.invert_channel(channel)}"
             utts = list(reader.get_utterances(convid))
             uttwords += word_count(utts)
             bcs = list(reader.get_backchannels(utts))
+            for bc, bcInfo in bcs:
+                fromTime = reader.getBcRealFirstEndTime(bc)
+                uttInfo = get_utterance_before(speaker_convid, fromTime)
+                lastTime = float(uttInfo['to'])
+                bcdelays.append((bc, fromTime - lastTime))
+                alltexts.append(reader.noise_filter(bcInfo['text']))
             bcwords += word_count(bcs)
             uttcount += len(utts)
             bccount += len(bcs)
     print(f"{bccount} backchannels out of a total of {uttcount} utterances ({bccount/uttcount*100:.3g}%) or " +
           f"{bcwords} words out of {uttwords} ({bcwords/uttwords*100:.3g}%)")
+    print(f"most common: {Counter(alltexts).most_common(10)}")
+    #print(f"\ndelays are")
+    bcdelays.sort(key=lambda x: x[1])
+    #with open("x", "w") as f:
+    #    f.writelines([str(delay)+"\n" for utt, delay in bcdelays])
+
+    import scipy.stats
+    print(f"delay stats: {scipy.stats.describe([delay for uttid, delay in bcdelays])}")
 
 
 def main():

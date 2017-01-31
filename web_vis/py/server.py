@@ -98,7 +98,11 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
-    return features.get_multidim_net_output(convid, id, smooth)
+    x = features.get_multidim_net_output(convid, id)[:, [1]]
+    if smooth:
+        return features.gaussian_blur(x, 300)
+    else:
+        return x
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -192,7 +196,7 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(feature, origReader, list(
-                evaluate.get_bc_samples(origReader, "sw2249-A"))))
+                evaluate.get_bc_samples(origReader, None, "sw2249-A"))))
         else:
             feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, feature)

@@ -33,7 +33,8 @@ interface EvalResult {
         min_talk_len: number | null,
         threshold: number,
         epoch: string,
-        weights_file: string
+        weights_file: string,
+        sigma_ms: number | undefined,
     },
     totals: { eval: SingleEvalResult, valid: SingleEvalResult }
 }
@@ -74,6 +75,7 @@ const xextractors: { [xaxis: string]: (r: EvalResult) => number } = {
     "Margin of Error Center": r => r.config.margin_of_error.reduce((a, b) => (a + b) / 2),
     "Margin of Error Width": r => r.config.margin_of_error.reduce((a, b) => +(b - a).toFixed(3)),
     "Min Talk Len": r => r.config.min_talk_len === null ? -1 : r.config.min_talk_len,
+    "Lowpass Sigma": r => r.config.sigma_ms === undefined ? 300 : r.config.sigma_ms,
     "Threshold": r => r.config.threshold,
 };
 const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {

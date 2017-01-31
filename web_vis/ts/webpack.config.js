@@ -21,7 +21,7 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.tsx?$/,
-      loaders: ['ts-loader'],
+      loaders: ['babel-loader?presets=es2015&plugins=transform-runtime', 'ts-loader'],
       //include: path.join(__dirname, 'src')
     },
     {
