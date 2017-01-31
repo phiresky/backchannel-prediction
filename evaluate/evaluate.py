@@ -116,15 +116,34 @@ def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple
     return correct + margin[0] <= predicted <= correct + margin[1]
 
 
-def random_predictor(reader: DBReader, convid: str, random_config: dict):
+def random_predictor(reader: DBReader, convid: str, config: dict):
+    shuffle_smart = config['random_baseline'].get("shuffle_in_talklen", False)
     # random.seed(convid)
-    utts = list(reader.get_utterances(convid))
+    utts = list(reader.get_utterances(swap_speaker(convid)))
     mintime = float(utts[0][1]['from'])
     maxtime = float(utts[-1][1]['to'])
-    bcount = len(reader.get_backchannels(utts))
-    predicted = [random.uniform(mintime, maxtime) for _ in range(bcount)]
+    bcs = reader.get_backchannels(utts)
+    bcount = len(bcs)
+    if shuffle_smart:
+        segs = get_monologuing_segments(reader, convid, 10)
+        bcstarts = [reader.getBcRealStartTime(bc) for bc, _ in bcs]
+        predicted = []
+        for start, stop in segs:
+            count = len(list(filter_ranges(bcstarts, [(start, stop)])))
+            predicted += [random.uniform(start, stop) for _ in range(count)]
+    else:
+        predicted = [random.uniform(mintime, maxtime) for _ in range(bcount)]
     predicted.sort()
     return predicted
+
+
+@functools.lru_cache(maxsize=476 + 400)
+def cached_smoothed_netout(config_path, convid, epoch, sigma):
+    reader = loadDBReader(config_path)
+    x = reader.features.get_multidim_net_output(convid, epoch)
+    x = 1 - x[:, [0]]
+    x = reader.features.gaussian_blur(x, sigma=sigma)
+    return x
 
 
 def evaluate_conv(config_path: str, convid: str, config: dict):
@@ -134,10 +153,9 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
 
     if 'random_baseline' in config:
-        predicted_bcs = random_predictor(reader, convid, config['random_baseline'])
+        predicted_bcs = random_predictor(reader, convid, config)
     else:
-        net_output = reader.features.get_multidim_net_output(convid, config["epoch"], smooth=True)
-        net_output = 1 - net_output[:, [0]]
+        net_output = cached_smoothed_netout(config_path, convid, config["epoch"], config.get('sigma_ms', 300))
         predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
@@ -191,9 +209,9 @@ default_config = dict(margin_of_error=(-0.5, 0.5), threshold=0.6, epoch="best", 
 
 def general_interesting_configs(config):
     # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
-    interesting_margins = [(-0.1, 0.5), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
+    interesting_margins = [(-0.1, 0.5), (-0.3, 0.3), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
     interesting_thresholds = [0.5, 0.6, 0.65, 0.7]
-    interesting_talk_lens = [None, 5, 10]
+    interesting_talk_lens = [None, 0, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
         yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
 
@@ -221,12 +239,18 @@ def min_talk_len_configs(config):
         yield {**default_config, **dict(min_talk_len=talk_len)}
 
 
+def smoothing_test_configs(config):
+    for sigma_ms in range(0, 1000 + 1, 25):
+        yield {**default_config, **dict(sigma_ms=sigma_ms)}
+
+
 def detailed_analysis(config):
     yield from min_talk_len_configs(config)
-    yield from epoch_test_configs(config)
+    # yield from epoch_test_configs(config)
     yield from general_interesting_configs(config)
     yield from margin_test_configs(config)
     yield from threshold_test_configs(config)
+    yield from smoothing_test_configs(config)
 
 
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict):
