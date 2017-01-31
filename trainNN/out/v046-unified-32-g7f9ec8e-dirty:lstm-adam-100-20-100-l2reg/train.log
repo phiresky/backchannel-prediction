@@ -1,0 +1,643 @@
+2017-01-29 17:42:23,092 DEBUG    version=v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg
+2017-01-29 17:42:23,093 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 17:42:29,680 DEBUG    getting all bc uttids...configs/lstm-adam/lstm-adam-100-20-100.json
+2017-01-29 17:42:30,429 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 17:42:57,945 DEBUG    loading cached extracted data from data/cache/extract-563f0cfda2bc8b6a659563483d8ddca63a2cf90cdf00f9f7f789bf6027ccda0a.pickle
+2017-01-29 17:42:59,796 DEBUG    set input dim to 2
+2017-01-29 17:42:59,812 DEBUG    input dim = 2
+2017-01-29 17:43:00,411 DEBUG    shuffling batches
+2017-01-29 17:43:39,084 DEBUG    shuffling done
+2017-01-29 17:43:39,084 DEBUG    loading data into ram
+2017-01-29 17:43:39,150 DEBUG    loading data took 0.066s (cpu: 0.065s)
+2017-01-29 17:43:39,277 DEBUG    getting all bc uttids...configs/lstm-adam/lstm-adam-100-20-100.json
+2017-01-29 17:43:39,518 DEBUG    set input dim to 2
+2017-01-29 17:43:39,519 DEBUG    input dim = 2
+2017-01-29 17:43:39,962 DEBUG    shuffling batches
+2017-01-29 17:43:43,444 DEBUG    shuffling done
+2017-01-29 17:43:43,444 DEBUG    loading data into ram
+2017-01-29 17:43:43,451 DEBUG    loading data took 0.006s (cpu: 0.006s)
+2017-01-29 17:43:43,730 DEBUG    Applying L2 regularization with 0.000100
+2017-01-29 17:43:43,815 INFO     Training network with 100142 trainable out of 100582 total params.
+2017-01-29 17:43:44,988 DEBUG    Using adam with learning_rate=0.001000
+2017-01-29 17:44:25,084 DEBUG    Starting training...
+2017-01-29 18:02:01,361 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-000.pkl
+2017-01-29 18:02:20,683 INFO     epoch: 0 took 1075.598s (0.014s in batching)
+training loss:	0.637093
+validation loss:	0.610378
+validation error:	0.337675
+2017-01-29 18:02:21,820 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 18:14:16,122 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-001.pkl
+2017-01-29 18:14:28,448 INFO     epoch: 1 took 727.765s (0.031s in batching)
+training loss:	0.615857
+validation loss:	0.602459
+validation error:	0.330170
+2017-01-29 18:14:28,449 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 18:25:01,510 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-002.pkl
+2017-01-29 18:25:13,579 INFO     epoch: 2 took 645.131s (0.013s in batching)
+training loss:	0.604668
+validation loss:	0.590348
+validation error:	0.319670
+2017-01-29 18:25:13,580 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 18:35:31,007 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-003.pkl
+2017-01-29 18:35:43,190 INFO     epoch: 3 took 629.611s (0.013s in batching)
+training loss:	0.595588
+validation loss:	0.588728
+validation error:	0.317269
+2017-01-29 18:35:43,190 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 18:48:17,184 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-004.pkl
+2017-01-29 18:48:34,669 INFO     epoch: 4 took 771.477s (0.014s in batching)
+training loss:	0.591796
+validation loss:	0.582382
+validation error:	0.311104
+2017-01-29 18:48:34,685 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:01:30,751 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-005.pkl
+2017-01-29 19:01:47,296 INFO     epoch: 5 took 792.628s (0.017s in batching)
+training loss:	0.589778
+validation loss:	0.580895
+validation error:	0.312156
+2017-01-29 19:01:48,124 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:12:15,443 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-006.pkl
+2017-01-29 19:12:27,652 INFO     epoch: 6 took 640.357s (0.013s in batching)
+training loss:	0.588286
+validation loss:	0.583031
+validation error:	0.311425
+2017-01-29 19:12:27,653 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:22:37,443 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-007.pkl
+2017-01-29 19:22:49,068 INFO     epoch: 7 took 621.416s (0.012s in batching)
+training loss:	0.587213
+validation loss:	0.582455
+validation error:	0.308943
+2017-01-29 19:22:49,069 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:33:25,496 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-008.pkl
+2017-01-29 19:33:38,252 INFO     epoch: 8 took 649.184s (0.013s in batching)
+training loss:	0.586257
+validation loss:	0.580215
+validation error:	0.308816
+2017-01-29 19:33:38,341 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:46:47,950 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-009.pkl
+2017-01-29 19:47:02,708 INFO     epoch: 9 took 804.450s (0.049s in batching)
+training loss:	0.585504
+validation loss:	0.580315
+validation error:	0.309679
+2017-01-29 19:47:02,819 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 19:58:10,509 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-010.pkl
+2017-01-29 19:58:23,049 INFO     epoch: 10 took 680.346s (0.017s in batching)
+training loss:	0.584876
+validation loss:	0.579527
+validation error:	0.309981
+2017-01-29 19:58:23,050 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:01:58,297 DEBUG    version=v046-unified-35-g298079b-dirty:lstm-adam-100-20-100-l2reg
+2017-01-29 21:03:19,284 DEBUG    version=v046-unified-35-g298079b-dirty:lstm-adam-100-20-100-l2reg
+2017-01-29 21:03:58,016 DEBUG    version=v046-unified-35-g298079b-dirty:lstm-adam-100-20-100-l2reg
+2017-01-29 21:03:58,071 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 21:04:10,078 DEBUG    getting all bc uttids...trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:04:10,079 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 21:04:21,578 DEBUG    loading cached extracted data from data/cache/extract-563f0cfda2bc8b6a659563483d8ddca63a2cf90cdf00f9f7f789bf6027ccda0a.pickle
+2017-01-29 21:04:23,016 DEBUG    set input dim to 2
+2017-01-29 21:04:23,018 DEBUG    input dim = 2
+2017-01-29 21:04:23,117 DEBUG    shuffling batches
+2017-01-29 21:04:59,282 DEBUG    shuffling done
+2017-01-29 21:04:59,283 DEBUG    loading data into ram
+2017-01-29 21:04:59,345 DEBUG    loading data took 0.063s (cpu: 0.063s)
+2017-01-29 21:04:59,377 DEBUG    getting all bc uttids...trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:04:59,616 DEBUG    set input dim to 2
+2017-01-29 21:04:59,616 DEBUG    input dim = 2
+2017-01-29 21:05:00,048 DEBUG    shuffling batches
+2017-01-29 21:05:03,414 DEBUG    shuffling done
+2017-01-29 21:05:03,414 DEBUG    loading data into ram
+2017-01-29 21:05:03,420 DEBUG    loading data took 0.006s (cpu: 0.006s)
+2017-01-29 21:05:22,090 DEBUG    version=v046-unified-35-g298079b-dirty:lstm-adam-100-20-100-l2reg
+2017-01-29 21:05:22,092 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 21:05:39,738 DEBUG    getting all bc uttids...trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:05:39,738 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-29 21:05:46,292 DEBUG    loading cached extracted data from data/cache/extract-563f0cfda2bc8b6a659563483d8ddca63a2cf90cdf00f9f7f789bf6027ccda0a.pickle
+2017-01-29 21:05:47,976 DEBUG    set input dim to 2
+2017-01-29 21:05:47,978 DEBUG    input dim = 2
+2017-01-29 21:05:48,073 DEBUG    shuffling batches
+2017-01-29 21:06:22,388 DEBUG    shuffling done
+2017-01-29 21:06:22,388 DEBUG    loading data into ram
+2017-01-29 21:06:22,449 DEBUG    loading data took 0.061s (cpu: 0.061s)
+2017-01-29 21:06:22,450 DEBUG    getting all bc uttids...trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:06:22,678 DEBUG    set input dim to 2
+2017-01-29 21:06:22,679 DEBUG    input dim = 2
+2017-01-29 21:06:23,116 DEBUG    shuffling batches
+2017-01-29 21:06:26,446 DEBUG    shuffling done
+2017-01-29 21:06:26,446 DEBUG    loading data into ram
+2017-01-29 21:06:26,452 DEBUG    loading data took 0.006s (cpu: 0.006s)
+2017-01-29 21:06:26,563 INFO     resuming from file trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-010.pkl
+2017-01-29 21:06:26,563 INFO     Loading old params from trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-010.pkl
+2017-01-29 21:06:26,793 DEBUG    Applying L2 regularization with 0.000100
+2017-01-29 21:06:26,875 INFO     Training network with 100142 trainable out of 100582 total params.
+2017-01-29 21:06:27,975 DEBUG    Using adam with learning_rate=0.001000
+2017-01-29 21:06:55,407 DEBUG    Starting training...
+2017-01-29 21:17:17,244 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-011.pkl
+2017-01-29 21:17:29,339 INFO     epoch: 11 took 633.931s (0.014s in batching)
+training loss:	0.584324
+validation loss:	0.578885
+validation error:	0.307090
+2017-01-29 21:17:29,362 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:28:13,085 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-012.pkl
+2017-01-29 21:28:25,987 INFO     epoch: 12 took 656.648s (0.012s in batching)
+training loss:	0.583895
+validation loss:	0.575244
+validation error:	0.304835
+2017-01-29 21:28:26,003 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:39:18,849 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-013.pkl
+2017-01-29 21:39:30,636 INFO     epoch: 13 took 664.650s (0.020s in batching)
+training loss:	0.583379
+validation loss:	0.577738
+validation error:	0.305193
+2017-01-29 21:39:30,638 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 21:49:59,647 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-014.pkl
+2017-01-29 21:50:11,571 INFO     epoch: 14 took 640.935s (0.015s in batching)
+training loss:	0.582969
+validation loss:	0.577289
+validation error:	0.306085
+2017-01-29 21:50:11,572 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:00:36,170 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-015.pkl
+2017-01-29 22:00:48,485 INFO     epoch: 15 took 636.915s (0.013s in batching)
+training loss:	0.582660
+validation loss:	0.577067
+validation error:	0.306439
+2017-01-29 22:00:48,487 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:11:04,744 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-016.pkl
+2017-01-29 22:11:16,943 INFO     epoch: 16 took 628.458s (0.012s in batching)
+training loss:	0.582309
+validation loss:	0.580946
+validation error:	0.307882
+2017-01-29 22:11:16,945 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:22:27,557 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-017.pkl
+2017-01-29 22:22:41,972 INFO     epoch: 17 took 685.028s (0.244s in batching)
+training loss:	0.581917
+validation loss:	0.578483
+validation error:	0.306264
+2017-01-29 22:22:42,000 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:33:09,230 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-018.pkl
+2017-01-29 22:33:21,090 INFO     epoch: 18 took 639.118s (0.017s in batching)
+training loss:	0.581747
+validation loss:	0.579021
+validation error:	0.309118
+2017-01-29 22:33:21,112 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:43:36,751 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-019.pkl
+2017-01-29 22:43:48,762 INFO     epoch: 19 took 627.672s (0.013s in batching)
+training loss:	0.581453
+validation loss:	0.578938
+validation error:	0.306429
+2017-01-29 22:43:51,305 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 22:54:14,308 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-020.pkl
+2017-01-29 22:54:26,683 INFO     epoch: 20 took 637.921s (0.013s in batching)
+training loss:	0.581162
+validation loss:	0.580629
+validation error:	0.308269
+2017-01-29 22:54:26,687 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:05:52,470 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-021.pkl
+2017-01-29 23:06:04,465 INFO     epoch: 21 took 697.783s (0.011s in batching)
+training loss:	0.581090
+validation loss:	0.578730
+validation error:	0.305995
+2017-01-29 23:06:04,467 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:16:11,480 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-022.pkl
+2017-01-29 23:16:23,088 INFO     epoch: 22 took 618.623s (0.011s in batching)
+training loss:	0.580748
+validation loss:	0.579664
+validation error:	0.306500
+2017-01-29 23:16:23,090 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:26:35,899 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-023.pkl
+2017-01-29 23:26:47,886 INFO     epoch: 23 took 624.797s (0.012s in batching)
+training loss:	0.580725
+validation loss:	0.579095
+validation error:	0.307198
+2017-01-29 23:26:47,918 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:37:08,022 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-024.pkl
+2017-01-29 23:37:21,098 INFO     epoch: 24 took 633.213s (0.013s in batching)
+training loss:	0.580525
+validation loss:	0.580241
+validation error:	0.307250
+2017-01-29 23:37:23,347 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:47:57,792 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-025.pkl
+2017-01-29 23:48:10,216 INFO     epoch: 25 took 649.118s (0.031s in batching)
+training loss:	0.580070
+validation loss:	0.580515
+validation error:	0.309222
+2017-01-29 23:48:10,218 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-29 23:58:50,769 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-026.pkl
+2017-01-29 23:59:03,043 INFO     epoch: 26 took 652.827s (0.014s in batching)
+training loss:	0.580149
+validation loss:	0.581345
+validation error:	0.307656
+2017-01-29 23:59:03,044 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 00:09:39,290 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-027.pkl
+2017-01-30 00:09:51,516 INFO     epoch: 27 took 648.473s (0.013s in batching)
+training loss:	0.579943
+validation loss:	0.579087
+validation error:	0.306604
+2017-01-30 00:09:51,518 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 00:20:10,001 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-028.pkl
+2017-01-30 00:20:21,614 INFO     epoch: 28 took 630.097s (0.013s in batching)
+training loss:	0.579719
+validation loss:	0.579170
+validation error:	0.307033
+2017-01-30 00:20:21,615 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 00:30:32,547 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-029.pkl
+2017-01-30 00:30:44,121 INFO     epoch: 29 took 622.508s (0.013s in batching)
+training loss:	0.579719
+validation loss:	0.577753
+validation error:	0.305547
+2017-01-30 00:30:44,123 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 00:44:46,090 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-030.pkl
+2017-01-30 00:46:00,486 INFO     epoch: 30 took 916.363s (0.012s in batching)
+training loss:	0.579560
+validation loss:	0.579149
+validation error:	0.306401
+2017-01-30 00:46:00,546 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 01:18:43,623 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-031.pkl
+2017-01-30 01:20:01,751 INFO     epoch: 31 took 2041.265s (0.016s in batching)
+training loss:	0.579657
+validation loss:	0.580082
+validation error:	0.305925
+2017-01-30 01:20:01,780 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 01:57:49,974 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-032.pkl
+2017-01-30 01:59:54,947 INFO     epoch: 32 took 2393.196s (0.013s in batching)
+training loss:	0.579503
+validation loss:	0.580577
+validation error:	0.308698
+2017-01-30 01:59:55,009 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 02:48:23,784 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-033.pkl
+2017-01-30 02:50:28,934 INFO     epoch: 33 took 3033.987s (0.013s in batching)
+training loss:	0.579293
+validation loss:	0.578934
+validation error:	0.303373
+2017-01-30 02:50:28,990 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 03:39:15,390 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-034.pkl
+2017-01-30 03:41:30,237 INFO     epoch: 34 took 3061.303s (0.013s in batching)
+training loss:	0.579237
+validation loss:	0.577979
+validation error:	0.305821
+2017-01-30 03:41:30,294 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 04:32:27,435 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-035.pkl
+2017-01-30 04:34:48,713 INFO     epoch: 35 took 3198.477s (0.013s in batching)
+training loss:	0.579094
+validation loss:	0.578285
+validation error:	0.304825
+2017-01-30 04:34:48,945 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 05:36:58,198 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-036.pkl
+2017-01-30 05:40:33,751 INFO     epoch: 36 took 3945.037s (0.023s in batching)
+training loss:	0.579060
+validation loss:	0.578791
+validation error:	0.306976
+2017-01-30 05:40:33,817 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 06:38:18,308 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-037.pkl
+2017-01-30 06:40:55,293 INFO     epoch: 37 took 3621.543s (0.013s in batching)
+training loss:	0.579024
+validation loss:	0.579547
+validation error:	0.306000
+2017-01-30 06:40:55,296 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 07:37:06,359 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-038.pkl
+2017-01-30 07:37:56,919 INFO     epoch: 38 took 3421.626s (0.012s in batching)
+training loss:	0.578883
+validation loss:	0.576663
+validation error:	0.305208
+2017-01-30 07:37:56,942 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 08:32:54,689 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-039.pkl
+2017-01-30 08:35:26,472 INFO     epoch: 39 took 3449.553s (0.015s in batching)
+training loss:	0.578880
+validation loss:	0.582096
+validation error:	0.306146
+2017-01-30 08:35:26,476 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 09:30:12,014 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-040.pkl
+2017-01-30 09:32:44,667 INFO     epoch: 40 took 3438.195s (0.015s in batching)
+training loss:	0.578734
+validation loss:	0.584722
+validation error:	0.311958
+2017-01-30 09:32:44,692 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 10:29:39,091 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-041.pkl
+2017-01-30 10:32:23,509 INFO     epoch: 41 took 3578.842s (0.016s in batching)
+training loss:	0.578540
+validation loss:	0.580598
+validation error:	0.307976
+2017-01-30 10:32:23,511 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 11:31:04,476 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-042.pkl
+2017-01-30 11:33:48,222 INFO     epoch: 42 took 3684.712s (0.011s in batching)
+training loss:	0.578611
+validation loss:	0.580896
+validation error:	0.308373
+2017-01-30 11:33:48,223 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 12:30:25,315 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-043.pkl
+2017-01-30 12:31:22,797 INFO     epoch: 43 took 3454.099s (0.033s in batching)
+training loss:	0.578464
+validation loss:	0.579371
+validation error:	0.305514
+2017-01-30 12:31:24,531 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 12:41:37,028 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-044.pkl
+2017-01-30 12:41:49,750 INFO     epoch: 44 took 627.430s (1.785s in batching)
+training loss:	0.578486
+validation loss:	0.579491
+validation error:	0.305212
+2017-01-30 12:41:49,755 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 12:51:37,454 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-045.pkl
+2017-01-30 12:51:48,946 INFO     epoch: 45 took 599.196s (0.010s in batching)
+training loss:	0.578242
+validation loss:	0.578315
+validation error:	0.303726
+2017-01-30 12:51:49,123 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 13:02:07,923 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-046.pkl
+2017-01-30 13:02:20,022 INFO     epoch: 46 took 631.075s (0.029s in batching)
+training loss:	0.578273
+validation loss:	0.580045
+validation error:	0.306302
+2017-01-30 13:02:20,252 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 13:13:44,406 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-047.pkl
+2017-01-30 13:14:05,114 INFO     epoch: 47 took 705.092s (3.588s in batching)
+training loss:	0.578253
+validation loss:	0.579732
+validation error:	0.306203
+2017-01-30 13:14:05,217 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 13:25:09,651 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-048.pkl
+2017-01-30 13:25:22,275 INFO     epoch: 48 took 677.161s (0.027s in batching)
+training loss:	0.578233
+validation loss:	0.581497
+validation error:	0.307835
+2017-01-30 13:25:22,277 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 13:37:30,098 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-049.pkl
+2017-01-30 13:37:48,385 INFO     epoch: 49 took 746.108s (4.188s in batching)
+training loss:	0.578171
+validation loss:	0.579383
+validation error:	0.304547
+2017-01-30 13:37:48,425 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 13:48:33,064 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-050.pkl
+2017-01-30 13:48:45,724 INFO     epoch: 50 took 657.341s (0.045s in batching)
+training loss:	0.578192
+validation loss:	0.580882
+validation error:	0.309146
+2017-01-30 13:48:45,726 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 14:12:47,382 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-051.pkl
+2017-01-30 14:18:16,896 INFO     epoch: 51 took 1771.170s (4.108s in batching)
+training loss:	0.578228
+validation loss:	0.580567
+validation error:	0.307113
+2017-01-30 14:18:16,996 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 15:08:29,020 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-052.pkl
+2017-01-30 15:08:40,486 INFO     epoch: 52 took 3023.593s (0.014s in batching)
+training loss:	0.578169
+validation loss:	0.582866
+validation error:	0.308297
+2017-01-30 15:08:40,489 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 15:18:44,399 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-053.pkl
+2017-01-30 15:18:56,039 INFO     epoch: 53 took 615.553s (0.011s in batching)
+training loss:	0.577917
+validation loss:	0.583341
+validation error:	0.308868
+2017-01-30 15:18:56,041 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 15:29:37,699 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-054.pkl
+2017-01-30 15:29:49,034 INFO     epoch: 54 took 652.995s (0.011s in batching)
+training loss:	0.578021
+validation loss:	0.579967
+validation error:	0.304792
+2017-01-30 15:29:49,036 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 15:40:48,350 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-055.pkl
+2017-01-30 15:41:09,066 INFO     epoch: 55 took 680.031s (0.011s in batching)
+training loss:	0.578001
+validation loss:	0.581124
+validation error:	0.309844
+2017-01-30 15:41:09,067 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 15:55:50,867 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-056.pkl
+2017-01-30 15:56:11,611 INFO     epoch: 56 took 902.545s (0.012s in batching)
+training loss:	0.577980
+validation loss:	0.580841
+validation error:	0.306184
+2017-01-30 15:56:11,613 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 16:10:59,124 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-057.pkl
+2017-01-30 16:11:19,570 INFO     epoch: 57 took 907.959s (0.013s in batching)
+training loss:	0.577928
+validation loss:	0.579996
+validation error:	0.305887
+2017-01-30 16:11:19,571 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 16:22:28,531 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-058.pkl
+2017-01-30 16:22:40,256 INFO     epoch: 58 took 680.686s (0.012s in batching)
+training loss:	0.577860
+validation loss:	0.582357
+validation error:	0.306873
+2017-01-30 16:22:40,258 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 16:32:52,676 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-059.pkl
+2017-01-30 16:33:04,391 INFO     epoch: 59 took 624.135s (0.012s in batching)
+training loss:	0.577901
+validation loss:	0.578637
+validation error:	0.305151
+2017-01-30 16:33:04,393 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 16:43:14,986 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-060.pkl
+2017-01-30 16:43:26,901 INFO     epoch: 60 took 622.510s (0.013s in batching)
+training loss:	0.577793
+validation loss:	0.580020
+validation error:	0.306075
+2017-01-30 16:43:26,903 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 16:53:57,127 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-061.pkl
+2017-01-30 16:54:08,898 INFO     epoch: 61 took 641.998s (0.012s in batching)
+training loss:	0.577676
+validation loss:	0.583645
+validation error:	0.308892
+2017-01-30 16:54:08,900 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:04:23,800 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-062.pkl
+2017-01-30 17:04:36,432 INFO     epoch: 62 took 627.534s (0.012s in batching)
+training loss:	0.577714
+validation loss:	0.581777
+validation error:	0.308967
+2017-01-30 17:04:36,435 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:15:13,380 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-063.pkl
+2017-01-30 17:15:25,785 INFO     epoch: 63 took 649.352s (0.013s in batching)
+training loss:	0.577684
+validation loss:	0.580261
+validation error:	0.304807
+2017-01-30 17:15:25,787 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:25:35,119 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-064.pkl
+2017-01-30 17:25:46,734 INFO     epoch: 64 took 620.949s (0.012s in batching)
+training loss:	0.577644
+validation loss:	0.583234
+validation error:	0.309363
+2017-01-30 17:25:46,736 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:35:50,584 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-065.pkl
+2017-01-30 17:36:02,096 INFO     epoch: 65 took 615.361s (0.011s in batching)
+training loss:	0.577683
+validation loss:	0.578884
+validation error:	0.306552
+2017-01-30 17:36:02,097 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:46:02,430 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-066.pkl
+2017-01-30 17:46:13,973 INFO     epoch: 66 took 611.877s (0.011s in batching)
+training loss:	0.577599
+validation loss:	0.581294
+validation error:	0.310236
+2017-01-30 17:46:13,975 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 17:56:13,991 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-067.pkl
+2017-01-30 17:56:25,487 INFO     epoch: 67 took 611.514s (0.011s in batching)
+training loss:	0.577484
+validation loss:	0.580425
+validation error:	0.304741
+2017-01-30 17:56:25,489 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:06:25,603 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-068.pkl
+2017-01-30 18:06:37,098 INFO     epoch: 68 took 611.611s (0.011s in batching)
+training loss:	0.577436
+validation loss:	0.582063
+validation error:	0.308212
+2017-01-30 18:06:37,100 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:16:37,087 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-069.pkl
+2017-01-30 18:16:48,588 INFO     epoch: 69 took 611.490s (0.011s in batching)
+training loss:	0.577586
+validation loss:	0.582538
+validation error:	0.307099
+2017-01-30 18:16:48,590 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:26:48,540 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-070.pkl
+2017-01-30 18:27:00,053 INFO     epoch: 70 took 611.465s (0.011s in batching)
+training loss:	0.577487
+validation loss:	0.582097
+validation error:	0.306637
+2017-01-30 18:27:00,055 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:37:11,623 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-071.pkl
+2017-01-30 18:37:23,123 INFO     epoch: 71 took 623.070s (0.011s in batching)
+training loss:	0.577427
+validation loss:	0.580831
+validation error:	0.307118
+2017-01-30 18:37:23,125 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:47:22,445 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-072.pkl
+2017-01-30 18:47:33,936 INFO     epoch: 72 took 610.813s (0.011s in batching)
+training loss:	0.577394
+validation loss:	0.582279
+validation error:	0.305415
+2017-01-30 18:47:33,938 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 18:57:33,400 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-073.pkl
+2017-01-30 18:57:44,912 INFO     epoch: 73 took 610.976s (0.011s in batching)
+training loss:	0.577438
+validation loss:	0.581005
+validation error:	0.306825
+2017-01-30 18:57:44,914 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:07:44,429 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-074.pkl
+2017-01-30 19:07:55,923 INFO     epoch: 74 took 611.011s (0.011s in batching)
+training loss:	0.577282
+validation loss:	0.584773
+validation error:	0.308368
+2017-01-30 19:07:55,925 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:17:55,490 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-075.pkl
+2017-01-30 19:18:07,038 INFO     epoch: 75 took 611.114s (0.011s in batching)
+training loss:	0.577288
+validation loss:	0.581593
+validation error:	0.307085
+2017-01-30 19:18:07,040 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:28:06,422 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-076.pkl
+2017-01-30 19:28:17,939 INFO     epoch: 76 took 610.901s (0.011s in batching)
+training loss:	0.577259
+validation loss:	0.585401
+validation error:	0.308703
+2017-01-30 19:28:17,961 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:38:17,428 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-077.pkl
+2017-01-30 19:38:28,923 INFO     epoch: 77 took 610.984s (0.012s in batching)
+training loss:	0.577143
+validation loss:	0.582299
+validation error:	0.308255
+2017-01-30 19:38:28,925 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:48:28,355 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-078.pkl
+2017-01-30 19:48:39,862 INFO     epoch: 78 took 610.939s (0.011s in batching)
+training loss:	0.577196
+validation loss:	0.582641
+validation error:	0.310217
+2017-01-30 19:48:39,864 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 19:58:39,279 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-079.pkl
+2017-01-30 19:58:50,765 INFO     epoch: 79 took 610.903s (0.011s in batching)
+training loss:	0.577172
+validation loss:	0.585371
+validation error:	0.311160
+2017-01-30 19:58:50,767 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 20:08:50,133 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-080.pkl
+2017-01-30 20:09:01,652 INFO     epoch: 80 took 610.887s (0.011s in batching)
+training loss:	0.577236
+validation loss:	0.583142
+validation error:	0.308094
+2017-01-30 20:09:01,654 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 20:19:01,068 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-081.pkl
+2017-01-30 20:19:12,568 INFO     epoch: 81 took 610.916s (0.011s in batching)
+training loss:	0.577110
+validation loss:	0.583876
+validation error:	0.307358
+2017-01-30 20:19:12,570 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 20:29:11,754 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-082.pkl
+2017-01-30 20:29:23,242 INFO     epoch: 82 took 610.674s (0.011s in batching)
+training loss:	0.577161
+validation loss:	0.583606
+validation error:	0.309840
+2017-01-30 20:29:23,244 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 20:39:30,451 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-083.pkl
+2017-01-30 20:39:41,997 INFO     epoch: 83 took 618.755s (0.011s in batching)
+training loss:	0.576962
+validation loss:	0.583690
+validation error:	0.310571
+2017-01-30 20:39:41,999 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 20:49:44,091 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-084.pkl
+2017-01-30 20:49:56,065 INFO     epoch: 84 took 614.068s (0.011s in batching)
+training loss:	0.577125
+validation loss:	0.580714
+validation error:	0.305948
+2017-01-30 20:49:56,067 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 21:00:20,942 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-085.pkl
+2017-01-30 21:00:33,325 INFO     epoch: 85 took 637.260s (0.013s in batching)
+training loss:	0.577026
+validation loss:	0.581323
+validation error:	0.305453
+2017-01-30 21:00:33,329 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 21:11:03,100 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-086.pkl
+2017-01-30 21:11:14,850 INFO     epoch: 86 took 641.525s (0.014s in batching)
+training loss:	0.577032
+validation loss:	0.584900
+validation error:	0.307632
+2017-01-30 21:11:15,035 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 21:21:33,267 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-087.pkl
+2017-01-30 21:21:45,296 INFO     epoch: 87 took 630.446s (0.016s in batching)
+training loss:	0.577018
+validation loss:	0.584272
+validation error:	0.310387
+2017-01-30 21:21:45,317 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 21:31:58,469 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-088.pkl
+2017-01-30 21:32:10,261 INFO     epoch: 88 took 624.965s (0.012s in batching)
+training loss:	0.576879
+validation loss:	0.580388
+validation error:	0.305698
+2017-01-30 21:32:10,264 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 21:45:06,962 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-089.pkl
+2017-01-30 21:45:28,856 INFO     epoch: 89 took 798.595s (0.013s in batching)
+training loss:	0.577017
+validation loss:	0.584553
+validation error:	0.308788
+2017-01-30 21:45:28,858 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:00:35,689 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-090.pkl
+2017-01-30 22:00:58,405 INFO     epoch: 90 took 929.549s (0.013s in batching)
+training loss:	0.576772
+validation loss:	0.581962
+validation error:	0.306825
+2017-01-30 22:00:58,408 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:14:56,900 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-091.pkl
+2017-01-30 22:15:09,509 INFO     epoch: 91 took 851.104s (0.014s in batching)
+training loss:	0.576938
+validation loss:	0.581633
+validation error:	0.304958
+2017-01-30 22:15:09,512 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:25:49,366 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-092.pkl
+2017-01-30 22:26:01,393 INFO     epoch: 92 took 651.884s (0.012s in batching)
+training loss:	0.576840
+validation loss:	0.582008
+validation error:	0.309066
+2017-01-30 22:26:01,410 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:36:09,838 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-093.pkl
+2017-01-30 22:36:21,484 INFO     epoch: 93 took 620.091s (0.011s in batching)
+training loss:	0.576836
+validation loss:	0.582586
+validation error:	0.306646
+2017-01-30 22:36:21,486 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:46:37,133 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-094.pkl
+2017-01-30 22:46:49,726 INFO     epoch: 94 took 628.242s (0.012s in batching)
+training loss:	0.576697
+validation loss:	0.582905
+validation error:	0.307335
+2017-01-30 22:46:49,730 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json
+2017-01-30 22:49:10,173 INFO     received exit signal, waiting for epoch to finish...
+2017-01-30 22:57:06,128 INFO     Saving network params to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/epoch-095.pkl
+2017-01-30 22:57:17,990 INFO     epoch: 95 took 628.264s (0.012s in batching)
+training loss:	0.576736
+validation loss:	0.582093
+validation error:	0.305325
+2017-01-30 22:57:17,994 INFO     Wrote output to trainNN/out/v046-unified-32-g7f9ec8e-dirty:lstm-adam-100-20-100-l2reg/config.json

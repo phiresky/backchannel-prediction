@@ -1,0 +1,287 @@
+2017-01-30 23:00:55,871 DEBUG    version=v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg
+2017-01-30 23:00:55,871 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-30 23:01:00,383 DEBUG    getting all bc uttids...configs/lstm-ffv-75-40-relu.json
+2017-01-30 23:01:00,383 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-30 23:01:11,160 DEBUG    loading cached extracted data from data/cache/extract-17095dffdd75068299ccb5dd895af8ecaa0fbe1575b09b5b1ad4e4febf4d84ae.pickle
+2017-01-30 23:01:15,661 DEBUG    set input dim to 9
+2017-01-30 23:01:15,684 DEBUG    input dim = 9
+2017-01-30 23:01:15,785 DEBUG    shuffling batches
+2017-01-30 23:01:57,055 DEBUG    shuffling done
+2017-01-30 23:01:57,068 DEBUG    loading data into ram
+2017-01-30 23:01:57,135 DEBUG    loading data took 0.067s (cpu: 0.065s)
+2017-01-30 23:01:57,229 DEBUG    getting all bc uttids...configs/lstm-ffv-75-40-relu.json
+2017-01-30 23:01:57,474 DEBUG    set input dim to 9
+2017-01-30 23:01:57,476 DEBUG    input dim = 9
+2017-01-30 23:01:57,945 DEBUG    shuffling batches
+2017-01-30 23:02:03,152 DEBUG    shuffling done
+2017-01-30 23:02:03,152 DEBUG    loading data into ram
+2017-01-30 23:02:03,159 DEBUG    loading data took 0.006s (cpu: 0.006s)
+2017-01-30 23:02:04,368 DEBUG    Applying L2 regularization with 0.000100
+2017-01-30 23:02:04,437 INFO     Training network with 44487 trainable out of 44717 total params.
+2017-01-30 23:02:04,880 DEBUG    Using adam with learning_rate=0.001000
+2017-01-30 23:02:29,266 DEBUG    Starting training...
+2017-01-30 23:08:39,947 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-000.pkl
+2017-01-30 23:08:47,938 INFO     epoch: 0 took 378.672s (0.014s in batching)
+training loss:	0.627358
+validation loss:	0.607506
+validation error:	0.333123
+2017-01-30 23:08:47,939 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:14:54,015 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-001.pkl
+2017-01-30 23:15:01,606 INFO     epoch: 1 took 373.667s (0.015s in batching)
+training loss:	0.606476
+validation loss:	0.591770
+validation error:	0.319892
+2017-01-30 23:15:01,607 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:21:08,589 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-002.pkl
+2017-01-30 23:21:16,342 INFO     epoch: 2 took 374.736s (0.011s in batching)
+training loss:	0.597832
+validation loss:	0.588226
+validation error:	0.315132
+2017-01-30 23:21:16,343 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:27:23,123 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-003.pkl
+2017-01-30 23:27:30,681 INFO     epoch: 3 took 374.340s (0.012s in batching)
+training loss:	0.592900
+validation loss:	0.583719
+validation error:	0.310547
+2017-01-30 23:27:30,682 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:33:37,836 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-004.pkl
+2017-01-30 23:33:45,755 INFO     epoch: 4 took 375.074s (0.012s in batching)
+training loss:	0.589560
+validation loss:	0.582217
+validation error:	0.312939
+2017-01-30 23:33:45,755 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:39:56,927 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-005.pkl
+2017-01-30 23:40:04,633 INFO     epoch: 5 took 378.879s (0.012s in batching)
+training loss:	0.587025
+validation loss:	0.576908
+validation error:	0.306769
+2017-01-30 23:40:04,635 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:46:10,982 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-006.pkl
+2017-01-30 23:46:19,259 INFO     epoch: 6 took 374.625s (0.012s in batching)
+training loss:	0.585390
+validation loss:	0.576329
+validation error:	0.304024
+2017-01-30 23:46:19,260 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:52:29,711 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-007.pkl
+2017-01-30 23:52:37,935 INFO     epoch: 7 took 378.676s (0.014s in batching)
+training loss:	0.583985
+validation loss:	0.577023
+validation error:	0.305495
+2017-01-30 23:52:37,936 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-30 23:58:51,542 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-008.pkl
+2017-01-30 23:58:59,141 INFO     epoch: 8 took 381.207s (0.014s in batching)
+training loss:	0.582808
+validation loss:	0.574425
+validation error:	0.304373
+2017-01-30 23:58:59,142 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:05:02,408 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-009.pkl
+2017-01-31 00:05:10,199 INFO     epoch: 9 took 371.058s (0.012s in batching)
+training loss:	0.581718
+validation loss:	0.574072
+validation error:	0.302377
+2017-01-31 00:05:10,200 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:11:20,497 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-010.pkl
+2017-01-31 00:11:28,048 INFO     epoch: 10 took 377.849s (0.013s in batching)
+training loss:	0.580857
+validation loss:	0.573213
+validation error:	0.302920
+2017-01-31 00:11:28,049 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:17:37,650 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-011.pkl
+2017-01-31 00:17:45,294 INFO     epoch: 11 took 377.245s (0.013s in batching)
+training loss:	0.580134
+validation loss:	0.573522
+validation error:	0.303255
+2017-01-31 00:17:45,295 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:23:52,483 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-012.pkl
+2017-01-31 00:24:00,058 INFO     epoch: 12 took 374.764s (0.016s in batching)
+training loss:	0.579575
+validation loss:	0.571955
+validation error:	0.299863
+2017-01-31 00:24:00,059 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:30:07,968 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-013.pkl
+2017-01-31 00:30:15,542 INFO     epoch: 13 took 375.485s (0.012s in batching)
+training loss:	0.579208
+validation loss:	0.579255
+validation error:	0.305608
+2017-01-31 00:30:15,543 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:36:20,595 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-014.pkl
+2017-01-31 00:36:29,877 INFO     epoch: 14 took 374.335s (0.011s in batching)
+training loss:	0.578726
+validation loss:	0.572193
+validation error:	0.300057
+2017-01-31 00:36:29,878 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:42:34,571 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-015.pkl
+2017-01-31 00:42:42,366 INFO     epoch: 15 took 372.489s (0.012s in batching)
+training loss:	0.577978
+validation loss:	0.575952
+validation error:	0.301561
+2017-01-31 00:42:42,367 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:48:48,781 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-016.pkl
+2017-01-31 00:48:56,916 INFO     epoch: 16 took 374.549s (0.011s in batching)
+training loss:	0.577712
+validation loss:	0.571587
+validation error:	0.302505
+2017-01-31 00:48:56,919 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 00:55:04,732 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-017.pkl
+2017-01-31 00:55:12,539 INFO     epoch: 17 took 375.624s (0.011s in batching)
+training loss:	0.577497
+validation loss:	0.576113
+validation error:	0.306255
+2017-01-31 00:55:12,541 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:01:19,468 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-018.pkl
+2017-01-31 01:01:28,045 INFO     epoch: 18 took 375.505s (0.011s in batching)
+training loss:	0.577021
+validation loss:	0.569279
+validation error:	0.300693
+2017-01-31 01:01:28,084 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:07:40,081 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-019.pkl
+2017-01-31 01:07:47,942 INFO     epoch: 19 took 379.896s (0.028s in batching)
+training loss:	0.576606
+validation loss:	0.572987
+validation error:	0.299297
+2017-01-31 01:07:47,943 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:13:56,586 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-020.pkl
+2017-01-31 01:14:04,161 INFO     epoch: 20 took 376.220s (0.011s in batching)
+training loss:	0.576527
+validation loss:	0.569592
+validation error:	0.297354
+2017-01-31 01:14:04,162 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:20:06,391 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-021.pkl
+2017-01-31 01:20:14,023 INFO     epoch: 21 took 369.862s (0.010s in batching)
+training loss:	0.576116
+validation loss:	0.572485
+validation error:	0.302090
+2017-01-31 01:20:14,024 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:26:18,159 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-022.pkl
+2017-01-31 01:26:25,864 INFO     epoch: 22 took 371.840s (0.011s in batching)
+training loss:	0.575825
+validation loss:	0.573354
+validation error:	0.301156
+2017-01-31 01:26:25,866 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:33:58,598 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-023.pkl
+2017-01-31 01:34:10,995 INFO     epoch: 23 took 465.131s (0.016s in batching)
+training loss:	0.575396
+validation loss:	0.569884
+validation error:	0.300099
+2017-01-31 01:34:10,997 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:42:47,271 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-024.pkl
+2017-01-31 01:42:59,347 INFO     epoch: 24 took 528.351s (0.013s in batching)
+training loss:	0.575154
+validation loss:	0.569104
+validation error:	0.298759
+2017-01-31 01:42:59,348 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:51:14,626 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-025.pkl
+2017-01-31 01:51:26,201 INFO     epoch: 25 took 506.854s (0.013s in batching)
+training loss:	0.574902
+validation loss:	0.573208
+validation error:	0.298184
+2017-01-31 01:51:26,203 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 01:58:43,182 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-026.pkl
+2017-01-31 01:58:52,351 INFO     epoch: 26 took 446.150s (0.017s in batching)
+training loss:	0.574874
+validation loss:	0.575693
+validation error:	0.305764
+2017-01-31 01:58:52,353 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:05:00,799 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-027.pkl
+2017-01-31 02:05:08,544 INFO     epoch: 27 took 376.194s (0.013s in batching)
+training loss:	0.574446
+validation loss:	0.569493
+validation error:	0.298679
+2017-01-31 02:05:08,546 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:11:26,485 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-028.pkl
+2017-01-31 02:11:34,698 INFO     epoch: 28 took 386.154s (0.013s in batching)
+training loss:	0.574651
+validation loss:	0.572122
+validation error:	0.303448
+2017-01-31 02:11:34,700 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:18:10,754 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-029.pkl
+2017-01-31 02:18:19,005 INFO     epoch: 29 took 404.307s (0.017s in batching)
+training loss:	0.574165
+validation loss:	0.568728
+validation error:	0.300038
+2017-01-31 02:18:19,007 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:25:01,191 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-030.pkl
+2017-01-31 02:25:09,875 INFO     epoch: 30 took 410.870s (0.013s in batching)
+training loss:	0.574209
+validation loss:	0.567907
+validation error:	0.296976
+2017-01-31 02:25:09,876 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:31:37,529 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-031.pkl
+2017-01-31 02:31:45,624 INFO     epoch: 31 took 395.749s (0.013s in batching)
+training loss:	0.573708
+validation loss:	0.571069
+validation error:	0.300208
+2017-01-31 02:31:45,626 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:37:51,137 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-032.pkl
+2017-01-31 02:37:58,909 INFO     epoch: 32 took 373.285s (0.017s in batching)
+training loss:	0.573791
+validation loss:	0.576238
+validation error:	0.308269
+2017-01-31 02:37:58,910 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:44:03,842 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-033.pkl
+2017-01-31 02:44:11,262 INFO     epoch: 33 took 372.353s (0.012s in batching)
+training loss:	0.573484
+validation loss:	0.575057
+validation error:	0.303906
+2017-01-31 02:44:11,263 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:50:12,055 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-034.pkl
+2017-01-31 02:50:19,653 INFO     epoch: 34 took 368.391s (0.012s in batching)
+training loss:	0.573438
+validation loss:	0.574487
+validation error:	0.300137
+2017-01-31 02:50:19,654 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 02:56:48,179 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-035.pkl
+2017-01-31 02:57:00,262 INFO     epoch: 35 took 400.609s (0.011s in batching)
+training loss:	0.573132
+validation loss:	0.572479
+validation error:	0.301467
+2017-01-31 02:57:00,264 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:05:10,282 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-036.pkl
+2017-01-31 03:05:21,701 INFO     epoch: 36 took 501.439s (0.011s in batching)
+training loss:	0.573349
+validation loss:	0.571308
+validation error:	0.299090
+2017-01-31 03:05:21,702 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:13:29,929 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-037.pkl
+2017-01-31 03:13:41,448 INFO     epoch: 37 took 499.747s (0.012s in batching)
+training loss:	0.573268
+validation loss:	0.570521
+validation error:	0.298802
+2017-01-31 03:13:41,449 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:21:15,129 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-038.pkl
+2017-01-31 03:21:22,874 INFO     epoch: 38 took 461.427s (0.012s in batching)
+training loss:	0.573092
+validation loss:	0.569640
+validation error:	0.297816
+2017-01-31 03:21:22,876 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:27:33,071 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-039.pkl
+2017-01-31 03:27:42,794 INFO     epoch: 39 took 379.919s (0.014s in batching)
+training loss:	0.573021
+validation loss:	0.568752
+validation error:	0.298434
+2017-01-31 03:27:42,795 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:34:23,958 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-040.pkl
+2017-01-31 03:34:32,727 INFO     epoch: 40 took 409.934s (0.014s in batching)
+training loss:	0.572948
+validation loss:	0.574521
+validation error:	0.303212
+2017-01-31 03:34:32,730 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:40:46,259 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-041.pkl
+2017-01-31 03:40:53,994 INFO     epoch: 41 took 381.267s (0.013s in batching)
+training loss:	0.572792
+validation loss:	0.578661
+validation error:	0.302406
+2017-01-31 03:40:53,996 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:47:07,147 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-042.pkl
+2017-01-31 03:47:14,728 INFO     epoch: 42 took 380.735s (0.013s in batching)
+training loss:	0.572816
+validation loss:	0.569018
+validation error:	0.298175
+2017-01-31 03:47:14,730 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:53:17,611 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-043.pkl
+2017-01-31 03:53:25,150 INFO     epoch: 43 took 370.422s (0.011s in batching)
+training loss:	0.572864
+validation loss:	0.572662
+validation error:	0.301684
+2017-01-31 03:53:25,152 INFO     Wrote output to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/config.json
+2017-01-31 03:59:26,778 INFO     Saving network params to trainNN/out/v046-unified-39-g6e8b967-dirty:lstm-ffv-75-40-relu-l2reg/epoch-044.pkl
