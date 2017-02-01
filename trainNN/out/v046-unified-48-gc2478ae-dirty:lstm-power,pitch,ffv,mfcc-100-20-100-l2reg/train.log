@@ -1,0 +1,87 @@
+2017-01-31 20:18:50,717 DEBUG    version=v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg
+2017-01-31 20:18:50,734 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-31 20:19:02,885 DEBUG    getting all bc uttids...configs/lstm-power,pitch,ffv,mfcc/lstm-power,pitch,ffv,mfcc-100-20-100.json
+2017-01-31 20:19:06,358 DEBUG    loading cached extracted data from data/cache/extract-ba7571dc6a7db671d332edf0234cef97f0689e9ddc9d53ad648b07a2a09af3df.pickle
+2017-01-31 20:19:20,528 DEBUG    set input dim to 29
+2017-01-31 20:19:20,528 DEBUG    input dim = 29
+2017-01-31 20:19:20,690 DEBUG    shuffling batches
+2017-01-31 20:21:00,370 DEBUG    shuffling done
+2017-01-31 20:21:00,370 DEBUG    loading data into ram
+2017-01-31 20:21:00,504 DEBUG    loading data took 0.134s (cpu: 0.134s)
+2017-01-31 20:21:00,508 DEBUG    getting all bc uttids...configs/lstm-power,pitch,ffv,mfcc/lstm-power,pitch,ffv,mfcc-100-20-100.json
+2017-01-31 20:21:00,854 DEBUG    set input dim to 29
+2017-01-31 20:21:00,854 DEBUG    input dim = 29
+2017-01-31 20:21:01,183 DEBUG    shuffling batches
+2017-01-31 20:21:10,755 DEBUG    shuffling done
+2017-01-31 20:21:10,756 DEBUG    loading data into ram
+2017-01-31 20:21:10,769 DEBUG    loading data took 0.013s (cpu: 0.013s)
+2017-01-31 20:21:11,169 DEBUG    Applying L2 regularization with 0.000100
+2017-01-31 20:21:11,380 INFO     Training network with 110942 trainable out of 111382 total params.
+2017-01-31 20:21:13,285 DEBUG    Using adam with learning_rate=0.001000
+2017-01-31 20:22:17,288 DEBUG    Starting training...
+2017-01-31 20:50:10,239 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-000.pkl
+2017-01-31 20:50:44,772 INFO     epoch: 0 took 1707.483s (0.049s in batching)
+training loss:	0.607037
+validation loss:	0.576221
+validation error:	0.306307
+2017-01-31 20:50:44,776 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 21:18:33,404 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-001.pkl
+2017-01-31 21:19:07,864 INFO     epoch: 1 took 1703.092s (0.049s in batching)
+training loss:	0.575268
+validation loss:	0.567734
+validation error:	0.300906
+2017-01-31 21:19:07,867 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 21:46:55,436 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-002.pkl
+2017-01-31 21:47:30,125 INFO     epoch: 2 took 1702.261s (0.048s in batching)
+training loss:	0.563720
+validation loss:	0.566584
+validation error:	0.294774
+2017-01-31 21:47:30,128 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 22:15:18,946 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-003.pkl
+2017-01-31 22:15:53,666 INFO     epoch: 3 took 1703.542s (0.048s in batching)
+training loss:	0.555452
+validation loss:	0.576888
+validation error:	0.298335
+2017-01-31 22:15:53,670 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 22:43:43,195 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-004.pkl
+2017-01-31 22:44:17,882 INFO     epoch: 4 took 1704.215s (0.049s in batching)
+training loss:	0.549267
+validation loss:	0.581552
+validation error:	0.300042
+2017-01-31 22:44:17,885 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 23:12:05,776 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-005.pkl
+2017-01-31 23:12:40,494 INFO     epoch: 5 took 1702.612s (0.048s in batching)
+training loss:	0.544111
+validation loss:	0.583510
+validation error:	0.300995
+2017-01-31 23:12:40,498 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-01-31 23:40:29,564 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-006.pkl
+2017-01-31 23:41:04,137 INFO     epoch: 6 took 1703.643s (0.048s in batching)
+training loss:	0.539581
+validation loss:	0.589338
+validation error:	0.305632
+2017-01-31 23:41:04,141 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-02-01 00:08:52,617 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-007.pkl
+2017-02-01 00:09:27,205 INFO     epoch: 7 took 1703.068s (0.049s in batching)
+training loss:	0.536195
+validation loss:	0.587121
+validation error:	0.303217
+2017-02-01 00:09:27,208 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-02-01 00:37:16,018 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-008.pkl
+2017-02-01 00:37:50,538 INFO     epoch: 8 took 1703.334s (0.050s in batching)
+training loss:	0.533311
+validation loss:	0.599978
+validation error:	0.306712
+2017-02-01 00:37:50,542 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-02-01 01:05:39,407 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-009.pkl
+2017-02-01 01:06:14,119 INFO     epoch: 9 took 1703.580s (0.049s in batching)
+training loss:	0.531240
+validation loss:	0.606450
+validation error:	0.308071
+2017-02-01 01:06:14,123 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json
+2017-02-01 01:34:03,026 INFO     Saving network params to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/epoch-010.pkl
+2017-02-01 01:34:37,576 INFO     epoch: 10 took 1703.458s (0.049s in batching)
+training loss:	0.529269
+validation loss:	0.605974
+validation error:	0.310693
+2017-02-01 01:34:37,580 INFO     Wrote output to trainNN/out/v046-unified-48-gc2478ae-dirty:lstm-power,pitch,ffv,mfcc-100-20-100-l2reg/config.json

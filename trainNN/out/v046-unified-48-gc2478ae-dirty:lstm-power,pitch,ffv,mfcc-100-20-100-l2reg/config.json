@@ -1,0 +1,215 @@
+{
+	"name": "lstm-power,pitch,ffv,mfcc-100-20-100-l2reg",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch",
+			"get_ffv",
+			"get_mfcc"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"epochs": 100,
+		"context_ms": 800,
+		"context_stride": 2,
+		"layer_sizes": [
+			100,
+			20,
+			100
+		],
+		"resume_parameters": null,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"gaussian": false,
+		"output_type": "single",
+		"l2_regularization": 0.0001,
+		"context_frames": 40,
+		"input_dim": 29
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.306306604155392,
+				"training_loss": 0.6070372518077929,
+				"validation_loss": 0.5762212091951437,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3009056603571154,
+				"training_loss": 0.5752682154917578,
+				"validation_loss": 0.5677343661422437,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.29477358447774404,
+				"training_loss": 0.5637203811309491,
+				"validation_loss": 0.5665838999216849,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.2983349059128536,
+				"training_loss": 0.5554516859396159,
+				"validation_loss": 0.5768876509073207,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.30004245225550996,
+				"training_loss": 0.5492667152902536,
+				"validation_loss": 0.5815515001216587,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3009952831099618,
+				"training_loss": 0.5441111480074319,
+				"validation_loss": 0.5835102046927754,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.30563207497855405,
+				"training_loss": 0.5395810691515605,
+				"validation_loss": 0.589337950361506,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.3032169815082595,
+				"training_loss": 0.5361946793292698,
+				"validation_loss": 0.5871213688602988,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.3067122645113828,
+				"training_loss": 0.5333105691169437,
+				"validation_loss": 0.5999777942966178,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.308070755229806,
+				"training_loss": 0.5312395410823543,
+				"validation_loss": 0.6064503166543426,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.3106933960093642,
+				"training_loss": 0.5292692830200084,
+				"validation_loss": 0.6059744719345614,
+				"weights": "epoch-010.pkl"
+			}
+		},
+		"source": "configs/lstm-power,pitch,ffv,mfcc/lstm-power,pitch,ffv,mfcc-100-20-100.json",
+		"environment": {
+			"SLURM_CHECKPOINT_IMAGE_DIR": "/var/slurm/checkpoint",
+			"SLURM_NODELIST": "i13hpc50",
+			"CPLUS_INCLUDE_PATH": "/home/rruede/.local/include",
+			"REMOTEHOST": "hsi-kbw-109-193-228-185.hsi7.kabel-badenwuerttemberg.de",
+			"SLURM_JOB_NAME": "lstm-power,pitch,ffv,mfcc-100-20-100.json",
+			"MANPATH": "/home/rruede/.nvm/versions/node/v7.4.0/share/man:/home/rruede/.local/share/man:/usr/local/man:/usr/local/share/man:/usr/share/man",
+			"XDG_SESSION_ID": "7835",
+			"SLURMD_NODENAME": "i13hpc50",
+			"SLURM_TOPOLOGY_ADDR": "i13hpc50",
+			"HOSTNAME": "i13hpc50",
+			"SLURM_PRIO_PROCESS": "0",
+			"SLURM_NODE_ALIASES": "(null)",
+			"NVM_CD_FLAGS": "",
+			"HOST": "i13hpc1",
+			"TERM": "rxvt-unicode-256color",
+			"SHELL": "/bin/tcsh",
+			"TMPDIR": "/tmp",
+			"SLURM_TOPOLOGY_ADDR_PATTERN": "node",
+			"SSH_CLIENT": "109.193.228.185 48894 22",
+			"LIBRARY_PATH": "/home/rruede/.local/lib",
+			"SBATCH_CPU_BIND_LIST": "0x004",
+			"JANUS_LIBRARY": "/home/kevink/janus/janus.git/library/",
+			"SLURM_JOB_GPUS": "2",
+			"SSH_TTY": "/dev/pts/61",
+			"SLURM_NNODES": "1",
+			"NVM_DIR": "/home/rruede/.nvm",
+			"GROUP": "i13",
+			"USER": "rruede",
+			"LD_LIBRARY_PATH": ":/home/rruede/.local/lib:/home/rruede/janus/build:/usr/local/cuda/lib64",
+			"SLURM_JOBID": "299514",
+			"CPATH": "/home/rruede/.local/include",
+			"HOSTTYPE": "x86_64-linux",
+			"SLURM_TASKS_PER_NODE": "1",
+			"MAIL": "/var/mail/rruede",
+			"PATH": "/home/rruede/.yarn/bin:/home/rruede/.nvm/versions/node/v7.4.0/bin:/home/rruede/.cargo/bin:/home/rruede/.local/bin:/home/rruede/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/cuda/bin",
+			"SBATCH_CPU_BIND_VERBOSE": "quiet",
+			"SLURM_JOB_ID": "299514",
+			"JOBS": "1",
+			"NVM_NODEJS_ORG_MIRROR": "https://nodejs.org/dist",
+			"C_INCLUDE_PATH": "/home/rruede/.local/include",
+			"SLURM_JOB_USER": "rruede",
+			"PWD": "/home/rruede/experiments/bachelor-thesis",
+			"CUDA_VISIBLE_DEVICES": "2",
+			"EDITOR": "vim",
+			"LANG": "en_US.UTF-8",
+			"SLURM_JOB_UID": "12330",
+			"SLURM_NODEID": "0",
+			"SLURM_SUBMIT_DIR": "/project/dialog/backchanneler/rruede_experiments/bachelor-thesis",
+			"SLURM_TASK_PID": "19211",
+			"SLURM_CPUS_ON_NODE": "1",
+			"SLURM_PROCID": "0",
+			"ENVIRONMENT": "BATCH",
+			"SLURM_JOB_NODELIST": "i13hpc50",
+			"SHLVL": "4",
+			"HOME": "/home/rruede",
+			"SLURM_LOCALID": "0",
+			"RPREFIX": "/home/rruede/.local",
+			"OSTYPE": "linux",
+			"LANGUAGE": "en_US:en",
+			"SBATCH_CPU_BIND_TYPE": "mask_cpu:",
+			"SLURM_JOB_CPUS_PER_NODE": "1",
+			"SLURM_CLUSTER_NAME": "rg3hpc",
+			"SLURM_GTIDS": "0",
+			"SLURM_SUBMIT_HOST": "i13hpc1",
+			"SLURM_JOB_PARTITION": "lowGPU",
+			"VENDOR": "unknown",
+			"MACHTYPE": "x86_64",
+			"LOGNAME": "rruede",
+			"GPU_DEVICE_ORDINAL": "2",
+			"LC_CTYPE": "en_US.UTF-8",
+			"SSH_CONNECTION": "109.193.228.185 48894 141.3.25.29 22",
+			"SLURM_JOB_NUM_NODES": "1",
+			"NVM_BIN": "/home/rruede/.nvm/versions/node/v7.4.0/bin",
+			"PKG_CONFIG_PATH": "/home/rruede/.local/lib/pkgconfig",
+			"SBATCH_CPU_BIND": "quiet,mask_cpu:0x004",
+			"NVM_IOJS_ORG_MIRROR": "https://iojs.org/dist",
+			"XDG_RUNTIME_DIR": "/run/user/12330",
+			"THEANO_FLAGS": "device=gpu0",
+			"SLURM_MEM_PER_NODE": "15000",
+			"_": "/home/rruede/.local/bin/python3",
+			"JOBLIB_START_METHOD": "forkserver"
+		}
+	}
+}
