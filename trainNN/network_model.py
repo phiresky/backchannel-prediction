@@ -125,3 +125,7 @@ def feedforward_dropout(train_config):
                               num_units=num_labels,
                               nonlinearity=lasagne.nonlinearities.softmax)
     return locals()
+
+def conv_stupid(train_config):
+    # lasagne.layers.DimshuffleLayer()
+    pass

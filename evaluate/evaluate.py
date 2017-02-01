@@ -46,7 +46,7 @@ def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
     return get_bc_audio2(reader, total_length_audio_index, bcs, predict_bcs(reader, smoothed_net_output, threshold=0.6))
 
 
-def get_bc_audio2(reader: DBReader, total_length_audio_index: float, bcs: List[Tuple[int, NumFeature]],
+def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, NumFeature]],
                   predictions: Iterator[float]):
     output_audio = NumFeature(np.zeros(total_length_audio_index, dtype='int16'),
                               samplingRate=bcs[0][1].samplingRate)
@@ -182,6 +182,41 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
                         false_positives=len(false_positives), false_negatives=len(false_negatives))
 
 
+def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
+    reader = loadDBReader(config_path)
+    bc_convid = swap_speaker(convid)
+    correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
+                   reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
+
+    net_output = reader.features.get_multidim_net_output(convid, config["epoch"])
+    net_output = reader.features.gaussian_blur(net_output, sigma=config.get('sigma_ms', 300))
+    any_predictor = 1 - net_output[:, [0]]
+    predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold']))
+    predicted_count = len(predicted_bcs)
+    predicted_inx = 0
+    if predicted_count > 0:
+        for correct_bc in correct_bcs:
+            while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
+                                                                 predicted_bcs[predicted_inx], correct_bc):
+                predicted_inx += 1
+            if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc, config['margin_of_error']):
+                predicted_bcs[predicted_inx] = correct_bc
+
+    if config['min_talk_len'] is not None:
+        segs = list(get_monologuing_segments(reader, convid, min_talk_len=config['min_talk_len']))
+        predicted_bcs = filter_ranges(predicted_bcs, segs)
+        correct_bcs = filter_ranges(correct_bcs, segs)
+    # https://www.wikiwand.com/en/Precision_and_recall
+    selected = set(predicted_bcs)
+    relevant = set(correct_bcs)
+    true_positives = selected & relevant
+    false_positives = selected - relevant
+    false_negatives = relevant - selected
+
+    return convid, dict(selected=len(selected), relevant=len(relevant), true_positives=len(true_positives),
+                        false_positives=len(false_positives), false_negatives=len(false_negatives))
+
+
 def precision_recall(stats: dict):
     if stats['true_positives'] == 0:
         # http://stats.stackexchange.com/a/16242
@@ -209,7 +244,8 @@ default_config = dict(margin_of_error=(-0.5, 0.5), threshold=0.6, epoch="best", 
 
 def general_interesting_configs(config):
     # http://eprints.eemcs.utwente.nl/22780/01/dekok_2012_surveyonevaluation.pdf
-    interesting_margins = [(-0.1, 0.5), (-0.3, 0.3), (-0.5, 0.5), (0, 1), (-1, 0), (-0.2, 0.2)]
+    interesting_margins = [(-0.1, 0.5), (-0.3, 0.3), (-0.5, 0.5), (-0.4, 0.6), (-0.6, 0.4), (0, 1), (-1, 0),
+                           (-0.2, 0.2)]
     interesting_thresholds = [0.5, 0.6, 0.65, 0.7]
     interesting_talk_lens = [None, 0, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
@@ -218,6 +254,8 @@ def general_interesting_configs(config):
 
 def margin_test_configs(config):
     for margin in moving_margins((-0.2, 0.2)):
+        yield {**default_config, **dict(margin_of_error=margin)}
+    for margin in moving_margins((-0.5, 0.5)):
         yield {**default_config, **dict(margin_of_error=margin)}
 
 
@@ -287,6 +325,9 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
+do_detailed_analysis = True
+
+
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
@@ -303,8 +344,11 @@ def main():
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
     do_baseline = config['eval_config'].get('do_random_baseline', None)
-    with Parallel(n_jobs=1) as parallel:
+    if do_detailed_analysis:
+        confs = list(detailed_analysis(config))
+    else:
         confs = list(general_interesting_configs(config))
+    with Parallel(n_jobs=1) as parallel:
         for inx, eval_config in enumerate(confs):
             if do_baseline is not None:
                 eval_config['random_baseline'] = do_baseline
