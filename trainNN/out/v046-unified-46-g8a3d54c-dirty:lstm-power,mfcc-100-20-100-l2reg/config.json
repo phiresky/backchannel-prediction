@@ -1,0 +1,345 @@
+{
+	"name": "lstm-power,mfcc-100-20-100-l2reg",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_mfcc"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"epochs": 100,
+		"context_ms": 800,
+		"context_stride": 2,
+		"layer_sizes": [
+			100,
+			20,
+			100
+		],
+		"resume_parameters": null,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"gaussian": false,
+		"output_type": "single",
+		"l2_regularization": 0.0001,
+		"context_frames": 40,
+		"input_dim": 21
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.30593396231250947,
+				"training_loss": 0.6107606254613888,
+				"validation_loss": 0.578186644979243,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3042028306649541,
+				"training_loss": 0.5809182762053975,
+				"validation_loss": 0.5752562634154873,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.29896698147058487,
+				"training_loss": 0.5698496524736896,
+				"validation_loss": 0.5739596968973583,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.30226415100525006,
+				"training_loss": 0.5618516590790442,
+				"validation_loss": 0.5807326008337286,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.30923113198775165,
+				"training_loss": 0.5552495900301906,
+				"validation_loss": 0.5899754668111509,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.30721698153131416,
+				"training_loss": 0.5501221941298211,
+				"validation_loss": 0.5909894495007565,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.31824528179922196,
+				"training_loss": 0.5461937635544448,
+				"validation_loss": 0.6058730081356359,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.31121698099206074,
+				"training_loss": 0.543225600757794,
+				"validation_loss": 0.6011015102267265,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.3132358485797666,
+				"training_loss": 0.5404176818034803,
+				"validation_loss": 0.6057044470436731,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.31956132037459684,
+				"training_loss": 0.5382995867520048,
+				"validation_loss": 0.6196611756986042,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.3161745281573737,
+				"training_loss": 0.5363592115724296,
+				"validation_loss": 0.6160811082512703,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.31944339680221845,
+				"training_loss": 0.534396828810374,
+				"validation_loss": 0.6201411549985971,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.31559905599591864,
+				"training_loss": 0.5331806062432061,
+				"validation_loss": 0.6161063095238412,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.31871226289362276,
+				"training_loss": 0.5320959961658333,
+				"validation_loss": 0.6198400550363761,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.32075943481528535,
+				"training_loss": 0.5312028020097498,
+				"validation_loss": 0.628154678024211,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.32328773718678727,
+				"training_loss": 0.5302693230541129,
+				"validation_loss": 0.6284230013711835,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.3245188676101981,
+				"training_loss": 0.5295579814422897,
+				"validation_loss": 0.6292847539034655,
+				"weights": "epoch-016.pkl"
+			},
+			"17": {
+				"validation_error": 0.31996698066029905,
+				"training_loss": 0.5288359744472113,
+				"validation_loss": 0.6273460934325209,
+				"weights": "epoch-017.pkl"
+			},
+			"18": {
+				"validation_error": 0.3207500004824603,
+				"training_loss": 0.5280535705570589,
+				"validation_loss": 0.6355002510519523,
+				"weights": "epoch-018.pkl"
+			},
+			"19": {
+				"validation_error": 0.32307075547441,
+				"training_loss": 0.5273561357406148,
+				"validation_loss": 0.6406161446335181,
+				"weights": "epoch-019.pkl"
+			},
+			"20": {
+				"validation_error": 0.31981132137325574,
+				"training_loss": 0.5269076984214504,
+				"validation_loss": 0.6303918831190973,
+				"weights": "epoch-020.pkl"
+			},
+			"21": {
+				"validation_error": 0.3212594337199094,
+				"training_loss": 0.5265380913855737,
+				"validation_loss": 0.635459083290595,
+				"weights": "epoch-021.pkl"
+			},
+			"22": {
+				"validation_error": 0.3178962257532578,
+				"training_loss": 0.525957957694405,
+				"validation_loss": 0.6299572400045845,
+				"weights": "epoch-022.pkl"
+			},
+			"23": {
+				"validation_error": 0.32581603737934584,
+				"training_loss": 0.5252402455764904,
+				"validation_loss": 0.6392081212603821,
+				"weights": "epoch-023.pkl"
+			},
+			"24": {
+				"validation_error": 0.32380660321071464,
+				"training_loss": 0.5251007257637225,
+				"validation_loss": 0.6425565630197525,
+				"weights": "epoch-024.pkl"
+			},
+			"25": {
+				"validation_error": 0.3218726420880489,
+				"training_loss": 0.5244558690340199,
+				"validation_loss": 0.6367568392306566,
+				"weights": "epoch-025.pkl"
+			},
+			"26": {
+				"validation_error": 0.32475471623101326,
+				"training_loss": 0.5242212571247279,
+				"validation_loss": 0.6427073283648154,
+				"weights": "epoch-026.pkl"
+			},
+			"27": {
+				"validation_error": 0.32505660384612267,
+				"training_loss": 0.5239676910499383,
+				"validation_loss": 0.6352152986768281,
+				"weights": "epoch-027.pkl"
+			},
+			"28": {
+				"validation_error": 0.32392452650193904,
+				"training_loss": 0.5235620940672724,
+				"validation_loss": 0.6388061163279245,
+				"weights": "epoch-028.pkl"
+			},
+			"29": {
+				"validation_error": 0.32122641415247377,
+				"training_loss": 0.5234858815328419,
+				"validation_loss": 0.6381940659276157,
+				"weights": "epoch-029.pkl"
+			},
+			"30": {
+				"validation_error": 0.32514622582579555,
+				"training_loss": 0.5231204137641784,
+				"validation_loss": 0.6527652034079129,
+				"weights": "epoch-030.pkl"
+			},
+			"31": {
+				"validation_error": 0.32535377320534775,
+				"training_loss": 0.522633592012333,
+				"validation_loss": 0.6393770859137459,
+				"weights": "epoch-031.pkl"
+			},
+			"32": {
+				"validation_error": 0.32596226409077644,
+				"training_loss": 0.522682485974323,
+				"validation_loss": 0.645203052615782,
+				"weights": "epoch-032.pkl"
+			}
+		},
+		"source": "configs/lstm-power,mfcc/lstm-power,mfcc-100-20-100.json",
+		"environment": {
+			"SLURM_CHECKPOINT_IMAGE_DIR": "/var/slurm/checkpoint",
+			"SLURM_NODELIST": "i13hpc50",
+			"CPLUS_INCLUDE_PATH": "/home/rruede/.local/include",
+			"REMOTEHOST": "hsi-kbw-109-193-228-185.hsi7.kabel-badenwuerttemberg.de",
+			"SLURM_JOB_NAME": "lstm-power,mfcc-100-20-100.json",
+			"MANPATH": "/home/rruede/.nvm/versions/node/v7.4.0/share/man:/home/rruede/.local/share/man:/usr/local/man:/usr/local/share/man:/usr/share/man",
+			"XDG_SESSION_ID": "7835",
+			"SLURMD_NODENAME": "i13hpc50",
+			"SLURM_TOPOLOGY_ADDR": "i13hpc50",
+			"HOSTNAME": "i13hpc50",
+			"SLURM_PRIO_PROCESS": "0",
+			"SLURM_NODE_ALIASES": "(null)",
+			"NVM_CD_FLAGS": "",
+			"HOST": "i13hpc1",
+			"TERM": "rxvt-unicode-256color",
+			"SHELL": "/bin/tcsh",
+			"TMPDIR": "/tmp",
+			"SLURM_TOPOLOGY_ADDR_PATTERN": "node",
+			"SSH_CLIENT": "109.193.228.185 48894 22",
+			"LIBRARY_PATH": "/home/rruede/.local/lib",
+			"SBATCH_CPU_BIND_LIST": "0x080",
+			"JANUS_LIBRARY": "/home/kevink/janus/janus.git/library/",
+			"SLURM_JOB_GPUS": "7",
+			"SSH_TTY": "/dev/pts/61",
+			"SLURM_NNODES": "1",
+			"NVM_DIR": "/home/rruede/.nvm",
+			"GROUP": "i13",
+			"USER": "rruede",
+			"LD_LIBRARY_PATH": ":/home/rruede/.local/lib:/home/rruede/janus/build:/usr/local/cuda/lib64",
+			"SLURM_JOBID": "299513",
+			"CPATH": "/home/rruede/.local/include",
+			"HOSTTYPE": "x86_64-linux",
+			"SLURM_TASKS_PER_NODE": "1",
+			"MAIL": "/var/mail/rruede",
+			"PATH": "/home/rruede/.yarn/bin:/home/rruede/.nvm/versions/node/v7.4.0/bin:/home/rruede/.cargo/bin:/home/rruede/.local/bin:/home/rruede/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/cuda/bin",
+			"SBATCH_CPU_BIND_VERBOSE": "quiet",
+			"SLURM_JOB_ID": "299513",
+			"JOBS": "1",
+			"NVM_NODEJS_ORG_MIRROR": "https://nodejs.org/dist",
+			"C_INCLUDE_PATH": "/home/rruede/.local/include",
+			"SLURM_JOB_USER": "rruede",
+			"PWD": "/home/rruede/experiments/bachelor-thesis",
+			"CUDA_VISIBLE_DEVICES": "7",
+			"EDITOR": "vim",
+			"LANG": "en_US.UTF-8",
+			"SLURM_JOB_UID": "12330",
+			"SLURM_NODEID": "0",
+			"SLURM_SUBMIT_DIR": "/project/dialog/backchanneler/rruede_experiments/bachelor-thesis",
+			"SLURM_TASK_PID": "9873",
+			"SLURM_CPUS_ON_NODE": "1",
+			"SLURM_PROCID": "0",
+			"ENVIRONMENT": "BATCH",
+			"SLURM_JOB_NODELIST": "i13hpc50",
+			"SHLVL": "4",
+			"HOME": "/home/rruede",
+			"SLURM_LOCALID": "0",
+			"RPREFIX": "/home/rruede/.local",
+			"OSTYPE": "linux",
+			"LANGUAGE": "en_US:en",
+			"SBATCH_CPU_BIND_TYPE": "mask_cpu:",
+			"SLURM_JOB_CPUS_PER_NODE": "1",
+			"SLURM_CLUSTER_NAME": "rg3hpc",
+			"SLURM_GTIDS": "0",
+			"SLURM_SUBMIT_HOST": "i13hpc1",
+			"SLURM_JOB_PARTITION": "lowGPU",
+			"VENDOR": "unknown",
+			"MACHTYPE": "x86_64",
+			"LOGNAME": "rruede",
+			"GPU_DEVICE_ORDINAL": "7",
+			"LC_CTYPE": "en_US.UTF-8",
+			"SSH_CONNECTION": "109.193.228.185 48894 141.3.25.29 22",
+			"SLURM_JOB_NUM_NODES": "1",
+			"NVM_BIN": "/home/rruede/.nvm/versions/node/v7.4.0/bin",
+			"PKG_CONFIG_PATH": "/home/rruede/.local/lib/pkgconfig",
+			"SBATCH_CPU_BIND": "quiet,mask_cpu:0x080",
+			"NVM_IOJS_ORG_MIRROR": "https://iojs.org/dist",
+			"XDG_RUNTIME_DIR": "/run/user/12330",
+			"THEANO_FLAGS": "device=gpu0",
+			"SLURM_MEM_PER_NODE": "15000",
+			"_": "/home/rruede/.local/bin/python3",
+			"JOBLIB_START_METHOD": "forkserver"
+		}
+	}
+}
