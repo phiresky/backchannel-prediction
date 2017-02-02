@@ -109,13 +109,13 @@ for (const model_function of ["lstm_simple", "feedforward_simple"]) {
         for (const layer_sizes of best_layers(model_function)) {
             const name = `${categoryname}-${layer_sizes.join("-")}`;
             const config = make_config({
-                name: name + '-l2reg',
+                name: name,// + '-l2reg',
                 extract_config: make_extract_config({input_features, extraction_method: method_std()}),
                 train_config: {
                     ...make_train_config({layer_sizes, model_function, epochs: 100}),
                     update_method: "adam",
                     learning_rate: 0.001,
-                    l2_regularization: 0.0001
+                    //l2_regularization: 0.0001
                 },
             });
             const outdir = `configs/${categoryname}`;
