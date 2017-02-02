@@ -34,6 +34,8 @@ def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
+        if end - start < 0.02:
+            continue
         peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end)  # - np.average(reader.method['bc'])
         peak_prediction_s += reader.config['eval_config']['prediction_offset']
         yield peak_prediction_s
@@ -199,7 +201,7 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
-    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(time)]) for time in predicted_bcs]
+    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)]) for time in predicted_bcs]
     if predicted_count > 0:
         for correct_bc in correct_bcs:
             while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
@@ -345,7 +347,7 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
-do_detailed_analysis = True
+do_detailed_analysis = False
 
 
 def nptolist(dictionary: dict):
