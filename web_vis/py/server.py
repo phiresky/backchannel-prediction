@@ -98,7 +98,7 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
-    x = features.get_multidim_net_output(convid, id)[:, [1]]
+    x = 1 - features.get_multidim_net_output(convid, id)[:, [0]]
     if smooth:
         return features.gaussian_blur(x, 300)
     else:

@@ -49,6 +49,7 @@ def isl_noise_filter(text):
 
     return " ".join(words)
 
+
 @functools.lru_cache()
 def orig_noise_filter(text: str):
     words = []
@@ -279,6 +280,17 @@ def outputBackchannelGauss(reader: DBReader, utt: str, uttInfo: DBEntry):
     yield from np.append(input[left_bound:right_bound], output[left_bound:right_bound], axis=1)
 
 
+def bc_to_category(reader: DBReader, uttInfo):
+    if reader.extract_config.get("categories", None) is not None:
+        txt = reader.noise_filter(uttInfo['text'].lower())
+        outnum = reader.category_to_index[reader.bc_to_category[txt]]
+        if outnum == 0:
+            raise Exception("new phone who dis")
+        return outnum
+    else:
+        return 1
+
+
 def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.array, np.array]:
     uttInfo = reader.uttDB[utt]
     back_channel_convid = uttInfo['convid']
@@ -291,20 +303,14 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.
         return
 
     F = reader.features.get_combined_feature(speaking_channel_convid, begin, end + 0.1)
-    range_frames = int((end - begin) * 1000 / F.shift)
+    range_frames = round((end - begin) * 1000 / F.shift)
     F = F[0:range_frames]
     frames, dim = F.shape
     if frames < range_frames:
         raise Exception(f"FBC too small: {frames}")
 
     if bc:
-        if reader.extract_config.get("categories", None) is not None:
-            txt = reader.noise_filter(uttInfo['text'].lower())
-            outnum = reader.category_to_index[reader.bc_to_category[txt]]
-            if outnum == 0:
-                raise Exception("new phone who dis")
-        else:
-            outnum = 1
+        outnum = bc_to_category(reader, uttInfo)
     else:
         outnum = 0
     out = np.array([[outnum]], dtype=np.int32)
@@ -474,7 +480,7 @@ def bc_is_while_monologuing(reader: DBReader, uttInfo):
 
 
 def all_uttids_(config_path: str, convos: List[str]):
-    logging.debug(f"getting all bc uttids...{config_path}")
+    # logging.debug(f"getting all bc uttids...{config_path}")
     reader = loadDBReader(config_path)
     for convo in convos:
         for channel in ["A", "B"]:
