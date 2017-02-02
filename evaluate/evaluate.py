@@ -6,7 +6,7 @@ import os
 import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
-from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations
+from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, bc_to_category
 from extract_pfiles_python.util import load_config, filter_ranges, get_talking_segments, get_monologuing_segments
 from tqdm import tqdm
 import functools
@@ -141,13 +141,14 @@ def random_predictor(reader: DBReader, convid: str, config: dict):
 def cached_smoothed_netout(config_path, convid, epoch, sigma):
     reader = loadDBReader(config_path)
     x = reader.features.get_multidim_net_output(convid, epoch)
-    x = 1 - x[:, [0]]
     x = reader.features.gaussian_blur(x, sigma=sigma)
     return x
 
 
 def evaluate_conv(config_path: str, convid: str, config: dict):
     reader = loadDBReader(config_path)
+    if reader.config['extract_config'].get('categories', None) is not None:
+        return evaluate_conv_multiclass(config_path, convid, config)
     bc_convid = swap_speaker(convid)
     correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
@@ -156,6 +157,7 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
         predicted_bcs = random_predictor(reader, convid, config)
     else:
         net_output = cached_smoothed_netout(config_path, convid, config["epoch"], config.get('sigma_ms', 300))
+        net_output = 1 - net_output[:, [0]]
         predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
@@ -183,17 +185,21 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
 
 
 def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
+    # ooh boy this code be stupdid
     reader = loadDBReader(config_path)
     bc_convid = swap_speaker(convid)
-    correct_bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in
-                   reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
+    _correct_bcs = [(reader.getBcRealStartTime(utt), bc_to_category(reader, uttInfo)) for
+                    utt, uttInfo in
+                    reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
+    correct_bcs = [time for time, _ in _correct_bcs]
+    correct_categories = [cat for _, cat in _correct_bcs]
 
-    net_output = reader.features.get_multidim_net_output(convid, config["epoch"])
-    net_output = reader.features.gaussian_blur(net_output, sigma=config.get('sigma_ms', 300))
+    net_output = cached_smoothed_netout(config_path, convid, config["epoch"], config.get('sigma_ms', 300))
     any_predictor = 1 - net_output[:, [0]]
     predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
+    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(time)]) for time in predicted_bcs]
     if predicted_count > 0:
         for correct_bc in correct_bcs:
             while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
@@ -206,6 +212,17 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
         segs = list(get_monologuing_segments(reader, convid, min_talk_len=config['min_talk_len']))
         predicted_bcs = filter_ranges(predicted_bcs, segs)
         correct_bcs = filter_ranges(correct_bcs, segs)
+
+    category_count = len(reader.categories.keys()) + 1
+    confusion = np.zeros((category_count, category_count), dtype=np.int32)
+    correct = {time: category for time, category in zip(correct_bcs, correct_categories)}
+    predicted = {time: category for time, category in zip(predicted_bcs, predicted_categories)}
+    for time, correct_category in correct.items():
+        confusion[correct_category][predicted.get(time, 0)] += 1
+        if time in predicted:
+            del predicted[time]
+    for time, incorrect_category in predicted.items():
+        confusion[0][incorrect_category] += 1
     # https://www.wikiwand.com/en/Precision_and_recall
     selected = set(predicted_bcs)
     relevant = set(correct_bcs)
@@ -214,7 +231,8 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     false_negatives = relevant - selected
 
     return convid, dict(selected=len(selected), relevant=len(relevant), true_positives=len(true_positives),
-                        false_positives=len(false_positives), false_negatives=len(false_negatives))
+                        false_positives=len(false_positives), false_negatives=len(false_negatives),
+                        confusion_matrix=confusion)
 
 
 def precision_recall(stats: dict):
@@ -301,6 +319,8 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
             tqdm([delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids])):
         results[convid] = result
         for k, v in result.items():
+            if k == 'confusion_matrix':
+                totals.setdefault(k, np.zeros_like(v))
             totals[k] = totals.get(k, 0) + v
         result.update(precision_recall(result))
 
@@ -326,6 +346,15 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
 
 
 do_detailed_analysis = True
+
+
+def nptolist(dictionary: dict):
+    for key, val in dictionary.items():
+        if isinstance(val, dict):
+            nptolist(dictionary[key])
+        elif isinstance(val, np.ndarray):
+            dictionary[key] = dictionary[key].tolist()
+    return dictionary
 
 
 def main():
@@ -355,7 +384,7 @@ def main():
             print(f"\n{inx}/{len(confs)}: {eval_config}\n")
             ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
             va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
-            res.append(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']}))
+            res.append(nptolist(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']})))
 
             with open(os.path.join(out_dir, "results.json"), "w") as f:
                 json.dump(res, f, indent='\t')
