@@ -14,11 +14,13 @@ import * as mu from 'mobx-utils';
 import * as Rx from 'rxjs';
 import * as T from './table';
 import 'babel-polyfill';
+import * as qs from 'querystring';
 
 // defined by webpack
 declare var VERSIONS: string[];
 
 interface SingleEvalResult {
+    confusion_matrix?: number[][],
     "selected": number,
     "relevant": number,
     "true_positives": number,
@@ -66,15 +68,17 @@ const ignore = [
 type VGPropsMaybe = { ok: false, error: string, version: string, log: string | null } | VGProps;
 type VGProps = { ok: true, evalInfo?: EvalResult[], config: ConfigJSON, version: string, data: { datasets: { label: string, yAxisID: string, data: { x: number, y: number }[] }[] }, options: any };
 
-function persist<T>({ initial, prefix = "plot:" }: { initial: T, prefix?: string }) {
+let query = qs.parse((location.search || "").substring(1));
+function persist<T>({ initial, prefix = "" }: { initial: T, prefix?: string }) {
     return (prototype: Object, name: string) => {
-        const stored = localStorage.getItem(prefix + name);
-        const value = observable(stored === null ? initial : JSON.parse(stored));
+        const stored = query[prefix + name];
+        const value = observable(stored === undefined ? initial : JSON.parse(stored));
         Object.defineProperty(prototype, name, {
             get: () => value.get(),
             set: (v) => {
                 value.set(v);
-                localStorage.setItem(prefix + name, JSON.stringify(v));
+                query[prefix + name] = JSON.stringify(v);
+                history.replaceState(null, "", "?" + qs.stringify(query));
             }
         });
     };
@@ -188,6 +192,7 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
 
 @observer
 class VersionEpochsGUI extends React.Component<VGProps, {}> {
+    @observable showPlot = false;
     render() {
         const { evalInfo, version, data, options } = this.props;
         /*if(evalInfo)
@@ -201,8 +206,9 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         }
         return (
             <div>
-                <Line data={toJS(data)} options={toJS(options)} />
-                {evalInfo &&
+                <button onClick={() => this.showPlot = !this.showPlot}>show plot</button>
+                {this.showPlot && <Line data={toJS(data)} options={toJS(options)} /> }
+                {this.showPlot && evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
                     <Table className="evalTable" sortable
@@ -225,6 +231,21 @@ function LogGui(p: VGProps) {
     })();
     return <Observer>{() => <pre style={logStyle}>{res.txt}</pre>}</Observer>;
 }
+@observer class ConfusionDisplay extends React.Component<VGProps, {}> {
+    render() {
+        const best = bestResult(this.props.evalInfo!);
+        const confusion = best.totals.eval.confusion_matrix!;
+        console.log(confusion);
+        const category = (id: number) => this.props.config.train_config.category_names[id] || "No BC";
+        return (
+            <div>
+                <Table
+                    data={confusion.map((row, correct) => Object.assign({correct: category(correct)}, ...row.map((count, predicted) => ({[category(predicted)]: count}))))}
+                />
+            </div>
+        )
+    }
+}
 @observer
 class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
     @observable tab = 0;
@@ -240,16 +261,19 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
         }
         if (p.ok) {
             const { evalInfo } = p;
+            const confusion = evalInfo && evalInfo[0].totals.eval.confusion_matrix;
             var inner = (
                 <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
                     <TabList>
                         <Tab>Training Graph</Tab>
                         <Tab>Training Log</Tab>
                         {evalInfo && <Tab>Eval Detail Graphs ({evalInfo.length} evaluations) </Tab>}
+                        {confusion && <Tab>Confusion</Tab>}
                     </TabList>
                     <TabPanel><VersionEpochsGUI {...p} /></TabPanel>
                     <TabPanel><LogGui {...p} /></TabPanel>
                     {evalInfo && <TabPanel><VersionEvalDetailGUI {...p} /></TabPanel>}
+                    {confusion && <TabPanel><ConfusionDisplay {...p} /></TabPanel>}
                 </Tabs>
             );
         } else {
@@ -303,13 +327,13 @@ function mapObject<A, K extends keyof A, B>(obj: A, mapper: (x: A[K], k: K) => B
     }
     return result;
 }
-
+const bestResult = mobx.createTransformer((data: EvalResult[]) => {
+    return maxByKey(data, info => info.totals.valid.f1_score);
+});
 @observer class OverviewStats extends React.Component<{ results: VGPropsMaybe[] }, {}> {
-    bestResult = mobx.createTransformer((data: EvalResult[]) => {
-        return maxByKey(data, info => info.totals.valid.f1_score);
-    });
+    
     render() {
-        const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({ version: res.version, info: this.bestResult((res as VGProps).evalInfo!) }));
+        const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({ version: res.version, info: bestResult((res as VGProps).evalInfo!) }));
         return (
             <div>
                 <h4>Best for each</h4>
@@ -333,6 +357,8 @@ class GUI extends React.Component<{}, {}> {
     @persist({ initial: true }) onlyNew: boolean;
     @persist({ initial: false }) onlyFailed: boolean;
     @persist({ initial: true }) onlyOk: boolean;
+    @persist({ initial: [] }) visible: string[];
+
     @observable results = observable.map() as any as Map<string, VGPropsMaybe>;
     @observable loaded = 0; @observable total = 1;
     axisMinMax(results: VGPropsMaybe[], filter: string, axisId: string) {

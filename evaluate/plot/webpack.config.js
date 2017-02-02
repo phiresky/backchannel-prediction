@@ -4,50 +4,37 @@ const path = require('path');
 const Html = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
-class WatchDirPlugin {
-    constructor(paths) {
-        this.paths = paths.map(pa => path.resolve(pa));
-    }
-    apply(compiler) {
-        compiler.plugin("this-compilation", (compilation, params) => {
-            for(const pathname of this.paths) {
-                const cont = fs.readdirSync(pathname);
-                compiler.apply(new webpack.DefinePlugin({
-                    "VERSIONS": JSON.stringify(cont)
-                }));
-            }
-        });
-        /*compiler.plugin("after-compile", (compilation, cb) => {
-            compilation.contextDependencies.push(...this.paths);
-            compilation.fileDependencies.push(...this.paths);
-            cb();
-        });*/
-    }
-};
-
 module.exports = {
     entry: './plot',
     devtool: 'source-map',
     plugins: [
-        new WatchDirPlugin([
-            "../../trainNN/out"
-        ]),
         new Html({
             title: 'Backchanneler NN evaluation'
         }),
-        new ExtractTextPlugin("styles.[hash].css")
+        new ExtractTextPlugin("styles.[hash].css"),
+        new webpack.DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify('production')
+            }
+        }),
+        new webpack.DefinePlugin({
+            "VERSIONS": JSON.stringify(fs.readdirSync("../../trainNN/out"))
+        })
     ],
     output: {
         path: path.resolve('./dist'),
         filename: 'plot.[hash].js',
         publicPath: "./"
     },
-    resolve: {extensions: [".js", ".json", ".ts", ".tsx"]},
+    resolve: { extensions: [".js", ".json", ".ts", ".tsx"] },
     module: {
         rules: [
             { test: /\.tsx?$/, loader: 'babel-loader?presets=es2015!awesome-typescript-loader' },
             { test: /\.css$/, loader: ExtractTextPlugin.extract('css-loader') },
-            { test: /\.less$/, loader: ExtractTextPlugin.extract('css-loader!less-loader')}
+            { test: /\.less$/, loader: ExtractTextPlugin.extract('css-loader!less-loader') }
         ]
+    },
+    devServer: {
+        publicPath: "/evaluate/plot/dist"
     }
 }

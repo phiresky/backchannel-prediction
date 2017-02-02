@@ -30,8 +30,9 @@ backchannels = None
 config_path = None
 
 
-def extract(utterance: Tuple[str, bool]):
-    return readDB.extract(config_path)[utterance]
+def extract(utterance: Tuple[str, int, bool]):
+    utt_id, copy_id, is_bc = utterance
+    return readDB.extract(config_path)[utt_id, is_bc]
 
 
 def extract_batch(batch: List[Tuple[Tuple[str, bool], List[int]]], context_frames: int, input_dim: int,
@@ -144,7 +145,7 @@ def train():
             # inputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
             convos = readDB.read_conversations(config)
-            backchannels = list(readDB.all_uttids(config_path, convos[t]))
+            backchannels = list(readDB.balance_data(config_path, readDB.all_uttids(config_path, convos[t])))
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             inxtoname = {**{v: k for k, v in reader.category_to_index.items()}, 0: None}

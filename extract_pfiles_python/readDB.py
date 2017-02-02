@@ -26,6 +26,7 @@ from .features import Features
 from tqdm import tqdm
 from . import util
 import hashlib
+import random
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
@@ -499,10 +500,33 @@ def all_uttids(config_path: str, convos: List[str]):
 def extract_convo(config_path: str, convo: str):
     reader = loadDBReader(config_path)
     out_dict = {}
-    for uttId, is_bc in all_uttids_(config_path, [convo]):
-        out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
+    for uttId, copy_id, is_bc in all_uttids(config_path, [convo]):
+        out_dict[uttId, copy_id, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
     return out_dict
 
+
+def sample_m_of_n(m: int, things: list):
+    n = len(things)
+    while m > n:
+        yield from things
+        m -= n
+    yield from random.sample(things, m)
+
+
+def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[Tuple[str, int, bool]]:
+    reader = loadDBReader(config_path)
+    if reader.extract_config.get('categories', None) is not None:
+        logging.info("balancing data...")
+        cat_to_uttids = {}
+        for utt, is_bc in bcs:
+            cat = bc_to_category(reader, reader.uttDB[utt]) if is_bc else 0
+            cat_to_uttids.setdefault(cat, []).append((utt, is_bc))
+        counts = {category: len(bcs) for category, bcs in cat_to_uttids.items()}
+        max_count = max(counts.values())
+        for category, utts in cat_to_uttids.items():
+            yield from ((utt_id, index, is_bc) for index, (utt_id, is_bc) in enumerate(sample_m_of_n(max_count, utts)))
+    else:
+        yield from ((utt_id, index, is_bc) for index, (utt_id, is_bc) in enumerate(bcs))
 
 @functools.lru_cache(maxsize=1)
 def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array]]:

@@ -210,21 +210,22 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
             if bc_is_within_margin_of_error(predicted_bcs[predicted_inx], correct_bc, config['margin_of_error']):
                 predicted_bcs[predicted_inx] = correct_bc
 
+    correct = {time: category for time, category in zip(correct_bcs, correct_categories)}
+    predicted = {time: category for time, category in zip(predicted_bcs, predicted_categories)}
+
     if config['min_talk_len'] is not None:
         segs = list(get_monologuing_segments(reader, convid, min_talk_len=config['min_talk_len']))
-        predicted_bcs = filter_ranges(predicted_bcs, segs)
-        correct_bcs = filter_ranges(correct_bcs, segs)
+        predicted_bcs = list(filter_ranges(predicted_bcs, segs))
+        correct_bcs = list(filter_ranges(correct_bcs, segs))
 
     category_count = len(reader.categories.keys()) + 1
     confusion = np.zeros((category_count, category_count), dtype=np.int32)
-    correct = {time: category for time, category in zip(correct_bcs, correct_categories)}
-    predicted = {time: category for time, category in zip(predicted_bcs, predicted_categories)}
-    for time, correct_category in correct.items():
-        confusion[correct_category][predicted.get(time, 0)] += 1
-        if time in predicted:
-            del predicted[time]
-    for time, incorrect_category in predicted.items():
-        confusion[0][incorrect_category] += 1
+
+    for time in correct_bcs:
+        confusion[correct[time]][predicted.get(time, 0)] += 1
+    for time in predicted_bcs:
+        if time not in correct:
+            confusion[0][predicted[time]] += 1
     # https://www.wikiwand.com/en/Precision_and_recall
     selected = set(predicted_bcs)
     relevant = set(correct_bcs)
