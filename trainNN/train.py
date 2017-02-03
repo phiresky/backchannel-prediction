@@ -15,7 +15,7 @@ import numpy as np
 from typing import TypeVar
 from extract_pfiles_python.util import load_config, batch_list, windowed_indices
 from trainNN import train_func
-from . import network_model
+from . import network_model, evaluate
 from extract_pfiles_python import readDB
 import functools
 import time
@@ -175,13 +175,36 @@ def train():
 
     create_network = getattr(network_model, train_config['model_function'])
     model = create_network(train_config)
+    out_layer = model['output_layer']
+
+    resume_parameters = train_config.get('resume_parameters', None)
+    finetune_config = train_config.get("finetune", None)
+    if finetune_config is not None:
+        import lasagne
+        if load_params is not None or resume_parameters is not None:
+            raise Exception("cant finetune and load")
+        ft_config_path = finetune_config['config']
+        epoch = finetune_config['epoch']
+        which_layers = finetune_config['layers']
+        ft_layers, _ = evaluate.get_network_outputter(ft_config_path, epoch, batch_size=250)
+        layers = lasagne.layers.get_all_layers(out_layer)
+        for inx, (layer_config, layer, ft_layer) in enumerate(zip(which_layers, layers, ft_layers)):
+            do_load = layer_config['load']
+            do_freeze = layer_config['freeze']
+            if do_load:
+                for param, ft_param in zip(layer.get_params(), ft_layer.get_params()):
+                    param.set_value(ft_param.get_value())
+                logging.info(f"loaded layer {inx} ({ {repr(p): p.get_value().shape for p in layer.get_params()} })")
+            if do_freeze:
+                logging.info(f"freezing layer {inx}")
+                train_func.freeze(layer)
 
     stats_generator = train_func.train_network(
-        network=model['output_layer'],
+        network=out_layer,
         twodimensional_output=False,
         scheduling_method=None,
         start_epoch=load_epoch + 1,
-        resume=load_params if load_params is not None else train_config['resume_parameters'],
+        resume=load_params if load_params is not None else resume_parameters,
         l2_regularization=train_config.get("l2_regularization", None),
         # scheduling_params=(0.8, 0.000001),
         update_method=train_config['update_method'],

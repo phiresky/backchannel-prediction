@@ -15,7 +15,6 @@ import * as Rx from 'rxjs';
 import * as T from './table';
 import 'babel-polyfill';
 import * as qs from 'querystring';
-
 // defined by webpack
 declare var VERSIONS: string[];
 
@@ -232,15 +231,29 @@ function LogGui(p: VGProps) {
     return <Observer>{() => <pre style={logStyle}>{res.txt}</pre>}</Observer>;
 }
 @observer class ConfusionDisplay extends React.Component<VGProps, {}> {
+    @observable normalize = "none";
     render() {
         const best = bestResult(this.props.evalInfo!);
-        const confusion = best.totals.eval.confusion_matrix!;
+        let confusion: number[][] = best.totals.eval.confusion_matrix!;
         console.log(confusion);
         const category = (id: number) => this.props.config.train_config.category_names[id] || "No BC";
+        let confusionStr;
+        if(this.normalize === "rows")
+            confusionStr = confusion.map(row => {var sum = row.reduce((a,b)=>a+b); return row.map(v => (v / sum * 100).toPrecision(3) + "%");});
+        else if(this.normalize === "cols") {
+            const colSums = confusion[0].map((_, column) => confusion.map(row => row[column]).reduce((a,b) => a+b));
+            confusionStr = confusion.map(row => row.map((v, vi) => (v / colSums[vi]*100).toPrecision(3)+"%"));
+        } else {
+            confusionStr = confusion.map(row => row.map(v => String(v)));
+        }
+        const data = confusionStr.map((row, correct) => Object.assign({"correct \\ predicted": category(correct)}, ...row.map((count, predicted) => ({[category(predicted)]: count}))));
         return (
             <div>
+                <label>Normalize:
+                    <Select clearable={false} searchable={false} value={this.normalize} options={"none,rows,cols".split(",").map(value => ({value, label:value}))} onChange={(x: Select.Option) => this.normalize = String(x.value)}/>
+                </label>
                 <Table
-                    data={confusion.map((row, correct) => Object.assign({correct: category(correct)}, ...row.map((count, predicted) => ({[category(predicted)]: count}))))}
+                    data={data}
                 />
             </div>
         )

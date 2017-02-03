@@ -35,6 +35,7 @@ module.exports = {
         ]
     },
     devServer: {
-        publicPath: "/evaluate/plot/dist"
+        publicPath: "/evaluate/plot/dist",
+        contentBase: "../.."
     }
 }

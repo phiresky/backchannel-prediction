@@ -500,8 +500,8 @@ def all_uttids(config_path: str, convos: List[str]):
 def extract_convo(config_path: str, convo: str):
     reader = loadDBReader(config_path)
     out_dict = {}
-    for uttId, copy_id, is_bc in all_uttids(config_path, [convo]):
-        out_dict[uttId, copy_id, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
+    for uttId, is_bc in all_uttids(config_path, [convo]):
+        out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
     return out_dict
 
 
