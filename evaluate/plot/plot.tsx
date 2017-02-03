@@ -1,7 +1,7 @@
 import { Line } from 'react-chartjs-2';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Table } from 'reactable';
+import { Table, Tr, Td } from 'reactable';
 import { observable, action, computed } from 'mobx';
 import * as mobx from 'mobx';
 import { observer, Observer } from 'mobx-react';
@@ -238,11 +238,14 @@ function LogGui(p: VGProps) {
         console.log(confusion);
         const category = (id: number) => this.props.config.train_config.category_names[id] || "No BC";
         let confusionStr;
-        if(this.normalize === "rows")
+        let style = (val: string) => ({} as any);
+        if(this.normalize === "rows") {
             confusionStr = confusion.map(row => {var sum = row.reduce((a,b)=>a+b); return row.map(v => (v / sum * 100).toPrecision(3) + "%");});
-        else if(this.normalize === "cols") {
+            style = (val: string) => ({backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1))/200}`});
+        } else if(this.normalize === "cols") {
             const colSums = confusion[0].map((_, column) => confusion.map(row => row[column]).reduce((a,b) => a+b));
             confusionStr = confusion.map(row => row.map((v, vi) => (v / colSums[vi]*100).toPrecision(3)+"%"));
+            style = (val: string) => ({backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1))/200}`});
         } else {
             confusionStr = confusion.map(row => row.map(v => String(v)));
         }
@@ -252,9 +255,9 @@ function LogGui(p: VGProps) {
                 <label>Normalize:
                     <Select clearable={false} searchable={false} value={this.normalize} options={"none,rows,cols".split(",").map(value => ({value, label:value}))} onChange={(x: Select.Option) => this.normalize = String(x.value)}/>
                 </label>
-                <Table
-                    data={data}
-                />
+                <Table>
+                    {data.map(row => <Tr>{Object.entries(row).map(([col, val]) => <Td style={style(val)} column={col}>{val}</Td>)}</Tr>)}
+                </Table>
             </div>
         )
     }
