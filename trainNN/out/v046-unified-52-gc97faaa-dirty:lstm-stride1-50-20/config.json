@@ -1,0 +1,403 @@
+{
+	"name": "lstm-stride1-50-20",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 1,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"l2_regularization": 0.0001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			50,
+			20
+		],
+		"output_type": "single",
+		"context_frames": 80,
+		"input_dim": 2
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.337995282462183,
+				"training_loss": 0.6428328530063406,
+				"validation_loss": 0.6144239777382815,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3269858500164635,
+				"training_loss": 0.6161477925833205,
+				"validation_loss": 0.6020235060802046,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.3234905654669933,
+				"training_loss": 0.608724548565714,
+				"validation_loss": 0.597442597361668,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.31914150960884,
+				"training_loss": 0.6046067504088084,
+				"validation_loss": 0.593048835981567,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.31284905562423315,
+				"training_loss": 0.5973614634861026,
+				"validation_loss": 0.5838585063323097,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3090094341984335,
+				"training_loss": 0.5916054473494926,
+				"validation_loss": 0.5809342461936878,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.3060047168214366,
+				"training_loss": 0.5887565079139687,
+				"validation_loss": 0.577942181659757,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.30572641430036074,
+				"training_loss": 0.5868669643492727,
+				"validation_loss": 0.5768623408984463,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.3063679241909171,
+				"training_loss": 0.5852581942151165,
+				"validation_loss": 0.5772923692217413,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.3053254713567922,
+				"training_loss": 0.5841688810454475,
+				"validation_loss": 0.5768464159501611,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.30563679288299583,
+				"training_loss": 0.5833813857369953,
+				"validation_loss": 0.5768724841610441,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.30666981025967954,
+				"training_loss": 0.5826978798637613,
+				"validation_loss": 0.5764495033489646,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.3053632081960732,
+				"training_loss": 0.5819832523175847,
+				"validation_loss": 0.5774045900424134,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.3019999995968252,
+				"training_loss": 0.5815432544375023,
+				"validation_loss": 0.5723800260643914,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.30082547186680564,
+				"training_loss": 0.5810775495934904,
+				"validation_loss": 0.5728182744867397,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.3032075466834149,
+				"training_loss": 0.5806029854810726,
+				"validation_loss": 0.5764988281254498,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.3007735855315091,
+				"training_loss": 0.5801062968774149,
+				"validation_loss": 0.5726913680796916,
+				"weights": "epoch-016.pkl"
+			},
+			"17": {
+				"validation_error": 0.3032783010517651,
+				"training_loss": 0.5796990230383232,
+				"validation_loss": 0.5776743597157721,
+				"weights": "epoch-017.pkl"
+			},
+			"18": {
+				"validation_error": 0.3010849057925198,
+				"training_loss": 0.5793740424635815,
+				"validation_loss": 0.5733786091770766,
+				"weights": "epoch-018.pkl"
+			},
+			"19": {
+				"validation_error": 0.3033820763933208,
+				"training_loss": 0.5792056145096383,
+				"validation_loss": 0.5743400362091806,
+				"weights": "epoch-019.pkl"
+			},
+			"20": {
+				"validation_error": 0.3030566036138894,
+				"training_loss": 0.5788793345048414,
+				"validation_loss": 0.5740564601531006,
+				"weights": "epoch-020.pkl"
+			},
+			"21": {
+				"validation_error": 0.30475000074168423,
+				"training_loss": 0.5786390036588523,
+				"validation_loss": 0.5745577887052072,
+				"weights": "epoch-021.pkl"
+			},
+			"22": {
+				"validation_error": 0.29958018920612783,
+				"training_loss": 0.5783449178132397,
+				"validation_loss": 0.570206266212857,
+				"weights": "epoch-022.pkl"
+			},
+			"23": {
+				"validation_error": 0.2974292448950264,
+				"training_loss": 0.5780977286929972,
+				"validation_loss": 0.5699699879184646,
+				"weights": "epoch-023.pkl"
+			},
+			"24": {
+				"validation_error": 0.3027499989378002,
+				"training_loss": 0.5779646811708372,
+				"validation_loss": 0.5736225627643882,
+				"weights": "epoch-024.pkl"
+			},
+			"25": {
+				"validation_error": 0.301580188057895,
+				"training_loss": 0.5777584337630467,
+				"validation_loss": 0.5729718463108787,
+				"weights": "epoch-025.pkl"
+			},
+			"26": {
+				"validation_error": 0.30192452802691816,
+				"training_loss": 0.5775279976784834,
+				"validation_loss": 0.5722950040802078,
+				"weights": "epoch-026.pkl"
+			},
+			"27": {
+				"validation_error": 0.2990849046212323,
+				"training_loss": 0.577310405206262,
+				"validation_loss": 0.5712986998260021,
+				"weights": "epoch-027.pkl"
+			},
+			"28": {
+				"validation_error": 0.3019622626872558,
+				"training_loss": 0.5771470166577233,
+				"validation_loss": 0.5748891542964386,
+				"weights": "epoch-028.pkl"
+			},
+			"29": {
+				"validation_error": 0.3034339634315023,
+				"training_loss": 0.577073165798745,
+				"validation_loss": 0.5731688269747878,
+				"weights": "epoch-029.pkl"
+			},
+			"30": {
+				"validation_error": 0.3023867922712047,
+				"training_loss": 0.5768460998549099,
+				"validation_loss": 0.5717415181252191,
+				"weights": "epoch-030.pkl"
+			},
+			"31": {
+				"validation_error": 0.29843396201448624,
+				"training_loss": 0.576717752643496,
+				"validation_loss": 0.5715538801730804,
+				"weights": "epoch-031.pkl"
+			},
+			"32": {
+				"validation_error": 0.2998584909540303,
+				"training_loss": 0.5765670535404083,
+				"validation_loss": 0.5736504533802563,
+				"weights": "epoch-032.pkl"
+			},
+			"33": {
+				"validation_error": 0.2982547172116783,
+				"training_loss": 0.5765379973148045,
+				"validation_loss": 0.5714837100778548,
+				"weights": "epoch-033.pkl"
+			},
+			"34": {
+				"validation_error": 0.3025188675888304,
+				"training_loss": 0.5763772804137559,
+				"validation_loss": 0.5768152358326709,
+				"weights": "epoch-034.pkl"
+			},
+			"35": {
+				"validation_error": 0.3004103776700092,
+				"training_loss": 0.5760826712393621,
+				"validation_loss": 0.571109455043696,
+				"weights": "epoch-035.pkl"
+			},
+			"36": {
+				"validation_error": 0.30453773468451684,
+				"training_loss": 0.5760418246991453,
+				"validation_loss": 0.5748851540726874,
+				"weights": "epoch-036.pkl"
+			},
+			"37": {
+				"validation_error": 0.2988443406263612,
+				"training_loss": 0.5759028203166716,
+				"validation_loss": 0.5722072044352315,
+				"weights": "epoch-037.pkl"
+			},
+			"38": {
+				"validation_error": 0.3030000008502096,
+				"training_loss": 0.5757488107332709,
+				"validation_loss": 0.5748246477319384,
+				"weights": "epoch-038.pkl"
+			},
+			"39": {
+				"validation_error": 0.30208490535898025,
+				"training_loss": 0.5756202015298152,
+				"validation_loss": 0.572049913119595,
+				"weights": "epoch-039.pkl"
+			},
+			"40": {
+				"validation_error": 0.29884905740618706,
+				"training_loss": 0.5754617617736782,
+				"validation_loss": 0.5723339487570074,
+				"weights": "epoch-040.pkl"
+			},
+			"41": {
+				"validation_error": 0.2997122638208686,
+				"training_loss": 0.5753759628011469,
+				"validation_loss": 0.5711846359003827,
+				"weights": "epoch-041.pkl"
+			}
+		},
+		"source": "configs/lstm-stride1-50-20.json",
+		"environment": {
+			"PATH": "/home/tehdog/.local/bin:/home/tehdog/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/opt/cuda/bin:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl",
+			"NVM_RC_VERSION": "",
+			"XAUTHORITY": "/home/tehdog/.Xauthority",
+			"LC_MEASUREMENT": "de_DE.UTF-8",
+			"LC_TELEPHONE": "de_DE.UTF-8",
+			"SSLKEYLOGFILE": "/home/tehdog/.ssl-premasterkeys",
+			"LC_TIME": "de_DE.UTF-8",
+			"GTK_IM_MODULE": "xim",
+			"LC_MESSAGES": "en_US.UTF-8",
+			"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+			"IDE_PROJECT_ROOTS": "/home/tehdog/data/dev/2016/bachelorthesis",
+			"ANDROID_HOME": "/home/tehdog/pkg/nobackup/android-sdk-linux",
+			"AUTOJUMP_SOURCED": "1",
+			"MAIL": "/var/spool/mail/tehdog",
+			"SSH_AGENT_PID": "1390",
+			"MOZ_PLUGIN_PATH": "/usr/lib/mozilla/plugins",
+			"COLORTERM": "rxvt",
+			"LD_LIBRARY_PATH": "/opt/pycharm-professional/bin:",
+			"LC_COLLATE": "en_US.UTF-8",
+			"LC_PAPER": "de_DE.UTF-8",
+			"LOGNAME": "tehdog",
+			"PWD": "/home/tehdog/data/dev/2016/bachelorthesis",
+			"_JAVA_AWT_WM_NONREPARENTING": "1",
+			"PYCHARM_HOSTED": "1",
+			"WINDOWID": "77594633",
+			"PYTHONPATH": "/home/tehdog/data/dev/2016/bachelorthesis:/opt/pycharm-professional/helpers/pydev",
+			"NVM_CD_FLAGS": "-q",
+			"ANDROID_EMULATOR_USE_SYSTEM_LIBS": "1",
+			"SHELL": "/usr/bin/zsh",
+			"LC_ADDRESS": "de_DE.UTF-8",
+			"PAGER": "less",
+			"OLDPWD": "/tmp/15.50.54",
+			"ANDROID_NDK": "/home/tehdog/pkg/nobackup/android-ndk",
+			"IPYTHONENABLE": "True",
+			"CUDA_HOME": "/opt/cuda",
+			"HH_CONFIG": "hicolor,rawhistory,keywords",
+			"NVM_IOJS_ORG_MIRROR": "https://iojs.org/dist",
+			"_JAVA_OPTIONS": "-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel",
+			"SAVEHIST": "1000000000",
+			"LESS": "-R",
+			"COLORFGBG": "default;default",
+			"LC_CTYPE": "en_US.UTF-8",
+			"LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:",
+			"SHLVL": "6",
+			"AUTOJUMP_ERROR_PATH": "/home/tehdog/.local/share/autojump/errors.log",
+			"LC_IDENTIFICATION": "de_DE.UTF-8",
+			"HISTFILE": "/home/tehdog/.zsh_history",
+			"LC_MONETARY": "de_DE.UTF-8",
+			"HISTSIZE": "1000000000",
+			"TERM": "rxvt-unicode-256color",
+			"XFILESEARCHPATH": "/usr/dt/app-defaults/%L/Dt",
+			"EMSCRIPTEN_FASTCOMP": "/usr/lib/emscripten-fastcomp",
+			"LANG": "en_US.UTF-8",
+			"XDG_SESSION_ID": "c1",
+			"GRADLE_HOME": "/usr/share/java/gradle",
+			"MAVEN_OPTS": "-Xmx512m",
+			"HISTFILESIZE": "1000000000",
+			"ANT_HOME": "/usr/share/apache-ant",
+			"MKL_DYNAMIC": "TRUE",
+			"DISPLAY": ":0",
+			"LIBRARY_ROOTS": "/usr/lib/python3.6:/usr/lib/python3.6/lib-dynload:/home/tehdog/.local/lib/python3.6/site-packages:/home/tehdog/data/dev/2016/bachelorthesis/janus/build:/home/tehdog/.local/lib/python3.6/site-packages/SoundFile-0.8.1-py3.6.egg:/home/tehdog/.local/lib/python3.6/site-packages/munch-2.1.0-py3.6.egg!/:/usr/lib/python3.6/site-packages:/usr/lib/python3.6/site-packages/gtk-2.0:/home/tehdog/.PyCharm2016.3/system/python_stubs/-1247971763:/opt/pycharm-professional/helpers/python-skeletons",
+			"NVM_NODEJS_ORG_MIRROR": "https://nodejs.org/dist",
+			"LC_NAME": "de_DE.UTF-8",
+			"_": "/usr/lib/jvm/java-8-openjdk/bin/java",
+			"HAXE_STD_PATH": "/usr/share/haxe/std",
+			"NVM_DIR": "/home/tehdog/.nvm",
+			"EMSCRIPTEN": "/usr/lib/emscripten",
+			"LSCOLORS": "Gxfxcxdxbxegedabagacad",
+			"PYTHONIOENCODING": "UTF-8",
+			"USER": "tehdog",
+			"DESKTOP_STARTUP_ID": "i3/i3-sensible-terminal/1471-106-phirearch_TIME157234670",
+			"WINDOWPATH": "1",
+			"PYTHONDONTWRITEBYTECODE": "1",
+			"LC_NUMERIC": "de_DE.UTF-8",
+			"XDG_SEAT": "seat0",
+			"SSH_AUTH_SOCK": "/tmp/ssh-eqfBfpSih3Ty/agent.1389",
+			"EDITOR": "vim",
+			"PYTHONUNBUFFERED": "1",
+			"JOBS": "1",
+			"NLSPATH": "/usr/dt/lib/nls/msg/%L/%N.cat",
+			"QT_QPA_PLATFORMTHEME": "qt5ct",
+			"XDG_RUNTIME_DIR": "/run/user/1000",
+			"XDG_VTNR": "1",
+			"HOME": "/home/tehdog",
+			"HG": "/usr/bin/hg",
+			"JOBLIB_START_METHOD": "forkserver"
+		}
+	}
+}
