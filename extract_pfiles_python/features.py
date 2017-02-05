@@ -46,21 +46,23 @@ def NumFeatureCache(f):
         meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
         digest = hashlib.sha256(meta_json).hexdigest()
         path = os.path.join('data/cache', digest[0:2], digest[2:] + ".pickle")
-        if os.path.exists(path):
-            with open(path, 'rb') as file:
-                return NumFeature_from_dict(pickle.load(file))
+        try:
+            if os.path.exists(path):
+                with open(path, 'rb') as file:
+                    return NumFeature_from_dict(pickle.load(file))
+        except Exception as e:
+            logging.warning(f"could not read cached file {path} ({e}), recomputing")
+        val = f(*args, **kwargs)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path + ".part", 'wb') as file:
+            pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
+        if os.path.isfile(path + ".part"):
+            os.rename(path + ".part", path)
+            with open(path + '.meta.json', 'wb') as file:
+                file.write(meta_json)
         else:
-            val = f(*args, **kwargs)
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path + ".part", 'wb') as file:
-                pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
-            if os.path.isfile(path + ".part"):
-                os.rename(path + ".part", path)
-                with open(path + '.meta.json', 'wb') as file:
-                    file.write(meta_json)
-            else:
-                logging.warning(f"could not find file {path}.part after writing")
-            return val
+            logging.warning(f"could not find file {path}.part after writing")
+        return val
 
     return wrap
 
