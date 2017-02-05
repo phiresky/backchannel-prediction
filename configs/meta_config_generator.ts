@@ -27,7 +27,7 @@ const features_ffv = [...features_std, "get_ffv"];
 
 const rangeround = (x: number) => +x.toFixed(3);
 
-const method_std = ({bcend = 0, span = 2.01, nbcend = bcend - span, } = {}) => ({
+const method_std = ({bcend = 0, span = 1.51, nbcend = bcend - span, } = {}) => ({
     "type": "discrete",
     "bc": [bcend - span, bcend].map(rangeround),
     "nbc": [nbcend - span, nbcend].map(rangeround)
@@ -46,7 +46,7 @@ const make_extract_config = ({input_features = features_std, extraction_method =
 });
 
 const make_train_config = ({
-    context_ms = 2000, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
+    context_ms = 1500, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
     model_function = "lstm_simple",
     epochs = 100
 } = {}) => ({
@@ -137,7 +137,7 @@ const interesting_features = [
 ];
 for (const input_features of interesting_features) {
     const extract_config = make_extract_config({input_features});
-    const name = `lstm-best-features-${input_features.map(feat => feat.split("_")[1])}`;
+    const name = `lstm-best-features-${input_features.map(feat => feat.substr(feat.indexOf("_") + 1))}`;
     const config = make_config({name, extract_config});
     write_config("vary-features", name, config);
 }

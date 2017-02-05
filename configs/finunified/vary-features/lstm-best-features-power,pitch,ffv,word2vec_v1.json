@@ -1,5 +1,5 @@
 {
-	"name": "lstm-best-features-power,ffv",
+	"name": "lstm-best-features-power,pitch,ffv,word2vec_v1",
 	"paths": {
 		"databasePrefix": "data/db/all240302",
 		"adc": "data/adc",
@@ -15,7 +15,9 @@
 	"extract_config": {
 		"input_features": [
 			"get_power",
-			"get_ffv"
+			"get_pitch",
+			"get_ffv",
+			"get_word2vec_v1"
 		],
 		"extraction_method": {
 			"type": "discrete",

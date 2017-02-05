@@ -1,5 +1,5 @@
 {
-	"name": "lstm-best-features-power,pitch,ffv,word2vec",
+	"name": "lstm-best-features-power,pitch,word2vec_dim10",
 	"paths": {
 		"databasePrefix": "data/db/all240302",
 		"adc": "data/adc",
@@ -16,18 +16,17 @@
 		"input_features": [
 			"get_power",
 			"get_pitch",
-			"get_ffv",
-			"get_word2vec_v1"
+			"get_word2vec_dim10"
 		],
 		"extraction_method": {
 			"type": "discrete",
 			"bc": [
-				-2.01,
+				-1.51,
 				0
 			],
 			"nbc": [
-				-4.02,
-				-2.01
+				-3.02,
+				-1.51
 			]
 		},
 		"useOriginalDB": true,
@@ -38,7 +37,7 @@
 	"train_config": {
 		"model_function": "lstm_simple",
 		"epochs": 100,
-		"context_ms": 2000,
+		"context_ms": 1500,
 		"context_stride": 2,
 		"layer_sizes": [
 			70,

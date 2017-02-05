@@ -16,17 +16,17 @@
 		"input_features": [
 			"get_power",
 			"get_pitch",
-			"get_word2vec_dim10"
+			"get_word2vec_v1"
 		],
 		"extraction_method": {
 			"type": "discrete",
 			"bc": [
-				-2.01,
+				-1.51,
 				0
 			],
 			"nbc": [
-				-4.02,
-				-2.01
+				-3.51,
+				-2
 			]
 		},
 		"useOriginalDB": true,
@@ -37,7 +37,7 @@
 	"train_config": {
 		"model_function": "lstm_simple",
 		"epochs": 100,
-		"context_ms": 2000,
+		"context_ms": 1500,
 		"context_stride": 2,
 		"layer_sizes": [
 			70,
