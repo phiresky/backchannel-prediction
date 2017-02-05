@@ -115,8 +115,7 @@ for (const context of interesting_contexts) {
     const extract_config = make_extract_config({
         extraction_method, input_features: [
             ...features_std,
-            "get_ffv",
-            "get_word2vec_v1"
+            "get_ffv"
         ]
     });
     const train_config = make_train_config({context_ms});

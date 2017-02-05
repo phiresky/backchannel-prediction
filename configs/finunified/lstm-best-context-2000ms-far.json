@@ -1,5 +1,5 @@
 {
-	"name": "lstm-best-context-1500ms",
+	"name": "lstm-best-context-2000ms-far",
 	"paths": {
 		"databasePrefix": "data/db/all240302",
 		"adc": "data/adc",
@@ -16,17 +16,18 @@
 		"input_features": [
 			"get_power",
 			"get_pitch",
-			"get_ffv"
+			"get_ffv",
+			"get_word2vec_v1"
 		],
 		"extraction_method": {
 			"type": "discrete",
 			"bc": [
-				-1.51,
+				-2.01,
 				0
 			],
 			"nbc": [
-				-3.51,
-				-2
+				-4.52,
+				-2.51
 			]
 		},
 		"useOriginalDB": true,
@@ -37,7 +38,7 @@
 	"train_config": {
 		"model_function": "lstm_simple",
 		"epochs": 100,
-		"context_ms": 1500,
+		"context_ms": 2000,
 		"context_stride": 2,
 		"layer_sizes": [
 			70,
