@@ -1,0 +1,167 @@
+{
+	"name": "lstm-1500ms-60-30-multicat-finetune2-slow",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.6,
+				-0.1
+			],
+			"nbc": [
+				-3.5,
+				-2.0
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out",
+		"categories": "v1"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 1490,
+		"context_stride": 2,
+		"update_method": "adam",
+		"learning_rate": 0.0001,
+		"l2_regularization": 0.0001,
+		"num_labels": 6,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			60,
+			30
+		],
+		"output_type": "single",
+		"nonlinearity": "tanh",
+		"finetune": {
+			"config": "trainNN/out/v046-unified-53-g69abbfa-dirty:lstm-1500ms-60-30/config.json",
+			"epoch": "best",
+			"layers": [
+				{
+					"load": true,
+					"freeze": true
+				},
+				{
+					"load": true,
+					"freeze": true
+				},
+				{
+					"load": true,
+					"freeze": false
+				},
+				{
+					"load": false,
+					"freeze": false
+				}
+			]
+		},
+		"context_frames": 74,
+		"input_dim": 2,
+		"category_names": [
+			null,
+			"neutral",
+			"question",
+			"surprise/negative",
+			"affirmative",
+			"positive"
+		]
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.7602975196500127,
+				"training_loss": 1.7425642843228226,
+				"validation_loss": 1.7133593234148892,
+				"weights": "epoch-000.pkl"
+			}
+		},
+		"source": "configs/lstm-1500ms-60-30-multicat-finetune.json",
+		"environment": {
+			"USER": "tehdog",
+			"LOGNAME": "tehdog",
+			"HOME": "/home/tehdog",
+			"PATH": "/home/tehdog/.local/bin:/home/tehdog/.cargo/bin:/home/tehdog/bin:/home/tehdog/.local/bin:/home/tehdog/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/opt/cuda/bin:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/tehdog/.cabal/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/tehdog/.gem/ruby/2.2.0/bin:/home/tehdog/.gem/ruby/2.3.0/bin",
+			"MAIL": "/var/spool/mail/tehdog",
+			"SHELL": "/usr/bin/zsh",
+			"SSH_CLIENT": "141.52.249.2 5860 22",
+			"SSH_CONNECTION": "141.52.249.2 5860 192.168.178.22 22",
+			"SSH_TTY": "/dev/pts/8",
+			"TERM": "rxvt-unicode-256color",
+			"XDG_SESSION_ID": "c3",
+			"XDG_RUNTIME_DIR": "/run/user/1000",
+			"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+			"SHLVL": "1",
+			"PWD": "/home/tehdog/data/dev/2016/bachelorthesis",
+			"OLDPWD": "/home/tehdog/data/dev/2016/bachelorthesis/extract_pfiles_python",
+			"ANT_HOME": "/usr/share/apache-ant",
+			"AUTOJUMP_SOURCED": "1",
+			"AUTOJUMP_ERROR_PATH": "/home/tehdog/.local/share/autojump/errors.log",
+			"EMSCRIPTEN": "/usr/lib/emscripten",
+			"EMSCRIPTEN_FASTCOMP": "/usr/lib/emscripten-fastcomp",
+			"FT2_SUBPIXEL_HINTING": "1",
+			"_JAVA_OPTIONS": "-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel",
+			"GRADLE_HOME": "/usr/share/java/gradle",
+			"HAXE_STD_PATH": "/usr/share/haxe/std",
+			"MKL_DYNAMIC": "TRUE",
+			"_JAVA_AWT_WM_NONREPARENTING": "1",
+			"LANG": "en_US.UTF-8",
+			"LC_NUMERIC": "de_DE.UTF-8",
+			"LC_TIME": "de_DE.UTF-8",
+			"LC_COLLATE": "en_US.UTF-8",
+			"LC_MONETARY": "de_DE.UTF-8",
+			"LC_MESSAGES": "en_US.UTF-8",
+			"LC_PAPER": "de_DE.UTF-8",
+			"LC_NAME": "de_DE.UTF-8",
+			"LC_ADDRESS": "de_DE.UTF-8",
+			"LC_TELEPHONE": "de_DE.UTF-8",
+			"LC_MEASUREMENT": "de_DE.UTF-8",
+			"LC_IDENTIFICATION": "de_DE.UTF-8",
+			"MAVEN_OPTS": "-Xmx512m",
+			"HG": "/usr/bin/hg",
+			"MOZ_PLUGIN_PATH": "/usr/lib/mozilla/plugins",
+			"SSH_AUTH_SOCK": "/tmp/ssh-6R2UWarpQT6s/agent.20746",
+			"SSH_AGENT_PID": "20747",
+			"PAGER": "less",
+			"LESS": "-R",
+			"LSCOLORS": "Gxfxcxdxbxegedabagacad",
+			"LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:",
+			"HISTSIZE": "1000000000",
+			"HISTFILESIZE": "1000000000",
+			"SAVEHIST": "1000000000",
+			"LC_CTYPE": "en_US.UTF-8",
+			"EDITOR": "vim",
+			"SSLKEYLOGFILE": "/home/tehdog/.ssl-premasterkeys",
+			"HISTFILE": "/home/tehdog/.zsh_history",
+			"HH_CONFIG": "hicolor,rawhistory,keywords",
+			"CUDA_HOME": "/opt/cuda",
+			"ANDROID_HOME": "/home/tehdog/pkg/nobackup/android-sdk-linux",
+			"ANDROID_NDK": "/home/tehdog/pkg/nobackup/android-ndk",
+			"ANDROID_EMULATOR_USE_SYSTEM_LIBS": "1",
+			"QT_QPA_PLATFORMTHEME": "qt5ct",
+			"NVM_DIR": "/home/tehdog/.nvm",
+			"_": "/usr/bin/python",
+			"JOBLIB_START_METHOD": "forkserver"
+		}
+	}
+}

@@ -133,6 +133,7 @@ const interesting_features = [
     [...features_std, "get_word2vec_dim10"],
     [...features_std, "get_mfcc"],
     ["get_power", "get_ffv", "get_mfcc"],
+    ["get_power", "get_ffv"]
 ];
 for (const input_features of interesting_features) {
     const extract_config = make_extract_config({input_features});
