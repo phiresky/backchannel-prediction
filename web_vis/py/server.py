@@ -12,7 +12,7 @@ import math
 import os.path
 from evaluate import evaluate
 from extract_pfiles_python.features import Features
-
+import numpy as np
 
 # logging.getLogger().setLevel(logging.DEBUG)
 # for handler in logging.getLogger().handlers:
@@ -98,11 +98,10 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
-    x = features.get_multidim_net_output(convid, id)
     if smooth:
-        return features.gaussian_blur(x, 300)
+        return features.smooth(convid, id, {'type': 'gauss', 'sigma_ms': 300, 'cutoff_sigma': 1.0})
     else:
-        return x
+        return features.get_multidim_net_output(convid, id)
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -155,7 +154,7 @@ def get_features():
 
 def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, threshold: float, color=[0, 255, 0]):
     ls = []
-    for start, end in evaluate.get_larger_threshold(feat, reader, threshold):
+    for start, end in evaluate.get_larger_threshold((1 - feat[:, [0]]), reader, threshold):
         ls.append({'from': start, 'to': end, 'text': 'T', 'color': color})
     return {
         'name': name,
@@ -195,8 +194,8 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
-            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(feature, origReader, list(
-                evaluate.get_bc_samples(origReader, None, "sw2249-A"))))
+            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(1 - feature[:, [0]], origReader, list(
+                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False, offset=0))
         else:
             feature = get_net_output(convid, path)
             await sendNumFeature(ws, id, conv, featFull, feature)
@@ -293,6 +292,7 @@ async def handler(websocket, path):
 
 def start_server():
     start_server = websockets.serve(handler, "localhost", 8765)
+    print("server started")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)
 

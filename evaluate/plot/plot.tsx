@@ -38,6 +38,11 @@ interface EvalResult {
         epoch: string,
         weights_file: string,
         sigma_ms: number | undefined,
+        smoother?: {
+            type: string,
+            factor?: number,
+            sigma_ms?: number,
+        }
     },
     totals: { eval: SingleEvalResult, valid: SingleEvalResult }
 }
@@ -91,7 +96,8 @@ const xextractors: { [xaxis: string]: (r: EvalResult) => number } = {
     "Margin of Error Center": r => r.config.margin_of_error.reduce((a, b) => (a + b) / 2),
     "Margin of Error Width": r => r.config.margin_of_error.reduce((a, b) => +(b - a).toFixed(3)),
     "Min Talk Len": r => r.config.min_talk_len === null ? -1 : r.config.min_talk_len,
-    "Lowpass Sigma": r => r.config.sigma_ms === undefined ? 300 : r.config.sigma_ms,
+    "Smoother": r => (r.config.smoother ? r.config.smoother.type : "gauss") as any,
+    "Sigma": r => (r.config.sigma_ms === undefined ? r.config.smoother ? r.config.smoother.sigma_ms || r.config.smoother.factor : 300 : r.config.sigma_ms) as any,
     "Threshold": r => r.config.threshold,
 };
 const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {
@@ -103,7 +109,7 @@ const yextractors: { [yaxis: string]: (r: EvalResult) => number } = {
     "Eval: F1 Score": r => r.totals.eval.f1_score
 }
 const colors = "#3366CC,#DC3912,#FF9900,#109618,#990099,#3B3EAC,#0099C6,#DD4477,#66AA00,#B82E2E,#316395,#994499,#22AA99,#AAAA11,#6633CC,#E67300,#8B0707,#329262,#5574A6,#3B3EAC".split(",");
-const toPrecision = (x: number | null) => typeof x === "number" ? x.toPrecision(3) : NaN;
+const toPrecision = (x: number | null) => typeof x === "number" ? x.toPrecision(3) : x;
 const toTableData = mobx.createTransformer(function toTableData(v: EvalResult) {
     return {
         ...Object.assign({}, ...Object.keys(xextractors).map(name => ({ [name]: toPrecision(xextractors[name](v)) }))),
@@ -116,10 +122,11 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
     validXaxes = Object.keys(xextractors);
     @observable config = {
         xaxis: "Margin of Error Center",
-        yaxes: ["Valid: F1 Score", "Valid: Precision", "Valid: Recall"]
+        yaxes: ["Valid: F1 Score", "Valid: Precision", "Valid: Recall"],
+        which: null as string|null
     }
     render() {
-        const { xaxis, yaxes } = this.config;
+        const { xaxis, yaxes, which } = this.config;
         if (!this.props.evalInfo) return <div>no evaluation data</div>;
         const options = {
             scales: {
@@ -142,14 +149,20 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
 
         const extractor = xextractors[xaxis];
         const { [xaxis]: mine, ...otherso } = xextractors;
-        const others = Object.keys(otherso).sort().map(x => xextractors[x]);
+        const others = Object.keys(otherso).sort();
         for (const evalInfo of this.props.evalInfo) {
             const myValue = mine(evalInfo);
-            const otherValues = others.map(extractor => extractor(evalInfo)).join(",");
+            const otherValues = JSON.stringify(Object.assign(others.map(extractor => ({[extractor]:xextractors[extractor](evalInfo)}))));
             if (!map.has(otherValues)) map.set(otherValues, []);
             map.get(otherValues)!.push(evalInfo);
         }
-        const relevants = Array.from(map.values()).reduce((a, b) => a.length > b.length ? a : b);
+        let relevants: EvalResult[];
+        if(which && map.has(which)) relevants = map.get(which)!;
+        else {
+            let newwhich: string;
+            [newwhich, relevants] = Array.from(map.entries()).reduce((a, b) => a[1].length > b[1].length ? a : b)!;
+            setTimeout(() => this.config.which = newwhich, 0);
+        }
         console.log(map);
         const datasets = yaxes.map((yaxis, i) => {
             const data = relevants.map(ele => ({ x: extractor(ele), y: yextractors[yaxis](ele) }));
@@ -177,6 +190,11 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
                     options={Object.keys(yextractors).map(value => ({ value, label: value }))}
                     multi
                     onChange={x => this.config.yaxes = (x as any[]).map(x => x.value)} />
+                which series: <Select searchable={false} clearable={false}
+                    value={which || undefined}
+                    options={[...map.keys()].map(key => ({value: key, label: `${map.get(key)!.length}×: ${key}`}))}
+                    onChange={x => this.config.which = (x as any).value}
+                    />
                 <Line data={{ datasets }} options={options} />
                 <Table className="evalTable" sortable
                     itemsPerPage={6}

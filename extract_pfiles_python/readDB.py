@@ -112,6 +112,7 @@ class DBReader:
         self.load_db()
         self.backchannels, self.categories = load_backchannels(self.paths_config['backchannels'])
         self.category_to_index = {category: (index + 1) for index, category in enumerate(self.categories)}
+        self.index_to_category = {(index + 1): category for index, category in enumerate(self.categories)}
         self.bc_to_category = {bc: category for category, bcs in self.categories.items() for bc in bcs}
         self.sample_window_ms = self.extract_config['sample_window_ms']
         self.method = self.extract_config['extraction_method']
@@ -522,6 +523,7 @@ def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[
             cat = bc_to_category(reader, reader.uttDB[utt]) if is_bc else 0
             cat_to_uttids.setdefault(cat, []).append((utt, is_bc))
         counts = {category: len(bcs) for category, bcs in cat_to_uttids.items()}
+        pprint({reader.index_to_category.get(category, "NBC"): len(bcs) for category, bcs in cat_to_uttids.items()})
         max_count = max(counts.values())
         for category, utts in cat_to_uttids.items():
             yield from ((utt_id, index, is_bc) for index, (utt_id, is_bc) in enumerate(sample_m_of_n(max_count, utts)))
@@ -640,12 +642,13 @@ def to_vec(config_path: str):
     folder = "data/word2vec"
     words_file = os.path.join(folder, "words-noisefiltered")
     phrases_file = os.path.join(folder, "phrases-noisefiltered")
-    dimension = 5
+    dimension = 10
     w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
     with open(words_file, "w") as f:
         f.writelines(gen())
     word2vec.word2phrase(words_file, phrases_file, verbose=True)
     word2vec.word2vec(phrases_file, w2v_file, size=dimension)
+    logging.info("wrote to " + w2v_file)
 
 
 def main():

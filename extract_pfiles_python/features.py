@@ -207,6 +207,33 @@ def pure_get_word2vec_v1(adc_path: str, sample_window_ms: float, convid: str):
     return NumFeature(w2v)
 
 
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_dim10(adc_path: str, sample_window_ms: float, convid: str):
+    import word2vec
+    from extract_pfiles_python import readDB
+    feat_dim = 10
+    model = word2vec.load(f"data/word2vec/noisefiltered-{feat_dim}.bin")
+    # for dimensions
+    pow = pure_get_power(adc_path, sample_window_ms, convid)
+    frames, _ = pow.shape
+    w2v = np.zeros((frames, feat_dim), dtype=np.float32)
+    reader = readDB.loadDBReader("extract_pfiles_python/config.json")
+    words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
+             readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
+    inx = 0
+
+    def inxtotime(sample_index):
+        return (sample_window_ms / 2 + sample_index * pow.shift) / 1000
+
+    for frame in range(frames):
+        time = inxtotime(frame)
+        if inx < len(words) - 1 and words[inx + 1][0] <= time:
+            inx += 1
+        w2v[frame] = model[words[inx][1]]
+    return NumFeature(w2v)
+
+
 class Features:
     def __init__(self, config: dict, config_path: str):
         self.config = config
@@ -253,6 +280,9 @@ else:
 
     def get_word2vec_v1(self, convid: str):
         return pure_get_word2vec_v1(self.config['paths']['adc'], self.sample_window_ms, convid)
+
+    def get_word2vec_dim10(self, convid: str):
+        return pure_get_word2vec_dim10(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     def get_combined_feature(self, convid: str, start_time: float = None, end_time: float = None):
         adc_path = self.config['paths']['adc']
@@ -350,13 +380,31 @@ else:
         output = self.batched_eval(inp, fn, out_dim=self.config['train_config']['num_labels'])
         return NumFeature(output)
 
-    def gaussian_blur(self, feature: NumFeature, sigma: float):
-        if sigma > 0:
-            import scipy.ndimage
-            res = scipy.ndimage.filters.gaussian_filter1d(feature, sigma / feature.shift, axis=0)
-            return NumFeature(res)
+    def smooth(self, convid: str, epoch: str, smoother: dict):
+        x = self.get_multidim_net_output(convid, epoch)
+        if smoother['type'].startswith("gauss"):
+            import scipy.signal
+            sigma = smoother['sigma_ms'] / x.shift
+            cutoff = sigma * smoother['cutoff_sigma']
+            # 4 x sigma contains 99.9 of values
+            window = scipy.signal.gaussian(sigma * 2 * 4, sigma).astype(np.float32)
+            # cut off only on left side (after convolution this is the future)
+            window = window[int(np.round(len(window)/2 - cutoff)):]
+            window = window / sum(window)
+            x = np.array([scipy.signal.convolve(row, window)[:row.size] for row in x.T]).T
+        elif smoother['type'].startswith("exponential"):
+            factor = smoother['factor']
+            facs = (factor * (1 - factor) ** np.arange(1000, dtype=np.float32))
+            x = np.array([np.convolve(row, facs, mode='full')[:row.size] for row in x.T]).T
+        elif smoother['type'] == 'kalman':
+            # todo
+            import pykalman
+            kf = pykalman.KalmanFilter(n_dim_obs=x.shape[1])
+            res, _ = kf.filter(x)  # features.gaussian_blur(x, 300)
+            return NumFeature(res.astype(np.float32))
         else:
-            return feature
+            raise Exception(f"unknown method {smoother['type']}")
+        return NumFeature(x)
 
     def sample_index_to_time(self, feat: NumFeature, sample_index):
         if feat.typ == FeatureType.FMatrix:
