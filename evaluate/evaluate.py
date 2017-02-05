@@ -32,20 +32,22 @@ def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
 
 
 # the word-aligned beginning of the bc is predicted
-def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float):
+def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float, at_start: bool, offset=0.0):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
         if end - start < 0.02:
             continue
-        peak_prediction_s = reader.get_max_time(smoothed_net_output, start, end)  # - np.average(reader.method['bc'])
-        peak_prediction_s += reader.config['eval_config']['prediction_offset']
-        yield peak_prediction_s
+        if at_start:
+            yield start + offset
+        else:
+            yield reader.get_max_time(smoothed_net_output, start, end) + offset
 
 
 def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
-                 bcs: List[Tuple[int, NumFeature]]):
+                 bcs: List[Tuple[int, NumFeature]], at_start: bool, offset=0.0):
     total_length_s = reader.features.sample_index_to_time(smoothed_net_output, smoothed_net_output.shape[0])
     total_length_audio_index = reader.features.time_to_sample_index(bcs[0][1], total_length_s)
-    return get_bc_audio2(reader, total_length_audio_index, bcs, predict_bcs(reader, smoothed_net_output, threshold=0.6))
+    return get_bc_audio2(reader, total_length_audio_index, bcs,
+                         predict_bcs(reader, smoothed_net_output, threshold=0.6, at_start=at_start, offset=offset))
 
 
 def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, NumFeature]],
@@ -140,11 +142,13 @@ def random_predictor(reader: DBReader, convid: str, config: dict):
 
 
 @functools.lru_cache(maxsize=476 + 400)
-def cached_smoothed_netout(config_path, convid, epoch, sigma):
-    reader = loadDBReader(config_path)
-    x = reader.features.get_multidim_net_output(convid, epoch)
-    x = reader.features.gaussian_blur(x, sigma=sigma)
-    return x
+def cached_smoothed_netout(config_path, convid, epoch, smoother):
+    return loadDBReader(config_path).features.smooth(convid, epoch, smoother)
+
+
+class Hashabledict(dict):
+    def __hash__(self):
+        return hash(frozenset(self.items()))
 
 
 def evaluate_conv(config_path: str, convid: str, config: dict):
@@ -158,9 +162,16 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
     if 'random_baseline' in config:
         predicted_bcs = random_predictor(reader, convid, config)
     else:
-        net_output = cached_smoothed_netout(config_path, convid, config["epoch"], config.get('sigma_ms', 300))
+        if 'sigma_ms' in config:
+            if 'smoother' in config:
+                raise Exception('conflicting options: smoother and sigma')
+            smoother = {'type': 'gauss', 'sigma_ms': config['sigma_ms']}
+        else:
+            smoother = config['smoother']
+        net_output = cached_smoothed_netout(config_path, convid, config["epoch"], Hashabledict(smoother))
         net_output = 1 - net_output[:, [0]]
-        predicted_bcs = list(predict_bcs(reader, net_output, threshold=config['threshold']))
+        predicted_bcs = list(
+            predict_bcs(reader, net_output, threshold=config['threshold'], at_start=config['at_start']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
     if predicted_count > 0:
@@ -201,7 +212,8 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
-    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)]) for time in predicted_bcs]
+    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)]) for time in
+                            predicted_bcs]
     if predicted_count > 0:
         for correct_bc in correct_bcs:
             while predicted_inx < predicted_count - 1 and nearer(predicted_bcs[predicted_inx + 1],
@@ -254,7 +266,7 @@ def precision_recall(stats: dict):
     return dict(precision=precision, recall=recall, f1_score=f1_score)
 
 
-def moving_margins(margin: Tuple[float, float], count=50, span=2):
+def moving_margins(margin: Tuple[float, float], count=50, span=2.0):
     arr = np.array(margin)
     for offset in np.linspace(-span / 2, span / 2, count):
         yield tuple(arr + offset)
@@ -271,6 +283,66 @@ def general_interesting_configs(config):
     interesting_talk_lens = [None, 0, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
         yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
+
+
+def general_interesting_2(config):
+    for thres in [0.62, 0.63, 0.64]:
+        for cutoff in [1.1, 1.3, 1.5]:
+            yield {**default_config, **dict(margin_of_error=(0.0, 1.0), threshold=thres,
+                                            smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=300,
+                                                          cutoff_sigma=cutoff), at_start=False)}
+    for thres in [0.7, 0.725, 0.75]:
+        for cutoff in [0.9, 1.0, 1.1]:
+            for sigma in [170, 200, 250]:
+                for margin in [(-0.5, 0.5), (-0.2, 0.2), (-0.3, 0.3)]:
+                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
+                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
+                                                                  cutoff_sigma=cutoff), at_start=True)}
+                for margin in [(-0.1, 0.5)]:
+                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
+                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
+                                                                  cutoff_sigma=cutoff), at_start=True)}
+                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
+                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
+                                                                  cutoff_sigma=cutoff), at_start=False)}
+
+
+def smoother_interesting(config):
+    smoothers = [
+        *[dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=s, cutoff_sigma=cutoff) for s in np.linspace(200, 400, 3) for
+          cutoff in np.linspace(0, 3, 7)],
+        *[dict(type='exponential', factor=s) for s in np.linspace(0.03, 0.06, 4)]
+    ]
+    margins = moving_margins((-0.25, 0.75), count=5, span=0.5)
+    thresholds = np.linspace(0.5, 0.8, 5)
+    for smoother, margin, threshold in product(smoothers, margins, thresholds):
+        yield {**default_config,
+               **dict(margin_of_error=margin, smoother={**smoother, 'type': smoother['type'] + ".s"},
+                      threshold=threshold,
+                      at_start=True)}
+        yield {**default_config,
+               **dict(margin_of_error=margin, smoother={**smoother, 'type': smoother['type'] + ".m"},
+                      threshold=threshold,
+                      at_start=False)}
+
+
+def smoother_specific_interesting(config):
+    smoothers = [
+        # *[dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=s, cutoff_sigma=cutoff) for s in np.linspace(250, 350, 3) for
+        #  cutoff in np.linspace(0.5, 1.7, 7)],
+        *[dict(type='exponential', factor=s) for s in np.linspace(0.03, 0.06, 4)]
+    ]
+    margins = moving_margins((-0.1, 0.5), 5, 0.2)
+    thresholds = np.linspace(0.575, 0.725, 6)
+    for smoother, margin, threshold in product(smoothers, margins, thresholds):
+        # yield {**default_config,
+        #       **dict(margin_of_error=margin, smoother={**smoother, 'type': smoother['type'] + ".s"},
+        #              threshold=threshold,
+        #              at_start=True)}
+        yield {**default_config,
+               **dict(margin_of_error=margin, smoother={**smoother, 'type': smoother['type'] + ".m"},
+                      threshold=threshold,
+                      at_start=False)}
 
 
 def margin_test_configs(config):
@@ -379,7 +451,7 @@ def main():
     if do_detailed_analysis:
         confs = list(detailed_analysis(config))
     else:
-        confs = list(general_interesting_configs(config))
+        confs = list(general_interesting_2(config))
     with Parallel(n_jobs=1) as parallel:
         for inx, eval_config in enumerate(confs):
             if do_baseline is not None:
