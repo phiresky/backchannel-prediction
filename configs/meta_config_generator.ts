@@ -37,7 +37,7 @@ const method_close = ({span = 1}) => method_std({nbcend: -0.1 - span - 0.1, span
 
 const method_far = ({span = 1}) => method_std({nbcend: -0.1 - span - 1.3, span});
 
-const make_extract_config = ({input_features = features_std, extraction_method = method_std()} = {}) => ({
+const make_extract_config = ({input_features = features_ffv, extraction_method = method_std()} = {}) => ({
     input_features, extraction_method,
     "useOriginalDB": true,
     "useWordsTranscript": false,
@@ -112,12 +112,7 @@ for (const context of interesting_contexts) {
     const span = context + 0.01;
     const context_ms = Math.round(context * 1000) | 0;
     const extraction_method = method_std({span, bcend: 0, nbcend: Math.min(-2, 0 - span)});
-    const extract_config = make_extract_config({
-        extraction_method, input_features: [
-            ...features_std,
-            "get_ffv"
-        ]
-    });
+    const extract_config = make_extract_config({extraction_method});
     const train_config = make_train_config({context_ms});
     const name = `lstm-best-context-${context_ms}ms`;
     const config = make_config({
@@ -134,12 +129,38 @@ const interesting_features = [
     ["get_power", "get_ffv", "get_mfcc"],
     ["get_power", "get_ffv"]
 ];
+const interesting_strides = [1, /*default/best = 2, */4];
+const interesting_layers_best = [
+    [100],
+    [50, 20],
+    /*default/best = [70, 35]*/
+    [100, 50],
+    [70, 50, 35]
+];
 for (const input_features of interesting_features) {
     const extract_config = make_extract_config({input_features});
     const name = `lstm-best-features-${input_features.map(feat => feat.substr(feat.indexOf("_") + 1))}`;
     const config = make_config({name, extract_config});
     write_config("vary-features", name, config);
 }
+for (const context_stride of interesting_strides) {
+    const extract_config = make_extract_config();
+    const train_config = make_train_config({context_stride});
+    const name = `lstm-best-stride-${context_stride}`;
+    const config = make_config({
+        name, extract_config, train_config
+    });
+    write_config("vary-stride", name, config);
+}
+
+for (const layer_sizes of interesting_layers_best) {
+    const extract_config = make_extract_config();
+    const train_config = make_train_config({layer_sizes});
+    const name = `lstm-best-layers-${layer_sizes.join("-")}`;
+    const config = make_config({name, extract_config, train_config});
+    write_config("vary-layers", name, config);
+}
+
 /*for (const model_function of ["lstm_simple", "feedforward_simple"]) {
  const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];
  for (const input_features of mfcc_combos) {
