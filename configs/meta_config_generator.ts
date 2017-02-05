@@ -27,7 +27,7 @@ const features_ffv = [...features_std, "get_ffv"];
 
 const rangeround = (x: number) => +x.toFixed(3);
 
-const method_std = ({bcend = -0.1, nbcend = bcend - 1.8, span = 1} = {}) => ({
+const method_std = ({bcend = 0, span = 2.01, nbcend = bcend - span, } = {}) => ({
     "type": "discrete",
     "bc": [bcend - span, bcend].map(rangeround),
     "nbc": [nbcend - span, nbcend].map(rangeround)
@@ -46,7 +46,7 @@ const make_extract_config = ({input_features = features_std, extraction_method =
 });
 
 const make_train_config = ({
-    context_ms = 800, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
+    context_ms = 2000, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
     model_function = "lstm_simple",
     epochs = 100
 } = {}) => ({
@@ -101,13 +101,13 @@ const mfcc_combos = [
 ];
 const dropout_name = categoryname => `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize || "inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
 
-const interesting_contexts = [0.5, 1.0, 1.5, 2.0];
 
 function write_config(category: string, name: string, config: any) {
     const outdir = `configs/finunified/${category}`;
     if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
     fs.writeFileSync(`configs/finunified/${category}/${name}.json`, JSON.stringify(config, null, '\t'));
 }
+const interesting_contexts = [0.5, 1.0, 1.5, 2.0];
 for (const context of interesting_contexts) {
     const span = context + 0.01;
     const context_ms = Math.round(context * 1000) | 0;
@@ -125,6 +125,20 @@ for (const context of interesting_contexts) {
         name, extract_config, train_config
     });
     write_config("vary-context", name, config);
+}
+const interesting_features = [
+    features_std, features_ffv,
+    [...features_std, "get_word2vec_v1"],
+    [...features_ffv, "get_word2vec_v1"],
+    [...features_std, "get_word2vec_dim10"],
+    [...features_std, "get_mfcc"],
+    ["get_power", "get_ffv", "get_mfcc"],
+];
+for (const input_features of interesting_features) {
+    const extract_config = make_extract_config({input_features});
+    const name = `lstm-best-features-${input_features.map(feat => feat.split("_")[1])}`;
+    const config = make_config({name, extract_config});
+    write_config("vary-features", name, config);
 }
 /*for (const model_function of ["lstm_simple", "feedforward_simple"]) {
  const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];

@@ -54,9 +54,12 @@ def NumFeatureCache(f):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path + ".part", 'wb') as file:
                 pickle.dump(NumFeature_to_dict(val), file, protocol=pickle.HIGHEST_PROTOCOL)
-            os.rename(path + ".part", path)
-            with open(path + '.meta.json', 'wb') as file:
-                file.write(meta_json)
+            if os.path.isfile(path + ".part"):
+                os.rename(path + ".part", path)
+                with open(path + '.meta.json', 'wb') as file:
+                    file.write(meta_json)
+            else:
+                logging.warning(f"could not find file {path}.part after writing")
             return val
 
     return wrap
