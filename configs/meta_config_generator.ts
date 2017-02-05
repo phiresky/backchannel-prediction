@@ -27,7 +27,7 @@ const features_ffv = [...features_std, "get_ffv"];
 
 const rangeround = (x: number) => +x.toFixed(3);
 
-const method_std = ({bcend = 0, span = 1.51, nbcend = Math.min(-2, bcend - span), } = {}) => ({
+const method_std = ({bcend = 0, span = 1.51, nbcend = Math.min(-2, bcend - span),} = {}) => ({
     "type": "discrete",
     "bc": [bcend - span, bcend].map(rangeround),
     "nbc": [nbcend - span, nbcend].map(rangeround)
