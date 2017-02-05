@@ -13,9 +13,7 @@ const make_config = ({name, extract_config = make_extract_config(), train_config
         "backchannels": "data/backchannels-top200.txt",
         "originalSwbTranscriptions": "data/swb_ms98_transcriptions"
     },
-    "eval_config": {
-        "prediction_offset": 0.1
-    },
+    "eval_config": {},
     extract_config,
     train_config
 });
@@ -48,9 +46,9 @@ const make_extract_config = ({input_features = features_std, extraction_method =
 });
 
 const make_train_config = ({
-    context_ms = 800, context_stride = 2, layer_sizes = [100, 50] as number[]|[number|null, number][],
-    model_function = "feedforward_simple",
-    epochs = 200
+    context_ms = 800, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
+    model_function = "lstm_simple",
+    epochs = 100
 } = {}) => ({
     model_function,
     epochs,
@@ -58,8 +56,9 @@ const make_train_config = ({
     context_stride,
     layer_sizes,
     "resume_parameters": null,
-    "update_method": "sgd",
-    "learning_rate": 0.7,
+    "update_method": "adam",
+    "learning_rate": 0.001,
+    "l2_regularization": 0.0001,
     "num_labels": 2,
     "batch_size": 250,
     "gaussian": false,
@@ -102,25 +101,50 @@ const mfcc_combos = [
 ];
 const dropout_name = categoryname => `${categoryname}-${layers.map(([lsize, dropout]) => `${lsize || "inp"}.${dropout.toString().split(".")[1]}`).join("-")}`;
 
-for (const model_function of ["lstm_simple", "feedforward_simple"]) {
-    const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];
-    for (const input_features of mfcc_combos) {
-        const categoryname = categoryname0 + "-" + input_features.map(feat => feat.split("_")[1]);
-        for (const layer_sizes of best_layers(model_function)) {
-            const name = `${categoryname}-${layer_sizes.join("-")}`;
-            const config = make_config({
-                name: name,// + '-l2reg',
-                extract_config: make_extract_config({input_features, extraction_method: method_std()}),
-                train_config: {
-                    ...make_train_config({layer_sizes, model_function, epochs: 100}),
-                    update_method: "adam",
-                    learning_rate: 0.001,
-                    //l2_regularization: 0.0001
-                },
-            });
-            const outdir = `configs/${categoryname}`;
-            if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
-            fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
-        }
-    }
+const interesting_contexts = [0.5, 1.0, 1.5, 2.0];
+
+function write_config(category: string, name: string, config: any) {
+    const outdir = `configs/finunified/${category}`;
+    if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
+    fs.writeFileSync(`configs/finunified/${category}/${name}.json`, JSON.stringify(config, null, '\t'));
 }
+for (const context of interesting_contexts) {
+    const span = context + 0.01;
+    const context_ms = Math.round(context * 1000) | 0;
+    const extraction_method = method_std({span, bcend: 0, nbcend: Math.min(-2, 0 - span)});
+    const extract_config = make_extract_config({
+        extraction_method, input_features: [
+            ...features_std,
+            "get_ffv",
+            "get_word2vec_v1"
+        ]
+    });
+    const train_config = make_train_config({context_ms});
+    const name = `lstm-best-context-${context_ms}ms`;
+    const config = make_config({
+        name, extract_config, train_config
+    });
+    write_config("vary-context", name, config);
+}
+/*for (const model_function of ["lstm_simple", "feedforward_simple"]) {
+ const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];
+ for (const input_features of mfcc_combos) {
+ const categoryname = categoryname0 + "-" + input_features.map(feat => feat.split("_")[1]);
+ for (const layer_sizes of best_layers(model_function)) {
+ const name = `${categoryname}-${layer_sizes.join("-")}`;
+ const config = make_config({
+ name: name,// + '-l2reg',
+ extract_config: make_extract_config({input_features, extraction_method: method_std()}),
+ train_config: {
+ ...make_train_config({layer_sizes, model_function, epochs: 100}),
+ update_method: "adam",
+ learning_rate: 0.001,
+ //l2_regularization: 0.0001
+ },
+ });
+ const outdir = `configs/${categoryname}`;
+ if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
+ fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
+ }
+ }
+ }*/
