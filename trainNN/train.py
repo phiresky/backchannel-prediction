@@ -35,30 +35,35 @@ def extract(utterance: Tuple[str, int, bool]):
     return readDB.extract(config_path)[utt_id, is_bc]
 
 
-def extract_batch(batch: List[Tuple[Tuple[str, bool], List[int]]], context_frames: int, input_dim: int,
+def extract_batch(batch: List[Tuple[Tuple[str, int, bool], List[int]]], context_frames: int,
+                  input_dim: int,
+                  weighted_update: bool,
                   output_all: bool):
     inputs = np.zeros((len(batch), context_frames, input_dim), dtype='float32')
     outputs = np.zeros((len(batch),), dtype='int32')  # if not output_all else np.empty((len(batch), context_frames),
     #                                 dtype='int32')
+    weights = np.ones((len(batch),), dtype='float32')
     for index, (utterance_id, indices) in enumerate(batch):
         cur_inputs, cur_outputs = extract(utterance_id)
         inputs[index] = cur_inputs[indices]
         outputs[index] = cur_outputs[indices][0]  # if not output_all else cur_outputs[indices][:, 0]
-    return inputs, outputs
+        if weighted_update:
+            weights[index] = utterance_id[1]
+    return inputs, outputs, weights
 
 
 def iterate_minibatches(train_config, all_elements, output_all, random=True):
     batchsize = train_config['batch_size']
     context_frames = train_config['context_frames']
     input_dim = train_config['input_dim']
-
+    weighted_update = train_config.get('balance_method', None) == "weighted"
     if random:
         numpy.random.shuffle(all_elements)
     for _, batch in batch_list(all_elements, batchsize, include_last_partial=False):
-        yield extract_batch(batch, context_frames, input_dim, output_all)
+        yield extract_batch(batch, context_frames, input_dim, weighted_update=weighted_update, output_all=output_all)
 
 
-# randomize once
+# randomize every batch only once at start. significantly improves performance but might make training worse
 def iterate_faster_minibatches(train_config, all_elements, output_all):
     logging.debug("shuffling batches")
     batches = list(tqdm(iterate_minibatches(train_config, all_elements, output_all)))
@@ -145,7 +150,13 @@ def train():
             # inputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['input']))
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
             convos = readDB.read_conversations(config)
-            backchannels = list(readDB.balance_data(config_path, readDB.all_uttids(config_path, convos[t])))
+            balance_method = train_config.get('balance_method', None)
+            if balance_method is None:
+                backchannels = list(readDB.balance_data(config_path, readDB.all_uttids(config_path, convos[t])))
+            elif balance_method == "weighted":
+                backchannels = list(readDB.get_balanced_weights(config_path, readDB.all_uttids(config_path, convos[t])))
+            else:
+                raise Exception(f"unknown balance method {balance_method}")
             input_dim = extract(backchannels[0])[0].shape[1]
             logging.debug(f"set input dim to {input_dim}")
             inxtoname = {**{v: k for k, v in reader.category_to_index.items()}, 0: None}

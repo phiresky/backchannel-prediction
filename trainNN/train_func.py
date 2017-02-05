@@ -73,6 +73,7 @@ def train_network(network,
     else:
         target_var = T.fvector('targets')
     learning_rate = T.fscalar('learning_rate')
+    update_weights_var = T.fvector('update_weights')
     # States for newbob
     doScaleRate = False
 
@@ -81,7 +82,7 @@ def train_network(network,
         loss = lasagne.objectives.categorical_crossentropy(prediction, target_var)
     else:
         loss = lasagne.objectives.squared_error(prediction, target_var)
-    loss = loss.mean()
+    loss = lasagne.objectives.aggregate(loss, weights=update_weights_var)
 
     if l2_regularization is not None:
         logging.debug("Applying L2 regularization with {:.6f}".format(l2_regularization))
@@ -136,7 +137,7 @@ def train_network(network,
         logging.debug("Compiling theano functions...")
 
     input_var = lasagne.layers.get_all_layers(network)[0].input_var
-    train_fn = theano.function([input_var, target_var, learning_rate], loss, updates=updates)
+    train_fn = theano.function([input_var, target_var, update_weights_var, learning_rate], loss, updates=updates)
     val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
     if draw_theano_graph is not None:
@@ -160,9 +161,9 @@ def train_network(network,
 
         time_spent_batching = 0
         before = timer()
-        for inputs, outputs in iterate_minibatches_train():
+        for inputs, outputs, weights in iterate_minibatches_train():
             time_spent_batching += timer() - before
-            train_err += train_fn(inputs, outputs, learning_rate_num)
+            train_err += train_fn(inputs, outputs, weights, learning_rate_num)
             train_batches += 1
             before = timer()
 
@@ -177,7 +178,7 @@ def train_network(network,
         val_err = 0
         val_acc = 0
         val_batches = 0
-        for inputs, outputs in iterate_minibatches_validate():
+        for inputs, outputs, weights in iterate_minibatches_validate():
             err, acc = val_fn(inputs, outputs)
             val_err += err
             val_acc += acc

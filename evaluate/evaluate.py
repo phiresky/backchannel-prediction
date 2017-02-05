@@ -289,7 +289,7 @@ def general_interesting_2(config):
     for thres in [0.62, 0.63, 0.64]:
         for cutoff in [1.1, 1.3, 1.5]:
             for margin in moving_margins((-0.1, 0.9), count=3, span=0.2):
-                yield {**default_config, **dict(margin_of_error=(0.0, 1.0), threshold=thres,
+                yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
                                                 smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=300,
                                                               cutoff_sigma=cutoff), at_start=False)}
     for thres in [0.7, 0.725, 0.75]:

@@ -514,6 +514,8 @@ def sample_m_of_n(m: int, things: list):
     yield from random.sample(things, m)
 
 
+# duplicate samples of categories with few samples until all categories have same number of samples if outputting
+# categorical, else dont do anything
 def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[Tuple[str, int, bool]]:
     reader = loadDBReader(config_path)
     if reader.extract_config.get('categories', None) is not None:
@@ -529,6 +531,26 @@ def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[
             yield from ((utt_id, index, is_bc) for index, (utt_id, is_bc) in enumerate(sample_m_of_n(max_count, utts)))
     else:
         yield from ((utt_id, index, is_bc) for index, (utt_id, is_bc) in enumerate(bcs))
+
+
+# todo: code dedup with balance_data
+# get a mapper that assigns every utt_id a weight for use in lasagne.objectives.aggregate(weights=_)
+def get_balanced_weights(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[Tuple[str, float, bool]]:
+    reader = loadDBReader(config_path)
+    if reader.extract_config.get('categories', None) is not None:
+        logging.info("balancing data...")
+        cat_to_uttids = {}
+        for utt, is_bc in bcs:
+            cat = bc_to_category(reader, reader.uttDB[utt]) if is_bc else 0
+            cat_to_uttids.setdefault(cat, []).append((utt, is_bc))
+        counts = {category: len(bcs) for category, bcs in cat_to_uttids.items()}
+        pprint({reader.index_to_category.get(category, "NBC"): len(bcs) for category, bcs in cat_to_uttids.items()})
+        max_count = max(counts.values())
+        for category, utts in cat_to_uttids.items():
+            yield from ((utt_id, max_count / counts[category], is_bc) for (utt_id, is_bc) in utts)
+    else:
+        yield from ((utt_id, 1.0, is_bc) for (utt_id, is_bc) in bcs)
+
 
 @functools.lru_cache(maxsize=1)
 def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array]]:
