@@ -417,13 +417,14 @@ class MakeLatexTable extends React.Component<{ gui: GUI, results: VGPropsMaybe[]
         "Precision": (p) => this.bestTotals(p).precision.toFixed(3),
         "Recall": (p) => this.bestTotals(p).recall.toFixed(3),
         "F1-Score": (p) => this.bestTotals(p).f1_score.toFixed(3),
+        "Layers": p => "$in \\rightarrow " + p.config.train_config.layer_sizes.join(" \\rightarrow ") + " \\rightarrow out$"
     }
     bestTotals(p: VGProps) {
         let x = bestResult(p.evalInfo!).totals;
         if (this.evalOrValid === "eval") return x.eval;
         else return x.valid;
     }
-    @observable evalOrValid = "eval";
+    @observable evalOrValid = "valid";
     @observable dimensions = ["Context"];
     render() {
         let res = this.props.results.filter(result => result.ok && result.evalInfo) as VGProps[];
