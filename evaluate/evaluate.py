@@ -293,28 +293,19 @@ def general_interesting_configs(config):
 
 def general_interesting_2(config):
     for thres in [0.6, 0.62, 0.63, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.8]:
-        for cutoff in [0, 1.1, 1.3, 1.5, 2]:
-            for min_talk_len in [None, 0, 5, 10]:
-                for margin in moving_margins((-0.1, 0.9), count=3, span=0.2):
-                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
-                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=300,
-                                                                  cutoff_sigma=cutoff),
-                                                    at_start=False,
-                                                    min_talk_len=min_talk_len)}
-    for thres in [0.7, 0.725, 0.75]:
-        for cutoff in [0, 0.9, 1.0, 1.1, 2]:
-            for sigma in [170, 200, 250]:
-                for margin in [(-0.5, 0.5), (-0.2, 0.2), (-0.3, 0.3)]:
-                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
-                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
-                                                                  cutoff_sigma=cutoff), at_start=True)}
-                for margin in [(-0.1, 0.5)]:
-                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
-                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
-                                                                  cutoff_sigma=cutoff), at_start=True)}
-                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
-                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma,
-                                                                  cutoff_sigma=cutoff), at_start=False)}
+        for cutoff in [0, 0.9, 1.1, 1.3, 1.5, 2]:
+            for sigma in [170, 200, 250, 300, 350]:
+                for min_talk_len in [None, 0, 5, 10]:
+                    for margin in [*moving_margins((-0.1, 0.9), count=3, span=0.2), (-0.5, 0.5), (-0.2, 0.2),
+                                   (-0.3, 0.3), (-0.1, 0.5)]:
+                        for at_start in [False, True]:
+                            yield {**default_config, **dict(margin_of_error=margin,
+                                                            threshold=thres,
+                                                            smoother=dict(type=f"gauss-cutoff-{cutoff}σ",
+                                                                          sigma_ms=sigma,
+                                                                          cutoff_sigma=cutoff),
+                                                            at_start=at_start,
+                                                            min_talk_len=min_talk_len)}
 
 
 def smoother_interesting(config):
