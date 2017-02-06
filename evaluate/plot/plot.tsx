@@ -15,6 +15,7 @@ import * as Rx from 'rxjs';
 import * as T from './table';
 import 'babel-polyfill';
 import * as qs from 'querystring';
+
 // defined by webpack
 declare var VERSIONS: string[];
 
@@ -47,10 +48,38 @@ interface EvalResult {
     totals: { eval: SingleEvalResult, valid: SingleEvalResult }
 }
 interface ConfigJSON {
-    extract_config: any,
-    train_config: any,
+    extract_config: {
+        input_features: string[],
+        extraction_method: {
+            type: "discrete",
+            bc: [number, number],
+            nbc: [number, number]
+        },
+        useOriginalDB: true,
+        useWordsTranscript: false,
+        sample_window_ms: 32,
+        outputDirectory: "extract_pfiles_python/out"
+    },
+    train_config: {
+        model_function: string;
+        epochs: number;
+        context_ms: number;
+        context_stride: number;
+        layer_sizes: (number | null)[];
+        resume_parameters: string | null;
+        update_method: "sgd" | "adam";
+        learning_rate: number;
+        l2_regularization?: number;
+        num_labels: number;
+        batch_size: number;
+        gaussian: false;
+        output_type: "single";
+        context_frames: number;
+        category_names?: string[];
+        input_dim: number;
+    },
     train_output: {
-        stats: {[epoch: string]: {[attribute: string]: number}},
+        stats: { [epoch: string]: { [attribute: string]: number } },
         source: string,
         environment?: {
             SLURM_JOB_ID?: string
@@ -123,7 +152,7 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
     @observable config = {
         xaxis: "Margin of Error Center",
         yaxes: ["Valid: F1 Score", "Valid: Precision", "Valid: Recall"],
-        which: null as string|null
+        which: null as string | null
     }
     render() {
         const { xaxis, yaxes, which } = this.config;
@@ -152,12 +181,12 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
         const others = Object.keys(otherso).sort();
         for (const evalInfo of this.props.evalInfo) {
             const myValue = mine(evalInfo);
-            const otherValues = JSON.stringify(Object.assign(others.map(extractor => ({[extractor]:xextractors[extractor](evalInfo)}))));
+            const otherValues = JSON.stringify(Object.assign(others.map(extractor => ({ [extractor]: xextractors[extractor](evalInfo) }))));
             if (!map.has(otherValues)) map.set(otherValues, []);
             map.get(otherValues)!.push(evalInfo);
         }
         let relevants: EvalResult[];
-        if(which && map.has(which)) relevants = map.get(which)!;
+        if (which && map.has(which)) relevants = map.get(which)!;
         else {
             let newwhich: string;
             [newwhich, relevants] = Array.from(map.entries()).reduce((a, b) => a[1].length > b[1].length ? a : b)!;
@@ -192,9 +221,9 @@ class VersionEvalDetailGUI extends React.Component<VGProps, {}> {
                     onChange={x => this.config.yaxes = (x as any[]).map(x => x.value)} />
                 which series: <Select searchable={false} clearable={false}
                     value={which || undefined}
-                    options={[...map.keys()].map(key => ({value: key, label: `${map.get(key)!.length}×: ${key}`}))}
+                    options={[...map.keys()].map(key => ({ value: key, label: `${map.get(key)!.length}×: ${key}` }))}
                     onChange={x => this.config.which = (x as any).value}
-                    />
+                />
                 <Line data={{ datasets }} options={options} />
                 <Table className="evalTable" sortable
                     itemsPerPage={6}
@@ -224,7 +253,7 @@ class VersionEpochsGUI extends React.Component<VGProps, {}> {
         return (
             <div>
                 <button onClick={() => this.showPlot = !this.showPlot}>show plot</button>
-                {this.showPlot && <Line data={toJS(data)} options={toJS(options)} /> }
+                {this.showPlot && <Line data={toJS(data)} options={toJS(options)} />}
                 {this.showPlot && evalInfo &&
                     <div>
                         Eval Results for best epoch according to val_error ({evalInfo[0].config.weights_file}):
@@ -254,24 +283,24 @@ function LogGui(p: VGProps) {
         const best = bestResult(this.props.evalInfo!);
         let confusion: number[][] = best.totals.eval.confusion_matrix!;
         console.log(confusion);
-        const category = (id: number) => this.props.config.train_config.category_names[id] || "No BC";
+        const category = (id: number) => this.props.config.train_config.category_names![id] || "No BC";
         let confusionStr;
         let style = (val: string) => ({} as any);
-        if(this.normalize === "rows") {
-            confusionStr = confusion.map(row => {var sum = row.reduce((a,b)=>a+b); return row.map(v => (v / sum * 100).toPrecision(3) + "%");});
-            style = (val: string) => ({backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1))/200}`});
-        } else if(this.normalize === "cols") {
-            const colSums = confusion[0].map((_, column) => confusion.map(row => row[column]).reduce((a,b) => a+b));
-            confusionStr = confusion.map(row => row.map((v, vi) => (v / colSums[vi]*100).toPrecision(3)+"%"));
-            style = (val: string) => ({backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1))/200}`});
+        if (this.normalize === "rows") {
+            confusionStr = confusion.map(row => { var sum = row.reduce((a, b) => a + b); return row.map(v => (v / sum * 100).toPrecision(3) + "%"); });
+            style = (val: string) => ({ backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1)) / 200}` });
+        } else if (this.normalize === "cols") {
+            const colSums = confusion[0].map((_, column) => confusion.map(row => row[column]).reduce((a, b) => a + b));
+            confusionStr = confusion.map(row => row.map((v, vi) => (v / colSums[vi] * 100).toPrecision(3) + "%"));
+            style = (val: string) => ({ backgroundColor: `rgba(0,0,0,${+(val.substr(0, val.length - 1)) / 200}` });
         } else {
             confusionStr = confusion.map(row => row.map(v => String(v)));
         }
-        const data = confusionStr.map((row, correct) => Object.assign({"correct \\ predicted": category(correct)}, ...row.map((count, predicted) => ({[category(predicted)]: count}))));
+        const data = confusionStr.map((row, correct) => Object.assign({ "correct \\ predicted": category(correct) }, ...row.map((count, predicted) => ({ [category(predicted)]: count }))));
         return (
             <div>
                 <label>Normalize:
-                    <Select clearable={false} searchable={false} value={this.normalize} options={"none,rows,cols".split(",").map(value => ({value, label:value}))} onChange={(x: Select.Option) => this.normalize = String(x.value)}/>
+                    <Select clearable={false} searchable={false} value={this.normalize} options={"none,rows,cols".split(",").map(value => ({ value, label: value }))} onChange={(x: Select.Option) => this.normalize = String(x.value)} />
                 </label>
                 <Table>
                     {data.map(row => <Tr>{Object.entries(row).map(([col, val]) => <Td style={style(val)} column={col}>{val}</Td>)}</Tr>)}
@@ -356,7 +385,7 @@ function maxByKey<T>(data: T[], extractor: (t: T) => number) {
 }
 function mapObject<A, K extends keyof A, B>(obj: A, mapper: (x: A[K], k: K) => B): {[x in keyof A]: B} {
     const result = {} as any;
-    for(const [key, entry] of Object.entries(obj)) {
+    for (const [key, entry] of Object.entries(obj)) {
         result[key] = mapper(entry, key as K);
     }
     return result;
@@ -365,7 +394,7 @@ const bestResult = mobx.createTransformer((data: EvalResult[]) => {
     return maxByKey(data, info => info.totals.valid.f1_score);
 });
 @observer class OverviewStats extends React.Component<{ results: VGPropsMaybe[] }, {}> {
-    
+
     render() {
         const results = this.props.results.filter(res => res.ok && res.evalInfo).map(res => ({ version: res.version, info: bestResult((res as VGProps).evalInfo!) }));
         return (
@@ -375,6 +404,48 @@ const bestResult = mobx.createTransformer((data: EvalResult[]) => {
                     defaultSort={{ column: 'Valid: F1 Score', direction: 'desc' }}
                     data={results.map(result => ({ Git: result.version.split(":")[0], Version: result.version.split(":")[1], ...toTableData(result.info) }))}
                     sortable filterable />
+            </div>
+        );
+    }
+}
+@observer
+class MakeLatexTable extends React.Component<{ gui: GUI, results: VGPropsMaybe[] }, {}> {
+    pdimensions: { [name: string]: (p: VGProps) => string } = {
+        "Context": (p: VGProps) => p.config.train_config.context_ms + "ms",
+        "Stride": (p) => p.config.train_config.context_stride + "",
+        "Features": (p) => p.config.extract_config.input_features.map(s => s.substr(s.indexOf("_") + 1)).join(", "),
+        "Precision": (p) => this.bestTotals(p).precision.toFixed(3),
+        "Recall": (p) => this.bestTotals(p).recall.toFixed(3),
+        "F1-Score": (p) => this.bestTotals(p).f1_score.toFixed(3),
+    }
+    bestTotals(p: VGProps) {
+        let x = bestResult(p.evalInfo!).totals;
+        if (this.evalOrValid === "eval") return x.eval;
+        else return x.valid;
+    }
+    @observable evalOrValid = "eval";
+    @observable dimensions = ["Context"];
+    render() {
+        let res = this.props.results.filter(result => result.ok && result.evalInfo) as VGProps[];
+        res = res.sort((a, b) => this.bestTotals(a).f1_score - this.bestTotals(b).f1_score);
+        const dimensions = [...this.dimensions, "Precision", "Recall", "F1-Score"];
+        const text = String.raw`
+        \begin{tabular}{${dimensions.map(_ => "c").join("|")}}
+            ${dimensions.join(" & ")} \\
+            \svhline
+            ${res.map(res => dimensions.map(dimension => this.pdimensions[dimension](res)).join(" & ")).join(" \\\\\n")}
+        \end{tabular}
+    `.split("\n").map(x => x.trim()).join("\n").trim();
+        return (
+            <div style={{ margin: "1em", padding: "0.3em", boxShadow: "10px 10px 54px -7px rgba(0,0,0,0.75)" }}>
+                <Select clearable={false} searchable={false} options={"eval,valid".split(",").map(x => ({ value: x, label: x }))}
+                    value={this.evalOrValid} onChange={(e: any) => this.evalOrValid = e.value} />
+                <Select clearable={false} searchable={false} multi options={Object.keys(this.pdimensions).map(x => ({ value: x, label: x }))}
+                    value={toJS(this.dimensions)} onChange={(e: Select.Option[]) => this.dimensions = e.map(x => String(x.value))} />
+                <button onClick={() => util.copyToClipboard(text)}>Copy to Clipboard</button>
+                <pre>
+                    {text}
+                </pre>
             </div>
         );
     }
@@ -505,6 +576,7 @@ class GUI extends React.Component<{}, {}> {
         }
         return !!results[0];
     }
+    @observable showMakeTable = false;
     render() {
         const throttledFilter = util.throttleGet(500, this.getFilter);
         let results = Array.from(util.throttleGet(2000, this.getResults).values());
@@ -544,6 +616,8 @@ class GUI extends React.Component<{}, {}> {
                         {() => <input value={this.filter} onChange={e => this.filter = e.currentTarget.value} />}
                     </Observer>
                 </label>
+                <button onClick={() => this.showMakeTable = !this.showMakeTable}>Show Table Maker</button>
+                <Observer>{() => this.showMakeTable ? <MakeLatexTable gui={this} results={results} /> : <span />}</Observer>
                 <Observer>
                     {() => this.loaded < this.total ? <h3>Loading ({this.loaded}/{this.total})...</h3> : <h3>Loading complete</h3>}
                 </Observer>
