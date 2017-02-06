@@ -519,7 +519,7 @@ def sample_m_of_n(m: int, things: list):
 def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[Tuple[str, int, bool]]:
     reader = loadDBReader(config_path)
     if reader.extract_config.get('categories', None) is not None:
-        logging.info("balancing data...")
+        logging.info("balancing data by duplicating...")
         cat_to_uttids = {}
         for utt, is_bc in bcs:
             cat = bc_to_category(reader, reader.uttDB[utt]) if is_bc else 0
@@ -538,7 +538,7 @@ def balance_data(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[
 def get_balanced_weights(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> Iterable[Tuple[str, float, bool]]:
     reader = loadDBReader(config_path)
     if reader.extract_config.get('categories', None) is not None:
-        logging.info("balancing data...")
+        logging.info("balancing data by setting weights...")
         cat_to_uttids = {}
         for utt, is_bc in bcs:
             cat = bc_to_category(reader, reader.uttDB[utt]) if is_bc else 0
