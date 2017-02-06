@@ -207,9 +207,15 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     correct_bcs = [time for time, _ in _correct_bcs]
     correct_categories = [cat for _, cat in _correct_bcs]
 
-    net_output = cached_smoothed_netout(config_path, convid, config["epoch"], config.get('sigma_ms', 300))
+    if 'sigma_ms' in config:
+        if 'smoother' in config:
+            raise Exception('conflicting options: smoother and sigma')
+        smoother = {'type': 'gauss', 'sigma_ms': config['sigma_ms']}
+    else:
+        smoother = config['smoother']
+    net_output = cached_smoothed_netout(config_path, convid, config["epoch"], Hashabledict(smoother))
     any_predictor = 1 - net_output[:, [0]]
-    predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold']))
+    predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold'], at_start=config['at_start']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
     predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)]) for time in
@@ -286,14 +292,17 @@ def general_interesting_configs(config):
 
 
 def general_interesting_2(config):
-    for thres in [0.62, 0.63, 0.64]:
-        for cutoff in [1.1, 1.3, 1.5]:
-            for margin in moving_margins((-0.1, 0.9), count=3, span=0.2):
-                yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
-                                                smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=300,
-                                                              cutoff_sigma=cutoff), at_start=False)}
+    for thres in [0.6, 0.62, 0.63, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.8]:
+        for cutoff in [0, 1.1, 1.3, 1.5, 2]:
+            for min_talk_len in [None, 0, 5, 10]:
+                for margin in moving_margins((-0.1, 0.9), count=3, span=0.2):
+                    yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
+                                                    smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=300,
+                                                                  cutoff_sigma=cutoff),
+                                                    at_start=False,
+                                                    min_talk_len=min_talk_len)}
     for thres in [0.7, 0.725, 0.75]:
-        for cutoff in [0.9, 1.0, 1.1]:
+        for cutoff in [0, 0.9, 1.0, 1.1, 2]:
             for sigma in [170, 200, 250]:
                 for margin in [(-0.5, 0.5), (-0.2, 0.2), (-0.3, 0.3)]:
                     yield {**default_config, **dict(margin_of_error=margin, threshold=thres,
