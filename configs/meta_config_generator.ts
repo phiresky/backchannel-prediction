@@ -125,6 +125,8 @@ const interesting_features = [
     [...features_std, "get_word2vec_v1"],
     [...features_ffv, "get_word2vec_v1"],
     [...features_std, "get_word2vec_dim10"],
+    [...features_std, "get_word2vec_dim15"],
+    [...features_std, "get_word2vec_dim20"],
     [...features_std, "get_mfcc"],
     ["get_power", "get_ffv", "get_mfcc"],
     ["get_power", "get_ffv"]

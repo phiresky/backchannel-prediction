@@ -188,37 +188,31 @@ def pure_get_mfcc(adc_path: str, sample_windows_ms: float, convid: str):
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
 def pure_get_word2vec_v1(adc_path: str, sample_window_ms: float, convid: str):
-    import word2vec, bisect
-    from extract_pfiles_python import readDB
-    feat_dim = 5
-    model = word2vec.load(f"data/word2vec/noisefiltered-{feat_dim}.bin")
-    # for dimensions
-    pow = pure_get_power(adc_path, sample_window_ms, convid)
-    frames, _ = pow.shape
-    w2v = np.zeros((frames, feat_dim), dtype=np.float32)
-    reader = readDB.loadDBReader("extract_pfiles_python/config.json")
-    words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
-             readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
-    inx = 0
-
-    def inxtotime(sample_index):
-        return (sample_window_ms / 2 + sample_index * pow.shift) / 1000
-
-    for frame in range(frames):
-        time = inxtotime(frame)
-        if inx < len(words) - 1 and words[inx + 1][0] <= time:
-            inx += 1
-        w2v[frame] = model[words[inx][1]]
-    return NumFeature(w2v)
+    return get_word2vec(adc_path, sample_window_ms, convid, 5)
 
 
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
 def pure_get_word2vec_dim10(adc_path: str, sample_window_ms: float, convid: str):
-    import word2vec
+    return get_word2vec(adc_path, sample_window_ms, convid, 10)
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_dim15(adc_path: str, sample_window_ms: float, convid: str):
+    return get_word2vec(adc_path, sample_window_ms, convid, 15)
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_dim20(adc_path: str, sample_window_ms: float, convid: str):
+    return get_word2vec(adc_path, sample_window_ms, convid, 20)
+
+
+def get_word2vec(adc_path: str, sample_window_ms: float, convid: str, feat_dim: int):
     from extract_pfiles_python import readDB
-    feat_dim = 10
-    model = word2vec.load(f"data/word2vec/noisefiltered-{feat_dim}.bin")
+    model = readDB.word_to_vec(
+        "extract_pfiles_python/config.json",
+        dimension=feat_dim)
     # for dimensions
     pow = pure_get_power(adc_path, sample_window_ms, convid)
     frames, _ = pow.shape
@@ -390,11 +384,13 @@ else:
         if smoother['type'].startswith("gauss"):
             import scipy.signal
             sigma = smoother['sigma_ms'] / x.shift
+            if sigma < 1:
+                return NumFeature(x)
             cutoff = sigma * smoother['cutoff_sigma']
             # 4 x sigma contains 99.9 of values
             window = scipy.signal.gaussian(sigma * 2 * 4, sigma).astype(np.float32)
             # cut off only on left side (after convolution this is the future)
-            window = window[int(np.round(len(window)/2 - cutoff)):]
+            window = window[int(np.round(len(window) / 2 - cutoff)):]
             window = window / sum(window)
             x = np.array([scipy.signal.convolve(row, window)[:row.size] for row in x.T]).T
         elif smoother['type'].startswith("exponential"):

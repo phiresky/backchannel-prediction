@@ -13,6 +13,8 @@ import functools
 import trainNN.evaluate
 from trainNN import train
 from itertools import product
+import logging
+from pprint import pformat
 
 os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed

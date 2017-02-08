@@ -365,6 +365,7 @@ class FakeUttDB:
             raise Exception(f"could not find {base}")
         self.spkDB = jrtk.base.DBase(baseFilename=base, mode="r")
         if os.path.isfile("data/uttdbcache.json"):
+            logging.info("loading uttdb cache")
             with open("data/uttdbcache.json", "r") as f:
                 x = json.load(f)
                 self.uttsCache = x['uttsCache']
@@ -645,9 +646,17 @@ def count(config_path):
     import scipy.stats
     print(f"delay stats: {scipy.stats.describe([delay for uttid, delay in bcdelays])}")
 
-
-def to_vec(config_path: str):
+@functools.lru_cache(maxsize=1)
+def word_to_vec(config_path: str, dimension: int):
+    folder = "data/word2vec"
+    words_file = os.path.join(folder, "words-noisefiltered")
+    phrases_file = os.path.join(folder, "phrases-noisefiltered")
+    w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
     import word2vec
+    if os.path.isfile(w2v_file):
+        logging.debug(f"{w2v_file} exists, returning that")
+        return word2vec.load(w2v_file)
+
     reader = loadDBReader(config_path)
     allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
 
@@ -661,16 +670,13 @@ def to_vec(config_path: str):
                         if len(txt) > 0:
                             yield word['text'] + " "
 
-    folder = "data/word2vec"
-    words_file = os.path.join(folder, "words-noisefiltered")
-    phrases_file = os.path.join(folder, "phrases-noisefiltered")
-    dimension = 10
-    w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
+
     with open(words_file, "w") as f:
         f.writelines(gen())
     word2vec.word2phrase(words_file, phrases_file, verbose=True)
     word2vec.word2vec(phrases_file, w2v_file, size=dimension)
     logging.info("wrote to " + w2v_file)
+    return word2vec.load(w2v_file)
 
 
 def main():
