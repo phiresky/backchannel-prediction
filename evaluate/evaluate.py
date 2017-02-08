@@ -293,23 +293,6 @@ def general_interesting_configs(config):
         yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
 
 
-def general_interesting_2(config):
-    for thres in [0.6, 0.62, 0.63, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.8]:
-        for cutoff in [0, 0.9, 1.1, 1.3, 1.5, 2]:
-            for sigma in [170, 200, 250, 300, 350]:
-                for min_talk_len in [None, 0, 5, 10]:
-                    for margin in [*moving_margins((-0.1, 0.9), count=3, span=0.2), (-0.5, 0.5), (-0.2, 0.2),
-                                   (-0.3, 0.3), (-0.1, 0.5)]:
-                        for at_start in [False, True]:
-                            yield {**default_config, **dict(margin_of_error=margin,
-                                                            threshold=thres,
-                                                            smoother=dict(type=f"gauss-cutoff-{cutoff}σ",
-                                                                          sigma_ms=sigma,
-                                                                          cutoff_sigma=cutoff),
-                                                            at_start=at_start,
-                                                            min_talk_len=min_talk_len)}
-
-
 def smoother_interesting(config):
     smoothers = [
         *[dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=s, cutoff_sigma=cutoff) for s in np.linspace(200, 400, 3) for
@@ -394,7 +377,7 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
         eval_config["epoch"], eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
     convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
     for convid, result in parallel(
-            tqdm([delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids])):
+            [delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids]):
         results[convid] = result
         for k, v in result.items():
             if k == 'confusion_matrix':
@@ -424,6 +407,7 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
 
 
 do_detailed_analysis = False
+manual_analysis = False
 
 
 def nptolist(dictionary: dict):
@@ -435,6 +419,175 @@ def nptolist(dictionary: dict):
     return dictionary
 
 
+def general_interesting_2(config):
+    for thres in [0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72]:
+        for cutoff in [0.6, 0.9, 1.1, 1.3, 1.5, 2]:
+            for sigma in [170, 200, 250, 300, 350]:
+                for min_talk_len in [None, 0, 5, 10]:
+                    for margin in [*moving_margins((-0.1, 0.9), count=3, span=0.2)
+                                   # , (-0.5, 0.5), (-0.2, 0.2),(-0.3, 0.3), (-0.1, 0.5)
+                                   ]:
+                        for at_start in [False, True]:
+                            yield {**default_config, **dict(margin_of_error=margin,
+                                                            threshold=thres,
+                                                            smoother=dict(type=f"gauss-cutoff-{cutoff}σ",
+                                                                          sigma_ms=sigma,
+                                                                          cutoff_sigma=cutoff),
+                                                            at_start=at_start,
+                                                            min_talk_len=min_talk_len)}
+
+
+def bayesian_parameters():
+    from hyperopt import hp
+    return dict(
+        threshold=hp.uniform('threshold', 0.6, 0.8),
+        cutoff=hp.uniform('cutoff', 0, 2),
+        sigma_ms=hp.uniform('sigma', 170, 350),
+        margin_of_error_center=hp.uniform('margin_center', 0.3, 0.5),
+        at_start=hp.choice('at_start', [False, True])
+    )
+
+
+results = []
+
+
+def make_utility_function_hyperopt(parallel, config_path, conversations_list):
+    from hyperopt import STATUS_OK
+    def utility_function(conf):
+        margin_of_error_center = conf['margin_of_error_center']
+        threshold = conf['threshold']
+        cutoff = conf['cutoff']
+        sigma_ms = conf['sigma_ms']
+        at_start = conf.get('at_start', False)
+        eval_config = {**default_config, **dict(
+            margin_of_error=(margin_of_error_center - 0.5, margin_of_error_center + 0.5),
+            threshold=threshold,
+            smoother=dict(type=f"gauss-cutoff-{cutoff}σ", sigma_ms=sigma_ms, cutoff_sigma=cutoff),
+            at_start=at_start,
+            min_talk_len=10
+        )}
+        result = evaluate_convs(parallel, config_path, conversations_list, eval_config)
+        results.append(result)
+        return {'loss': -result['totals']['f1_score'], 'status': STATUS_OK, 'result': result}
+
+    return utility_function
+
+
+def make_utility_function_gpyopt(parallel, config_path, conversations_list):
+    def utility_function(conf):
+        [[threshold, cutoff, sigma_ms, margin_of_error_center, min_talk_len, margin_width, at_start]] = conf
+        at_start = True if at_start > 0.5 else False
+        eval_config = {**default_config, **dict(
+            margin_of_error=(margin_of_error_center - margin_width / 2, margin_of_error_center + margin_width / 2),
+            threshold=threshold,
+            smoother=dict(type=f"gauss-cutoff-{cutoff:.2f}σ.{'s' if at_start else 'm'}", sigma_ms=sigma_ms,
+                          cutoff_sigma=cutoff),
+            at_start=at_start,
+            min_talk_len=min_talk_len if min_talk_len >= 0 else None
+        )}
+
+        result = evaluate_convs(parallel, config_path, conversations_list, eval_config)
+        results.append(result)
+        f1 = result['totals']['f1_score']
+        print(f"it={len(results)} f1={f1} with\n{pformat(eval_config)}")
+        return -f1
+
+    return utility_function
+
+
+def bayesian_optimize_hyperopt(parallel, config_path, conversations_list):
+    from hyperopt import fmin, tpe, Trials
+    global results
+    results = []
+    utility = make_utility_function_hyperopt(parallel, config_path, conversations_list)
+    trials = Trials()
+    opt = fmin(utility, space=bayesian_parameters(), algo=tpe.suggest, max_evals=50, trials=trials)
+    print(opt)
+    # bo = BayesianOptimization(utility, bayesian_parameters())
+    # bo.maximize(init_points=10, n_iter=100)
+
+
+def gpyopt_parameters_best():
+    return [
+        dict(name='threshold', type='continuous', domain=(0.6, 0.8)),
+        dict(name='cutoff', type='continuous', domain=(0, 2)),
+        dict(name='sigma_ms', type='continuous', domain=(200, 350)),
+        dict(name='margin_of_error_center', type='continuous', domain=(0.4, 0.5)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='margin_width', type='continuous', domain=(1, 1)),
+        dict(name='at_start', type='discrete', domain=(0, 0)),
+    ]
+
+
+def gpyopt_parameters_center0():
+    params = gpyopt_parameters_best()
+    params[3]['domain'] = (-0.4, 0.0)
+    return params
+
+
+def gpyopt_parameters_w4():
+    return [
+        dict(name='threshold', type='continuous', domain=(0.6, 0.9)),
+        dict(name='cutoff', type='continuous', domain=(0, 2)),
+        dict(name='sigma_ms', type='continuous', domain=(150, 350)),
+        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='margin_width', type='continuous', domain=(0.4, 0.4)),
+        dict(name='at_start', type='discrete', domain=(0, 1)),
+    ]
+
+
+def gpyopt_parameters_w6():
+    return [
+        dict(name='threshold', type='continuous', domain=(0.6, 0.8)),
+        dict(name='cutoff', type='continuous', domain=(0, 2)),
+        dict(name='sigma_ms', type='continuous', domain=(150, 350)),
+        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='margin_width', type='continuous', domain=(0.6, 0.6)),
+        dict(name='at_start', type='discrete', domain=(0, 1)),
+
+    ]
+
+
+def gpyopt_parameters_mmueller():
+    return [
+        dict(name='threshold', type='continuous', domain=(0.6, 0.9)),
+        dict(name='cutoff', type='continuous', domain=(0, 2)),
+        dict(name='sigma_ms', type='continuous', domain=(150, 350)),
+        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
+        dict(name='min_talk_len', type='continuous', domain=(-1.0, -1.0)),
+        dict(name='margin_width', type='continuous', domain=(0.4, 0.4)),
+        dict(name='at_start', type='discrete', domain=(0, 1)),
+    ]
+
+
+def gpyopt(parallel, config_path, conversations_list, params):
+    from GPyOpt.methods import BayesianOptimization
+    global results
+    results = []
+    utility = make_utility_function_gpyopt(parallel, config_path, conversations_list)
+    bo = BayesianOptimization(utility, params, verbosity=True, initial_design_numdata=len(params) * 2)
+    bo.run_optimization(max_iter=300, verbosity=True)
+    print(f"done. best: {bo.fx_opt}")
+    return results
+
+
+def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
+    for params in [
+        gpyopt_parameters_center0,
+        gpyopt_parameters_mmueller,
+        gpyopt_parameters_best,
+        gpyopt_parameters_w4, gpyopt_parameters_w6
+        ]:
+        print(f"searching in {params.__name__}")
+        results = gpyopt(parallel, config_path, convos_valid, params())
+        best = max(results, key=lambda res: res['totals']['f1_score'])
+        best_eval = evaluate_convs(parallel, config_path, convos_eval, best['config'])
+        best.update(dict(config=best['config'], totals={'eval': best_eval['totals'], 'valid': best['totals']}))
+        yield [nptolist(res) for res in results]
+
+
 def main():
     config_path = sys.argv[1]
     _, _, version, _ = config_path.split("/")
@@ -443,6 +596,13 @@ def main():
         print("Output directory {} already exists, aborting".format(out_dir))
         sys.exit(1)
     os.makedirs(out_dir, exist_ok=True)
+    logging.root.handlers.clear()
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        handlers=[
+                            # logging.FileHandler(LOGFILE),
+                            logging.StreamHandler()
+                        ])
     config = load_config(config_path)
 
     conversations = read_conversations(config)
@@ -456,16 +616,26 @@ def main():
     else:
         confs = list(general_interesting_2(config))
     with Parallel(n_jobs=1) as parallel:
-        for inx, eval_config in enumerate(confs):
-            if do_baseline is not None:
-                eval_config['random_baseline'] = do_baseline
-            print(f"\n{inx}/{len(confs)}: {eval_config}\n")
-            ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
-            va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
-            res.append(nptolist(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']})))
+        if not manual_analysis:
+            itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations)
+            for inx, r in enumerate(itera):
+                print(f" itera {inx} ({len(r)} res)")
+                res.extend(r)
+                with open(os.path.join(out_dir, "results.json"), "w") as f:
+                    json.dump(res, f, indent='\t')
+            return
+        else:
+            # manual search
+            for inx, eval_config in enumerate(confs):
+                if do_baseline is not None:
+                    eval_config['random_baseline'] = do_baseline
+                print(f"\n{inx}/{len(confs)}: {eval_config}\n")
+                ev = evaluate_convs(parallel, config_path, eval_conversations, eval_config)
+                va = evaluate_convs(parallel, config_path, valid_conversations, eval_config)
+                res.append(nptolist(dict(config=ev['config'], totals={'eval': ev['totals'], 'valid': va['totals']})))
 
-            with open(os.path.join(out_dir, "results.json"), "w") as f:
-                json.dump(res, f, indent='\t')
+                with open(os.path.join(out_dir, "results.json"), "w") as f:
+                    json.dump(res, f, indent='\t')
 
 
 if __name__ == "__main__":

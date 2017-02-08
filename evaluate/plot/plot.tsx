@@ -324,7 +324,7 @@ class VersionGUI extends React.Component<{ gui: GUI, p: VGPropsMaybe }, {}> {
         }
         if (p.ok) {
             const { evalInfo } = p;
-            const confusion = evalInfo && evalInfo[0].totals.eval.confusion_matrix;
+            const confusion = evalInfo && evalInfo[0].totals.valid.confusion_matrix;
             var inner = (
                 <Tabs onSelect={i => this.tab = i} selectedIndex={this.tab}>
                     <TabList>
@@ -408,6 +408,7 @@ const bestResult = mobx.createTransformer((data: EvalResult[]) => {
         );
     }
 }
+
 @observer
 class MakeLatexTable extends React.Component<{ gui: GUI, results: VGPropsMaybe[] }, {}> {
     pdimensions: { [name: string]: (p: VGProps) => string } = {
@@ -518,7 +519,7 @@ class GUI extends React.Component<{}, {}> {
         if (evalResp.ok) evalInfo = await (evalResp.json());
         if (evalInfo) {
             // upgrade
-            evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: x.totals, valid: {} } } as any);
+            evalInfo = evalInfo.map(x => x.totals.eval ? x : { ...x, totals: { eval: {}, valid: x.totals } } as any);
             evalInfo.forEach(i => i.totals.valid.f1_score === 1 && (i.totals.valid.f1_score = 0));
             evalInfo.forEach(i => i.totals.eval.f1_score === 1 && (i.totals.eval.f1_score = 0));
         }
