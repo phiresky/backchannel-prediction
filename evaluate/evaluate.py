@@ -167,7 +167,7 @@ def evaluate_conv(config_path: str, convid: str, config: dict):
         if 'sigma_ms' in config:
             if 'smoother' in config:
                 raise Exception('conflicting options: smoother and sigma')
-            smoother = {'type': 'gauss', 'sigma_ms': config['sigma_ms']}
+            smoother = {'type': 'gauss', 'sigma_ms': config['sigma_ms'], 'cutoff_sigma': 2}
         else:
             smoother = config['smoother']
         net_output = cached_smoothed_netout(config_path, convid, config["epoch"], Hashabledict(smoother))
@@ -370,14 +370,16 @@ def detailed_analysis(config):
     yield from smoothing_test_configs(config)
 
 
-def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict):
+def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict, showprog=False):
     totals = {}
     results = {}
     if "weights_file" not in eval_config and 'random_baseline' not in eval_config and eval_config["epoch"] == "best":
         eval_config["epoch"], eval_config["weights_file"] = trainNN.evaluate.get_best_epoch(load_config(config_path))
     convids = ["{}-{}".format(conv, channel) for conv in convs for channel in ["A", "B"]]
-    for convid, result in parallel(
-            [delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids]):
+    tasks = [delayed(evaluate_conv)(config_path, convid, eval_config) for convid in convids]
+    if showprog:
+        tasks = tqdm(tasks)
+    for convid, result in parallel(tasks):
         results[convid] = result
         for k, v in result.items():
             if k == 'confusion_matrix':
@@ -575,11 +577,11 @@ def gpyopt(parallel, config_path, conversations_list, params):
 
 def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
     for params in [
-        #gpyopt_parameters_center0,
-        #gpyopt_parameters_mmueller,
+        # gpyopt_parameters_center0,
+        # gpyopt_parameters_mmueller,
         gpyopt_parameters_best,
-        #gpyopt_parameters_w4, gpyopt_parameters_w6
-        ]:
+        # gpyopt_parameters_w4, gpyopt_parameters_w6
+    ]:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())
         best = max(results, key=lambda res: res['totals']['f1_score'])
@@ -617,9 +619,14 @@ def main():
         confs = list(general_interesting_2(config))
     with Parallel(n_jobs=1) as parallel:
         if not manual_analysis:
+            print(f"filling caches...")
+            evaluate_convs(parallel, config_path, [*valid_conversations, *eval_conversations],
+                           {**default_config, 'sigma_ms': 300, 'at_start': False},
+                           showprog=True)
+            print(f"bayesian search done, checking scores on eval data set")
             itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations)
             for inx, r in enumerate(itera):
-                print(f" itera {inx} ({len(r)} res)")
+                print(f" itera {inx} ({len(r)} results)")
                 res.extend(r)
                 with open(os.path.join(out_dir, "results.json"), "w") as f:
                     json.dump(res, f, indent='\t')
