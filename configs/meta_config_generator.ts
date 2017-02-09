@@ -130,6 +130,8 @@ const interesting_features = [
     [...features_std, "get_word2vec_dim30"],
     [...features_std, "get_word2vec_dim40"],
     [...features_std, "get_word2vec_dim50"],
+    [...features_std, "get_word2vec_dim75"],
+    [...features_std, "get_word2vec_dim100"],
     [...features_std, "get_mfcc"],
     ["get_power", "get_ffv", "get_mfcc"],
     ["get_power", "get_ffv"]

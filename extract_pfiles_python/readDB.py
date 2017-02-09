@@ -649,8 +649,8 @@ def count(config_path):
 @functools.lru_cache(maxsize=1)
 def word_to_vec(config_path: str, dimension: int):
     folder = "data/word2vec"
-    words_file = os.path.join(folder, "words-noisefiltered")
-    phrases_file = os.path.join(folder, "phrases-noisefiltered")
+    words_file = os.path.join(folder, f"words-noisefiltered-{dimension}")
+    phrases_file = os.path.join(folder, f"phrases-noisefiltered-{dimension}")
     w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
     import word2vec
     if os.path.isfile(w2v_file):
