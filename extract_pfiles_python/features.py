@@ -202,10 +202,23 @@ def pure_get_word2vec_dim10(adc_path: str, sample_window_ms: float, convid: str)
 def pure_get_word2vec_dim15(adc_path: str, sample_window_ms: float, convid: str):
     return get_word2vec(adc_path, sample_window_ms, convid, 15)
 
+
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
 def pure_get_word2vec_dim20(adc_path: str, sample_window_ms: float, convid: str):
     return get_word2vec(adc_path, sample_window_ms, convid, 20)
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_dim30(adc_path: str, sample_window_ms: float, convid: str):
+    return get_word2vec(adc_path, sample_window_ms, convid, 30)
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
+def pure_get_word2vec_dim40(adc_path: str, sample_window_ms: float, convid: str):
+    return get_word2vec(adc_path, sample_window_ms, convid, 40)
 
 
 def get_word2vec(adc_path: str, sample_window_ms: float, convid: str, feat_dim: int):

@@ -568,17 +568,17 @@ def gpyopt(parallel, config_path, conversations_list, params):
     results = []
     utility = make_utility_function_gpyopt(parallel, config_path, conversations_list)
     bo = BayesianOptimization(utility, params, verbosity=True, initial_design_numdata=len(params) * 2)
-    bo.run_optimization(max_iter=300, verbosity=True)
+    bo.run_optimization(max_iter=200, verbosity=True)
     print(f"done. best: {bo.fx_opt}")
     return results
 
 
 def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
     for params in [
-        gpyopt_parameters_center0,
-        gpyopt_parameters_mmueller,
+        #gpyopt_parameters_center0,
+        #gpyopt_parameters_mmueller,
         gpyopt_parameters_best,
-        gpyopt_parameters_w4, gpyopt_parameters_w6
+        #gpyopt_parameters_w4, gpyopt_parameters_w6
         ]:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())
