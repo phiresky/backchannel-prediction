@@ -45,11 +45,12 @@ def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: fl
 
 
 def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
-                 bcs: List[Tuple[int, NumFeature]], at_start: bool, offset=0.0):
+                 bcs: List[Tuple[int, NumFeature]], at_start: bool, threshold, offset=0.0):
     total_length_s = reader.features.sample_index_to_time(smoothed_net_output, smoothed_net_output.shape[0])
     total_length_audio_index = reader.features.time_to_sample_index(bcs[0][1], total_length_s)
     return get_bc_audio2(reader, total_length_audio_index, bcs,
-                         predict_bcs(reader, smoothed_net_output, threshold=0.6, at_start=at_start, offset=offset))
+                         predict_bcs(reader, smoothed_net_output, threshold=threshold, at_start=at_start,
+                                     offset=offset))
 
 
 def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, NumFeature]],
@@ -408,10 +409,6 @@ def output_bc_samples(reader: DBReader, convs: List[str]):
         soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
 
 
-do_detailed_analysis = False
-manual_analysis = False
-
-
 def nptolist(dictionary: dict):
     for key, val in dictionary.items():
         if isinstance(val, dict):
@@ -515,7 +512,7 @@ def gpyopt_parameters_best():
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(200, 350)),
         dict(name='margin_of_error_center', type='continuous', domain=(0.4, 0.5)),
-        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 5.0)),
         dict(name='margin_width', type='continuous', domain=(1, 1)),
         dict(name='at_start', type='discrete', domain=(0, 0)),
     ]
@@ -527,25 +524,27 @@ def gpyopt_parameters_center0():
     return params
 
 
+# comparison with margin (-0.2, +0.2)
 def gpyopt_parameters_w4():
     return [
         dict(name='threshold', type='continuous', domain=(0.6, 0.9)),
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(150, 350)),
         dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
-        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 5.0)),
         dict(name='margin_width', type='continuous', domain=(0.4, 0.4)),
         dict(name='at_start', type='discrete', domain=(0, 1)),
     ]
 
 
+# comparison with margin (-0.1, +0.5)
 def gpyopt_parameters_w6():
     return [
         dict(name='threshold', type='continuous', domain=(0.6, 0.8)),
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(150, 350)),
-        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
-        dict(name='min_talk_len', type='continuous', domain=(5.0, 10.0)),
+        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.2)),
+        dict(name='min_talk_len', type='continuous', domain=(5.0, 5.0)),
         dict(name='margin_width', type='continuous', domain=(0.6, 0.6)),
         dict(name='at_start', type='discrete', domain=(0, 1)),
 
@@ -557,7 +556,7 @@ def gpyopt_parameters_mmueller():
         dict(name='threshold', type='continuous', domain=(0.6, 0.9)),
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(150, 350)),
-        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
+        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),  # domain=(-2,2) for offline),
         dict(name='min_talk_len', type='continuous', domain=(-1.0, -1.0)),
         dict(name='margin_width', type='continuous', domain=(0.4, 0.4)),
         dict(name='at_start', type='discrete', domain=(0, 1)),
@@ -577,10 +576,11 @@ def gpyopt(parallel, config_path, conversations_list, params):
 
 def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
     for params in [
-        # gpyopt_parameters_center0,
-        # gpyopt_parameters_mmueller,
-        gpyopt_parameters_best,
-        # gpyopt_parameters_w4, gpyopt_parameters_w6
+        #gpyopt_parameters_center0,
+        #gpyopt_parameters_mmueller,
+        #gpyopt_parameters_best,
+        #gpyopt_parameters_w4,
+        gpyopt_parameters_w6
     ]:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())
@@ -588,6 +588,10 @@ def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
         best_eval = evaluate_convs(parallel, config_path, convos_eval, best['config'])
         best.update(dict(config=best['config'], totals={'eval': best_eval['totals'], 'valid': best['totals']}))
         yield [nptolist(res) for res in results]
+
+
+do_detailed_analysis = False
+manual_analysis = False
 
 
 def main():
@@ -623,10 +627,10 @@ def main():
             evaluate_convs(parallel, config_path, [*valid_conversations, *eval_conversations],
                            {**default_config, 'sigma_ms': 300, 'at_start': False},
                            showprog=True)
-            print(f"bayesian search done, checking scores on eval data set")
             itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations)
             for inx, r in enumerate(itera):
                 print(f" itera {inx} ({len(r)} results)")
+                print(f"bayesian search done, checking scores on eval data set")
                 res.extend(r)
                 with open(os.path.join(out_dir, "results.json"), "w") as f:
                     json.dump(res, f, indent='\t')

@@ -7,7 +7,11 @@ from typing import List, Tuple, Iterator
 @functools.lru_cache(maxsize=8)
 def load_config(path):
     with open(path) as config_file:
-        return json.load(config_file, object_pairs_hook=OrderedDict)
+        try:
+            return json.load(config_file, object_pairs_hook=OrderedDict)
+        except Exception as e:
+            print(f"error loading {path}: {e}")
+            raise e
 
 
 def batch_list(list: List, n: int, include_last_partial: bool):

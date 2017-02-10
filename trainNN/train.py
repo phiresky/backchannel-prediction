@@ -31,7 +31,10 @@ config_path = None
 
 
 def extract(utterance: Tuple[str, int, bool]):
-    utt_id, copy_id, is_bc = utterance
+    if len(utterance) == 2:
+        utt_id, is_bc = utterance
+    else:
+        utt_id, copy_id, is_bc = utterance
     return readDB.extract(config_path)[utt_id, is_bc]
 
 
@@ -151,10 +154,11 @@ def train():
             # outputs = load_numpy_file(os.path.join(dir, train_config['files'][t]['output']))
             convos = readDB.read_conversations(config)
             balance_method = train_config.get('balance_method', None)
+            uttids = [bc for bc in readDB.all_uttids(config_path, convos[t]) if extract(bc) is not None]
             if balance_method is None:
-                backchannels = list(readDB.balance_data(config_path, readDB.all_uttids(config_path, convos[t])))
+                backchannels = list(readDB.balance_data(config_path, uttids))
             elif balance_method == "weighted":
-                backchannels = list(readDB.get_balanced_weights(config_path, readDB.all_uttids(config_path, convos[t])))
+                backchannels = list(readDB.get_balanced_weights(config_path, uttids))
             else:
                 raise Exception(f"unknown balance method {balance_method}")
             input_dim = extract(backchannels[0])[0].shape[1]

@@ -85,7 +85,8 @@ def findAllNets():
                 curList.append(id)
     return rootList
 
-
+# todo: should be automatically adjusted by eval results
+eval_conf = {'type': 'gauss', 'sigma_ms': 200, 'cutoff_sigma': 0.6, 'threshold': 0.68}
 def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
         path[-1] = path[-1][:-len(".smooth")]
@@ -99,7 +100,7 @@ def get_net_output(convid: str, path: List[str]):
     config = util.load_config(config_path)
     features = Features(config, config_path)
     if smooth:
-        return features.smooth(convid, id, {'type': 'gauss', 'sigma_ms': 300, 'cutoff_sigma': 1.0})
+        return features.smooth(convid, id, eval_conf)
     else:
         return features.get_multidim_net_output(convid, id)
 
@@ -154,15 +155,20 @@ def get_features():
 
 def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, threshold: float, color=[0, 255, 0]):
     ls = []
-    for start, end in evaluate.get_larger_threshold((1 - feat[:, [0]]), reader, threshold):
-        ls.append({'from': start, 'to': end, 'text': 'T', 'color': color})
+    for start, end in evaluate.get_larger_threshold(feat, reader, threshold):
+        ls.append({'from': start, 'to': end, 'text': 'Threshold', 'color': color})
     return {
         'name': name,
         'typ': 'highlights',
         'data': ls
     }
 
-
+def maybe_onedim(fes):
+    single_out_dim = True
+    if single_out_dim:
+        return 1 - fes[:, [0]]
+    else:
+        return fes
 async def sendFeature(ws, id: str, conv: str, featFull: str):
     if featFull[0] != '/':
         raise Exception("featname must start with /")
@@ -190,14 +196,19 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         if path[-1].endswith(".thres"):
             path[-1] = path[-1][:-len(".thres")]
             feature = get_net_output(convid, path)
-            await sendOtherFeature(ws, id, get_larger_threshold_feature(feature, origReader, featFull, threshold=0.6))
+            feature = maybe_onedim(feature)
+            onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
+            await sendOtherFeature(ws, id, get_larger_threshold_feature(onedim, origReader, featFull, threshold=eval_conf['threshold']))
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
-            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(1 - feature[:, [0]], origReader, list(
-                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False, offset=0))
+            feature = maybe_onedim(feature)
+            onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
+            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(onedim, origReader, list(
+                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False, threshold=eval_conf['threshold'], offset=0))
         else:
             feature = get_net_output(convid, path)
+            feature = maybe_onedim(feature)
             await sendNumFeature(ws, id, conv, featFull, feature)
     elif category == "extracted":
         feats = get_extracted_features(origReader)
@@ -291,7 +302,7 @@ async def handler(websocket, path):
 
 
 def start_server():
-    start_server = websockets.serve(handler, "localhost", 8765)
+    start_server = websockets.serve(handler, "0.0.0.0", 8765)
     print("server started")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)

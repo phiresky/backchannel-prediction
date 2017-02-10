@@ -223,18 +223,27 @@ def pure_get_word2vec_dim40(adc_path: str, sample_window_ms: float, convid: str)
 
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
+def pure_get_word2vec_dim41(adc_path: str, sample_window_ms: float, convid: str):
+    return get_word2vec(adc_path, sample_window_ms, convid, 41)
+
+
+@functools.lru_cache(maxsize=32)
+@NumFeatureCache
 def pure_get_word2vec_dim50(adc_path: str, sample_window_ms: float, convid: str):
     return get_word2vec(adc_path, sample_window_ms, convid, 50)
+
 
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
 def pure_get_word2vec_dim75(adc_path: str, sample_window_ms: float, convid: str):
     return get_word2vec(adc_path, sample_window_ms, convid, 75)
 
+
 @functools.lru_cache(maxsize=32)
 @NumFeatureCache
 def pure_get_word2vec_dim100(adc_path: str, sample_window_ms: float, convid: str):
     return get_word2vec(adc_path, sample_window_ms, convid, 100)
+
 
 def get_word2vec(adc_path: str, sample_window_ms: float, convid: str, feat_dim: int):
     from extract_pfiles_python import readDB

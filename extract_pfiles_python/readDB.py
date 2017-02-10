@@ -309,7 +309,8 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.
     F = F[0:range_frames]
     frames, dim = F.shape
     if frames < range_frames:
-        raise Exception(f"FBC too small: {frames}")
+        logging.debug(f"skipping utterance with F too small: {utt}({uttInfo['text']}): {frames}<{range_frames} ({begin}s - {end}s) (probably at end of file?)")
+        return
 
     if bc:
         outnum = bc_to_category(reader, uttInfo)
