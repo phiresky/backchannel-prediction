@@ -57,8 +57,7 @@ interface ConfigJSON {
         },
         useOriginalDB: true,
         useWordsTranscript: false,
-        sample_window_ms: 32,
-        outputDirectory: "extract_pfiles_python/out"
+        sample_window_ms: 32
     },
     train_config: {
         model_function: string;

@@ -1,6 +1,5 @@
 import functools
 import os.path
-from . import network_model
 
 
 def get_best_epoch(config: dict):
@@ -11,6 +10,7 @@ def get_best_epoch(config: dict):
 
 @functools.lru_cache(maxsize=1)
 def get_network_outputter(config_path: str, key: str, batch_size):
+    from . import network_model
     # load modules lazily to avoid startup delay when not needed
     import theano
     import lasagne.layers

@@ -1,7 +1,14 @@
 import functools
 import json
+import os
+import pickle
 from collections import OrderedDict
 from typing import List, Tuple, Iterator
+import hashlib
+import json
+import inspect
+
+import logging
 
 
 @functools.lru_cache(maxsize=8)
@@ -108,3 +115,90 @@ def get_monologuing_segments(reader, convid: str, min_talk_len=None) -> Iterator
         monologuing_end = float(all[-1][0])
         if min_talk_len is None or monologuing_end - monologuing_start >= min_talk_len:
             yield monologuing_start, monologuing_end
+
+
+@functools.lru_cache()
+def getsourcelines_cached(f):
+    return inspect.getsourcelines(f)[0]
+
+
+# cache file to disc. todo: locking
+def DiskCache(f):
+    @functools.wraps(f)
+    def wrap(*args, **kwargs):
+        args_to_pickle = list(args)
+        meta = dict(fnname=f.__name__, fnsource=getsourcelines_cached(f), args=args_to_pickle, kwargs=kwargs)
+        meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
+        digest = hashlib.sha256(meta_json).hexdigest()
+        path = os.path.join('data/cache', digest[0:2], digest[2:] + ".pickle")
+        try:
+            if os.path.exists(path):
+                with open(path, 'rb') as file:
+                    return pickle.load(file)
+        except Exception as e:
+            logging.warning(f"could not read cached file {path} ({e}), recomputing")
+        val = f(*args, **kwargs)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path + ".part", 'wb') as file:
+            pickle.dump(val, file, protocol=pickle.HIGHEST_PROTOCOL)
+        if os.path.isfile(path + ".part"):
+            os.rename(path + ".part", path)
+            with open(path + '.meta.json', 'wb') as file:
+                file.write(meta_json)
+        else:
+            logging.warning(f"could not find file {path}.part after writing")
+        return val
+
+    return wrap
+
+
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+def cache_usage():
+    from glob import glob
+    from tqdm import tqdm
+    from os.path import join
+    from pprint import pprint
+    from time import perf_counter
+    import json
+    dir = "data/cache"
+    stats = {}
+    last = perf_counter()
+    total = 256
+    cur = 0
+
+    def print_stats(factor=1):
+        it = list(stats.items())
+        it.sort(key=lambda a: a[1])
+        total = 0
+        for fnname, size in it:
+            total += size
+            print(f"{sizeof_fmt(size * factor): >10} {fnname}")
+        print(f"{sizeof_fmt(total * factor): >10} total")
+
+    for dir in tqdm(glob(join(dir, "??"))):
+        cur += 1
+        for metaf in glob(join(dir, "*.meta.json")):
+            fname = os.path.splitext(metaf)[0]
+            fname = os.path.splitext(fname)[0]
+            with open(metaf) as f:
+                meta = json.load(f)
+            fnname = meta['fnname']
+            stats.setdefault(fnname, 0)
+            stats[fnname] += os.stat(fname).st_size
+        now = perf_counter()
+        if perf_counter() - last > 10:
+            print("interpolated stats:")
+            print_stats(total / cur)
+            last = now
+    print_stats()
+
+
+if __name__ == '__main__':
+    cache_usage()

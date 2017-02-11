@@ -1,10 +1,10 @@
 import pickle
-import lasagne
 import logging
 
 
 # Save current network parameters
 def save_network_params(network, dumpfile, val_error=None):
+    import lasagne
     logging.info("Saving network params to {}".format(dumpfile))
 
     try:
@@ -21,6 +21,7 @@ def save_network_params(network, dumpfile, val_error=None):
 
 # Restore network parameters
 def load_network_params(network, dumpfile):
+    import lasagne
     logging.info("Loading old params from %s" % dumpfile)
 
     fd = open(dumpfile, 'rb')

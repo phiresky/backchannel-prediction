@@ -7,8 +7,6 @@
 import itertools
 from pprint import pprint
 
-import jrtk
-from jrtk.preprocessing import NumFeature
 from typing import Set, Dict, List, Iterable, Tuple
 import logging
 import os
@@ -25,6 +23,7 @@ import functools
 from .features import Features
 from tqdm import tqdm
 from . import util
+from .feature import Feature
 import hashlib
 import random
 
@@ -98,7 +97,6 @@ class DBReader:
     backchannels = None
 
     noise_filter = None
-    spkDB = None
     uttDB = None
     method = None
 
@@ -116,13 +114,6 @@ class DBReader:
         self.bc_to_category = {bc: category for category, bcs in self.categories.items() for bc in bcs}
         self.sample_window_ms = self.extract_config['sample_window_ms']
         self.method = self.extract_config['extraction_method']
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        self.spkDB.close()
-        self.uttDB.close()
 
     def is_backchannel(self, uttInfo: dict, index: int, utts: List[Tuple[str, DBEntry]]):
         uttText = uttInfo['text']
@@ -161,10 +152,9 @@ class DBReader:
             raise Exception("use original db")
             # return self.getBCMaxTime(utt) - 0.3
 
-    def get_max_time(self, feat: NumFeature, fromTime: float, toTime: float):
-        powerrange = self.features.cut_range_old(feat, fromTime, toTime)
-        maxIndex = powerrange.argmax()
-        maxTime = fromTime + self.features.sample_index_to_time(powerrange, maxIndex)
+    def get_max_time(self, feat: Feature, fromTime: float, toTime: float):
+        powerrange = feat.cut_by_time(fromTime, toTime)
+        maxTime = fromTime + powerrange.sample_index_to_time(powerrange.argmax())
         return maxTime
 
     @functools.lru_cache(maxsize=16)
@@ -186,20 +176,14 @@ class DBReader:
 
     def load_db(self) -> (DBase, DBase):
         if self.use_original_db:
-            uttDB = FakeUttDB(self.paths_config, self.extract_config['useWordsTranscript'])
+            uttDB = UttDB(self.config)
             self.noise_filter = orig_noise_filter
-            self.spkDB = uttDB.makeSpkDB()
             self.uttDB = uttDB
         else:
-            self.noise_filter = isl_noise_filter
-            self.uttDB = jrtk.base.DBase(baseFilename=self.paths_config['databasePrefix'] + "-utt", mode="r")
-            self.spkDB = jrtk.base.DBase(baseFilename=self.paths_config['databasePrefix'] + "-spk", mode="r")
+            raise Exception("ISL db not supported anymore")
 
     def get_utterances(self, spkr: str) -> Iterable[Tuple[str, DBEntry]]:
-        if not isinstance(self.spkDB, jrtk.base.DBase):
-            return self.uttDB.get_utterances(spkr)
-        else:
-            return [(utt, self.uttDB[utt]) for utt in self.spkDB[spkr]['segs'].strip().split(" ")]
+        return self.uttDB.get_utterances(spkr)
 
     def get_backchannels(self, utts: List[Tuple[str, DBEntry]]) -> List[Tuple[str, DBEntry]]:
         return [(utt, uttInfo)
@@ -207,22 +191,22 @@ class DBReader:
                 if self.is_backchannel(uttInfo, index, utts)
                 ]
 
-    def get_gauss_bc_array(self, power: NumFeature, utt: str) -> Tuple[float, np.array]:
+    def get_gauss_bc_array(self, power: Feature, utt: str) -> Tuple[float, np.array]:
         middle = self.getBcRealStartTime(utt) + self.method['peak']
         stddev = self.method['stddev']
         radius = self.method['radius']
-        times = np.arange(-radius, radius, power.shift / 1000, dtype="float32")
+        times = np.arange(-radius, radius, power.frame_shift_ms / 1000, dtype="float32")
         mean = 0
         variance = stddev ** 2
         return middle - radius, (1 / np.sqrt(2 * variance * np.pi)) * np.exp(-((times - mean) ** 2) / (2 * variance))
 
     def get_gauss_bcs(self, power_feature: np.array, spkr: str):
         arr = np.zeros_like(power_feature)
-        feat = NumFeature(arr, shift=power_feature.shift)
+        feat = Feature(arr, infofrom=power_feature)
         for bc, _ in self.get_backchannels(list(self.get_utterances(spkr))):
             offset, gauss = self.get_gauss_bc_array(power_feature, bc)
             gauss = gauss.reshape((gauss.shape[0], 1))
-            start = self.features.time_to_sample_index(feat, offset)
+            start = feat.time_to_sample_index(offset)
             if start < 0:
                 gauss = gauss[0 - start:]
                 start = 0
@@ -305,11 +289,12 @@ def outputBackchannelDiscrete(reader: DBReader, utt: str, bc: bool) -> Tuple[np.
         return
 
     F = reader.features.get_combined_feature(speaking_channel_convid, begin, end + 0.1)
-    range_frames = round((end - begin) * 1000 / F.shift)
+    range_frames = round((end - begin) * 1000 / F.frame_shift_ms)
     F = F[0:range_frames]
     frames, dim = F.shape
     if frames < range_frames:
-        logging.debug(f"skipping utterance with F too small: {utt}({uttInfo['text']}): {frames}<{range_frames} ({begin}s - {end}s) (probably at end of file?)")
+        logging.debug(
+            f"skipping utterance with F too small: {utt}({uttInfo['text']}): {frames}<{range_frames} ({begin}s - {end}s) (probably at end of file?)")
         return
 
     if bc:
@@ -352,51 +337,27 @@ def loadDBReader(config_path: str):
     return DBReader(config_path)
 
 
-class FakeUttDB:
+class UttDB:
     alignment_db = None
-    uttsCache = {}
-    wordsCache = {}
 
-    def __init__(self, paths_config, single_words=False):
-        self.paths_config = paths_config
+    def __init__(self, config: dict):
+        paths_config = config['paths']
+        allconvs = [conv for ls in read_conversations(config).values() for conv in ls]
+        self.speakers = sorted([f"{conv}-{channel}" for conv in allconvs for channel in ["A", "B"]])
         self.root = paths_config['originalSwbTranscriptions']
         self.extractname = re.compile(r'sw(\d{4})([AB])-ms98-a-(\d{4})')
-        base = paths_config['databasePrefix'] + "-spk"
-        if not os.path.isfile(base + ".idx"):
-            raise Exception(f"could not find {base}")
-        self.spkDB = jrtk.base.DBase(baseFilename=base, mode="r")
-        if os.path.isfile("data/uttdbcache.json"):
-            logging.info("loading uttdb cache")
-            with open("data/uttdbcache.json", "r") as f:
-                x = json.load(f)
-                self.uttsCache = x['uttsCache']
-                self.wordsCache = x['wordsCache']
-        else:
-            logging.warning("uttdbcache does not exist, run create_uttdb_cache for speedup")
 
-    def makeSpkDB(self):
-        class FakeSpkDB():
-            uttDB = self
-
-            def __iter__(self2):
-                yield from self.spkDB
-
-            def close(self):
-                pass
-
-        return FakeSpkDB()
-
-    @functools.lru_cache()
-    def load_utterances(self, convid: str, single_words=False):
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    @util.DiskCache
+    def load_utterances(root: str, convid: str, single_words=False):
         utts = OrderedDict()
         track = convid[2:6]
         speaker = convid[-1]
-        if not single_words and convid in self.uttsCache:
-            return self.uttsCache[convid]
         type = "word" if single_words else "trans"
         id_counter = 0
         last_id = None
-        with open(os.path.join(self.root, track[:2], track,
+        with open(os.path.join(root, track[:2], track,
                                "sw{}{}-ms98-a-{}.text".format(track, speaker, type))) as file:
             for line in file:
                 id, _from, to, text = line.split(maxsplit=3)
@@ -410,45 +371,25 @@ class FakeUttDB:
                 utts[id] = {
                     'from': _from, 'to': to, 'text': text.strip(), 'convid': convid
                 }
-        if not single_words:
-            self.uttsCache[convid] = utts
         return utts
 
     def get_speakers(self):
-        yield from self.spkDB
+        return self.speakers
 
-    def get_utterances(self, id: str):
-        return self.load_utterances(id).items()
+    def get_utterances(self, id: str) -> Tuple[str, DBEntry]:
+        return self.load_utterances(self.root, id).items()
 
     def get_words_for_utterance(self, uttid: str, utt: DBEntry) -> List[DBEntry]:
-        if uttid in self.wordsCache:
-            return self.wordsCache[uttid]
         fromTime = float(utt['from'])
         toTime = float(utt['to'])
-        words = self.load_utterances(utt['convid'], True).items()
+        words = self.load_utterances(self.root, utt['convid'], True).items()
         list = [word for id, word in words if float(word['from']) >= fromTime and float(word['to']) <= toTime]
-        self.wordsCache[uttid] = list
         return list
 
     def __getitem__(self, id):
         track, speaker, uttid = self.extractname.fullmatch(id).groups()
-        utts = self.load_utterances(f"sw{track}-{speaker}")
+        utts = self.load_utterances(self.root, f"sw{track}-{speaker}")
         return utts[id]
-
-    def close(self):
-        self.spkDB.close()
-
-
-def create_uttdb_cache(config_path: str):
-    config = util.load_config(config_path)
-    db = FakeUttDB(config['paths'])
-    for spk in db.get_speakers():
-        if not spk[0:2] == "sw":
-            continue
-        for utt, uttInfo in db.get_utterances(spk):
-            db.get_words_for_utterance(utt, uttInfo)
-    with open("data/uttdbcache.json", "w") as f:
-        json.dump({"uttsCache": db.uttsCache, "wordsCache": db.wordsCache}, f)
 
 
 def parse_conversations_file(path: str):
@@ -647,6 +588,7 @@ def count(config_path):
     import scipy.stats
     print(f"delay stats: {scipy.stats.describe([delay for uttid, delay in bcdelays])}")
 
+
 @functools.lru_cache(maxsize=1)
 def word_to_vec(config_path: str, dimension: int):
     folder = "data/word2vec"
@@ -671,7 +613,6 @@ def word_to_vec(config_path: str, dimension: int):
                         if len(txt) > 0:
                             yield word['text'] + " "
 
-
     with open(words_file, "w") as f:
         f.writelines(gen())
     word2vec.word2phrase(words_file, phrases_file, verbose=True)
@@ -682,7 +623,6 @@ def word_to_vec(config_path: str, dimension: int):
 
 def main():
     config_path = sys.argv[1]
-    jrtk.core.setupLogging(None, logging.DEBUG, logging.DEBUG)
     logging.root.handlers.clear()
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)-8s %(message)s',

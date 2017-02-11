@@ -15,7 +15,6 @@ import numpy as np
 from typing import TypeVar
 from extract.util import load_config, batch_list, windowed_indices
 from trainNN import train_func
-from . import network_model, evaluate
 from extract import readDB
 import functools
 import time
@@ -95,6 +94,7 @@ def benchmark_batcher(batcher):
 
 
 def train():
+    from . import network_model, evaluate
     global reader
     global backchannels
     global config_path

@@ -6,12 +6,10 @@ import os
 import numpy as np
 from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
-from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, bc_to_category
-from extract_pfiles_python.util import load_config, filter_ranges, get_talking_segments, get_monologuing_segments
+from extract.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, bc_to_category
+from extract.util import load_config, filter_ranges, get_talking_segments, get_monologuing_segments
 from tqdm import tqdm
 import functools
-import trainNN.evaluate
-from trainNN import train
 from itertools import product
 import logging
 from pprint import pformat
@@ -372,6 +370,7 @@ def detailed_analysis(config):
 
 
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict, showprog=False):
+    import trainNN.evaluate
     totals = {}
     results = {}
     if "weights_file" not in eval_config and 'random_baseline' not in eval_config and eval_config["epoch"] == "best":
@@ -576,11 +575,11 @@ def gpyopt(parallel, config_path, conversations_list, params):
 
 def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
     for params in [
-        #gpyopt_parameters_center0,
-        #gpyopt_parameters_mmueller,
-        #gpyopt_parameters_best,
-        #gpyopt_parameters_w4,
-        gpyopt_parameters_w6
+        # gpyopt_parameters_center0,
+        # gpyopt_parameters_mmueller,
+        gpyopt_parameters_best,
+        # gpyopt_parameters_w4,
+        # gpyopt_parameters_w6
     ]:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())

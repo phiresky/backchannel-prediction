@@ -1,4 +1,4 @@
-from extract_pfiles_python.readDB import DBReader
+from extract.readDB import DBReader
 from typing import List
 import random
 from . import evaluate
@@ -6,8 +6,8 @@ import numpy as np
 import os
 import soundfile
 import sys
-from extract_pfiles_python.util import load_config, invert_channel
-from extract_pfiles_python.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, orig_noise_filter
+from extract.util import load_config, invert_channel
+from extract.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, orig_noise_filter
 
 min_truth_bcs = 3
 monologue_length = 15

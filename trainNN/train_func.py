@@ -2,10 +2,6 @@ import random
 import logging
 from collections import OrderedDict
 
-import theano.tensor as T
-import lasagne
-import theano
-
 from timeit import default_timer as timer
 from .data_io import load_network_params, save_network_params
 
@@ -51,6 +47,9 @@ def train_network(network,
                   draw_theano_graph=None,
                   resume=None,
                   resume_error=None):
+    import theano.tensor as T
+    import lasagne
+    import theano
     import signal
     signal.signal(signal.SIGINT, sigterm)
     signal.signal(signal.SIGTERM, sigterm)
@@ -262,6 +261,8 @@ def train_network(network,
 
 # Print network configuration
 def print_network_config(input_var, net_dict):
+    import lasagne
+
     if isinstance(input_var, lasagne.layers.Layer):
         for key in list(net_dict.keys()):
             logging.info("{}\t{}".format(key, net_dict[key].num_units))
