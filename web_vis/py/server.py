@@ -6,12 +6,12 @@ from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional, List, Iterator
 import json
 from collections import OrderedDict
-from extract_pfiles_python import readDB, util
-from extract_pfiles_python.readDB import DBReader
+from extract import readDB, util
+from extract.readDB import DBReader
 import math
 import os.path
 from evaluate import evaluate
-from extract_pfiles_python.features import Features
+from extract.features import Features
 import numpy as np
 
 # logging.getLogger().setLevel(logging.DEBUG)
@@ -164,11 +164,12 @@ def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, 
     }
 
 def maybe_onedim(fes):
-    single_out_dim = True
+    single_out_dim = False
     if single_out_dim:
         return 1 - fes[:, [0]]
     else:
         return fes
+
 async def sendFeature(ws, id: str, conv: str, featFull: str):
     if featFull[0] != '/':
         raise Exception("featname must start with /")

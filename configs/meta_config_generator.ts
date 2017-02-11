@@ -41,8 +41,7 @@ const make_extract_config = ({input_features = features_ffv, extraction_method =
     input_features, extraction_method,
     "useOriginalDB": true,
     "useWordsTranscript": false,
-    "sample_window_ms": 32,
-    "outputDirectory": "extract_pfiles_python/out"
+    "sample_window_ms": 32
 });
 
 const make_train_config = ({

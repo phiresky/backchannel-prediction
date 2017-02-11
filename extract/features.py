@@ -3,7 +3,7 @@
 # (sha1sum c284a64313b39c81171a3a8de06383171e5731e)
 # on 2016-11-06
 
-from jrtk.preprocessing import FeatureExtractor, AbstractStep, NumFeature
+from jrtk.preprocessing import AbstractStep, NumFeature
 from jrtk.features import Filter, PitchTracker, FeatureType, FeatureSet
 import os
 import numpy as np
@@ -246,15 +246,15 @@ def pure_get_word2vec_dim100(adc_path: str, sample_window_ms: float, convid: str
 
 
 def get_word2vec(adc_path: str, sample_window_ms: float, convid: str, feat_dim: int):
-    from extract_pfiles_python import readDB
+    from extract import readDB
     model = readDB.word_to_vec(
-        "extract_pfiles_python/config.json",
+        "extract/config.json",
         dimension=feat_dim)
     # for dimensions
     pow = pure_get_power(adc_path, sample_window_ms, convid)
     frames, _ = pow.shape
     w2v = np.zeros((frames, feat_dim), dtype=np.float32)
-    reader = readDB.loadDBReader("extract_pfiles_python/config.json")
+    reader = readDB.loadDBReader("extract/config.json")  # exact config file is unimportant
     words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
              readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
     inx = 0
@@ -290,29 +290,6 @@ class Features:
 
     def get_mfcc(self, convid: str):
         return pure_get_mfcc(self.config['paths']['adc'], self.sample_window_ms, convid)
-
-    """   def word2vec_hist(self, convid: str):
-       import word2vec, bisect
-from extract_pfiles_python import readDB
-# (incomplete)
-# get last hist_len words ending before time
-vecs = []
-
-inx = bisect.bisect_left(keys, time)
-if inx == previnx:
-   vecs = prevvecs
-else:
-   previnx = inx
-   prevvecs = vecs
-    while len(vecs) < hist_len:
-       inx -= 1
-       if inx >= 0 and float(all_words[inx]['to']) >= time - max_lookback_s:
-           word = all_words[inx]
-           txt = reader.noise_filter(word['text'])
-           if txt in model:
-               vecs.append(model[txt])
-       else:
-           vecs.append(np.repeat(np.array([0], dtype=np.float32), feat_dim))"""
 
     def get_word2vec_v1(self, convid: str):
         return pure_get_word2vec_v1(self.config['paths']['adc'], self.sample_window_ms, convid)

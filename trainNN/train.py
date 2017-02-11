@@ -13,10 +13,10 @@ import itertools
 import numpy
 import numpy as np
 from typing import TypeVar
-from extract_pfiles_python.util import load_config, batch_list, windowed_indices
+from extract.util import load_config, batch_list, windowed_indices
 from trainNN import train_func
 from . import network_model, evaluate
-from extract_pfiles_python import readDB
+from extract import readDB
 import functools
 import time
 from tqdm import tqdm
