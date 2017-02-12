@@ -1,8 +1,6 @@
 import websockets
 import asyncio
 import sys
-from jrtk.preprocessing import NumFeature
-from jrtk.features import FeatureType
 from typing import Tuple, Dict, Optional, List, Iterator
 import json
 from collections import OrderedDict
@@ -12,7 +10,9 @@ import math
 import os.path
 from evaluate import evaluate
 from extract.features import Features
+from extract.feature import Feature, Audio
 import numpy as np
+
 
 # logging.getLogger().setLevel(logging.DEBUG)
 # for handler in logging.getLogger().handlers:
@@ -32,16 +32,26 @@ def create_binary_frame_with_metadata(meta_dict: dict, data: bytes):
     return meta_length + meta + data
 
 
-def featureToJSON(feature: NumFeature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
-    return {
-        'samplingRate': feature.samplingRate,
-        'dtype': str(feature.dtype),
-        'typ': str(feature.typ),
-        'shift': feature.shift,
-        'shape': feature.shape,
-        'data': None if nodata else feature.tolist(),
-        'range': range
-    }
+def featureToJSON(feature: Feature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
+    if isinstance(feature, Audio):
+        return {
+            'samplingRate': feature.sample_rate_hz,
+            'dtype': str(feature.dtype),
+            'typ': 'FeatureType.SVector',
+            'shape': feature.shape,
+            'data': None if nodata else feature.tolist(),
+            'range': range
+        }
+    elif isinstance(feature, Feature):
+        return {
+            'samplingRate': feature.sample_rate_hz,
+            'dtype': str(feature.dtype),
+            'typ': 'FeatureType.FMatrix',
+            'shift': feature.frame_shift_ms,
+            'shape': feature.shape,
+            'data': None if nodata else feature.tolist(),
+            'range': range
+        }
 
 
 def segsToJSON(reader: DBReader, spkr: str, name: str, words=False) -> Dict:
@@ -85,8 +95,11 @@ def findAllNets():
                 curList.append(id)
     return rootList
 
+
 # todo: should be automatically adjusted by eval results
 eval_conf = {'type': 'gauss', 'sigma_ms': 200, 'cutoff_sigma': 0.6, 'threshold': 0.68}
+
+
 def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
         path[-1] = path[-1][:-len(".smooth")]
@@ -107,7 +120,7 @@ def get_net_output(convid: str, path: List[str]):
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
     global lasttime
-    dataextra = feat.typ == FeatureType.SVector or feat.typ == FeatureType.FMatrix
+    dataextra = True
     await ws.send(json.dumps({
         "id": id,
         "data": featureToJSON(feat, range=(-2 ** 15, 2 ** 15) if "adc" in featname else None,
@@ -141,7 +154,8 @@ def get_features():
     features = [
         dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
                                           dict(name="Original",
-                                               children="text,words,bc,is_talking,is_silent,is_monologuing".split(","))]),
+                                               children="text,words,bc,is_talking,is_silent,is_monologuing".split(
+                                                   ","))]),
         dict(name="extracted", children=feature_names),
         dict(name="NN outputs", children=netsTree),
     ]
@@ -153,7 +167,7 @@ def get_features():
     ]
 
 
-def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, threshold: float, color=[0, 255, 0]):
+def get_larger_threshold_feature(feat: Feature, reader: DBReader, name: str, threshold: float, color=[0, 255, 0]):
     ls = []
     for start, end in evaluate.get_larger_threshold(feat, reader, threshold):
         ls.append({'from': start, 'to': end, 'text': 'Threshold', 'color': color})
@@ -163,12 +177,14 @@ def get_larger_threshold_feature(feat: NumFeature, reader: DBReader, name: str, 
         'data': ls
     }
 
+
 def maybe_onedim(fes):
     single_out_dim = False
     if single_out_dim:
         return 1 - fes[:, [0]]
     else:
         return fes
+
 
 async def sendFeature(ws, id: str, conv: str, featFull: str):
     if featFull[0] != '/':
@@ -199,14 +215,17 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
             feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
             onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
-            await sendOtherFeature(ws, id, get_larger_threshold_feature(onedim, origReader, featFull, threshold=eval_conf['threshold']))
+            await sendOtherFeature(ws, id, get_larger_threshold_feature(onedim, origReader, featFull,
+                                                                        threshold=eval_conf['threshold']))
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
             feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
             onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
             await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(onedim, origReader, list(
-                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False, threshold=eval_conf['threshold'], offset=0))
+                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False,
+                                                                               threshold=eval_conf['threshold'],
+                                                                               offset=0))
         else:
             feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
