@@ -14,12 +14,16 @@ from typing import Iterable
 from trainNN.evaluate import get_network_outputter
 
 from tqdm import tqdm, trange
-from .feature import Feature, Audio, filter_power, readAudioFile
+from .feature import Feature, Audio, filter_raw_power, filter_power, readAudioFile
 from .util import DiskCache, load_config
 
 
 def power_transform(adc: Audio, sample_window_ms: int) -> Feature:
     return filter_power(adc.get_power(sample_window_ms))
+
+
+def raw_power_transform(adc: Audio, sample_window_ms: int) -> Feature:
+    return filter_raw_power(adc.get_power(sample_window_ms))
 
 
 def ffv_transform(adc: Audio, sample_window_ms: int) -> Feature:
@@ -65,6 +69,12 @@ def pure_get_pitch(adc_path: str, sample_window_ms: int, convid: str) -> Feature
 @DiskCache
 def pure_get_power(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
     return power_transform(pure_get_adc(adc_path, convid), sample_window_ms)
+
+
+@functools.lru_cache(maxsize=32)
+@DiskCache
+def pure_get_raw_power(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
+    return raw_power_transform(pure_get_adc(adc_path, convid), sample_window_ms)
 
 
 @functools.lru_cache(maxsize=32)

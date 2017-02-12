@@ -175,6 +175,16 @@ def filter_power(_power: Feature) -> Feature:
     return Feature(power, infofrom=_power)
 
 
+def filter_raw_power(_power: Feature) -> Feature:
+    b = _power.max() / 10 ** 4
+    val = _power + b
+    for i in range(0, len(val)):
+        if val[i] <= 0:
+            val[i] = 1
+    power = np.log10(val)
+    return Feature(power, infofrom=_power)
+
+
 @functools.lru_cache(maxsize=1)
 def readAudioFile(filename: str, dtype='int16', **kwargs) -> List[Audio]:
     logging.debug("parsing audio file " + filename)

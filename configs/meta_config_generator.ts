@@ -121,6 +121,7 @@ for (const context of interesting_contexts) {
 }
 const interesting_features = [
     ["get_power"],
+    ["get_raw_power", "get_pitch", "get_ffv", "get_word2vec_dim30"],
     features_std, features_ffv,
     [...features_std, "get_word2vec_v1"],
     [...features_ffv, "get_word2vec_v1"],
