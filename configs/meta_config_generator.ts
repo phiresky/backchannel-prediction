@@ -120,6 +120,7 @@ for (const context of interesting_contexts) {
     write_config("vary-context", name, config);
 }
 const interesting_features = [
+    ["get_power"],
     features_std, features_ffv,
     [...features_std, "get_word2vec_v1"],
     [...features_ffv, "get_word2vec_v1"],

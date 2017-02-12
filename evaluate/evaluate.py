@@ -4,9 +4,9 @@ import random
 import soundfile
 import os
 import numpy as np
-from jrtk.preprocessing import NumFeature
 from typing import List, Tuple, Iterator
 from extract.readDB import loadDBReader, DBReader, swap_speaker, read_conversations, bc_to_category
+from extract.feature import Feature, Audio
 from extract.util import load_config, filter_ranges, get_talking_segments, get_monologuing_segments
 from tqdm import tqdm
 import functools
@@ -32,7 +32,7 @@ def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
 
 
 # the word-aligned beginning of the bc is predicted
-def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: float, at_start: bool, offset=0.0):
+def predict_bcs(reader: DBReader, smoothed_net_output: Feature, threshold: float, at_start: bool, offset=0.0):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
         if end - start < 0.02:
             continue
@@ -42,8 +42,8 @@ def predict_bcs(reader: DBReader, smoothed_net_output: NumFeature, threshold: fl
             yield reader.get_max_time(smoothed_net_output, start, end) + offset
 
 
-def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
-                 bcs: List[Tuple[int, NumFeature]], at_start: bool, threshold, offset=0.0):
+def get_bc_audio(smoothed_net_output: Feature, reader: DBReader,
+                 bcs: List[Tuple[int, Feature]], at_start: bool, threshold, offset=0.0):
     total_length_s = reader.features.sample_index_to_time(smoothed_net_output, smoothed_net_output.shape[0])
     total_length_audio_index = reader.features.time_to_sample_index(bcs[0][1], total_length_s)
     return get_bc_audio2(reader, total_length_audio_index, bcs,
@@ -51,10 +51,9 @@ def get_bc_audio(smoothed_net_output: NumFeature, reader: DBReader,
                                      offset=offset))
 
 
-def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, NumFeature]],
+def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, Feature]],
                   predictions: Iterator[float]):
-    output_audio = NumFeature(np.zeros(total_length_audio_index, dtype='int16'),
-                              samplingRate=bcs[0][1].samplingRate)
+    output_audio = Audio(np.zeros(total_length_audio_index, dtype='int16'), sample_rate_hz=bcs[0][1].sample_rate_hz)
 
     for peak_s in predictions:
         bc_start_offset, bc_audio = random.choice(bcs)
@@ -87,7 +86,7 @@ def get_first_false_inx(bool_arr, start_inx: int):
     return inx
 
 
-def get_larger_threshold(feat: NumFeature, reader: DBReader, threshold=0.5):
+def get_larger_threshold(feat: Feature, reader: DBReader, threshold=0.5):
     begin = None
     larger_threshold = feat.reshape((feat.size,)) >= threshold
     inx = 0
@@ -98,7 +97,7 @@ def get_larger_threshold(feat: NumFeature, reader: DBReader, threshold=0.5):
         end = get_first_false_inx(larger_threshold, start)
         if end is None:
             return
-        yield reader.features.sample_index_to_time(feat, start), reader.features.sample_index_to_time(feat, end)
+        yield feat.sample_index_to_time(start), feat.sample_index_to_time(end)
         inx = end + 1
 
 
@@ -123,12 +122,13 @@ def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple
 
 def random_predictor(reader: DBReader, convid: str, config: dict):
     shuffle_smart = config['random_baseline'].get("shuffle_in_talklen", False)
+    frequency = config['random_baseline'].get("frequency", 1)
     # random.seed(convid)
     utts = list(reader.get_utterances(swap_speaker(convid)))
     mintime = float(utts[0][1]['from'])
     maxtime = float(utts[-1][1]['to'])
     bcs = reader.get_backchannels(utts)
-    bcount = len(bcs)
+    bcount = int(round(len(bcs) * frequency))
     if shuffle_smart:
         segs = get_monologuing_segments(reader, convid, 10)
         bcstarts = [reader.getBcRealStartTime(bc) for bc, _ in bcs]
@@ -279,7 +279,8 @@ def moving_margins(margin: Tuple[float, float], count=50, span=2.0):
         yield tuple(arr + offset)
 
 
-default_config = dict(margin_of_error=(-0.5, 0.5), threshold=0.6, epoch="best", min_talk_len=10)
+default_config = dict(margin_of_error=(-0.5, 0.5), threshold=0.6, epoch="best", min_talk_len=10,
+                      smoother=dict(type='gauss-bla', sigma_ms=240, cutoff_sigma=0.7), at_start=False)
 
 
 def general_interesting_configs(config):
@@ -289,7 +290,8 @@ def general_interesting_configs(config):
     interesting_thresholds = [0.5, 0.6, 0.65, 0.7]
     interesting_talk_lens = [None, 0, 5, 10]
     for margin, threshold, talk_len in product(interesting_margins, interesting_thresholds, interesting_talk_lens):
-        yield dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)
+        yield {**default_config,
+               **dict(margin_of_error=margin, threshold=threshold, epoch="best", min_talk_len=talk_len)}
 
 
 def smoother_interesting(config):
@@ -357,16 +359,16 @@ def min_talk_len_configs(config):
 
 def smoothing_test_configs(config):
     for sigma_ms in range(0, 1000 + 1, 25):
-        yield {**default_config, **dict(sigma_ms=sigma_ms)}
+        yield {**default_config, 'smoother': {**default_config['smoother'], 'sigma_ms': sigma_ms}}
 
 
 def detailed_analysis(config):
     yield from min_talk_len_configs(config)
-    # yield from epoch_test_configs(config)
     yield from general_interesting_configs(config)
     yield from margin_test_configs(config)
     yield from threshold_test_configs(config)
     yield from smoothing_test_configs(config)
+    yield from epoch_test_configs(config)
 
 
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict, showprog=False):
