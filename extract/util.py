@@ -11,6 +11,11 @@ import inspect
 import logging
 
 
+class hashabledict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.keys())))
+
+
 @functools.lru_cache(maxsize=8)
 def load_config(path):
     with open(path) as config_file:

@@ -376,7 +376,7 @@ class UttDB:
     def get_speakers(self):
         return self.speakers
 
-    def get_utterances(self, id: str) -> Tuple[str, DBEntry]:
+    def get_utterances(self, id: str) -> Iterable[Tuple[str, DBEntry]]:
         return self.load_utterances(self.root, id).items()
 
     def get_words_for_utterance(self, uttid: str, utt: DBEntry) -> List[DBEntry]:
@@ -495,38 +495,27 @@ def get_balanced_weights(config_path: str, bcs: Iterable[Tuple[str, bool]]) -> I
         yield from ((utt_id, 1.0, is_bc) for (utt_id, is_bc) in bcs)
 
 
+config_path = None
+
+
 @functools.lru_cache(maxsize=1)
-def extract(config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array]]:
+@util.DiskCache
+def pure_extract(extract_config: dict):
     config = util.load_config(config_path)
-    extract_config = config['extract_config']
-    meta = dict(extract_config=extract_config)
-    meta_json = json.dumps(meta, sort_keys=True, indent='\t').encode('ascii')
-    digest = hashlib.sha256(meta_json).hexdigest()
-    path = os.path.join('data/cache', f"extract-{digest}.pickle")
-    if os.path.exists(path):
-        logging.debug(f"loading cached extracted data from {path}")
-        with open(path, 'rb') as file:
-            return pickle.load(file)
-    else:
-        logging.debug(f"extracting and saving data to {path}")
-        convo_map = read_conversations(config)
-        allconvos = [convo for convos in convo_map.values() for convo in convos]
-        out_dict = {}
-        for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(
-                tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
-            out_dict.update(out)
+    logging.debug(f"extracting and saving data")
+    convo_map = read_conversations(config)
+    allconvos = [convo for convos in convo_map.values() for convo in convos]
+    out_dict = {}
+    for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(
+            tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
+        out_dict.update(out)
+    return out_dict
 
-        # for uttId, is_bc in tqdm(utts):
-        #    out_dict[uttId, is_bc] = outputBackchannelDiscrete(reader, uttId, is_bc)
-        val = out_dict
 
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path + ".part", 'wb') as file:
-            pickle.dump(val, file, protocol=pickle.HIGHEST_PROTOCOL)
-        os.rename(path + ".part", path)
-        with open(path + '.meta.json', 'wb') as file:
-            file.write(meta_json)
-        return val
+def extract(_config_path: str) -> Dict[Tuple[str, bool], Tuple[np.array, np.array]]:
+    global config_path
+    config_path = _config_path
+    return pure_extract(util.hashabledict(util.load_config(config_path)['extract_config']))
 
 
 @functools.lru_cache(maxsize=10)

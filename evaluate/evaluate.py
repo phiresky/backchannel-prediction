@@ -333,10 +333,11 @@ def smoother_specific_interesting(config):
 
 
 def margin_test_configs(config):
-    for margin in moving_margins((-0.2, 0.2)):
+    for margin in moving_margins((0.2, 0.6)):
         yield {**default_config, **dict(margin_of_error=margin)}
-    for margin in moving_margins((-0.5, 0.5)):
-        yield {**default_config, **dict(margin_of_error=margin)}
+
+    # for margin in moving_margins((-0.5, 0.5)):
+        #    yield {**default_config, **dict(margin_of_error=margin)}
 
 
 def epoch_test_configs(config):
@@ -348,7 +349,7 @@ def epoch_test_configs(config):
 
 
 def threshold_test_configs(config):
-    for threshold in np.linspace(0.55, 0.65, 30):
+    for threshold in np.linspace(0.50, 0.9, 60):
         yield {**default_config, **dict(threshold=threshold)}
 
 
@@ -368,7 +369,7 @@ def detailed_analysis(config):
     yield from margin_test_configs(config)
     yield from threshold_test_configs(config)
     yield from smoothing_test_configs(config)
-    yield from epoch_test_configs(config)
+    # yield from epoch_test_configs(config)
 
 
 def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: dict, showprog=False):
@@ -591,12 +592,38 @@ def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
         yield [nptolist(res) for res in results]
 
 
+def stat(config_path: str):
+    reader = loadDBReader(config_path)
+    convs = read_conversations(reader.config)
+    convids = ["{}-{}".format(conv, channel) for conv in convs['eval'] for channel in ["A", "B"]]
+    total_s = 0
+    mono_s = 0
+    bc_count = 0
+    utt_count = 0
+    mono_bc_count = 0
+    for convid in convids:
+        utts = list(reader.get_utterances(convid))
+        utt_count += len(utts)
+        start = float(utts[0][1]['from'])
+        end = float(utts[-1][1]['to'])
+        total_s += end - start
+        monosegs = list(get_monologuing_segments(reader, convid, min_talk_len=5))
+        mono_s += sum(end - start for (start, end) in monosegs)
+        bcs = list(reader.get_backchannels(utts))
+        bcs = [reader.getBcRealStartTime(utt) for utt, uttInfo in bcs]
+        bc_count += len(bcs)
+        bcs = list(filter_ranges(bcs, monosegs))
+        mono_bc_count += len(bcs)
+    print(dict(total_s=total_s, mono_s=mono_s, bc_count=bc_count, utt_count=utt_count, mono_bc_count=mono_bc_count))
+
+
 do_detailed_analysis = False
 manual_analysis = False
 
 
 def main():
     config_path = sys.argv[1]
+    # return stat(config_path)
     _, _, version, _ = config_path.split("/")
     out_dir = os.path.join("evaluate", "out", version)
     if os.path.isdir(out_dir):
@@ -622,12 +649,14 @@ def main():
         confs = list(detailed_analysis(config))
     else:
         confs = list(general_interesting_2(config))
-    with Parallel(n_jobs=1) as parallel:
+    with Parallel(n_jobs=int(os.environ.get('JOBS', '1'))) as parallel:
+        print(f"filling caches...")
+        eval_config = default_config
+        if do_baseline is not None:
+            eval_config['random_baseline'] = do_baseline
+        evaluate_convs(parallel, config_path, [*valid_conversations, *eval_conversations],
+                       default_config, showprog=True)
         if not manual_analysis:
-            print(f"filling caches...")
-            evaluate_convs(parallel, config_path, [*valid_conversations, *eval_conversations],
-                           {**default_config, 'sigma_ms': 300, 'at_start': False},
-                           showprog=True)
             itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations)
             for inx, r in enumerate(itera):
                 print(f" itera {inx} ({len(r)} results)")

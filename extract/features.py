@@ -15,7 +15,7 @@ from trainNN.evaluate import get_network_outputter
 
 from tqdm import tqdm, trange
 from .feature import Feature, Audio, filter_power, readAudioFile
-from .util import DiskCache
+from .util import DiskCache, load_config
 
 
 def power_transform(adc: Audio, sample_window_ms: int) -> Feature:
@@ -159,7 +159,7 @@ def get_word2vec(adc_path: str, sample_window_ms: int, convid: str, feat_dim: in
     inx = 0
 
     def inxtotime(sample_index):
-        return (sample_window_ms / 2 + sample_index * pow.shift) / 1000
+        return (sample_window_ms / 2 + sample_index * pow.frame_shift_ms) / 1000
 
     for frame in range(frames):
         time = inxtotime(frame)
@@ -167,6 +167,40 @@ def get_word2vec(adc_path: str, sample_window_ms: int, convid: str, feat_dim: in
             inx += 1
         w2v[frame] = model[words[inx][1]]
     return Feature(w2v, infofrom=pow)
+
+
+@functools.lru_cache(maxsize=2)
+@DiskCache
+def pure_get_multidim_net_output(*, convid: str, epoch: str, config_path: str):
+    layers, fn = get_network_outputter(config_path, epoch, batch_size=None)
+    config = load_config(config_path)
+    f = Features(config, config_path)
+    input = f.get_combined_feature(convid)
+    total_frames = input.shape[0]
+    context_frames = config['train_config']['context_frames']
+    context_stride = config['train_config']['context_stride']
+    context_range = context_frames * context_stride
+
+    def stacker():
+        for frame in range(0, total_frames):
+            if frame < context_range:
+                # this is shitty / incorrect
+                yield input[range(0, context_range, context_stride)]
+            else:
+                yield input[range(frame - context_range, frame, context_stride)]
+
+    inp = np.stack(stacker())
+    output = batched_eval(inp, fn, out_dim=config['train_config']['num_labels'])
+    return Feature(output, infofrom=input)
+
+
+def batched_eval(inputs, mapper, out_dim=1, batchsize=2000):
+    from . import util
+    total_frames = inputs.shape[0]
+    output = np.zeros(shape=(total_frames, out_dim), dtype=np.float32)
+    for ndx, batch in util.batch_list(inputs, batchsize, True):
+        output[ndx:ndx + batch.shape[0]] = mapper(batch)
+    return output
 
 
 class Features:
@@ -206,41 +240,14 @@ class Features:
                      for feature in self.config['extract_config']['input_features']]
         return Feature(np.concatenate(feats, axis=1), infofrom=feats[0])
 
-    def batched_eval(self, inputs, mapper, out_dim=1, batchsize=2000):
-        from . import util
-        total_frames = inputs.shape[0]
-        output = np.zeros(shape=(total_frames, out_dim), dtype=np.float32)
-        for ndx, batch in util.batch_list(inputs, batchsize, True):
-            output[ndx:ndx + batch.shape[0]] = mapper(batch)
-        return Feature(output, infofrom=inputs)
-
-    @functools.lru_cache(maxsize=2)
-    @DiskCache
     def get_multidim_net_output(self, convid: str, epoch: str):
-        layers, fn = get_network_outputter(self.config_path, epoch, batch_size=None)
-        input = self.get_combined_feature(convid)
-        total_frames = input.shape[0]
-        context_frames = self.config['train_config']['context_frames']
-        context_stride = self.config['train_config']['context_stride']
-        context_range = context_frames * context_stride
-
-        def stacker():
-            for frame in range(0, total_frames):
-                if frame < context_range:
-                    # this is shitty / incorrect
-                    yield input[range(0, context_range, context_stride)]
-                else:
-                    yield input[range(frame - context_range, frame, context_stride)]
-
-        inp = np.stack(stacker())
-        output = self.batched_eval(inp, fn, out_dim=self.config['train_config']['num_labels'])
-        return Feature(output, infofrom=input)
+        return pure_get_multidim_net_output(convid=convid, epoch=epoch, config_path=self.config_path)
 
     def smooth(self, convid: str, epoch: str, smoother: dict):
         x = self.get_multidim_net_output(convid, epoch)
         if smoother['type'].startswith("gauss"):
             import scipy.signal
-            sigma = smoother['sigma_ms'] / x.shift
+            sigma = smoother['sigma_ms'] / x.frame_shift_ms
             if sigma < 1:
                 return x
             cutoff = sigma * smoother['cutoff_sigma']
@@ -249,11 +256,11 @@ class Features:
             # cut off only on left side (after convolution this is the future)
             window = window[int(np.round(len(window) / 2 - cutoff)):]
             window = window / sum(window)
-            x = np.array([scipy.signal.convolve(row, window)[:row.size] for row in x.T]).T
+            x = Feature(np.array([scipy.signal.convolve(row, window)[:row.size] for row in x.T]).T, infofrom=x)
         elif smoother['type'].startswith("exponential"):
             factor = smoother['factor']
             facs = (factor * (1 - factor) ** np.arange(1000, dtype=np.float32))
-            x = np.array([np.convolve(row, facs, mode='full')[:row.size] for row in x.T]).T
+            x = Feature(np.array([np.convolve(row, facs, mode='full')[:row.size] for row in x.T]).T, infofrom=x)
         elif smoother['type'] == 'kalman':
             # todo
             import pykalman
