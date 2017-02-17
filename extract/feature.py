@@ -134,7 +134,7 @@ class Audio(np.ndarray):
         import sklearn.preprocessing
         global melMatrix
 
-        fft0 = NumFeature(self).spectrum(window=ms(frame_window_ms), shift=ms(frame_shift_ms))
+        fft0 = self.to_num_feature().spectrum(window=ms(frame_window_ms), shift=ms(frame_shift_ms))
         fft = fft0.vtln(ratio=1.0, edge=0.8, mod='lin')
         if melMatrix is None:
             melMatrix = AbstractStep._getMelMatrix(None, filters=30, points=fft.shape[1], samplingRate=fft.samplingRate)

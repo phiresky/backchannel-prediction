@@ -506,7 +506,8 @@ def pure_extract(extract_config: dict):
     convo_map = read_conversations(config)
     allconvos = [convo for convos in convo_map.values() for convo in convos]
     out_dict = {}
-    for out in Parallel(n_jobs=int(os.environ.get('JOBS', -1)))(
+    for out in Parallel(n_jobs=2#int(os.environ.get('JOBS', 1))
+                        )(
             tqdm([delayed(extract_convo)(config_path, convo) for convo in allconvos])):
         out_dict.update(out)
     return out_dict

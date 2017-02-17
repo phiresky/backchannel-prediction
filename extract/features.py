@@ -49,6 +49,7 @@ def adjacent(feat: Feature, offsets: Iterable[int]):
 
 
 @functools.lru_cache(maxsize=32)
+@DiskCache
 def pure_get_adc(adc_path: str, convid: str) -> Audio:
     conv, channel = convid.split("-")
     adcfile = os.path.join(adc_path, conv + ".wav")

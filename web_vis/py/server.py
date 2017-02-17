@@ -35,7 +35,7 @@ def create_binary_frame_with_metadata(meta_dict: dict, data: bytes):
 def featureToJSON(feature: Feature, range: Optional[Tuple[float, float]], nodata: bool) -> Dict:
     if isinstance(feature, Audio):
         return {
-            'samplingRate': feature.sample_rate_hz,
+            'samplingRate': feature.sample_rate_hz / 1000,
             'dtype': str(feature.dtype),
             'typ': 'FeatureType.SVector',
             'shape': feature.shape,
@@ -44,7 +44,6 @@ def featureToJSON(feature: Feature, range: Optional[Tuple[float, float]], nodata
         }
     elif isinstance(feature, Feature):
         return {
-            'samplingRate': feature.sample_rate_hz,
             'dtype': str(feature.dtype),
             'typ': 'FeatureType.FMatrix',
             'shift': feature.frame_shift_ms,
@@ -152,10 +151,7 @@ def get_extracted_features(reader: DBReader):
 def get_features():
     feature_names = list(get_extracted_features(origReader))
     features = [
-        dict(name="transcript", children=[dict(name="ISL", children="text,bc".split(",")),
-                                          dict(name="Original",
-                                               children="text,words,bc,is_talking,is_silent,is_monologuing".split(
-                                                   ","))]),
+        dict(name="transcript", children="text,words,bc,is_talking,is_silent,is_monologuing".split(",")),
         dict(name="extracted", children=feature_names),
         dict(name="NN outputs", children=netsTree),
     ]
@@ -192,8 +188,8 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
     channel, category, *path = featFull.split("/")[1:]
     convid = conv + "-" + channel
     if category == "transcript":
-        readerType, featname = path
-        reader = islReader if readerType == "ISL" else origReader
+        (featname,) = path
+        reader = origReader
         if featname == "bc":
             await sendOtherFeature(ws, id,
                                    {"typ": "highlights", "data": getHighlights(reader, conv, channel)})
@@ -294,8 +290,8 @@ async def handler(websocket, path):
                     if msg['type'] == "getFeatures":
                         cats = [s.split(" & ") for s in
                                 [
-                                    "/extracted/adc & /transcript/Original/is_talking & /transcript/Original/is_silent & /transcript/Original/bc",
-                                    "/transcript/Original/text", "/extracted/pitch", "/extracted/power"]]
+                                    "/extracted/adc & /transcript/is_talking & /transcript/is_silent & /transcript/bc",
+                                    "/transcript/text", "/extracted/pitch", "/extracted/power"]]
                         conv = sanitize_conversation(msg['conversation'])
                         await websocket.send(json.dumps({"id": id, "data": {
                             'categories': get_features(),
@@ -335,7 +331,6 @@ if __name__ == '__main__':
     config = util.load_config(config_path)
 
     origReader = DBReader(config_path, originalDb=True)
-    islReader = DBReader(config_path, originalDb=False)
     conversations = readDB.read_conversations(config)
     netsTree = findAllNets()
     start_server()

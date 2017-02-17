@@ -125,6 +125,7 @@ const interesting_features = [
     features_std, features_ffv,
     [...features_std, "get_word2vec_v1"],
     [...features_ffv, "get_word2vec_v1"],
+    [...features_ffv, "get_mfcc"],
     [...features_std, "get_word2vec_dim10"],
     [...features_std, "get_word2vec_dim15"],
     [...features_std, "get_word2vec_dim20"],
@@ -173,25 +174,9 @@ for (const layer_sizes of interesting_layers_best) {
     write_config("vary-layers", name, config);
 }
 
-/*for (const model_function of ["lstm_simple", "feedforward_simple"]) {
- const categoryname0 = {feedforward: "ff", lstm: "lstm"}[model_function.split("_")[0]];
- for (const input_features of mfcc_combos) {
- const categoryname = categoryname0 + "-" + input_features.map(feat => feat.split("_")[1]);
- for (const layer_sizes of best_layers(model_function)) {
- const name = `${categoryname}-${layer_sizes.join("-")}`;
- const config = make_config({
- name: name,// + '-l2reg',
- extract_config: make_extract_config({input_features, extraction_method: method_std()}),
- train_config: {
- ...make_train_config({layer_sizes, model_function, epochs: 100}),
- update_method: "adam",
- learning_rate: 0.001,
- //l2_regularization: 0.0001
- },
- });
- const outdir = `configs/${categoryname}`;
- if (!fs.existsSync(outdir)) fs.mkdirSync(outdir);
- fs.writeFileSync(`configs/${categoryname}/${name}.json`, JSON.stringify(config, null, '\t'));
- }
- }
- }*/
+{
+    const extract_config = {...make_extract_config({extraction_method: method_std(span=3)}), categories: "v1"};
+    const train_config = make_train_config({layer_sizes: [100, 70, 50]});
+    const name = "100-70-50";
+    write_config("multicat", name, make_config({name, extract_config, train_config}));
+}
