@@ -108,7 +108,7 @@ def normalize_audio(sampletrack_audio, maxamplitude=1.0):
     multi = (32767 * maxamplitude) / max_amplitude
     if multi < 1:
         return sampletrack_audio
-    return (sampletrack_audio * multi).astype("int16")
+    return (np.asarray(sampletrack_audio) * multi).astype("int16")
 
 
 # is this nearer than that from other?
@@ -219,7 +219,8 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold'], at_start=config['at_start']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
-    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)]) for time in
+    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)][1:]) + 1 for
+                            time in
                             predicted_bcs]
     if predicted_count > 0:
         for correct_bc in correct_bcs:
@@ -336,7 +337,7 @@ def margin_test_configs(config):
     for margin in moving_margins((0.2, 0.6)):
         yield {**default_config, **dict(margin_of_error=margin)}
 
-    # for margin in moving_margins((-0.5, 0.5)):
+        # for margin in moving_margins((-0.5, 0.5)):
         #    yield {**default_config, **dict(margin_of_error=margin)}
 
 
