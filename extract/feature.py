@@ -92,9 +92,26 @@ class Audio(np.ndarray):
         obj.sample_rate_hz = sample_rate_hz
         return obj
 
+    # for pickling
+    # http://stackoverflow.com/a/26599346/2639190
+    def __reduce__(self):
+        # Get the parent's __reduce__ tuple
+        pickled_state = super(Audio, self).__reduce__()
+        info = dict(sample_rate_hz=self.sample_rate_hz)
+        # Create our own tuple to pass to __setstate__
+        new_state = pickled_state[2] + (info,)
+        # Return a tuple that replaces the parent's __setstate__ tuple with our own
+        return pickled_state[0], pickled_state[1], new_state
+
+    def __setstate__(self, state):
+        *state, info = state
+        self.sample_rate_hz = info.get('sample_rate_hz', None)
+        # Call the parent's __setstate__ with the other tuple elements.
+        super(Audio, self).__setstate__(state)
+
     def __array_finalize__(self, obj):
         assert len(self.shape) == 1
-        assert self.dtype == np.int16
+        # assert self.dtype == np.int16
 
         if obj is None:
             return

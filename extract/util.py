@@ -141,7 +141,7 @@ def DiskCache(f):
                 with open(path, 'rb') as file:
                     return pickle.load(file)
             except Exception as e:
-                logging.warning(f"could not read cached file {path} ({e}), recomputing")
+                logging.warning(f"could not read cached file {path} ({repr(e)}, {e}), recomputing")
         val = f(*args, **kwargs)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path + ".part", 'wb') as file:

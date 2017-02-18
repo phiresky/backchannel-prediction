@@ -220,7 +220,7 @@ class Features:
         self.config_path = config_path
         self.sample_window_ms = config['extract_config']['sample_window_ms']  # type: int
 
-    def get_adc(self, convid: str):
+    def get_adc(self, convid: str) -> Audio:
         return pure_get_adc(self.config['paths']['adc'], convid)
 
     def get_power(self, convid: str):
