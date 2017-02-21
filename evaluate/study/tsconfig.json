@@ -1,9 +1,14 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
+        "target": "es5",
         "allowJs": true,
         "jsx": "react",
+        "lib": [
+            "dom",
+            "es2015",
+            "es2015.promise"
+        ],
         "noImplicitAny": true,
         "noImplicitThis": true,
         "strictNullChecks": true,

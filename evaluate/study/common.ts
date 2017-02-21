@@ -2,20 +2,28 @@ type ServerMessages = {
 }
 export type BCSamples = {name: string, samples: string[]};
 type ClientRPCs = {
-    getBCSamples: {
+    getData: {
         request: {},
-        response: BCSamples[]
-    },
-    getMonosegs: {
-        request: {},
-        response: string[]
+        response: {
+            monosegs: string[],
+            bcSamples: BCSamples[],
+            netRatingSegments: string[]
+        }
     },
     beginStudy: {
         request: {bcSampleSource: string},
         response: {sessionId: number}
     },
     submitBC: {
-        request: {time: number, segment: string},
+        request: {time: number, duration: number, segment: string},
+        response: {}
+    }
+    submitNetRatings: {
+        request: [string, number][],
+        response: {}
+    }
+    comment: {
+        request: string,
         response: {}
     }
 }

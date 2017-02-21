@@ -9,33 +9,58 @@ import * as common from './common';
 import * as _ from 'lodash';
 import * as B from '@blueprintjs/core';
 import "@blueprintjs/core/dist/blueprint.css";
-
 class Store {
     @observable samples: common.BCSamples[] = [];
     @observable chosenSample: string;
     @observable chosenSamplesAudio: HTMLAudioElement[] = [];
     @observable monosegs: string[] = [];
-    @observable doneMonosegs: string[] = [];
-    @observable state: "intro" | "ingame" = "intro";
+    @observable netRatingSegments: string[] = [];
+    @observable netRatings: Map<string, number> = observable.map() as any;
+    @observable currentMonoseg: number = -1;
+    @observable state: "beforeGame" | "ingame" | "after" | "rateNet";
     @observable hasBCedOnce = false;
     @observable sessionId: number;
     @observable bcCount = 0;
+    @observable bcsLoaded = false;
+    @observable nextSegment: HTMLAudioElement | null;
+    preload(files: string[]) {
+        const total = files.length;
+        let done = 0;
+        return files.map(path => {
+            const audio = new Audio(path);
+            audio.addEventListener("canplaythrough", e => {
+                done++;
+                if (done === total) this.bcsLoaded = true;
+            });
+            return audio;
+        });
+    }
     constructor(public socket: common.RouletteClientSocket) {
-        socket.emit("getBCSamples", {}, samples => {
-            this.samples = samples;
-            this.chosenSample = _.sample(mobx.toJS(samples)).name;
+        this.state = Math.random() < 0.5 ? "beforeGame" : "rateNet";
+
+        socket.emit("getData", {}, ({ bcSamples, monosegs, netRatingSegments }) => {
+            this.samples = bcSamples;
+            this.monosegs = monosegs;
+            this.netRatingSegments = netRatingSegments;
+            this.chosenSample = _.sample(mobx.toJS(bcSamples)).name;
             console.log(this.chosenSample);
         });
-        socket.emit("getMonosegs", {}, monosegs => this.monosegs = monosegs);
         mobx.autorun(() => {
             if (!this.chosenSample) return;
             const found = this.samples.find(e => e.name === this.chosenSample);
             if (!found) return;
-            this.chosenSamplesAudio = found.samples.map(path => new Audio(path));
+            this.bcsLoaded = false;
+            this.chosenSamplesAudio = this.preload(found.samples);
+        });
+        mobx.autorun(() => {
+            const i = this.currentMonoseg + 1;
+            // for preloading
+            if (0 <= i && i < this.monosegs.length)
+                this.nextSegment = new Audio(this.monosegs[i]);
         });
     }
     playBackchannel() {
-        if (!(this.state === "intro" || this.currentSegment)) return;
+        if (!(this.state === "beforeGame" || this.currentMonoseg >= 0)) return;
         if (this.chosenSamplesAudio.length === 0) console.error("no samples, cant play");
 
         const audio = _.sample(mobx.toJS(this.chosenSamplesAudio));
@@ -44,23 +69,31 @@ class Store {
         audio.play();
         this.hasBCedOnce = true;
         this.bcCount++;
-        if (this.currentSegment && this.currentAudio) {
-            const t = this.currentAudio.currentTime;
-            this.socket.emit("submitBC", { segment: this.currentSegment, time: t }, () => {
-
-            });
+        if (this.currentMonoseg >= 0 && this.currentAudio) {
+            const time = this.currentAudio.currentTime;
+            if (time < this.currentAudio.duration)
+                this.socket.emit("submitBC", { segment: this.monosegs[this.currentMonoseg], time, duration: this.currentAudio.duration }, () => { });
         }
     }
-    begin() {
+    submitNetRatings() {
+        const entries = Array.from(this.netRatings.entries());
+        this.socket.emit("submitNetRatings", entries, () => {
+            this.netRatingsSubmitted = true;
+            if (!this.hasBCedOnce) this.state = "beforeGame";
+            else this.state = "after";
+        });
+    }
+    beginGame() {
         this.socket.emit("beginStudy", { bcSampleSource: this.chosenSample }, data => {
+            this.currentMonoseg++;
             this.state = "ingame";
             this.sessionId = data.sessionId;
         });
     }
     @observable x = 10;
     @observable y = NaN;
+    @observable netRatingsSubmitted = false;
     @observable currentAudio: HTMLAudioElement | null;
-    @observable currentSegment: string | null;
 }
 
 @mobxReact.observer
@@ -93,7 +126,32 @@ const Select = mobxReact.observer(function Select({ value, options, label }: { v
     );
 });
 
-
+class NetRatingScreen extends Component {
+    submit = () => this.props.store.submitNetRatings();
+    render() {
+        const store = this.props.store;
+        return (
+            <div>
+                <p>Listen to the following audio samples. One person will be talking and another listening.
+                Rate the way the <i>listener</i> sounds from 1 meaning ("completely unnatural") to 5 ("completely natural").
+                </p>
+                <hr />
+                {store.netRatingSegments.map(segment => (
+                    <div key={segment}>
+                        <audio src={segment} controls />
+                        <B.RadioGroup
+                            label="Your rating"
+                            onChange={e => store.netRatings.set(segment, +(e.currentTarget as HTMLInputElement).value)}
+                            selectedValue={store.netRatings.get(segment) + ""}
+                        >{...[1, 2, 3, 4, 5].map(r => <B.Radio className="pt-inline" key={r} label={"" + r} value={"" + r} />)}</B.RadioGroup>
+                        <hr />
+                    </div>
+                ))}
+                <button className="pt-button pt-intent-primary" onClick={this.submit}>Submit</button>
+            </div>
+        )
+    }
+}
 class InGame extends Component {
     @observable curTime = NaN;
     @observable totalTime = NaN;
@@ -103,8 +161,15 @@ class InGame extends Component {
     nextAudio = () => {
         const store = this.props.store;
         this.gameState = "loading";
-        store.currentSegment = _.sample(mobx.toJS(this.props.store.monosegs));
-        store.currentAudio!.src = store.currentSegment;
+        if (store.currentMonoseg >= store.monosegs.length) {
+            if (store.netRatingsSubmitted) {
+                store.state = "after";
+            } else {
+                store.state = "rateNet";
+            }
+            return;
+        }
+        store.currentAudio!.src = store.monosegs[store.currentMonoseg];
         store.bcCount = 0;
     }
     play = () => {
@@ -115,7 +180,7 @@ class InGame extends Component {
     audioDone = () => {
         const store = this.props.store;
         this.gameState = "finished";
-        this.props.store.doneMonosegs.push(store.currentSegment!);
+        store.currentMonoseg++;
     }
     loadingComplete = () => {
         this.play();
@@ -138,35 +203,40 @@ class InGame extends Component {
             this.totalTime = NaN;
         }
     }
+    get cur() {
+        if (this.gameState === "finished") return this.props.store.currentMonoseg - 1;
+        else return this.props.store.currentMonoseg;
+    }
     render() {
         const store = this.props.store;
         return (
             <div>
                 <div>
-                    Sample: {store.doneMonosegs.length} of {store.monosegs.length}
-                <B.ProgressBar value={store.doneMonosegs.length / store.monosegs.length} intent={B.Intent.PRIMARY}
-                    className="pt-no-animation"
-                />
+                    Sample: {this.cur} of {store.monosegs.length}
+                    <B.ProgressBar value={this.cur / store.monosegs.length} intent={B.Intent.PRIMARY}
+                        className="pt-no-animation"
+                    />
                 </div>
                 <SpacebarTrigger store={store} />
                 <div>Playback: {this.curTime.toFixed(0)}&thinsp;s / {this.totalTime.toFixed(0)}&thinsp;s
-                <B.ProgressBar value={this.curTime ? this.curTime/this.totalTime: 0} intent={B.Intent.SUCCESS}
-                    className="pt-no-animation"
-                />
+                <B.ProgressBar value={this.curTime ? this.curTime / this.totalTime : 0} intent={B.Intent.SUCCESS}
+                        className="pt-no-animation"
+                    />
                 </div>
                 {/*<button onClick={() => store.playBackchannel()}>BC</button>*/}
                 <audio ref={a => store.currentAudio = a} onEnded={this.audioDone} onCanPlayThrough={this.loadingComplete} />
-                {(() => {
+                <mobxReact.Observer>{() => {
                     switch (this.gameState) {
                         case "loading":
                             return <span>Loading audio</span>/*<button onClick={this.play}>Play audio</button>*/
                         case "inprogress":
-                            return <span>Press space to say uh-huh whenever you feel like it</span>
+                            return <div><p>Press space to say uh-huh whenever you feel like it</p><p>BC count: {store.bcCount}</p></div>
                         case "finished":
                             return <div>Done! <B.Button onClick={this.nextAudio}>Go to next sample</B.Button></div>
                     }
-                })()}
-                <div style={{ marginTop: "2em" }}><small>Session: {store.sessionId} | Sample: {store.currentSegment}</small></div>
+                }}
+                </mobxReact.Observer>
+                <div style={{ marginTop: "2em" }}><small>Session: {store.sessionId} | Sample: {store.monosegs[this.cur]}</small></div>
             </div>
         );
     }
@@ -203,26 +273,50 @@ class SpacebarTrigger extends Component {
         return <span />;
     }
 }
-class Welcome extends Component {
+class BeforeGame extends Component {
     render() {
         const store = this.props.store;
         return (
             <div>
                 <SpacebarTrigger store={store} />
-                <p>You will listen to some segments of speech.</p><p>Pretend you are listening by pressing the space bar to say "uh-huh".</p>
-                <Select value={ref(store, "chosenSample")} options={store.samples.map(sample => sample.name)} label="Choose your voice:"/>
-                <span>Press the space bar to try it out</span>
-                <div><B.Button disabled={!store.hasBCedOnce} onClick={() => store.begin()}>Begin</B.Button></div>
+                <p>You will hear to some ~30 seconds long segments of speech.</p><p>Listen to them by pressing the space bar to say an acknowledgment such as "uh-huh", "yeah", "right".</p>
+                <Select value={ref(store, "chosenSample")} options={store.samples.map(sample => sample.name)} label="Choose your voice:" />
+                <span>Press the space bar to try it out. Make sure you can hear something, then press begin.</span>
+                <div><B.Button disabled={!store.hasBCedOnce || !store.bcsLoaded} onClick={() => store.beginGame()}>{store.bcsLoaded ? "Begin" : "Loading..."}</B.Button></div>
             </div>
         );
+    }
+}
+class After extends Component {
+    @observable text = "";
+    @observable textSubmitted = false;
+    submit = () => {
+        this.props.store.socket.emit("comment", this.text, () => {
+            this.textSubmitted = true;
+        });
+    }
+    render() {
+        const store = this.props.store;
+        return (
+            <div><p>Thank you for participating!</p>
+                {!this.textSubmitted ?
+                    <div><p>If you encountered any problems or have some other comment:</p>
+                    <textarea className="pt-input pt-fill" value={this.text} onChange={e => this.text = e.currentTarget.value} />
+                        <button className="pt-button pt-intent-primary" onClick={this.submit}>Submit</button></div>
+                    : ""}
+
+            </div>
+        )
     }
 }
 class GUI extends Component {
     inner() {
         const store = this.props.store;
         switch (store.state) {
-            case 'intro': return <Welcome store={store} />;
+            case 'beforeGame': return <BeforeGame store={store} />;
+            case 'rateNet': return <NetRatingScreen store={store} />;
             case 'ingame': return <InGame store={store} />;
+            case 'after': return <After store={store} />;
         }
     }
     render() {
