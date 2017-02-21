@@ -121,26 +121,30 @@ for (const context of interesting_contexts) {
 }
 const interesting_features = [
     ["get_power"],
-    ["get_raw_power", "get_pitch", "get_ffv", "get_word2vec_dim30"],
-    features_std, features_ffv,
-    [...features_std, "get_word2vec_v1"],
-    [...features_ffv, "get_word2vec_v1"],
+    // ["get_raw_power", "get_pitch", "get_ffv", "get_word2vec_dim30"],
+    features_std,
+    [...features_std, "get_mfcc"],
+    /// with ffv
+    ["get_power", "get_ffv"],
+    ["get_power", "get_ffv", "get_mfcc"],
+    features_ffv,
     [...features_ffv, "get_mfcc"],
-    [...features_std, "get_word2vec_dim10"],
-    [...features_std, "get_word2vec_dim15"],
-    [...features_std, "get_word2vec_dim20"],
-    [...features_std, "get_word2vec_dim30"],
+    /// linguistic
     ["get_word2vec_dim30"],
-    [...features_std, "get_word2vec_dim41"],
-    [...features_std, "get_word2vec_dim50"],
-    [...features_std, "get_word2vec_dim75"],
-    [...features_std, "get_word2vec_dim100"],
+    // [...features_std, "get_word2vec_v1"],
+    // [...features_ffv, "get_word2vec_v1"],
+    // [...features_std, "get_word2vec_dim10"],
+    // [...features_std, "get_word2vec_dim15"],
+    // [...features_std, "get_word2vec_dim20"],
+    [...features_std, "get_word2vec_dim30"],
+
+    // [...features_std, "get_word2vec_dim41"],
+    // [...features_std, "get_word2vec_dim50"],
+    // [...features_std, "get_word2vec_dim75"],
+    // [...features_std, "get_word2vec_dim100"],
     [...features_ffv, "get_word2vec_dim15"],
     [...features_ffv, "get_word2vec_dim30"],
     [...features_ffv, "get_word2vec_dim50"],
-    [...features_std, "get_mfcc"],
-    ["get_power", "get_ffv", "get_mfcc"],
-    ["get_power", "get_ffv"]
 ];
 const interesting_strides = [1, /*default/best = 2, */4];
 const interesting_layers_best = [
@@ -175,8 +179,14 @@ for (const layer_sizes of interesting_layers_best) {
 }
 
 {
-    const extract_config = {...make_extract_config({extraction_method: method_std(span=3)}), categories: "v1"};
-    const train_config = make_train_config({layer_sizes: [100, 70, 50]});
-    const name = "100-70-50";
+    const extract_config = {
+        ...make_extract_config({extraction_method: method_std({span: 2.01})}), categories: "v1"
+        , input_features: [...features_ffv, "get_word2vec_dim50"]
+    };
+    const train_config = {
+        ...make_train_config({layer_sizes: [100, 70, 50], context_ms: 2000}),
+        balance_method: "weighted"
+    };
+    const name = "multicat-100-70-50";
     write_config("multicat", name, make_config({name, extract_config, train_config}));
 }
