@@ -18,19 +18,6 @@ os.environ['JOBLIB_START_METHOD'] = 'forkserver'
 from joblib import Parallel, delayed
 
 
-def get_bc_samples(reader: DBReader, bc_filter, sampletrack="sw4687-B"):
-    sampletrack_audio = reader.features.get_adc(sampletrack)
-    bcs = reader.get_backchannels(list(reader.get_utterances(sampletrack)))
-    for bc_id, bc_info in bcs:
-        if bc_filter and not bc_filter(bc_info):
-            continue
-        bc_start_time = float(bc_info['from'])
-        bc_audio = sampletrack_audio[f"{bc_start_time}s":f"{bc_info['to']}s"]
-        bc_real_start_time = reader.getBcRealStartTime(bc_id)
-        bc_start_offset = bc_real_start_time - bc_start_time
-        yield bc_start_offset, bc_audio
-
-
 # the word-aligned beginning of the bc is predicted
 def predict_bcs(reader: DBReader, smoothed_net_output: Feature, threshold: float, at_start: bool, offset=0.0):
     for start, end in get_larger_threshold(smoothed_net_output, reader, threshold):
@@ -40,33 +27,6 @@ def predict_bcs(reader: DBReader, smoothed_net_output: Feature, threshold: float
             yield start + offset
         else:
             yield reader.get_max_time(smoothed_net_output, start, end) + offset
-
-
-def get_bc_audio(smoothed_net_output: Feature, reader: DBReader,
-                 bcs: List[Tuple[int, Feature]], at_start: bool, threshold, offset=0.0):
-    total_length_s = reader.features.sample_index_to_time(smoothed_net_output, smoothed_net_output.shape[0])
-    total_length_audio_index = reader.features.time_to_sample_index(bcs[0][1], total_length_s)
-    return get_bc_audio2(reader, total_length_audio_index, bcs,
-                         predict_bcs(reader, smoothed_net_output, threshold=threshold, at_start=at_start,
-                                     offset=offset))
-
-
-def get_bc_audio2(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[int, Feature]],
-                  predictions: Iterator[float]):
-    output_audio = Audio(np.zeros(total_length_audio_index, dtype='int16'), sample_rate_hz=bcs[0][1].sample_rate_hz)
-
-    for peak_s in predictions:
-        bc_start_offset, bc_audio = random.choice(bcs)
-        audio_len_samples = bc_audio.shape[0]
-        # audio_len_s = reader.features.sample_index_to_time(bc_audio, audio_len_samples)
-        start_s = peak_s - bc_start_offset
-        start_index = reader.features.time_to_sample_index(bc_audio, start_s)
-        if start_index < 0:
-            continue
-        if start_index + audio_len_samples > output_audio.shape[0]:
-            audio_len_samples = output_audio.shape[0] - start_index
-        output_audio[start_index:start_index + audio_len_samples] += bc_audio[0: audio_len_samples]
-    return output_audio
 
 
 def get_first_true_inx(bool_arr, start_inx: int):
@@ -152,6 +112,26 @@ class Hashabledict(dict):
         return hash(frozenset(self.items()))
 
 
+def get_predictions(config_path: str, convid: str, eval_config: dict):
+    reader = loadDBReader(config_path)
+    smoothed = cached_smoothed_netout(config_path, convid, eval_config['epoch'], Hashabledict(eval_config['smoother']))
+    return list(predict_bcs(reader, 1 - smoothed[:, [0]], eval_config['threshold'], eval_config['at_start']))
+
+
+@functools.lru_cache()
+def get_best_eval_config(config_path: str, margin: Tuple[float, float]):
+    import os.path
+    _, _, version, _ = config_path.split("/")
+    eval_path = os.path.join("evaluate/out", version, "results.json")
+    with open(eval_path) as f:
+        results = json.load(f)
+    results = [result for result in results if np.allclose(result['config']['margin_of_error'], margin)]
+    best = max(results, key=lambda res: res['totals'].get('valid', res['totals'])['f1_score'])['config']
+    print("best eval conf:")
+    print(best)
+    return best
+
+
 def evaluate_conv(config_path: str, convid: str, config: dict):
     reader = loadDBReader(config_path)
     if reader.config['extract_config'].get('categories', None) is not None:
@@ -219,7 +199,7 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
     predicted_bcs = list(predict_bcs(reader, any_predictor, threshold=config['threshold'], at_start=config['at_start']))
     predicted_count = len(predicted_bcs)
     predicted_inx = 0
-    predicted_categories = [np.argmax(net_output[reader.features.time_to_sample_index(net_output, time)][1:]) + 1 for
+    predicted_categories = [np.argmax(net_output[net_output.time_to_sample_index(time)][1:]) + 1 for
                             time in
                             predicted_bcs]
     if predicted_count > 0:
@@ -395,23 +375,6 @@ def evaluate_convs(parallel, config_path: str, convs: List[str], eval_config: di
     return dict(config=eval_config, totals=totals)  # , details=results)
 
 
-def output_bc_samples(reader: DBReader, convs: List[str]):
-    for conv in convs:
-        adc = reader.features.get_adc(conv)
-        bcs = reader.get_backchannels(list(reader.get_utterances(conv)))
-
-        def generator():
-            for (bc, bcInfo) in bcs:
-                from_index = reader.features.time_to_sample_index(adc, float(bcInfo['from']))
-                to_index = reader.features.time_to_sample_index(adc, float(bcInfo['to']))
-                yield adc[from_index:to_index]
-
-        audio_cut = np.concatenate(generator())
-        out_dir = os.path.join("tmp")
-        os.makedirs(out_dir, exist_ok=True)
-        soundfile.write(os.path.join(out_dir, "{}.wav".format(conv)), audio_cut, 8000)
-
-
 def nptolist(dictionary: dict):
     for key, val in dictionary.items():
         if isinstance(val, dict):
@@ -533,7 +496,7 @@ def gpyopt_parameters_w4():
         dict(name='threshold', type='continuous', domain=(0.6, 0.9)),
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(150, 350)),
-        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.0)),
+        dict(name='margin_of_error_center', type='continuous', domain=(0.0, 0.0)),
         dict(name='min_talk_len', type='continuous', domain=(5.0, 5.0)),
         dict(name='margin_width', type='continuous', domain=(0.4, 0.4)),
         dict(name='at_start', type='discrete', domain=(0, 1)),
@@ -546,7 +509,7 @@ def gpyopt_parameters_w6():
         dict(name='threshold', type='continuous', domain=(0.6, 0.8)),
         dict(name='cutoff', type='continuous', domain=(0, 2)),
         dict(name='sigma_ms', type='continuous', domain=(150, 350)),
-        dict(name='margin_of_error_center', type='continuous', domain=(-0.5, 0.2)),
+        dict(name='margin_of_error_center', type='continuous', domain=(0.2, 0.2)),
         dict(name='min_talk_len', type='continuous', domain=(5.0, 5.0)),
         dict(name='margin_width', type='continuous', domain=(0.6, 0.6)),
         dict(name='at_start', type='discrete', domain=(0, 1)),
@@ -579,11 +542,11 @@ def gpyopt(parallel, config_path, conversations_list, params):
 
 def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
     for params in [
-        # gpyopt_parameters_center0,
-        # gpyopt_parameters_mmueller,
+        gpyopt_parameters_center0,
+        gpyopt_parameters_mmueller,
         gpyopt_parameters_best,
-        # gpyopt_parameters_w4,
-        # gpyopt_parameters_w6
+        gpyopt_parameters_w4,
+        gpyopt_parameters_w6
     ]:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())

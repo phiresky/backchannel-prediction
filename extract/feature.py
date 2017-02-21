@@ -110,7 +110,7 @@ class Audio(np.ndarray):
         super(Audio, self).__setstate__(state)
 
     def __array_finalize__(self, obj):
-        assert len(self.shape) == 1
+        # assert len(self.shape) == 1
         # assert self.dtype == np.int16
 
         if obj is None:

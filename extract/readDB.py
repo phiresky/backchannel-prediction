@@ -133,24 +133,16 @@ class DBReader:
         return self.get_gauss_bcs(self.features.get_power(convid), convid)
 
     def getBcRealStartTime(self, utt: str):
-        if self.use_original_db:
-            for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
-                text = self.noise_filter(word['text'])
-                if len(text) > 0:
-                    return float(word['from'])
-        else:
-            raise Exception("use original db")
-            # return self.getBCMaxTime(utt) - 0.3
+        for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
+            text = self.noise_filter(word['text'])
+            if len(text) > 0:
+                return float(word['from'])
 
     def getBcRealFirstEndTime(self, utt: str):
-        if self.use_original_db:
-            for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
-                text = self.noise_filter(word['text'])
-                if len(text) > 0:
-                    return float(word['to'])
-        else:
-            raise Exception("use original db")
-            # return self.getBCMaxTime(utt) - 0.3
+        for word in self.uttDB.get_words_for_utterance(utt, self.uttDB[utt]):
+            text = self.noise_filter(word['text'])
+            if len(text) > 0:
+                return float(word['to'])
 
     def get_max_time(self, feat: Feature, fromTime: float, toTime: float):
         powerrange = feat.cut_by_time(fromTime, toTime)
