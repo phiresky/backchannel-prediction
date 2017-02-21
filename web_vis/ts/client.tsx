@@ -106,7 +106,7 @@ function getNNOutput(channel: string, version: string, epoch: string): any {
     return {
         uis: [
             { "features": [{ "feature": `/${channel}/extracted/adc`, "visualizer": "Waveform", "config": "givenRange", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
-            { "features": [{ "feature": `/${channel}/transcript/Original/text`, "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
+            { "features": [{ "feature": `/${channel}/transcript/text`, "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.169875830411911, "max": 0.8434500098228455 } }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 }, 
                 { "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth.thres`, "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25 },

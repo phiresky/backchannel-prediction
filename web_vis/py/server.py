@@ -8,7 +8,7 @@ from extract import readDB, util
 from extract.readDB import DBReader
 import math
 import os.path
-from evaluate import evaluate
+from evaluate import evaluate, write_wavs
 from extract.features import Features
 from extract.feature import Feature, Audio
 import numpy as np
@@ -95,8 +95,7 @@ def findAllNets():
     return rootList
 
 
-# todo: should be automatically adjusted by eval results
-eval_conf = {'type': 'gauss', 'sigma_ms': 200, 'cutoff_sigma': 0.6, 'threshold': 0.68}
+want_margin = (-0.2, 0.2)  # (-0.1, 0.5)
 
 
 def get_net_output(convid: str, path: List[str]):
@@ -111,10 +110,11 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
+    eval_conf = evaluate.get_best_eval_config(config_path, margin=want_margin)
     if smooth:
-        return features.smooth(convid, id, eval_conf)
+        return config_path, eval_conf, features.smooth(convid, id, eval_conf['smoother'])
     else:
-        return features.get_multidim_net_output(convid, id)
+        return config_path, eval_conf, features.get_multidim_net_output(convid, id)
 
 
 async def sendNumFeature(ws, id, conv: str, featname: str, feat):
@@ -208,22 +208,29 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
     elif category == "NN outputs":
         if path[-1].endswith(".thres"):
             path[-1] = path[-1][:-len(".thres")]
-            feature = get_net_output(convid, path)
+            config_path, eval_config, feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
             onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
             await sendOtherFeature(ws, id, get_larger_threshold_feature(onedim, origReader, featFull,
-                                                                        threshold=eval_conf['threshold']))
+                                                                        threshold=eval_config['threshold']))
         elif path[-1].endswith(".bc"):
             path[-1] = path[-1][:-len(".bc")]
-            feature = get_net_output(convid, path)
+            config_path, eval_config, feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
             onedim = feature if feature.shape[1] == 1 else 1 - feature[:, [0]]
-            await sendNumFeature(ws, id, conv, featFull, evaluate.get_bc_audio(onedim, origReader, list(
-                evaluate.get_bc_samples(origReader, None, "sw2249-A")), at_start=False,
-                                                                               threshold=eval_conf['threshold'],
-                                                                               offset=0))
+            predictions = evaluate.get_predictions(config_path, convid, eval_config)
+            _orig_audio = origReader.features.get_adc(convid)
+            import random
+            st = random.choice(write_wavs.good_bc_sample_tracks)
+            print(f"bcs from {st}")
+            bc_audio = write_wavs.get_bc_audio(origReader, _orig_audio.size, list(
+                write_wavs.bcs_to_samples(
+                    readDB.loadDBReader(config_path),
+                    write_wavs.get_boring_bcs(config_path, st))),
+                                               predictions)
+            await sendNumFeature(ws, id, conv, featFull, bc_audio)
         else:
-            feature = get_net_output(convid, path)
+            _, _, feature = get_net_output(convid, path)
             feature = maybe_onedim(feature)
             await sendNumFeature(ws, id, conv, featFull, feature)
     elif category == "extracted":
