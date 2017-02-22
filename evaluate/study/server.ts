@@ -14,6 +14,13 @@ import {
     CreateDateColumn
 } from 'typeorm';
 import "reflect-metadata";
+const expectedHost = 'study.thesis.host';
+
+function rejectUnknownHosts(req, res, next) {
+    if (req.headers.host !== expectedHost)
+        res.status(404).send('Not found ;)');
+    else next();
+}
 let db: Connection;
 let bcSamples: common.BCSamples[];
 let monosegs: string[];
@@ -118,6 +125,7 @@ async function listen() {
     server.listen(process.env.PORT || 8000);
     // force compression
     // app.use((req, res, next) => (req.headers['accept-encoding'] = 'gzip', next()))
+    app.use(rejectUnknownHosts);
     app.use(compression());
     app.use("/", express.static(join(__dirname, "build"), nocaching));
     app.use("/data", dataRewriter);
@@ -137,11 +145,11 @@ class Session {
     bcs: BCPrediction[];
     @CreateDateColumn()
     created: Date;
-    @Column()
+    @Column('text')
     handshake: string;
     @OneToMany(type => NetRating, rating => rating.session)
     netRatings: NetRating[];
-    @Column({ nullable: true })
+    @Column('text', { nullable: true })
     comment: string;
 }
 @Entity()
