@@ -33,15 +33,18 @@ async function listen() {
     const server = http.createServer(app);
     server.listen(process.env.PORT || 8000);
     app.use(compression());
-    app.get("/pcqxnugylresibwhwmzv/data.json", async (req, res) => {
+    app.get("/pcqxnugylresibwhwmzv/ratings.json", async (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Content-Type', 'application/json');
         const resp = await db.entityManager.createQueryBuilder(NetRating, "rating")
             .innerJoinAndSelect("rating.session", "session")
             .getMany();
-        /*const resp = await db.entityManager.createQueryBuilder(Session, "session")
-            .innerJoinAndSelect("session.netRatings", "netRatings")
-            .getMany();*/
+        res.send(JSON.stringify(resp, (k, v) => k === 'handshake' ? JSON.parse(v) : v));
+    });
+    app.get("/pcqxnugylresibwhwmzv/sessions.json", async (req, res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        const resp = await db.entityManager.find(Session);
         res.send(JSON.stringify(resp, (k, v) => k === 'handshake' ? JSON.parse(v) : v));
     });
 

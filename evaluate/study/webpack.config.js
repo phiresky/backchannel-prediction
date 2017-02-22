@@ -6,14 +6,19 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const plugins = [
 	new ExtractTextPlugin("[name].[hash].css"),
 	new webpack.DefinePlugin({
-		
+
 	}),
-    new HtmlWebpackPlugin({
+	new HtmlWebpackPlugin({
 		title: 'Backchannel Survey',
 		template: require('html-webpack-template'),
 		inject: false,
 		mobile: true,
 		appMountId: 'app',
+		meta: [
+			{ name: 'description', content: 'Survey for uh-hum prediction' },
+			{ property: 'og:image', content: 'img.png' },
+			{ property: 'og:type', content: 'website'},
+		],
 		excludeChunks: ['admin']
 	}),
 	new HtmlWebpackPlugin({
@@ -72,7 +77,7 @@ module.exports = {
 			},
 			{ test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff&name=[name]-[hash].[ext]" },
 			{ test: /\.(ttf|eot|svg|png|jpg|mp3)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "file-loader?name=[name]-[hash].[ext]" },
-			{test: /\.jsx?$/, include: /react-pivot/, loader: 'babel-loader', query: {presets: ['es2015', 'react']} }
+			{ test: /\.jsx?$/, include: /react-pivot/, loader: 'babel-loader', query: { presets: ['es2015', 'react'] } }
 		],
 	},
 	resolve: {

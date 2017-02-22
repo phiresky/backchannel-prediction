@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "webpack --watch",
+    "client-dev": "webpack --watch",
+    "client-prod": "NODE_ENV=production webpack",
     "start": "node --trace-warnings ./start.js",
     "admin": "PORT=8001 ts-node admin-server.ts"
   },

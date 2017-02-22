@@ -119,6 +119,7 @@ async function listen() {
     app.use(compression());
     app.use("/", express.static(join(__dirname, "build"), nocaching));
     app.use("/data", dataRewriter);
+    app.use("/", express.static(join(__dirname, "static")));
     app.use("/data", express.static(join(__dirname, "data"), nocaching));
     const socket = io(server);
 

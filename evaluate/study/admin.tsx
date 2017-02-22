@@ -33,7 +33,7 @@ class GUI extends Component {
         this.load();
     }
     async load() {
-        let url = location.protocol + "//" + location.hostname + ":8001" + location.pathname + "data.json";
+        let url = location.protocol + "//" + location.hostname + ":8001" + location.pathname + "ratings.json";
         url += "?" + Math.random();
         this.data = await (fetch(url).then(resp => resp.json()) as any);
     }
@@ -55,21 +55,21 @@ class GUI extends Component {
                         { value: row => row.session.id, title: 'Session ID' },
                         { value: row => getPredictor(row.segment), title: 'Predictor' },
                         { value: row => row.ratingType, title: 'Rating Type'},
-                        { value: row => row.final, title: 'is final'}
+                        { value: row => !row.final, title: 'wasOverwritten'}
                     ]}
                     reduce={this.reduce}
                     activeDimensions={[
-                        "is final",
+                        "wasOverwritten",
                         "Rating Type",
                         "Predictor"
                     ]}
-                    solo={{title: "is final", value: "true"}}
+                    solo={{title: "wasOverwritten", value: "false"}}
                     calculations={[
                         {
                             title: 'Average Rating',
                             value: row => row.ratingTotal / row.ratingCount,
                             template: (val, row) => {
-                                return val + " points";
+                                return val.toPrecision(2) + " points";
                             }
                         },
                         {
