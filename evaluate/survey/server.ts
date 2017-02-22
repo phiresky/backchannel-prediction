@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import { openDatabase, Session, BCPrediction, NetRating } from './db';
 import "reflect-metadata";
-const expectedHost = process.env.HOST || 'study.thesis.host';
+const expectedHost = process.env.HOST || 'survey.thesis.host';
 
 function rejectUnknownHosts(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (req.headers.host !== expectedHost)
