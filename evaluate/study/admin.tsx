@@ -33,7 +33,9 @@ class GUI extends Component {
         this.load();
     }
     async load() {
-        this.data = await (fetch(location.protocol + "//" + location.hostname + ":8001" + location.pathname + "data.json").then(resp => resp.json()) as any);
+        let url = location.protocol + "//" + location.hostname + ":8001" + location.pathname + "data.json";
+        url += "?" + Math.random();
+        this.data = await (fetch(url).then(resp => resp.json()) as any);
     }
     reduce(row: NetRating, reduced: Reduced) {
         if (!reduced.ratingCount) Object.assign(reduced, initialReduced);
@@ -56,6 +58,12 @@ class GUI extends Component {
                         { value: row => row.final, title: 'is final'}
                     ]}
                     reduce={this.reduce}
+                    activeDimensions={[
+                        "is final",
+                        "Rating Type",
+                        "Predictor"
+                    ]}
+                    solo={{title: "is final", value: "true"}}
                     calculations={[
                         {
                             title: 'Average Rating',

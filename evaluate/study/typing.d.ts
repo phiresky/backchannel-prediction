@@ -5,7 +5,7 @@ declare module 'react-pivot' {
     }
     namespace ReactPivot {
         type Dimension<Row> = {
-            value: (row: Row) => number | string,
+            value: (row: Row) => number | string | boolean,
             title: string
         }
         type Calculation<Row, Reduced> = {
@@ -16,6 +16,8 @@ declare module 'react-pivot' {
         interface PivotProps<Row, Reduced> {
             rows: Row[];
             dimensions: Dimension<Row>[];
+            activeDimensions: string[];
+            solo: {title: string, value: string}
             calculations: Calculation<Row, Reduced>[];
             reduce<T>(row: Row, reduced: Reduced): Reduced;
         }

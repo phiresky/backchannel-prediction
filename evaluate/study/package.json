@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "webpack --watch",
-    "start": "node --trace-warnings ./start.js"
+    "start": "node --trace-warnings ./start.js",
+    "admin": "PORT=8001 ts-node admin-server.ts"
   },
   "dependencies": {
     "@blueprintjs/core": "^1.9.0",
