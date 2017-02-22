@@ -15,8 +15,8 @@ const plugins = [
 		mobile: true,
 		appMountId: 'app',
 		meta: [
-			{ name: 'description', content: 'Survey for an artificial uh-hum predictor' },
-			{ property: 'og:image', content: 'http://study.thesis.host/img.png' },
+			{ name: 'description', content: 'Survey for an artificial uh-huh predictor' },
+			{ property: 'og:image', content: 'http://survey.thesis.host/img.png' },
 			{ property: 'og:type', content: 'website'},
 		],
 		excludeChunks: ['admin']
