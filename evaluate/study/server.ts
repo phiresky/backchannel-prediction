@@ -9,14 +9,13 @@ import * as glob from 'glob';
 import * as Random from 'random-js';
 import * as compression from 'compression';
 import {
-    createConnection, Entity, Column,
-    PrimaryColumn, PrimaryGeneratedColumn, Connection, OneToOne, OneToMany, ManyToOne,
-    CreateDateColumn
+    createConnection, Connection,
 } from 'typeorm';
+import { openDatabase, Session, BCPrediction, NetRating } from './db';
 import "reflect-metadata";
-const expectedHost = 'study.thesis.host';
+const expectedHost = process.env.HOST || 'study.thesis.host';
 
-function rejectUnknownHosts(req, res, next) {
+function rejectUnknownHosts(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (req.headers.host !== expectedHost)
         res.status(404).send('Not found ;)');
     else next();
@@ -89,16 +88,7 @@ const meths = ["nn", "truthrandom", "random"];
 const r = Random.engines.mt19937().autoSeed(); //.seed(1337);
 
 async function listen() {
-    db = await createConnection({
-        driver: {
-            type: "sqlite",
-            storage: join(__dirname, "db.sqlite")
-        },
-        entities: [
-            Session, BCPrediction, NetRating
-        ],
-        autoSchemaSync: true
-    })
+    db = await openDatabase();
     bcSamples = glob.sync(join(__dirname, "data/BC", "*/"))
         .map(dir => ({ name: basename(dir), samples: glob.sync(join(dir, "*.wav")).map(x => join("data/BC", basename(dir), basename(x))) }));
     console.log("loaded", bcSamples.length, "bc sample files");
@@ -111,7 +101,7 @@ async function listen() {
     monosegs = monosegs.slice(0, wantedSegCount);
     netRatingSegments = monosegs
         .map(monoseg => basename(monoseg).split(".")[0])
-        .map(monoseg => Random.shuffle(r, meths).map(meth => join(__dirname, "data", meth, monoseg + "*.mp3"))
+        .map(monoseg => meths.map(meth => join(__dirname, "data", meth, monoseg + "*.mp3"))
             .map(g => assumeSingleGlob(g))
             .map(f => f.substr(join(__dirname, "data").length))
         );
@@ -134,53 +124,8 @@ async function listen() {
 
     socket.on('connection', initClient);
 }
-
-@Entity()
-class Session {
-    @PrimaryGeneratedColumn()
-    id: number;
-    @Column({ nullable: true })
-    bcSampleSource: string | null = null;
-    @OneToMany(type => BCPrediction, bc => bc.session)
-    bcs: BCPrediction[];
-    @CreateDateColumn()
-    created: Date;
-    @Column('text')
-    handshake: string;
-    @OneToMany(type => NetRating, rating => rating.session)
-    netRatings: NetRating[];
-    @Column('text', { nullable: true })
-    comment: string;
-}
-@Entity()
-export class BCPrediction {
-    @PrimaryGeneratedColumn()
-    id: number;
-    @ManyToOne(type => Session, session => session.bcs)
-    session: Session;
-    @Column()
-    segment: string;
-    @Column()
-    time: number;
-    @Column()
-    duration: number;
-    @CreateDateColumn()
-    created: Date;
-}
-@Entity()
-export class NetRating {
-    @PrimaryGeneratedColumn()
-    id: number;
-    @ManyToOne(type => Session, session => session.netRatings)
-    session: Session;
-    @Column()
-    segment: string;
-    @Column("int", { nullable: true })
-    rating: number | null;
-    @CreateDateColumn()
-    created: Date;
-    @Column()
-    final: boolean;
+function range(min: number, maxExclusive: number) {
+    return Array.from(Array(maxExclusive - min), (_, k) => min + k);
 }
 function initClient(_client: SocketIO.Socket) {
     const client = _client as common.RouletteServerSocket;
@@ -195,8 +140,15 @@ function initClient(_client: SocketIO.Socket) {
     });
     client.on("getData", async (options, callback) => {
         await sessionPersisted;
-        const segments = Random.shuffle(r, netRatingSegments.map(choices => Random.sample(r, choices, 1)[0]));
-        callback({ bcSamples, monosegs, netRatingSegments: segments, sessionId: session.id});
+        const methCount = meths.length;
+        const segCount = netRatingSegments.length;
+        const segsPerMeth = segCount / methCount;
+        if (segsPerMeth !== Math.round(segsPerMeth)) console.error("not divisible", segsPerMeth);
+        const methIndices = ([] as number[]).concat(...range(0, segsPerMeth).map(() => range(0, methCount)));
+        Random.shuffle(r, methIndices);
+        const segments = Random.shuffle(r, netRatingSegments.slice());
+        const chosen = segments.map((segs, i) => segs[methIndices[i]]);
+        callback({ bcSamples, monosegs, netRatingSegments: chosen, sessionId: session.id });
     });
     client.on("submitBC", async (options, callback) => {
         const pred = new BCPrediction();
