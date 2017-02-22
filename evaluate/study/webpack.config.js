@@ -8,7 +8,12 @@ const plugins = [
 	new webpack.DefinePlugin({
 		
 	}),
-    new HtmlWebpackPlugin({title: 'Backchannel Survey'})
+    new HtmlWebpackPlugin({
+		title: 'Backchannel Survey',
+		template: require('html-webpack-template'),
+		inject: false,
+		mobile: true
+	})
 ];
 if (production) {
 	plugins.push(new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }));

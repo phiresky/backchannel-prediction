@@ -5,6 +5,7 @@ type ClientRPCs = {
     getData: {
         request: {},
         response: {
+            sessionId: number,
             monosegs: string[],
             bcSamples: BCSamples[],
             netRatingSegments: string[]
@@ -12,14 +13,14 @@ type ClientRPCs = {
     },
     beginStudy: {
         request: {bcSampleSource: string},
-        response: {sessionId: number}
+        response: {}
     },
     submitBC: {
         request: {time: number, duration: number, segment: string},
         response: {}
     }
     submitNetRatings: {
-        request: [string, number][],
+        request: {segments: [string, number][], final: boolean},
         response: {}
     }
     comment: {

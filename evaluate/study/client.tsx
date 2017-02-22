@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 import * as B from '@blueprintjs/core';
 import "@blueprintjs/core/dist/blueprint.css";
 class Store {
+    @observable doGameStudy = false; // :(
     @observable samples: common.BCSamples[] = [];
     @observable chosenSample: string;
     @observable chosenSamplesAudio: HTMLAudioElement[] = [];
@@ -17,7 +18,7 @@ class Store {
     @observable netRatingSegments: string[] = [];
     @observable netRatings: Map<string, number> = observable.map() as any;
     @observable currentMonoseg: number = -1;
-    @observable state: "beforeGame" | "ingame" | "after" | "rateNet";
+    @observable state: "loading" | "beforeGame" | "ingame" | "after" | "rateNet";
     @observable hasBCedOnce = false;
     @observable sessionId: number;
     @observable bcCount = 0;
@@ -36,14 +37,16 @@ class Store {
         });
     }
     constructor(public socket: common.RouletteClientSocket) {
-        this.state = Math.random() < 0.5 ? "beforeGame" : "rateNet";
+        this.state = "loading";
 
-        socket.emit("getData", {}, ({ bcSamples, monosegs, netRatingSegments }) => {
+        socket.emit("getData", {}, ({ bcSamples, monosegs, netRatingSegments, sessionId }) => {
             this.samples = bcSamples;
             this.monosegs = monosegs;
             this.netRatingSegments = netRatingSegments;
-            this.chosenSample = _.sample(mobx.toJS(bcSamples)).name;
-            console.log(this.chosenSample);
+            this.sessionId = sessionId;
+            console.log("segments: ", netRatingSegments);
+            if (this.doGameStudy) this.chosenSample = _.sample(mobx.toJS(bcSamples)).name;
+            this.state = (this.doGameStudy && Math.random() < 0.5) ? "beforeGame" : "rateNet";
         });
         mobx.autorun(() => {
             if (!this.chosenSample) return;
@@ -53,6 +56,7 @@ class Store {
             this.chosenSamplesAudio = this.preload(found.samples);
         });
         mobx.autorun(() => {
+            if (!this.doGameStudy) return;
             const i = this.currentMonoseg + 1;
             // for preloading
             if (0 <= i && i < this.monosegs.length)
@@ -77,9 +81,9 @@ class Store {
     }
     submitNetRatings() {
         const entries = Array.from(this.netRatings.entries());
-        this.socket.emit("submitNetRatings", entries, () => {
+        this.socket.emit("submitNetRatings", { segments: entries, final: true }, () => {
             this.netRatingsSubmitted = true;
-            if (!this.hasBCedOnce) this.state = "beforeGame";
+            if (!this.hasBCedOnce && this.doGameStudy) this.state = "beforeGame";
             else this.state = "after";
         });
     }
@@ -87,7 +91,6 @@ class Store {
         this.socket.emit("beginStudy", { bcSampleSource: this.chosenSample }, data => {
             this.currentMonoseg++;
             this.state = "ingame";
-            this.sessionId = data.sessionId;
         });
     }
     @observable x = 10;
@@ -125,29 +128,49 @@ const Select = mobxReact.observer(function Select({ value, options, label }: { v
         </label>
     );
 });
-
+@mobxReact.observer
+class Segment extends React.Component<{ store: Store, segment: string }, {}> {
+    random = Math.random();
+    setRating = (segment: string, rating: string) => {
+        this.props.store.netRatings.set(segment, +rating);
+        this.props.store.socket.emit("submitNetRatings", { segments: [[segment, +rating]], final: false }, () => { });
+    }
+    render() {
+        const { store, segment } = this.props;
+        return (
+            <div>
+                <div><audio src={segment + "?" + this.random} controls style={{ width: "100%", marginBottom: "1em" }} /></div>
+                Very Unnatural
+                <B.RadioGroup
+                    //label="Your rating"
+                    className="pt-control pt-inline"
+                    //className="pt-inline"
+                    onChange={(e: React.SyntheticEvent<HTMLInputElement>) => this.setRating(segment, e.currentTarget.value)}
+                    selectedValue={store.netRatings.get(segment) + ""}
+                >
+                    {...[1, 2, 3, 4, 5].map(r => <B.Radio className="pt-inline" key={r} label={"" + r} value={"" + r} />)}
+                </B.RadioGroup>
+                <span style={{ marginLeft: "-20px" }}>Completely Natural</span>
+                <hr />
+            </div>
+        );
+    }
+}
 class NetRatingScreen extends Component {
     submit = () => this.props.store.submitNetRatings();
+    @mobx.computed get canSubmit() {
+        return this.props.store.netRatings.size >= 5;
+    }
     render() {
         const store = this.props.store;
         return (
             <div>
-                <p>Listen to the following audio samples. One person will be talking and another listening.
-                Rate the way the <i>listener</i> sounds from 1 meaning ("completely unnatural") to 5 ("completely natural").
-                </p>
+                <p>Listen to the following audio samples. One person will be talking and another listening.</p>
+                <p>Rate the way the <i>listener</i> sounds from 1 ("very unnatural") to 5 ("completely natural").</p>
                 <hr />
-                {store.netRatingSegments.map(segment => (
-                    <div key={segment}>
-                        <audio src={segment} controls />
-                        <B.RadioGroup
-                            label="Your rating"
-                            onChange={e => store.netRatings.set(segment, +(e.currentTarget as HTMLInputElement).value)}
-                            selectedValue={store.netRatings.get(segment) + ""}
-                        >{...[1, 2, 3, 4, 5].map(r => <B.Radio className="pt-inline" key={r} label={"" + r} value={"" + r} />)}</B.RadioGroup>
-                        <hr />
-                    </div>
-                ))}
-                <button className="pt-button pt-intent-primary" onClick={this.submit}>Submit</button>
+                {store.netRatingSegments.map(segment => <Segment key={segment} segment={segment} store={store} />)}
+                {!this.canSubmit && <div className="pt-callout pt-intent-warning">You need to rate at least 5 of the above to be able to submit</div>}
+                <button className="pt-button pt-intent-primary" disabled={!this.canSubmit} onClick={this.submit}>Submit</button>
             </div>
         )
     }
@@ -274,12 +297,17 @@ class SpacebarTrigger extends Component {
     }
 }
 class BeforeGame extends Component {
+    componentDidMount() {
+        const store = this.props.store;
+        if (!store.chosenSample)
+            store.chosenSample = _.sample(mobx.toJS(store.samples)).name;
+    }
     render() {
         const store = this.props.store;
         return (
             <div>
                 <SpacebarTrigger store={store} />
-                <p>You will hear to some ~30 seconds long segments of speech.</p><p>Listen to them by pressing the space bar to say an acknowledgment such as "uh-huh", "yeah", "right".</p>
+                <p>You will hear some ~30 seconds long segments of speech.</p><p>Listen to them by pressing the space bar to say an acknowledgment such as "uh-huh", "yeah", "right".</p>
                 <Select value={ref(store, "chosenSample")} options={store.samples.map(sample => sample.name)} label="Choose your voice:" />
                 <span>Press the space bar to try it out. Make sure you can hear something, then press begin.</span>
                 <div><B.Button disabled={!store.hasBCedOnce || !store.bcsLoaded} onClick={() => store.beginGame()}>{store.bcsLoaded ? "Begin" : "Loading..."}</B.Button></div>
@@ -298,11 +326,13 @@ class After extends Component {
     render() {
         const store = this.props.store;
         return (
-            <div><p>Thank you for participating!</p>
+            <div>
+                <p>Thank you for participating!</p>
+                <p>Your session id: {store.sessionId}</p>
                 {!this.textSubmitted ?
                     <div><p>If you encountered any problems or have some other comment:</p>
-                    <textarea className="pt-input pt-fill" value={this.text} onChange={e => this.text = e.currentTarget.value} />
-                        <button className="pt-button pt-intent-primary" onClick={this.submit}>Submit</button></div>
+                        <textarea className="pt-input pt-fill" value={this.text} onChange={e => this.text = e.currentTarget.value} />
+                        <p><button className="pt-button pt-intent-primary" onClick={this.submit}>Submit</button></p></div>
                     : ""}
 
             </div>
@@ -313,6 +343,7 @@ class GUI extends Component {
     inner() {
         const store = this.props.store;
         switch (store.state) {
+            case 'loading': return <div>Loading...</div>;
             case 'beforeGame': return <BeforeGame store={store} />;
             case 'rateNet': return <NetRatingScreen store={store} />;
             case 'ingame': return <InGame store={store} />;
@@ -321,7 +352,7 @@ class GUI extends Component {
     }
     render() {
         return (
-            <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+            <div style={{ maxWidth: "900px", margin: "0 auto", marginTop: "1em" }}>
                 <h1>Backchannel Survey</h1>
                 <hr />
                 {this.inner()}
