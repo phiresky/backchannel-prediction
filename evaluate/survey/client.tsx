@@ -36,7 +36,7 @@ class Store {
             return audio;
         });
     }
-    constructor(public socket: common.RouletteClientSocket) {
+    constructor(public socket: common.TypedClientSocket) {
         this.state = "loading";
 
         socket.emit("getData", {}, ({ bcSamples, monosegs, netRatingSegments, sessionId }) => {
@@ -383,7 +383,7 @@ let gui;
 let store;
 document.addEventListener("DOMContentLoaded", () => {
     const _socket = io();
-    const socket = _socket as any as common.RouletteClientSocket;
+    const socket = _socket as any as common.TypedClientSocket;
     store = new Store(socket);
     gui = render(<GUI store={store} />, document.getElementById("app"));
     Object.assign(window, { store, gui, mobx, mobxReact });
