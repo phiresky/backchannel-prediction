@@ -80,23 +80,25 @@ def bc_is_within_margin_of_error(predicted: float, correct: float, margin: Tuple
     return correct + margin[0] <= predicted <= correct + margin[1]
 
 
-def random_predictor(reader: DBReader, convid: str, config: dict):
+def random_predictor(reader: DBReader, speaker_convid: str, config: dict):
     shuffle_smart = config['random_baseline'].get("shuffle_in_talklen", False)
     frequency = config['random_baseline'].get("frequency", 1)
     # random.seed(convid)
-    utts = list(reader.get_utterances(swap_speaker(convid)))
+    bc_convid = swap_speaker(speaker_convid)
+    utts = list(reader.get_utterances(bc_convid))
     mintime = float(utts[0][1]['from'])
     maxtime = float(utts[-1][1]['to'])
     bcs = reader.get_backchannels(utts)
-    bcount = int(round(len(bcs) * frequency))
+
     if shuffle_smart:
-        segs = get_monologuing_segments(reader, convid, 10)
+        segs = get_monologuing_segments(reader, speaker_convid, 10)
         bcstarts = [reader.getBcRealStartTime(bc) for bc, _ in bcs]
         predicted = []
         for start, stop in segs:
-            count = len(list(filter_ranges(bcstarts, [(start, stop)])))
+            count = int(round(len(list(filter_ranges(bcstarts, [(start, stop)]))) * frequency))
             predicted += [random.uniform(start, stop) for _ in range(count)]
     else:
+        bcount = int(round(len(bcs) * frequency))
         predicted = [random.uniform(mintime, maxtime) for _ in range(bcount)]
     predicted.sort()
     return predicted

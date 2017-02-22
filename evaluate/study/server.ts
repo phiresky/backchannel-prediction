@@ -118,7 +118,7 @@ async function listen() {
     server.listen(process.env.PORT || 8000);
     // force compression
     // app.use((req, res, next) => (req.headers['accept-encoding'] = 'gzip', next()))
-    // app.use(compression({filter: () => true}));
+    app.use(compression());
     app.use("/", express.static(join(__dirname, "build"), nocaching));
     app.use("/data", dataRewriter);
     app.use("/data", express.static(join(__dirname, "data"), nocaching));
