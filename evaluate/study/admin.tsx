@@ -36,26 +36,31 @@ class GUI extends Component {
         this.data = await (fetch(location.protocol + "//" + location.hostname + ":8001" + location.pathname + "data.json").then(resp => resp.json()) as any);
     }
     reduce(row: NetRating, reduced: Reduced) {
-        if(!reduced.ratingCount) Object.assign(reduced, initialReduced);
+        if (!reduced.ratingCount) Object.assign(reduced, initialReduced);
         reduced.ratingTotal += row.rating!;
         reduced.ratingCount += 1;
+        return reduced;
     }
 
     render() {
         if (!this.data) return <div>Loading...</div>;
+        class TPivot extends ReactPivot<NetRating, Reduced> {}
         return (
             <div>
-                <ReactPivot
+                <TPivot
                     rows={this.data}
                     dimensions={[
-                        { value: (row: NetRating) => row.session.id, title: 'Session ID' },
-                        { value: (row: NetRating) => getPredictor(row.segment), title: 'Predictor'}
+                        { value: row => row.session.id, title: 'Session ID' },
+                        { value: row => getPredictor(row.segment), title: 'Predictor' },
+                        { value: row => row.ratingType, title: 'Rating Type'},
+                        { value: row => row.final, title: 'is final'}
                     ]}
                     reduce={this.reduce}
                     calculations={[
                         {
-                            title: 'Average Rating', value: (row: Reduced) => row.ratingTotal / row.ratingCount,
-                            template: (val: number, row: Reduced) => {
+                            title: 'Average Rating',
+                            value: row => row.ratingTotal / row.ratingCount,
+                            template: (val, row) => {
                                 return val + " points";
                             }
                         },

@@ -161,16 +161,20 @@ function initClient(_client: SocketIO.Socket) {
         callback({});
     });
     client.on("submitNetRatings", async ({ segments, final }, callback) => {
-        const entities = segments.map(([segment, rating]) => {
-            const x = new NetRating();
-            x.rating = rating;
-            segment = secretUrlToReal(segment);
-            x.segment = segment;
-            x.session = session;
-            x.final = final;
-            if (final) console.log(session.id, "rated", segment, "with", rating);
-            return x;
-        });
+        const entities = [] as NetRating[];
+        for(const [segment, rating] of segments) {
+            for (const ratingType of Object.keys(rating)) {
+                const x = new NetRating();
+                x.rating = rating[ratingType];
+                x.ratingType = ratingType;
+                const realSegment = secretUrlToReal(segment);
+                x.segment = realSegment;
+                x.session = session;
+                x.final = final;
+                if (final) console.log(session.id, "rated", realSegment, "with", rating);
+                entities.push(x);
+            }
+        }
         await db.entityManager.persist(entities);
         callback({});
     });

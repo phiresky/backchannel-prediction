@@ -49,6 +49,8 @@ export class NetRating {
     segment: string;
     @Column("int", { nullable: true })
     rating: number | null;
+    @Column()
+    ratingType: string;
     @CreateDateColumn()
     created: Date;
     @Column()

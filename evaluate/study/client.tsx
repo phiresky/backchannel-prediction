@@ -16,7 +16,7 @@ class Store {
     @observable chosenSamplesAudio: HTMLAudioElement[] = [];
     @observable monosegs: string[] = [];
     @observable netRatingSegments: string[] = [];
-    @observable netRatings: Map<string, number> = observable.map() as any;
+    @observable netRatings: Map<string, {[r: string]: number}> = observable.map() as any;
     @observable currentMonoseg: number = -1;
     @observable state: "loading" | "beforeGame" | "ingame" | "after" | "rateNet";
     @observable hasBCedOnce = false;
@@ -131,26 +131,44 @@ const Select = mobxReact.observer(function Select({ value, options, label }: { v
 @mobxReact.observer
 class Segment extends React.Component<{ store: Store, segment: string }, {}> {
     random = Math.random();
-    setRating = (segment: string, rating: string) => {
-        this.props.store.netRatings.set(segment, +rating);
-        this.props.store.socket.emit("submitNetRatings", { segments: [[segment, +rating]], final: false }, () => { });
+    setRating = (segment: string, ratingType: common.ratingTypes, rating: string) => {
+        const store = this.props.store;
+        
+        if(!this.props.store.netRatings.has(segment)) {
+            const r = Object.assign({}, ...common.ratingTypes.map(r => ({[r]: undefined}))) as {[r: string]: number};
+            store.netRatings.set(segment, r);
+        }
+        const r = this.props.store.netRatings.get(segment)!;
+        r[ratingType] = +rating;
+        this.props.store.socket.emit("submitNetRatings", { segments: [[segment, {[ratingType]: +rating}]], final: false }, () => { });
     }
     render() {
         const { store, segment } = this.props;
+        const labels = {
+            "naturalness": ["Very Unnatural", "Completely Natural"],
+            "timing": ["Inappropriate", "Appropriate"]
+        };
+        const titles = {
+            "naturalness": "Naturalness",
+            "timing": "Timing"
+        }
         return (
             <div>
                 <div><audio src={segment + "?" + this.random} controls style={{ width: "100%", marginBottom: "1em" }} /></div>
-                Very Unnatural
-                <B.RadioGroup
-                    //label="Your rating"
-                    className="pt-control pt-inline"
-                    //className="pt-inline"
-                    onChange={(e: React.SyntheticEvent<HTMLInputElement>) => this.setRating(segment, e.currentTarget.value)}
-                    selectedValue={store.netRatings.get(segment) + ""}
-                >
-                    {...[1, 2, 3, 4, 5].map(r => <B.Radio className="pt-inline" key={r} label={"" + r} value={"" + r} />)}
-                </B.RadioGroup>
-                <span style={{ marginLeft: "-20px" }}>Completely Natural</span>
+                {common.ratingTypes.map(ratingType => <div key={ratingType} className="temp">
+                    <h5>{titles[ratingType]}</h5>
+                    <span>{labels[ratingType][0]}</span>
+                    <B.RadioGroup
+                        //label="Your rating"
+                        className="pt-control pt-inline"
+                        //className="pt-inline"
+                        onChange={(e: React.SyntheticEvent<HTMLInputElement>) => this.setRating(segment, ratingType, e.currentTarget.value)}
+                        selectedValue={store.netRatings.has(segment) ? store.netRatings.get(segment)![ratingType] + "": undefined}
+                    >
+                        {...[1, 2, 3, 4, 5].map(r => <B.Radio className="pt-inline" key={r} label={"" + r} value={"" + r} />)}
+                    </B.RadioGroup>
+                    <span style={{ marginLeft: "-20px" }}>{labels[ratingType][1]}</span> 
+                </div>)}
                 <hr />
             </div>
         );
@@ -166,7 +184,7 @@ class NetRatingScreen extends Component {
         return (
             <div>
                 <p>Listen to the following conversations. One person is talking about a topic, another person is listening and giving backchannel feedback (e.g. "uh-hum", "yeah", "right").</p>
-                <p>Rate the way the <i>listener</i> sounds from 1 ("very unnatural") to 5 ("completely natural").</p>
+                <p>Rate how natural the conversation sounds and how appropriate the backchannel timing is.</p>
                 <hr />
                 {store.netRatingSegments.map(segment => <Segment key={segment} segment={segment} store={store} />)}
                 {!this.canSubmit && <div className="pt-callout pt-intent-warning">You need to rate at least 5 of the above to be able to submit</div>}

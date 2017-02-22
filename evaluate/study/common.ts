@@ -1,6 +1,9 @@
 type ServerMessages = {
 }
 export type BCSamples = {name: string, samples: string[]};
+export type ratingTypes = "timing" | "naturalness";
+export const ratingTypes: ratingTypes[] = ["naturalness", "timing"];
+
 type ClientRPCs = {
     getData: {
         request: {},
@@ -20,7 +23,7 @@ type ClientRPCs = {
         response: {}
     }
     submitNetRatings: {
-        request: {segments: [string, number][], final: boolean},
+        request: {segments: [string, {[r: string]: number}][], final: boolean},
         response: {}
     }
     comment: {
