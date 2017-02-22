@@ -48,7 +48,14 @@ class GUI extends Component {
         reduced.ratingCount += 1;
         return reduced;
     }
-
+    timeTaken(session: Session) {
+        const created = new Date(session.created);
+        const key = (rating: NetRating) => new Date(rating.created).getTime();
+        const data = this.data!.filter(rating => rating.session.id === session.id).sort((a, b) => key(b) - key(a));
+        if (data.length > 0)
+            return (key(data[0]) - created.getTime()) / 1000;
+        else return 0;
+    }
     render() {
         if (!this.data) return <div>Loading...</div>;
         return (
@@ -84,15 +91,18 @@ class GUI extends Component {
                 />
                 <table>
                     <thead>
-                        <tr><th>Session ID</th><th>Created</th><th>Comment</th></tr>
+                        <tr><th>Session ID</th><th>Created</th><th>Time taken</th><th>Comment</th><th>IP</th><th>Agent</th></tr>
                     </thead>
                     <tbody>
-                        {this.sessions && this.sessions.map(session => 
+                        {this.sessions && this.sessions.map(session =>
                             <tr>
                                 <td>{session.id}</td>
                                 <td>{session.created}</td>
+                                <td>{this.timeTaken(session)}</td>
                                 {/*<td>{JSON.stringify(session.handshake, null, 3)}</td>*/}
                                 <td>{session.comment}</td>
+                                <td>{(session.handshake as any)['address']}</td>
+                                <td>{(session.handshake as any)['headers']['user-agent']}</td>
                             </tr>
                         )}
                     </tbody>

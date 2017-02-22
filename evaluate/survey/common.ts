@@ -35,7 +35,7 @@ type ClientRPCs = {
 type ClientMessages = {
 }
 
-export interface RouletteClientSocket {
+export interface TypedClientSocket {
     on<K extends keyof ServerMessages>(type: K, listener: (info: ServerMessages[K]) => void): this;
 
     emit<K extends keyof ClientMessages>(type: K, info: ClientMessages[K]): this;
@@ -44,7 +44,7 @@ export interface RouletteClientSocket {
     disconnect(): any;
 }
 
-export interface RouletteServerSocket {
+export interface TypedServerSocket {
     on<K extends keyof ClientMessages>(type: K, listener: (info: ClientMessages[K]) => void): this;
     on<K extends keyof ClientRPCs>(type: K, listener: (info: ClientRPCs[K]["request"], callback: (data: ClientRPCs[K]["response"]) => void) => void): this;
 

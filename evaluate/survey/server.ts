@@ -173,7 +173,7 @@ function range(min: number, maxExclusive: number) {
     return Array.from(Array(maxExclusive - min), (_, k) => min + k);
 }
 function initClient(_client: SocketIO.Socket) {
-    const client = _client as common.RouletteServerSocket;
+    const client = _client as common.TypedServerSocket;
     let session = new Session();
     const meta = _client.request;
     session.handshake = JSON.stringify(_client.handshake);
