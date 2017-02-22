@@ -165,7 +165,7 @@ class NetRatingScreen extends Component {
         const store = this.props.store;
         return (
             <div>
-                <p>Listen to the following audio samples. One person will be talking and another listening.</p>
+                <p>Listen to the following conversations. One person is talking about a topic, another person is listening and giving backchannel feedback (e.g. "uh-hum", "yeah", "right").</p>
                 <p>Rate the way the <i>listener</i> sounds from 1 ("very unnatural") to 5 ("completely natural").</p>
                 <hr />
                 {store.netRatingSegments.map(segment => <Segment key={segment} segment={segment} store={store} />)}
@@ -352,7 +352,7 @@ class GUI extends Component {
     }
     render() {
         return (
-            <div style={{ maxWidth: "900px", margin: "0 auto", marginTop: "1em" }}>
+            <div style={{ maxWidth: "800px", margin: "0 auto", marginTop: "1em" }}>
                 <h1>Backchannel Survey</h1>
                 <hr />
                 {this.inner()}
