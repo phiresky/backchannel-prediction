@@ -24,18 +24,23 @@ function getPredictor(segment: string) {
     const [, type, ...stuff] = segment.split("/");
     return type;
 }
+class TPivot extends ReactPivot<NetRating, Reduced> { }
 class GUI extends Component {
     @observable.ref
     data: NetRating[] | null = null;
+    @observable.ref
+    sessions: Session[] | null = null;
 
     constructor() {
         super();
         this.load();
     }
     async load() {
+        let url1 = location.protocol + "//" + location.hostname + ":8001" + location.pathname;
         let url = location.protocol + "//" + location.hostname + ":8001" + location.pathname + "ratings.json";
         url += "?" + Math.random();
-        this.data = await (fetch(url).then(resp => resp.json()) as any);
+        this.data = await (fetch("ratings.json").then(resp => resp.json()) as any);
+        this.sessions = await (fetch("sessions.json").then(resp => resp.json()) as any);
     }
     reduce(row: NetRating, reduced: Reduced) {
         if (!reduced.ratingCount) Object.assign(reduced, initialReduced);
@@ -46,16 +51,16 @@ class GUI extends Component {
 
     render() {
         if (!this.data) return <div>Loading...</div>;
-        class TPivot extends ReactPivot<NetRating, Reduced> {}
         return (
             <div>
+                <button onClick={() => this.load()}>Reload</button>
                 <TPivot
                     rows={this.data}
                     dimensions={[
                         { value: row => row.session.id, title: 'Session ID' },
                         { value: row => getPredictor(row.segment), title: 'Predictor' },
-                        { value: row => row.ratingType, title: 'Rating Type'},
-                        { value: row => !row.final, title: 'wasOverwritten'}
+                        { value: row => row.ratingType, title: 'Rating Type' },
+                        { value: row => !row.final, title: 'wasOverwritten' }
                     ]}
                     reduce={this.reduce}
                     activeDimensions={[
@@ -63,7 +68,7 @@ class GUI extends Component {
                         "Rating Type",
                         "Predictor"
                     ]}
-                    solo={{title: "wasOverwritten", value: "false"}}
+                    solo={{ title: "wasOverwritten", value: "false" }}
                     calculations={[
                         {
                             title: 'Average Rating',
@@ -77,6 +82,21 @@ class GUI extends Component {
                         }
                     ]}
                 />
+                <table>
+                    <thead>
+                        <tr><th>Session ID</th><th>Created</th><th>Comment</th></tr>
+                    </thead>
+                    <tbody>
+                        {this.sessions && this.sessions.map(session => 
+                            <tr>
+                                <td>{session.id}</td>
+                                <td>{session.created}</td>
+                                {/*<td>{JSON.stringify(session.handshake, null, 3)}</td>*/}
+                                <td>{session.comment}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         )
     }

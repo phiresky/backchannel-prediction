@@ -87,6 +87,10 @@ function assumeSingleGlob(path: string) {
 const meths = ["nn", "truthrandom", "random"];
 const r = Random.engines.mt19937().autoSeed(); //.seed(1337);
 
+function getPredictor(segment: string) {
+    const [, type, ...stuff] = segment.split("/");
+    return type;
+}
 async function listen() {
     db = await openDatabase();
     bcSamples = glob.sync(join(__dirname, "data/BC", "*/"))
@@ -121,6 +125,46 @@ async function listen() {
     app.use("/data", dataRewriter);
     app.use("/", express.static(join(__dirname, "static")));
     app.use("/data", express.static(join(__dirname, "data"), nocaching));
+    app.get("/result.json", async (req, res) => {
+        const session = +req.query.session;
+        if (!session) {
+            res.status(400).send("invalid request");
+            return;
+        }
+        res.setHeader('Content-Type', 'application/json');
+        const q = db.entityManager.createQueryBuilder(NetRating, "netRating")
+            .where("netRating.final = 1")
+            .innerJoinAndSelect("netRating.session", "session")
+            .andWhere("session.id = :session", { session });
+        const resp = await q.getMany();
+        const x = {} as any;
+        for (const ratingType of common.ratingTypes) {
+            const name: any = {
+                "nn": "Neural Net output",
+                "truthrandom": "Ground Truth (random audio samples)",
+                "random": "Random predictor (baseline)"
+            };
+            const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+            x[ratingType] = Object.assign({}, ...meths.map(meth => (
+                { [name[meth]]: avg(resp.filter(x => x.ratingType === ratingType && getPredictor(x.segment) === meth).map(rating => rating.rating!)) }
+            )));
+        }
+        res.send(JSON.stringify(x, null, "\t"));
+    });
+    app.get("/pcqxnugylresibwhwmzv/ratings.json", async (req, res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        const resp = await db.entityManager.createQueryBuilder(NetRating, "rating")
+            .innerJoinAndSelect("rating.session", "session")
+            .getMany();
+        res.send(JSON.stringify(resp, (k, v) => k === 'handshake' ? JSON.parse(v) : v));
+    });
+    app.get("/pcqxnugylresibwhwmzv/sessions.json", async (req, res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+        const resp = await db.entityManager.find(Session);
+        res.send(JSON.stringify(resp, (k, v) => k === 'handshake' ? JSON.parse(v) : v));
+    });
     const socket = io(server);
 
     socket.on('connection', initClient);
@@ -163,7 +207,7 @@ function initClient(_client: SocketIO.Socket) {
     });
     client.on("submitNetRatings", async ({ segments, final }, callback) => {
         const entities = [] as NetRating[];
-        for(const [segment, rating] of segments) {
+        for (const [segment, rating] of segments) {
             for (const ratingType of Object.keys(rating)) {
                 const x = new NetRating();
                 x.rating = rating[ratingType];
