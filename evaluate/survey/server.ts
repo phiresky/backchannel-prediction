@@ -13,10 +13,10 @@ import {
 } from 'typeorm';
 import { openDatabase, Session, BCPrediction, NetRating } from './db';
 import "reflect-metadata";
-const expectedHost = process.env.HOST || 'survey.thesis.host';
+const expectedHost = [process.env.HOST, 'survey.thesis.host', 'study.thesis.host'];
 
 function rejectUnknownHosts(req: express.Request, res: express.Response, next: express.NextFunction) {
-    if (req.headers.host !== expectedHost)
+    if (expectedHost.indexOf(req.headers.host) < 0)
         res.status(404).send('Not found ;)');
     else next();
 }
