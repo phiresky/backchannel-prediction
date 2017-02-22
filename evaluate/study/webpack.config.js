@@ -12,7 +12,18 @@ const plugins = [
 		title: 'Backchannel Survey',
 		template: require('html-webpack-template'),
 		inject: false,
-		mobile: true
+		mobile: true,
+		appMountId: 'app',
+		excludeChunks: ['admin']
+	}),
+	new HtmlWebpackPlugin({
+		title: 'Backchannel Survey',
+		template: require('html-webpack-template'),
+		inject: false,
+		mobile: true,
+		appMountId: 'app',
+		filename: 'pcqxnugylresibwhwmzv/index.html',
+		excludeChunks: ['client']
 	})
 ];
 if (production) {
@@ -25,7 +36,8 @@ if (production) {
 }
 module.exports = {
 	entry: {
-		"client": "./client"
+		"client": "./client",
+		"admin": "./admin"
 	},
 	devtool: 'source-map',
 	output: {
@@ -59,8 +71,8 @@ module.exports = {
 				loader: ExtractTextPlugin.extract('css-loader?sourceMap!less-loader')
 			},
 			{ test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff&name=[name]-[hash].[ext]" },
-			{ test: /\.(ttf|eot|svg|png|jpg|mp3)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "file-loader?name=[name]-[hash].[ext]" }
-
+			{ test: /\.(ttf|eot|svg|png|jpg|mp3)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "file-loader?name=[name]-[hash].[ext]" },
+			{test: /\.jsx?$/, include: /react-pivot/, loader: 'babel-loader', query: {presets: ['es2015', 'react']} }
 		],
 	},
 	resolve: {

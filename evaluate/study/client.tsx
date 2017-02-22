@@ -364,11 +364,9 @@ class GUI extends Component {
 let gui;
 let store;
 document.addEventListener("DOMContentLoaded", () => {
-    const div = document.createElement("div");
     const _socket = io();
     const socket = _socket as any as common.RouletteClientSocket;
     store = new Store(socket);
-    document.body.appendChild(div);
-    gui = render(<GUI store={store} />, div);
+    gui = render(<GUI store={store} />, document.getElementById("app"));
     Object.assign(window, { store, gui, mobx, mobxReact });
 });
