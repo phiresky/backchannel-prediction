@@ -24,15 +24,6 @@ let db: Connection;
 let bcSamples: common.BCSamples[];
 let monosegs: string[];
 let netRatingSegments: string[][];
-const preferred = [
-    "sw2007B @294.",
-    //"sw2476B @13.",
-    "sw2396A @381.",
-    "sw2491B @387.",
-    "sw4774B @130.",
-    "sw3038B @250.",
-    "sw2325A @61.",
-] as string[];
 class TwoWayMap<A, B> {
     mapA = new Map<A, B>();
     mapB = new Map<B, A>();
@@ -87,10 +78,6 @@ function assumeSingleGlob(path: string) {
 const meths = ["nn", "truthrandom", "random"];
 const r = Random.engines.mt19937().autoSeed(); //.seed(1337);
 
-function getPredictor(segment: string) {
-    const [, type, ...stuff] = segment.split("/");
-    return type;
-}
 async function listen() {
     db = await openDatabase();
     bcSamples = glob.sync(join(__dirname, "data/BC", "*/"))
@@ -99,8 +86,8 @@ async function listen() {
 
     monosegs = glob.sync(join(__dirname, "data/mono/*.wav"));
     Random.shuffle(r, monosegs);
-    monosegs.unshift(...preferred.map(str => assumeSingleGlob(join(__dirname, "data/mono", str + "*.wav"))));
-    console.log("we have", preferred.length, "preferred segments, adding", wantedSegCount - preferred.length, "random ones");
+    monosegs.unshift(...common.preferred.map(str => assumeSingleGlob(join(__dirname, "data/mono", str + "*.wav"))));
+    console.log("we have", common.preferred.length, "preferred segments, adding", wantedSegCount - common.preferred.length, "random ones");
     monosegs = monosegs.map(d => join("/mono", basename(d)));
     monosegs = monosegs.slice(0, wantedSegCount);
     netRatingSegments = monosegs
@@ -168,11 +155,13 @@ async function listen() {
     const socket = io(server);
 
     socket.on('connection', initClient);
+    socket.on('connect', () => console.log("connect", new Date()));
 }
 function range(min: number, maxExclusive: number) {
     return Array.from(Array(maxExclusive - min), (_, k) => min + k);
 }
 function initClient(_client: SocketIO.Socket) {
+    console.log("initing client", new Date());
     const client = _client as common.TypedServerSocket;
     let session = new Session();
     const meta = _client.request;

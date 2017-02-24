@@ -17,7 +17,9 @@ declare module 'react-pivot' {
             rows: Row[];
             dimensions: Dimension<Row>[];
             activeDimensions: string[];
-            solo: {title: string, value: string}
+            hiddenColumns?: string[];
+            sortBy?: string;
+            solo?: {title: string, value: string}
             calculations: Calculation<Row, Reduced>[];
             reduce<T>(row: Row, reduced: Reduced): Reduced;
         }

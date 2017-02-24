@@ -1,6 +1,6 @@
 type ServerMessages = {
 }
-export type BCSamples = {name: string, samples: string[]};
+export type BCSamples = { name: string, samples: string[] };
 export type ratingTypes = "timing" | "naturalness";
 export const ratingTypes: ratingTypes[] = ["naturalness", "timing"];
 
@@ -15,15 +15,15 @@ type ClientRPCs = {
         }
     },
     beginStudy: {
-        request: {bcSampleSource: string},
+        request: { bcSampleSource: string },
         response: {}
     },
     submitBC: {
-        request: {time: number, duration: number, segment: string},
+        request: { time: number, duration: number, segment: string },
         response: {}
     }
     submitNetRatings: {
-        request: {segments: [string, {[r: string]: number}][], final: boolean},
+        request: { segments: [string, { [r: string]: number }][], final: boolean },
         response: {}
     }
     comment: {
@@ -49,4 +49,21 @@ export interface TypedServerSocket {
     on<K extends keyof ClientRPCs>(type: K, listener: (info: ClientRPCs[K]["request"], callback: (data: ClientRPCs[K]["response"]) => void) => void): this;
 
     emit<K extends keyof ServerMessages>(type: K, info: ServerMessages[K]): this;
+}
+
+export const preferred = [
+    "sw2007B @294.",
+    //"sw2476B @13.",
+    "sw2396A @381.",
+    "sw2491B @387.",
+    "sw4774B @130.",
+    "sw3038B @250.",
+    "sw2325A @61.",
+] as string[];
+
+export function getPredictor(segmentPath: string) {
+    const [, type, filename] = segmentPath.split("/");
+    const [sample, time, ..._] = filename.split(" ");
+    const preferredId = preferred.findIndex(ele => filename.startsWith(ele));
+    return { type, sample, sampletime: sample + " " + time, time, filename, preferredId };
 }
