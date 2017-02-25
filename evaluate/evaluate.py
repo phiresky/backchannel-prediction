@@ -189,7 +189,8 @@ def evaluate_conv_multiclass(config_path: str, convid: str, config: dict):
                     reader.get_backchannels(list(reader.get_utterances(bc_convid)))]
     correct_bcs = [time for time, _ in _correct_bcs]
     correct_categories = [cat for _, cat in _correct_bcs]
-
+    if 'random_baseline' in config:
+        raise Exception("cant baseline multiclass")
     if 'sigma_ms' in config:
         if 'smoother' in config:
             raise Exception('conflicting options: smoother and sigma')
