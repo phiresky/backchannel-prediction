@@ -47,7 +47,7 @@ const make_extract_config = ({input_features = features_ffv, extraction_method =
 const make_train_config = ({
     context_ms = 1500, context_stride = 2, layer_sizes = [70, 35] as number[]|[number|null, number][],
     model_function = "lstm_simple",
-    epochs = 100
+    epochs = 150
 } = {}) => ({
     model_function,
     epochs,

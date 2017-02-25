@@ -3,8 +3,23 @@ Code for my bachelor thesis and the corresponding paper
 More documentation to follow :)
 
 
-The final configurations are in configs/finunified. All of these are generated with configs/meta_config_generator.ts
+The final configurations are in configs/finunified. All of the ones in `vary-*` are generated with configs/meta_config_generator.ts
 
+## Setup
+
+### Get the data
+
+See [data/README.md](data/README.md) for more details.
+
+### Build Janus
+
+```bash
+cd janus
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+sudo python setup.py develop
+```
 
 ## Meta config generator
 
@@ -15,7 +30,7 @@ Run this from the project root:
     ts-node --fast configs/meta_config_generator.ts
    
 
-## Web Visualizer
+## Data Visualizer
 
 Server is in /web_vis/py/
 
@@ -33,5 +48,21 @@ This will start a webserver serving the client at <http://localhost:3000>, which
 
 ## Extraction
 
+The main script for extraction is extract/readDB.py. Run it via
+
+    export JOBS=4 # run in parallel
+    python -m extract.readDB configs/...
+   
+Note that the extraction will also be run automatically when before training when necessary
+
 ## Training
 
+## Evaluation Visualizer
+
+Build it and run the server
+
+    cd evaluate/plot
+    yarn
+    yarn run dev
+
+Then go to <http://localhost:8080/evaluate/plot/dist/>

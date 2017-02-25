@@ -543,14 +543,20 @@ def gpyopt(parallel, config_path, conversations_list, params):
     return results
 
 
-def gpyopt_all(parallel, config_path, convos_valid, convos_eval):
-    for params in [
-        gpyopt_parameters_center0,
-        gpyopt_parameters_mmueller,
-        gpyopt_parameters_best,
-        gpyopt_parameters_w4,
-        gpyopt_parameters_w6
-    ]:
+def gpyopt_all(parallel, config_path, convos_valid, convos_eval, only_best: bool):
+    if only_best:
+        paramss = [
+            gpyopt_parameters_best,
+        ]
+    else:
+        paramss = [
+            gpyopt_parameters_center0,
+            gpyopt_parameters_mmueller,
+            gpyopt_parameters_best,
+            gpyopt_parameters_w4,
+            gpyopt_parameters_w6
+        ]
+    for params in paramss:
         print(f"searching in {params.__name__}")
         results = gpyopt(parallel, config_path, convos_valid, params())
         best = max(results, key=lambda res: res['totals']['f1_score'])
@@ -586,10 +592,21 @@ def stat(config_path: str):
 
 do_detailed_analysis = False
 manual_analysis = False
+all_margins = False
 
 
 def main():
     config_path = sys.argv[1]
+    dowhat = sys.argv[2]
+    if dowhat == "allmargins":
+        # auto find best params for all margins
+        manual_analysis = False
+        all_margins = True
+    elif dowhat == "bestmargin":
+        manual_analysis = False
+        all_margins = False
+    else:
+        raise Exception("dowhat?")
     # return stat(config_path)
     _, _, version, _ = config_path.split("/")
     out_dir = os.path.join("evaluate", "out", version)
@@ -612,10 +629,6 @@ def main():
     eval_conversations = sorted(conversations['eval'])
     valid_conversations = sorted(conversations['validate'])
     do_baseline = config['eval_config'].get('do_random_baseline', None)
-    if do_detailed_analysis:
-        confs = list(detailed_analysis(config))
-    else:
-        confs = list(general_interesting_2(config))
     with Parallel(n_jobs=int(os.environ.get('JOBS', '1'))) as parallel:
         print(f"filling caches...")
         eval_config = default_config
@@ -624,7 +637,8 @@ def main():
         evaluate_convs(parallel, config_path, [*valid_conversations, *eval_conversations],
                        default_config, showprog=True)
         if not manual_analysis:
-            itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations)
+            itera = gpyopt_all(parallel, config_path, valid_conversations, eval_conversations,
+                               only_best=not all_margins)
             for inx, r in enumerate(itera):
                 print(f" itera {inx} ({len(r)} results)")
                 print(f"bayesian search done, checking scores on eval data set")
@@ -633,6 +647,10 @@ def main():
                     json.dump(res, f, indent='\t')
             return
         else:
+            if do_detailed_analysis:
+                confs = list(detailed_analysis(config))
+            else:
+                confs = list(general_interesting_2(config))
             # manual search
             for inx, eval_config in enumerate(confs):
                 if do_baseline is not None:
