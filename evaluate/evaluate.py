@@ -121,13 +121,18 @@ def get_predictions(config_path: str, convid: str, eval_config: dict):
 
 
 @functools.lru_cache()
-def get_best_eval_config(config_path: str, margin: Tuple[float, float]):
+def get_best_eval_config(config_path: str, *, margin: Tuple[float, float] = None, filter=None):
     import os.path
     _, _, version, _ = config_path.split("/")
     eval_path = os.path.join("evaluate/out", version, "results.json")
     with open(eval_path) as f:
         results = json.load(f)
-    results = [result for result in results if np.allclose(result['config']['margin_of_error'], margin)]
+    if margin is not None:
+        results = [result for result in results if np.allclose(result['config']['margin_of_error'], margin)]
+    if filter is not None:
+        results = [result for result in results if filter(result)]
+    if len(results) == 0:
+        raise Exception("found no matching eval results")
     best = max(results, key=lambda res: res['totals'].get('valid', res['totals'])['f1_score'])['config']
     print("best eval conf:")
     print(best)
