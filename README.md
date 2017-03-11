@@ -29,6 +29,10 @@ Run this from the project root:
 
     ts-node --fast configs/meta_config_generator.ts
    
+The best network configuration according to the objective evaluation is
+
+    configs/finunified/vary-features/lstm-best-features-power,pitch,ffv,word2vec_dim30.json
+
 
 ## Data Visualizer
 
