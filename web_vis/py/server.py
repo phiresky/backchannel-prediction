@@ -237,7 +237,10 @@ async def sendFeature(ws, id: str, conv: str, featFull: str):
         feats = get_extracted_features(origReader)
         featname, = path
         if featname in feats:
-            return await sendNumFeature(ws, id, conv, featFull, feats[featname](convid))
+            featout = feats[featname](convid)
+            if featname == "pitch":
+                featout = -featout
+            return await sendNumFeature(ws, id, conv, featFull, featout)
         raise Exception("feature not found: {}".format(featFull))
     else:
         raise Exception("unknown category " + category)

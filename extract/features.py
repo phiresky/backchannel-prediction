@@ -263,7 +263,7 @@ class Features:
                 return x
             cutoff = sigma * smoother['cutoff_sigma']
             # 4 x sigma contains 99.9 of values
-            window = scipy.signal.gaussian(sigma * 2 * 4, sigma).astype(np.float32)
+            window = scipy.signal.gaussian(int(round(sigma * 2 * 4)), sigma).astype(np.float32)
             # cut off only on left side (after convolution this is the future)
             window = window[int(np.round(len(window) / 2 - cutoff)):]
             window = window / sum(window)
