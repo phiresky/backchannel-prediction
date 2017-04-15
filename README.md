@@ -1,9 +1,6 @@
 Code for my bachelor thesis and the corresponding paper
 
-More documentation to follow :)
-
-
-The final configurations are in configs/finunified. All of the ones in `vary-*` are generated with configs/meta_config_generator.ts
+The final configurations are in [configs/finunified](configs/finunified). All of the ones in `vary-*` are generated with configs/meta_config_generator.ts
 
 ## Setup
 
@@ -20,6 +17,12 @@ cmake ..
 make -j$(nproc)
 sudo python setup.py develop
 ```
+
+## Reproducing the results of the paper
+
+You can reproduce the results of the paper using the script [scripts/reproduce.sh](scripts/reproduce.sh).
+
+Note that this may take a long time (~3h to extract the data (only once), ~2h to train one LSTM, 1h to evaluate it).
 
 ## Meta config generator
 
@@ -57,7 +60,7 @@ The main script for extraction is extract/readDB.py. Run it via
     export JOBS=4 # run in parallel
     python -m extract.readDB configs/...
    
-Note that the extraction will also be run automatically when before training when necessary
+Note that the extraction will also be run automatically when before training when necessary, with all the results being cached. The `data/cache` folder will grow to about 10-20 GByte.
 
 ## Training
 
@@ -70,3 +73,7 @@ Build it and run the server
     yarn run dev
 
 Then go to <http://localhost:8080/evaluate/plot/dist/>
+
+## Technical details
+
+You can see more information in `Section 6: Implementation` of my bachelor's thesis, see here: https://github.com/phiresky/bachelor-thesis/blob/master/build/thesis.pdf
