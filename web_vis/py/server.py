@@ -175,7 +175,7 @@ def get_larger_threshold_feature(feat: Feature, reader: DBReader, name: str, thr
 
 
 def maybe_onedim(fes):
-    single_out_dim = False
+    single_out_dim = True
     if single_out_dim:
         return 1 - fes[:, [0]]
     else:

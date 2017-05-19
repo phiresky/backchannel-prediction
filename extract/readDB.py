@@ -571,31 +571,13 @@ def count(config_path):
 
 
 @functools.lru_cache(maxsize=1)
-def word_to_vec(config_path: str, dimension: int):
+def word_to_vec(config_path: str, dimension: int, T = ""):
     folder = "data/word2vec"
-    words_file = os.path.join(folder, f"words-noisefiltered-{dimension}")
-    phrases_file = os.path.join(folder, f"phrases-noisefiltered-{dimension}")
-    w2v_file = os.path.join(folder, f"noisefiltered-{dimension}.bin")
+    words_file = os.path.join(folder, f"{T}words-noisefiltered-{dimension}")
+    phrases_file = os.path.join(folder, f"{T}phrases-noisefiltered-{dimension}")
+    w2v_file = os.path.join(folder, f"{T}noisefiltered-{dimension}.bin")
     import word2vec
-    if os.path.isfile(w2v_file):
-        logging.debug(f"{w2v_file} exists, returning that")
-        return word2vec.load(w2v_file)
 
-    reader = loadDBReader(config_path)
-    allconvs = [conv for ls in read_conversations(reader.config).values() for conv in ls]
-
-    def gen():
-        for conv in tqdm(allconvs):
-            for channel in ["A", "B"]:
-                convid = f"{conv}-{channel}"
-                for utt, uttInfo in reader.get_utterances(convid):
-                    for word in reader.uttDB.get_words_for_utterance(utt, uttInfo):
-                        txt = reader.noise_filter(word['text'])
-                        if len(txt) > 0:
-                            yield word['text'] + " "
-
-    with open(words_file, "w") as f:
-        f.writelines(gen())
     word2vec.word2phrase(words_file, phrases_file, verbose=True)
     word2vec.word2vec(phrases_file, w2v_file, size=dimension)
     logging.info("wrote to " + w2v_file)

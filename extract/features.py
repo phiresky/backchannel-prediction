@@ -124,6 +124,15 @@ def pure_get_word2vec_dim20(adc_path: str, sample_window_ms: int, convid: str) -
 def pure_get_word2vec_dim30(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
     return get_word2vec(adc_path, sample_window_ms, convid, 30)
 
+@functools.lru_cache(maxsize=32)
+@DiskCache
+def pure_get_word2vec_dim30_4M(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
+    return get_word2vec(adc_path, sample_window_ms, convid, 30, "4M")
+
+@functools.lru_cache(maxsize=32)
+@DiskCache
+def pure_get_word2vec_dim30_4M_clean(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
+    return get_word2vec(adc_path, sample_window_ms, convid, 30, "4Mclean")
 
 @functools.lru_cache(maxsize=32)
 @DiskCache
@@ -155,16 +164,18 @@ def pure_get_word2vec_dim100(adc_path: str, sample_window_ms: int, convid: str) 
     return get_word2vec(adc_path, sample_window_ms, convid, 100)
 
 
-def get_word2vec(adc_path: str, sample_window_ms: int, convid: str, feat_dim: int) -> Feature:
+def get_word2vec(adc_path: str, sample_window_ms: int, convid: str, feat_dim: int, T="") -> Feature:
     from extract import readDB
+    cp = "trainNN/out/v050-finunified-16-g1be124b-dirty:lstm-best-features-power,pitch,ffv,word2vec_dim30-slowbatch/config.json"
     model = readDB.word_to_vec(
-        "extract/config.json",
-        dimension=feat_dim)
+        cp,
+        dimension=feat_dim,
+        T=T)
     # for dimensions
     pow = pure_get_power(adc_path, sample_window_ms, convid)
     frames, _ = pow.shape
     w2v = np.zeros((frames, feat_dim), dtype=np.float32)
-    reader = readDB.loadDBReader("extract/config.json")  # exact config file is unimportant
+    reader = readDB.loadDBReader("configs/finunified/vary-features/lstm-best-features-power,ffv.json")  # exact config file is unimportant
     words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
              readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
     inx = 0
