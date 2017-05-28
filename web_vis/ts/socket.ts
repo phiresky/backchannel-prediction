@@ -133,7 +133,10 @@ export class SocketManager {
 
                 console.log("RECEIVING BUF", meta);
                 const feature = this.getFeature(meta.conversation, meta.feature).data;
-                if (!feature) throw Error("received feature data before feature: " + meta.feature);
+                if (!feature) {
+                    console.error("received feature data before feature: " + meta.feature);
+                    return;
+                }
                 if (!c.isNumFeature(feature)) throw Error("wat2");
 
                 let floatsArray;

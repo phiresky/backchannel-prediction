@@ -68,7 +68,7 @@ class OptimizedFeaturesTree {
         const path = parentPath + "/" + category.name;
         let children = category.children.map(c => this.getFeaturesTree(path, c));
         return {
-            id: path,
+            id: path + "@",
             label: category.name,
             get childNodes(this: B.ITreeNode) {
                 if (!this.isExpanded) return [];
@@ -220,8 +220,14 @@ export class GUI extends React.Component<{}, {}> {
     @mobx.observable zoom = {
         left: 0, right: 1
     };
-    @mobx.observable totalTimeSeconds = NaN;
-
+    @mobx.observable _totalTimeSeconds = NaN;
+    get totalTimeSeconds() {
+        return this._totalTimeSeconds;
+    }
+    set totalTimeSeconds(v) {
+        if(v === null) throw new Error("NO")
+        this._totalTimeSeconds = v;
+    }
     audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
     uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
     @mobx.observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = mobx.action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
@@ -245,7 +251,7 @@ export class GUI extends React.Component<{}, {}> {
             conversation: this.conversation,
             uis: this.uis, // TODO: remove uuids
             zoom: this.zoom,
-            totalTimeSeconds: this.totalTimeSeconds
+            //totalTimeSeconds: this.totalTimeSeconds
         })));
     }
     @mobx.action
@@ -364,7 +370,9 @@ export class GUI extends React.Component<{}, {}> {
                 totalTime = feature.data.shape[0] * feature.shift / 1000;
             }
             if (!isNaN(totalTime)) {
-                if (isNaN(this.totalTimeSeconds)) mobx.runInAction("setTotalTime", () => this.totalTimeSeconds = totalTime);
+                if (isNaN(this.totalTimeSeconds)) mobx.runInAction("setTotalTime", () => {
+                    this.totalTimeSeconds = totalTime
+                });
                 else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
                 }
@@ -401,20 +409,16 @@ export class GUI extends React.Component<{}, {}> {
         this.socketManager.socketOpen().then(this.onSocketOpen);
     }
     getFeature(id: string | FeatureID) {
-        if (id === microphoneFeature.id) {
-            return new s.LulPromise(AudioRecorder.getFeature());
-        }
-        const f = this.socketManager.getFeature(this.conversation, id as any as FeatureID);
-        f.then(f => this.checkTotalTime(f));
+        let f: s.LulPromise<Feature>;
+        if (id === microphoneFeature.id) f = new s.LulPromise(AudioRecorder.getFeature());
+        else f = this.socketManager.getFeature(this.conversation, id as any as FeatureID);
+        f.then(f => {
+            this.checkTotalTime(f)
+        });
         return f;
     }
     getFeatures() {
-        return this.socketManager.getFeatures(this.conversation).then(features => {
-            return {
-                ...features,
-                categories: [...features.categories, { name: "client", children: [microphoneFeature.name] }],
-            };
-        });
+        return this.socketManager.getFeatures(this.conversation);
     }
     getConversations() {
         return this.socketManager.getConversations();
