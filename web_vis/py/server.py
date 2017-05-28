@@ -154,7 +154,7 @@ def get_features():
     return [
         dict(name="A", children=features),
         dict(name="B", children=features),
-        dict(name="microphone", children=[dict(name="extracted", children=feature_names),
+        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn"]),
                                           dict(name="NN outputs", children=netsTree)])
     ]
 
@@ -330,6 +330,14 @@ class MicrophoneHandler:
             self.context_frames = self.nn_config['train_config']['context_frames']
             self.context_stride = self.nn_config['train_config']['context_stride']
             self.context_range = self.context_frames * self.context_stride
+            self.features["nn"] = Feature(
+                np.zeros((round(1000 * self.buffer_length_s / self.window_shift_ms), 2),
+                         dtype=np.float32),
+                infofrom=dict(
+                    frame_window_ms=self.frame_window_ms,
+                    frame_shift_ms=self.window_shift_ms,
+                    initial_frame_offset_ms=0
+                ))
 
     def nn_eval(self, input):
         # adapted from extract.features.pure_get_multidim_net_output
@@ -390,11 +398,12 @@ class MicrophoneHandler:
                 gottenfeats.append(feat)
                 self.emit_change(featname, exact_offset_in_frames, feat)
             if self.do_nn is not None and exact_offset_in_frames - self.context_range >= 0:
-                fes = [self.features[f][exact_offset_in_frames - self.context_range:exact_offset_in_frames + expected_frames] for f in
-                     self.featurenames]
+                fes = [self.features[f][
+                       exact_offset_in_frames - self.context_range:exact_offset_in_frames + expected_frames] for f in
+                       self.featurenames]
                 combined_input = Feature(np.concatenate(fes, axis=1), infofrom=self.features[self.featurenames[0]])
                 output = self.nn_eval(combined_input)
-                print(output)
+                self.emit_change("nn", exact_offset_in_frames, output)
             self.previous_end_offset_samples = exact_offset + frame_shift_samples * expected_frames
 
     def emit_change(self, featname, frame_offset: int, feat):
