@@ -124,15 +124,18 @@ def pure_get_word2vec_dim20(adc_path: str, sample_window_ms: int, convid: str) -
 def pure_get_word2vec_dim30(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
     return get_word2vec(adc_path, sample_window_ms, convid, 30)
 
+
 @functools.lru_cache(maxsize=32)
 @DiskCache
 def pure_get_word2vec_dim30_4M(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
     return get_word2vec(adc_path, sample_window_ms, convid, 30, "4M")
 
+
 @functools.lru_cache(maxsize=32)
 @DiskCache
 def pure_get_word2vec_dim30_4M_clean(adc_path: str, sample_window_ms: int, convid: str) -> Feature:
     return get_word2vec(adc_path, sample_window_ms, convid, 30, "4Mclean")
+
 
 @functools.lru_cache(maxsize=32)
 @DiskCache
@@ -175,7 +178,8 @@ def get_word2vec(adc_path: str, sample_window_ms: int, convid: str, feat_dim: in
     pow = pure_get_power(adc_path, sample_window_ms, convid)
     frames, _ = pow.shape
     w2v = np.zeros((frames, feat_dim), dtype=np.float32)
-    reader = readDB.loadDBReader("configs/finunified/vary-features/lstm-best-features-power,ffv.json")  # exact config file is unimportant
+    reader = readDB.loadDBReader(
+        "configs/finunified/vary-features/lstm-best-features-power,ffv.json")  # exact config file is unimportant
     words = [(float(word['to']), reader.noise_filter(word['text'])) for word in
              readDB.get_all_nonsilent_words(reader, convid) if reader.noise_filter(word['text']) in model]
     inx = 0
@@ -236,6 +240,9 @@ class Features:
 
     def get_power(self, convid: str):
         return pure_get_power(self.config['paths']['adc'], self.sample_window_ms, convid)
+
+    def get_raw_power(self, convid: str):
+        return pure_get_raw_power(self.config['paths']['adc'], self.sample_window_ms, convid)
 
     def get_pitch(self, convid: str):
         return pure_get_pitch(self.config['paths']['adc'], self.sample_window_ms, convid)

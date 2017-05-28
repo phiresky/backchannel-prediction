@@ -84,6 +84,16 @@ def ms(ms: int):
     return f"{ms}ms"
 
 
+_min = float("inf")
+_max = float("-inf")
+
+# normalize some array to the range (-1, +1) with known global bounds
+def normalize_known(assumed_min: float, assumed_max: float, data):
+    zerotoone = (data - assumed_min) / (assumed_max - assumed_min)
+    minusonetoone = 2 * zerotoone - 1
+    return minusonetoone
+
+
 class Audio(np.ndarray):
     sample_rate_hz: int = None
 
@@ -128,6 +138,7 @@ class Audio(np.ndarray):
 
     def get_power(self, frame_window_ms: int, frame_shift_ms: int = 10):
         pow = self.to_num_feature().adc2pow(window=ms(frame_window_ms), shift=ms(frame_shift_ms))
+
         assert pow.shift == frame_shift_ms
         f = Feature(pow, infofrom=dict(frame_window_ms=frame_window_ms, frame_shift_ms=frame_shift_ms,
                                        initial_frame_offset_ms=frame_window_ms // 2))
@@ -135,12 +146,14 @@ class Audio(np.ndarray):
 
     def get_intonation(self, frame_window_ms: int, frame_shift_ms: int = 10) -> Feature:
         ffv = self.to_num_feature().intonation(window=ms(frame_window_ms), shift=ms(frame_shift_ms))
+        ffv = normalize_known(0, 1, ffv)
         return Feature(ffv, infofrom=dict(frame_window_ms=frame_window_ms, frame_shift_ms=frame_shift_ms,
                                           initial_frame_offset_ms=frame_window_ms // 2))
 
     def get_pitch(self, frame_window_ms: int, frame_shift_ms: int = 10) -> Feature:
         pitch = self.to_num_feature().applyPitchTracker(tracker, window=ms(frame_window_ms),
-                                                        shift=ms(frame_shift_ms)).normalize(min=-1, max=1)
+                                                        shift=ms(frame_shift_ms))
+        pitch = normalize_known(0, 200, pitch)
         return Feature(pitch, infofrom=dict(frame_window_ms=frame_window_ms, frame_shift_ms=frame_shift_ms,
                                             initial_frame_offset_ms=frame_window_ms // 2))
 
@@ -160,6 +173,8 @@ class Audio(np.ndarray):
 
         cepN = 20
         MFCC_MCEP = scipy.fftpack.dct(x=lMEL, type=2, n=cepN, norm="ortho")
+        # todo: normalize each dimension with their own respective min/maxes
+        # MFCC_MCEP = normalize_known(-7, 40, MFCC_MCEP)
         # normalize. warning: this is not actually possible in realtime because we don't yet know global min/max!
         MFCC_MCEP = sklearn.preprocessing.normalize(MFCC_MCEP, axis=0, norm='max')
         return Feature(MFCC_MCEP, infofrom=dict(frame_window_ms=frame_window_ms, frame_shift_ms=frame_shift_ms,
@@ -192,13 +207,16 @@ def filter_power(_power: Feature) -> Feature:
     return Feature(power, infofrom=_power)
 
 
+max_known_power = 0.17
 def filter_raw_power(_power: Feature) -> Feature:
-    b = _power.max() / 10 ** 4
+
+    b = max_known_power / 10 ** 4
     val = _power + b
     for i in range(0, len(val)):
         if val[i] <= 0:
             val[i] = 1
     power = np.log10(val)
+    power = normalize_known(-4.8, 0, power)
     return Feature(power, infofrom=_power)
 
 

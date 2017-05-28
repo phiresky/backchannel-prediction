@@ -29,3 +29,4 @@ def get_network_outputter(config_path: str, key: str, batch_size):
     y = lasagne.layers.get_output(out_layer, deterministic=True)
     f = theano.function([layers[0].input_var], y)
     return layers, f
+
