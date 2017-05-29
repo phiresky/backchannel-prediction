@@ -46,22 +46,26 @@ def write_convert(fname, data, sample_rate, downmix: bool, convFmt: str):
         outname = os.path.splitext(fname)[0] + "." + convFmt
         subprocess.call(['ffmpeg', '-y', '-loglevel', 'panic', '-i', fname, '-c:a', 'libmp3lame', '-q:a', '3', outname])
 
+def add_bc_to_audio_track(output_audio: Audio, start_index: int, bcs: List[Tuple[str, dict, float, Audio]]):
+    bc, bcInfo, bc_start_offset, bc_audio = random.choice(bcs)
+    audio_len_samples = bc_audio.shape[0]
+    if start_index < 0:
+        return
+    if start_index + audio_len_samples > output_audio.shape[0]:
+        audio_len_samples = output_audio.shape[0] - start_index
+    output_audio[start_index:start_index + audio_len_samples] += bc_audio[0: audio_len_samples]
+    return audio_len_samples
 
 def get_bc_audio(reader: DBReader, total_length_audio_index: int, bcs: List[Tuple[str, dict, float, Audio]],
                  predictions: Iterator[float]):
     output_audio = Audio(np.zeros(total_length_audio_index, dtype='int16'), sample_rate_hz=bcs[0][3].sample_rate_hz)
 
     for peak_s in predictions:
-        bc, bcInfo, bc_start_offset, bc_audio = random.choice(bcs)
-        audio_len_samples = bc_audio.shape[0]
         # audio_len_s = reader.features.sample_index_to_time(bc_audio, audio_len_samples)
         start_s = peak_s - 0
-        start_index = bc_audio.time_to_sample_index(start_s)
-        if start_index < 0:
-            continue
-        if start_index + audio_len_samples > output_audio.shape[0]:
-            audio_len_samples = output_audio.shape[0] - start_index
-        output_audio[start_index:start_index + audio_len_samples] += bc_audio[0: audio_len_samples]
+        start_index = output_audio.time_to_sample_index(start_s)
+        add_bc_to_audio_track(output_audio, start_index, bcs)
+
     return output_audio
 
 

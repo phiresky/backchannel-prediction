@@ -22,7 +22,9 @@ export const globalConfig = mobx.observable({
     zoomFactor: 1.2,
     emptyVisHeight: 50,
     defaultConversation: "sw2807",
-    minRenderDelayMS: 50
+    minRenderDelayMS: 10,
+    socketDebug: false,
+    followingPlaybackRenderWidthFactor: 1.2
 });
 export class Styles {
     @mobx.computed static get leftBarCSS() {
@@ -187,7 +189,9 @@ class MaybeAudioPlayer extends React.Component<{ gui: GUI }, {}> {
         const visibleFeatures = new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []));
         const visibleAudioFeatures = [...visibleFeatures]
             .map(f => gui.getFeature(f.feature).data)
-            .filter(f => f && f.typ === "FeatureType.SVector") as NumFeatureSVector[];
+            .filter(f => f && f.typ === "FeatureType.SVector" &&
+                (this.props.gui.playthrough || !this.props.gui.audioRecorder || !this.props.gui.audioRecorder.recording || f.name !== microphoneFeature.id)
+            ) as NumFeatureSVector[];
         if (visibleAudioFeatures.length > 0)
             return <AudioPlayer features={visibleAudioFeatures} gui={gui} ref={gui.setAudioPlayer} />;
         else return <span />;
@@ -201,7 +205,7 @@ class MaybeAudioRecorder extends React.Component<{ gui: GUI }, {}> {
         const visibleFeatures = [...new Set(gui.uis.map(ui => ui.features).reduce((a, b) => (a.push(...b), a), []))];
         const visible = visibleFeatures.some(f => f.feature === microphoneFeature.id);
         if (visible)
-            return <AudioRecorder gui={gui} />;
+            return <AudioRecorder gui={gui} ref={gui.setAudioRecorder} />;
         else return <span />;
     }
 }
@@ -213,10 +217,11 @@ export class GUI extends React.Component<{}, {}> {
     @mobx.observable selectionStart = NaN;
     @mobx.observable selectionEnd = NaN;
     @mobx.observable followPlayback = false;
-
+    @mobx.observable followCenter = 0.8;
     @mobx.observable conversation: ConversationID;
     @mobx.observable conversationSelectorText = "";
     @mobx.observable uis = [] as UIState[];
+    @mobx.observable playthrough = false;
     @mobx.observable zoom = {
         left: 0, right: 1
     };
@@ -228,7 +233,9 @@ export class GUI extends React.Component<{}, {}> {
         if(v === null) throw new Error("NO")
         this._totalTimeSeconds = v;
     }
-    audioPlayer: AudioPlayer; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
+    audioPlayer: AudioPlayer | null = null; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
+    @mobx.observable audioRecorder: AudioRecorder | null = null;
+    setAudioRecorder = mobx.action("setAudioRecorder", (a: AudioRecorder) => this.audioRecorder = a);
     uisDiv: HTMLDivElement; setUisDiv = (e: HTMLDivElement) => this.uisDiv = e;
     @mobx.observable widthCalcDiv: HTMLDivElement; setWidthCalcDiv = mobx.action("setWidthCalcDiv", (e: HTMLDivElement) => this.widthCalcDiv = e);
     socketManager: s.SocketManager;
@@ -272,6 +279,7 @@ export class GUI extends React.Component<{}, {}> {
     }
     @mobx.action
     applyState(targetState: GUI) {
+        console.log("applying state", targetState);
         if (targetState.uis) targetState.uis.forEach(ui => { ui.uuid = uuid++; ui.features.forEach(ui => ui.uuid = uuid++); });
         Object.assign(this, targetState);
     }
@@ -471,7 +479,7 @@ export class GUI extends React.Component<{}, {}> {
                     {[...this.getVisualizers()]}
                 </div>
                 <MaybeAudioPlayer gui={this} />
-                <DevTools />
+                {!!localStorage.devTools && <DevTools />}
             </div>
         );
     }

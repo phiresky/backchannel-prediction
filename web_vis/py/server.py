@@ -98,6 +98,7 @@ def want_margin_filter(res):
     [l, r] = res['config']['margin_of_error']
     return r - l < 0.41
 
+
 def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
         path[-1] = path[-1][:-len(".smooth")]
@@ -158,7 +159,7 @@ def get_features():
     return [
         dict(name="A", children=features),
         dict(name="B", children=features),
-        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn", "nn.smoothed"]),
+        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn", "nn.smooth", "nn.smooth.bc"]),
                                           dict(name="NN outputs", children=netsTree)])
     ]
 
@@ -306,9 +307,12 @@ class MicrophoneHandler:
         self.buffer_length_s = 60
         self.client_microphone = Audio(np.zeros(self.client_sample_rate * self.buffer_length_s, dtype='int16'),
                                        self.client_sample_rate)
+        self.nn_adc = Audio(np.zeros(self.client_sample_rate * self.buffer_length_s, dtype='int16'),
+                            self.client_sample_rate)
         self.previous_end_offset_samples = 0
         self.frame_window_ms = 32  # config['extract_config']['sample_window_ms']
         self.window_shift_ms = 10
+        self.was_above_thres_prev = False
         self.do_nn = "trainNN/out/v050-finunified-65-ge1015c2-dirty:lstm-best-features-raw_power,pitch,ffv_live/config.json"
         self.dimensions = {
             'ffv': 7,
@@ -337,7 +341,7 @@ class MicrophoneHandler:
             self.context_frames = self.nn_config['train_config']['context_frames']
             self.context_stride = self.nn_config['train_config']['context_stride']
             self.context_range = self.context_frames * self.context_stride
-            self.smoother_context_range = 1000 // self.window_shift_ms #500ms
+            self.smoother_context_range = 1000 // self.window_shift_ms  # 500ms
             self.smoother = self.reader.features.smoothing_for_live(self.window_shift_ms, self.eval_config['smoother'])
 
             def feat():
@@ -351,7 +355,16 @@ class MicrophoneHandler:
                     ))
 
             self.features["nn"] = feat()
-            self.features["nn.smoothed"] = feat()
+            self.features["nn.smooth"] = feat()
+            self.features["nn.smooth.bc"] = self.nn_adc
+
+            import random
+            st = random.choice(write_wavs.good_bc_sample_tracks)
+            print(f"bcs from {st}")
+            self.bc_samples = list(
+                write_wavs.bcs_to_samples(
+                    readDB.loadDBReader(config_path),
+                    write_wavs.get_boring_bcs(config_path, st)))
 
     def nn_eval(self, input):
         # adapted from extract.features.pure_get_multidim_net_output
@@ -420,7 +433,7 @@ class MicrophoneHandler:
                 if output.shape[0] != expected_frames:
                     raise Exception(f"got wrong out len from NN: {output.shape[0]} != {expected_frames}")
                 nnfeat = self.features["nn"]
-                nn_smoothed_feat = self.features["nn.smoothed"]
+                nn_smoothed_feat = self.features["nn.smooth"]
 
                 nnfeat[exact_offset_in_frames:exact_offset_in_frames + expected_frames] = output
                 self.emit_change("nn", exact_offset_in_frames, output)
@@ -431,17 +444,38 @@ class MicrophoneHandler:
                     if smoothed.shape[0] != expected_frames + self.smoother_context_range:
                         raise Exception(
                             f"got wrong out len from smoother: {smoothed.shape[0]} != {expected_frames + self.smoother_context_range}")
+                    smoothed = smoothed[self.smoother_context_range:]
+                    nn_smoothed_feat[exact_offset_in_frames: exact_offset_in_frames + expected_frames] = smoothed
+                    thresholded = smoothed >= 0.55 # self.eval_config["threshold"]
+                    inx = 0
+                    if self.was_above_thres_prev:
+                        # wait until is below threshold again before triggering
+                        inx = evaluate.get_first_false_inx(thresholded, inx)
+                    if inx is not None:
+                        # find threshold index
+                        inx = evaluate.get_first_true_inx(thresholded, inx)
+                        if inx is not None:
+                            # falls below threshold ?
+                            if evaluate.get_first_false_inx(thresholded, inx) is not None:
+                                self.was_above_thres_prev = False
+                            else:
+                                self.was_above_thres_prev = True
+                        else:
+                            self.was_above_thres_prev = False
 
-                    nn_smoothed_feat[exact_offset_in_frames: exact_offset_in_frames + expected_frames] = smoothed[
-                                                                                                         self.smoother_context_range:]
-                    self.emit_change("nn.smoothed", exact_offset_in_frames, smoothed[self.smoother_context_range:])
+                    if inx is not None:
+                        # trigger at inx!
+                        start = exact_offset + int(inx)
+                        length = write_wavs.add_bc_to_audio_track(self.nn_adc, start, self.bc_samples)
+                        self.emit_change("nn.smooth.bc", start, self.nn_adc[start: start + length])
+                    self.emit_change("nn.smooth", exact_offset_in_frames, smoothed)
 
             self.previous_end_offset_samples = exact_offset + frame_shift_samples * expected_frames
 
     def emit_change(self, featname, frame_offset: int, feat):
         featbytes = feat.tobytes()
         meta = {'conversation': "sw2807", 'feature': f"/microphone/extracted/{featname}",
-                'byteOffset': frame_offset * 4 * feat.shape[1]}
+                'byteOffset': frame_offset * feat.dtype.itemsize * (feat.shape[1] if len(feat.shape) > 1 else 1)}
         asyncio.ensure_future(self.client_socket.send(create_binary_frame_with_metadata(meta, featbytes)))
 
 
@@ -460,7 +494,7 @@ async def handler(websocket, path):
                     if msg['type'] == "getFeatures":
                         cats = [s.split(" & ") for s in
                                 ["/extracted/adc & /transcript/is_talking & /transcript/is_silent & /transcript/bc",
-                                    "/transcript/text", "/extracted/pitch", "/extracted/power"]]
+                                 "/transcript/text", "/extracted/pitch", "/extracted/power"]]
                         conv = sanitize_conversation(msg['conversation'])
                         await websocket.send(json.dumps({"id": id, "data": {
                             'categories': get_features(),

@@ -21,13 +21,13 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
         super(props);
     }
 
-    center() {
+    center(offset = 0.5) {
         const zoom = this.props.gui.zoom;
         const w = zoom.right - zoom.left;
         let pos = this.props.gui.playbackPosition;
-        if (pos - w / 2 < 0) pos = w / 2;
-        if (pos + w / 2 > 1) pos = 1 - w / 2;
-        zoom.left = pos - w / 2; zoom.right = pos + w / 2;
+        if (pos - w * offset < 0) pos = w * offset;
+        if (pos + w * (1 - offset) > 1) pos = 1 - w * (1 - offset);
+        zoom.left = pos - w * offset; zoom.right = pos + w * (1 - offset);
     }
     @autobind @mobx.action
     updatePlaybackPosition() {
@@ -39,7 +39,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
             return;
         }
         this.props.gui.playbackPosition = newPos;
-        if (this.props.gui.followPlayback) this.center();
+        if (this.props.gui.followPlayback) this.center(this.props.gui.followCenter);
         if (this.playing) requestAnimationFrame(this.updatePlaybackPosition);
     }
     @mobx.computed get xTranslation() {
@@ -150,6 +150,7 @@ export class RegionSelector extends React.Component<{ gui: GUI }, {}> {
     onMouseUp(event: MouseEvent) {
         window.removeEventListener("mousemove", this.onMouseMove);
         const gui = this.props.gui;
+        if (isNaN(gui.selectionStart)) return;
         gui.playbackPosition = gui.selectionStart;
         const diff = util.getPixelFromPosition(Math.abs(gui.selectionStart - gui.selectionEnd), 0, this.props.gui.width, { left: 0, right: gui.zoom.right - gui.zoom.left });
         if (diff < 5) {
@@ -241,7 +242,7 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     static bufferDuration_s = 60;
     static doResample = true;
     static sampleRate = AudioRecorder.doResample ? 8000 : audioContext.sampleRate;
-    static processingBufferDuration_s = 0.5;
+    static processingBufferDuration_s = 0.2;
     static bufferSize = 2 ** Math.round(Math.log2(audioContext.sampleRate * AudioRecorder.processingBufferDuration_s));
     microphone: MediaStreamTrack;
     inputStream: MediaStream;
@@ -249,6 +250,7 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     processor: ScriptProcessorNode;
     @mobx.observable recording = false;
     recordingStartTime = NaN;
+    @mobx.observable playthrough = false;
     constructor(props: any) {
         super(props);
     }
@@ -312,8 +314,11 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         });
         this.source.connect(this.processor);
         this.processor.connect(audioContext.destination);
-        mobx.runInAction("startRecording", () => this.recording = true);
-
+        mobx.runInAction("startRecording", () => {
+            this.recording = true;
+            this.props.gui.playbackPosition = 0;
+            setTimeout(() => this.props.gui.audioPlayer && this.props.gui.audioPlayer.startPlaying(), 5);
+        });
     }
     @autobind @mobx.action
     stopRecording() {
@@ -321,6 +326,11 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         this.microphone.stop();
         this.source.disconnect(this.processor);
         this.processor.disconnect(audioContext.destination);
+        this.props.gui.audioPlayer && this.props.gui.audioPlayer.stopPlaying();
+    }
+    @mobx.action
+    togglePlaythrough = (e: React.SyntheticEvent<HTMLInputElement>) => {
+        this.props.gui.playthrough = e.currentTarget.checked;
     }
 
     render() {
@@ -328,7 +338,9 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
             <div>{this.recording
                 ? <button onClick={this.stopRecording}>Stop Rec</button>
                 : <button onClick={this.startRecording}>Start Rec</button>
-            }</div>
+            }
+                <label><input type="checkbox" checked={this.props.gui.playthrough} onChange={this.togglePlaythrough} /> Playthrough while recording</label>
+            </div>
         );
     }
 }
