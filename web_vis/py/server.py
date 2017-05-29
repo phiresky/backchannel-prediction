@@ -91,8 +91,12 @@ def findAllNets():
     return rootList
 
 
-want_margin = (-0.2, 0.2)  # (-0.1, 0.5)
+# want_margin = (-0.2, 0.2)  # (-0.1, 0.5)
 
+
+def want_margin_filter(res):
+    [l, r] = res['config']['margin_of_error']
+    return r - l < 0.41
 
 def get_net_output(convid: str, path: List[str]):
     if path[-1].endswith(".smooth"):
@@ -106,7 +110,7 @@ def get_net_output(convid: str, path: List[str]):
     config_path = os.path.join(version_path, "config.json")
     config = util.load_config(config_path)
     features = Features(config, config_path)
-    eval_conf = evaluate.get_best_eval_config(config_path, margin=want_margin)
+    eval_conf = evaluate.get_best_eval_config(config_path, filter=want_margin_filter)
     if smooth:
         return config_path, eval_conf, features.smooth(convid, id, eval_conf['smoother'])
     else:
@@ -154,7 +158,7 @@ def get_features():
     return [
         dict(name="A", children=features),
         dict(name="B", children=features),
-        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn"]),
+        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn", "nn.smoothed"]),
                                           dict(name="NN outputs", children=netsTree)])
     ]
 
@@ -170,9 +174,11 @@ def get_larger_threshold_feature(feat: Feature, reader: DBReader, name: str, thr
     }
 
 
+single_nn_out_dim = True
+
+
 def maybe_onedim(fes):
-    single_out_dim = True
-    if single_out_dim:
+    if single_nn_out_dim:
         return 1 - fes[:, [0]]
     else:
         return fes
@@ -290,24 +296,25 @@ def sanitize_conversation(conv):
 
 
 class MicrophoneHandler:
-    client_sample_rate = 8000
-    client_dtype = 'float32'
-    buffer_length_s = 60
-    client_microphone = Audio(np.zeros(client_sample_rate * buffer_length_s, dtype='int16'), client_sample_rate)
-    previous_end_offset_samples = 0
-    frame_window_ms = 32  # config['extract_config']['sample_window_ms']
-    window_shift_ms = 10
-    do_nn = "trainNN/out/v048-finunified-15-g92ee0a9-dirty:lstm-best-features-power,pitch,ffv/config.json"
-    dimensions = {
-        'ffv': 7,
-        'raw_power': 1,
-        'pitch': 1
-    }
-    featurenames = []
-
     def __init__(self, reader: DBReader, client_socket):
         self.reader = reader
         self.client_socket = client_socket
+        self.featurenames = []
+        self.previous_end_offset_samples = 0
+        self.client_sample_rate = 8000
+        self.client_dtype = 'float32'
+        self.buffer_length_s = 60
+        self.client_microphone = Audio(np.zeros(self.client_sample_rate * self.buffer_length_s, dtype='int16'),
+                                       self.client_sample_rate)
+        self.previous_end_offset_samples = 0
+        self.frame_window_ms = 32  # config['extract_config']['sample_window_ms']
+        self.window_shift_ms = 10
+        self.do_nn = "trainNN/out/v050-finunified-65-ge1015c2-dirty:lstm-best-features-raw_power,pitch,ffv_live/config.json"
+        self.dimensions = {
+            'ffv': 7,
+            'raw_power': 1,
+            'pitch': 1
+        }
         for featname in self.reader.config['extract_config']['input_features']:
             pref, featnamepart = featname[0:4], featname[4:]
             if pref != "get_":
@@ -324,20 +331,27 @@ class MicrophoneHandler:
             for featurename in self.featurenames}
         if self.do_nn is not None:
             self.nn_config = util.load_config(self.do_nn)
-            eval_config = evaluate.get_best_eval_config(self.do_nn)
+            self.eval_config = evaluate.get_best_eval_config(self.do_nn, filter=want_margin_filter)
             epoch, _ = trainNN.evaluate.get_best_epoch(self.nn_config)
             layers, self.nn_fn = trainNN.evaluate.get_network_outputter(self.do_nn, epoch, batch_size=None)
             self.context_frames = self.nn_config['train_config']['context_frames']
             self.context_stride = self.nn_config['train_config']['context_stride']
             self.context_range = self.context_frames * self.context_stride
-            self.features["nn"] = Feature(
-                np.zeros((round(1000 * self.buffer_length_s / self.window_shift_ms), 2),
-                         dtype=np.float32),
-                infofrom=dict(
-                    frame_window_ms=self.frame_window_ms,
-                    frame_shift_ms=self.window_shift_ms,
-                    initial_frame_offset_ms=0
-                ))
+            self.smoother_context_range = 1000 // self.window_shift_ms #500ms
+            self.smoother = self.reader.features.smoothing_for_live(self.window_shift_ms, self.eval_config['smoother'])
+
+            def feat():
+                return Feature(
+                    np.zeros((round(1000 * self.buffer_length_s / self.window_shift_ms), 1 if single_nn_out_dim else 2),
+                             dtype=np.float32),
+                    infofrom=dict(
+                        frame_window_ms=self.frame_window_ms,
+                        frame_shift_ms=self.window_shift_ms,
+                        initial_frame_offset_ms=0
+                    ))
+
+            self.features["nn"] = feat()
+            self.features["nn.smoothed"] = feat()
 
     def nn_eval(self, input):
         # adapted from extract.features.pure_get_multidim_net_output
@@ -366,7 +380,6 @@ class MicrophoneHandler:
         if end_offset > self.client_microphone.shape[0]:
             print("warning: offset > buffer length")
         else:
-            print("setting audio", offset, end_offset)
             self.client_microphone[offset:end_offset] = data
             self.microphone_data_changed(end_offset)
 
@@ -403,7 +416,26 @@ class MicrophoneHandler:
                        self.featurenames]
                 combined_input = Feature(np.concatenate(fes, axis=1), infofrom=self.features[self.featurenames[0]])
                 output = self.nn_eval(combined_input)
+                output = maybe_onedim(output)
+                if output.shape[0] != expected_frames:
+                    raise Exception(f"got wrong out len from NN: {output.shape[0]} != {expected_frames}")
+                nnfeat = self.features["nn"]
+                nn_smoothed_feat = self.features["nn.smoothed"]
+
+                nnfeat[exact_offset_in_frames:exact_offset_in_frames + expected_frames] = output
                 self.emit_change("nn", exact_offset_in_frames, output)
+
+                if exact_offset_in_frames - self.smoother_context_range >= 0:
+                    smoothed = self.smoother(nnfeat[
+                                             exact_offset_in_frames - self.smoother_context_range:exact_offset_in_frames + expected_frames])
+                    if smoothed.shape[0] != expected_frames + self.smoother_context_range:
+                        raise Exception(
+                            f"got wrong out len from smoother: {smoothed.shape[0]} != {expected_frames + self.smoother_context_range}")
+
+                    nn_smoothed_feat[exact_offset_in_frames: exact_offset_in_frames + expected_frames] = smoothed[
+                                                                                                         self.smoother_context_range:]
+                    self.emit_change("nn.smoothed", exact_offset_in_frames, smoothed[self.smoother_context_range:])
+
             self.previous_end_offset_samples = exact_offset + frame_shift_samples * expected_frames
 
     def emit_change(self, featname, frame_offset: int, feat):
@@ -427,8 +459,8 @@ async def handler(websocket, path):
                 try:
                     if msg['type'] == "getFeatures":
                         cats = [s.split(" & ") for s in
-                                [
-                                    "/extracted/mfcc"]]
+                                ["/extracted/adc & /transcript/is_talking & /transcript/is_silent & /transcript/bc",
+                                    "/transcript/text", "/extracted/pitch", "/extracted/power"]]
                         conv = sanitize_conversation(msg['conversation'])
                         await websocket.send(json.dumps({"id": id, "data": {
                             'categories': get_features(),

@@ -274,13 +274,16 @@ class Features:
 
     def smooth(self, convid: str, epoch: str, smoother: dict):
         x = self.get_multidim_net_output(convid, epoch)
+        return self.smooth2(x, smoother)
+
+    def smooth2(self, x: Feature, smoother: dict):
         if smoother['type'].startswith("gauss"):
             import scipy.signal
             sigma = smoother['sigma_ms'] / x.frame_shift_ms
             if sigma < 1:
                 return x
             cutoff = sigma * smoother['cutoff_sigma']
-            # 4 x sigma contains 99.9 of values
+            # 4 x sigma contains 99.9% of values
             window = scipy.signal.gaussian(int(round(sigma * 2 * 4)), sigma).astype(np.float32)
             # cut off only on left side (after convolution this is the future)
             window = window[int(np.round(len(window) / 2 - cutoff)):]
@@ -299,3 +302,26 @@ class Features:
         else:
             raise Exception(f"unknown method {smoother['type']}")
         return x
+
+    def smoothing_for_live(self, frame_shift_ms: int, smoother: dict):
+        if smoother['type'].startswith("gauss"):
+            import scipy.signal
+            sigma = smoother['sigma_ms'] / frame_shift_ms
+            if sigma < 1:
+                return (lambda x: x)
+            cutoff = sigma * smoother['cutoff_sigma']
+            # 2 x sigma contains 95% of values
+            window = scipy.signal.gaussian(int(round(sigma * 2 * 2)), sigma).astype(np.float32)
+            # cut off only on left side (after convolution this is the future)
+            window = window[int(np.round(len(window) / 2 - cutoff)):]
+            window = window / sum(window)
+
+            def smoother(x: Feature):
+                # print(f"{x.shape} {window.shape}")
+                x = Feature(np.array([scipy.signal.convolve(row, window)[:row.size] for row in x.T]).T, infofrom=x)
+                # print(f"{x.shape}")
+                return x
+
+            return smoother
+        else:
+            raise Exception(f"unknown live method {smoother['type']}")
