@@ -1,6 +1,6 @@
 FROM base/devel
 
-RUN pacman -Sy --noconfirm yarn python-pip libsndfile git openssh cmake tcl cython wget
+RUN pacman -Sy --noconfirm yarn python-pip libsndfile git cmake tcl cython
 
 RUN pip install websockets soundfile tqdm joblib
 RUN pip install --upgrade https://github.com/Theano/Theano/archive/c697eeab84e5b8a74908da654b66ec9eca4f1291.zip
@@ -14,15 +14,16 @@ RUN git reset --hard 5d6fb82f5b1ca71b6ca4a96cc9cf6ebcbecbf6de
 RUN mkdir build && cd build && cmake ..
 WORKDIR /janus/build
 RUN make -j$(nproc)
-RUN python setup.py install
+RUN python setup.py develop
 
 RUN git clone --branch v052-docker --depth 1  https://github.com/phiresky/backchannel-prediction /code
 
 WORKDIR /code/web_vis/ts
 RUN yarn
 
-WORKDIR /code
-RUN scripts/getdata.sh
+WORKDIR /code/data
+COPY switchboard_word_alignments.tar.gz /code/data
+RUN tar xf switchboard_word_alignments.tar.gz && rm switchboard_word_alignments.tar.gz
 
 COPY adc /code/data/adc
 
@@ -34,8 +35,9 @@ RUN echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen \
      && echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 ENV LANG en_US.UTF-8
 
+WORKDIR /code
 # fill caches
 RUN python -c 'from web_vis.py.server import fill_caches; fill_caches("configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json")'
 
-CMD (cd /code && python3 -m web_vis.py.server configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json)\
- & (cd /code/web_vis/ts && yarn run dev)
+CMD python3 -m web_vis.py.server configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json & \
+ (cd /code/web_vis/ts && yarn run dev)
