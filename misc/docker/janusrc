@@ -1,0 +1,7 @@
+set TclLibraryPath  "/janus/tcl-lib"
+set JANUSLIB        "/janus/gui-tcl"
+set JANUS_LIBRARY   "/janus/library" 
+
+# guarantee there's at least an empty auto_path
+lappend auto_path
+set auto_path [linsert $auto_path 0 $TclLibraryPath $JANUSLIB $JANUS_LIBRARY]

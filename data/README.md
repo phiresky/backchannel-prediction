@@ -12,8 +12,7 @@ The ISL utterance database (should not be needed anymore, replaced by the ISIP t
 
 The original transcriptions are from <https://www.isip.piconepress.com/projects/switchboard/>
 
-	wget https://www.isip.piconepress.com/projects/switchboard/releases/switchboard_word_alignments.tar.gz
-	tar xf switchboard_word_alignments.tar.gz
+	scrips/getdata.sh
 	
 You can compare the integrity of the data files with the ones I used by running
 
