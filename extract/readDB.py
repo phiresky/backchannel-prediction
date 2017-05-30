@@ -102,6 +102,7 @@ class DBReader:
 
     def __init__(self, config_path: str, originalDb=None):
         config = util.load_config(config_path)
+        self.config_path = config_path
         self.config = config
         self.extract_config = self.config['extract_config']
         self.paths_config = self.config['paths']

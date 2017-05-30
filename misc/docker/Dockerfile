@@ -7,15 +7,16 @@ RUN pip install --upgrade https://github.com/Theano/Theano/archive/c697eeab84e5b
 RUN pip install --upgrade https://github.com/Lasagne/Lasagne/archive/b1e5bc468a2fbc5e5d026f6d1c6170b80e8be224.zip
 
 COPY janusrc /root/.janusrc
-COPY janus /janus
+COPY janus/.git /janus/.git
 
 WORKDIR /janus
+RUN git reset --hard 5d6fb82f5b1ca71b6ca4a96cc9cf6ebcbecbf6de
 RUN mkdir build && cd build && cmake ..
 WORKDIR /janus/build
 RUN make -j$(nproc)
 RUN python setup.py install
 
-RUN git clone --branch v051-docker --depth 1 https://github.com/phiresky/backchannel-prediction /code
+RUN git clone --branch master --depth 1 https://github.com/phiresky/backchannel-prediction /code
 
 WORKDIR /code/web_vis/ts
 RUN yarn
@@ -24,6 +25,9 @@ WORKDIR /code
 RUN scripts/getdata.sh
 
 COPY adc /code/data/adc
+
+# fill caches
+RUN python -c 'from web_vis.py.server import fill_caches; fill_caches("configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json")'
 
 EXPOSE 3000
 EXPOSE 8765

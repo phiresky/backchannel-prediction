@@ -363,8 +363,8 @@ class MicrophoneHandler:
             print(f"bcs from {st}")
             self.bc_samples = list(
                 write_wavs.bcs_to_samples(
-                    readDB.loadDBReader(config_path),
-                    write_wavs.get_boring_bcs(config_path, st)))
+                    reader,
+                    write_wavs.get_boring_bcs(reader.config_path, st)))
 
     def nn_eval(self, input):
         # adapted from extract.features.pure_get_multidim_net_output
@@ -528,6 +528,9 @@ def start_server():
 
     loop.run_forever()
 
+def fill_caches(config_path: str):
+    reader = DBReader(config_path, originalDb=True)
+    micro = MicrophoneHandler(reader, None)
 
 if __name__ == '__main__':
     config_path = sys.argv[1]
