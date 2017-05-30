@@ -16,7 +16,7 @@ WORKDIR /janus/build
 RUN make -j$(nproc)
 RUN python setup.py install
 
-RUN git clone --branch master --depth 1 https://github.com/phiresky/backchannel-prediction /code
+RUN git clone --branch v051-docker --depth 1  https://github.com/phiresky/backchannel-prediction /code
 
 WORKDIR /code/web_vis/ts
 RUN yarn
