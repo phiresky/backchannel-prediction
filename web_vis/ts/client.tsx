@@ -14,7 +14,8 @@ import * as v from "./Visualizer";
 import { Feature, NumFeature, NumFeatureSVector, FeatureID, ConversationID } from "./features";
 import { AudioPlayer, PlaybackPosition, AudioRecorder, microphoneFeature, RegionSelector } from "./Audio";
 import * as queryString from "query-string";
-
+import * as x from "./RpcWebWorker";
+x;
 export const globalConfig = mobx.observable({
     maxColor: "#3232C8",
     rmsColor: "#6464DC",
