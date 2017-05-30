@@ -26,9 +26,6 @@ RUN scripts/getdata.sh
 
 COPY adc /code/data/adc
 
-# fill caches
-RUN python -c 'from web_vis.py.server import fill_caches; fill_caches("configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json")'
-
 EXPOSE 3000
 EXPOSE 8765
 
@@ -36,6 +33,9 @@ RUN echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen \
      && locale-gen \
      && echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 ENV LANG en_US.UTF-8
+
+# fill caches
+RUN python -c 'from web_vis.py.server import fill_caches; fill_caches("configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json")'
 
 CMD (cd /code && python3 -m web_vis.py.server configs/finunified/vary-features/lstm-best-features-raw_power,pitch,ffv.json)\
  & (cd /code/web_vis/ts && yarn run dev)

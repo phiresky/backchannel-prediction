@@ -159,8 +159,9 @@ def get_features():
     return [
         dict(name="A", children=features),
         dict(name="B", children=features),
-        dict(name="microphone", children=[dict(name="extracted", children=[*feature_names, "nn", "nn.smooth", "nn.smooth.bc"]),
-                                          dict(name="NN outputs", children=netsTree)])
+        dict(name="microphone",
+             children=[dict(name="extracted", children=[*feature_names, "nn", "nn.smooth", "nn.smooth.bc"]),
+                       dict(name="NN outputs", children=netsTree)])
     ]
 
 
@@ -446,7 +447,7 @@ class MicrophoneHandler:
                             f"got wrong out len from smoother: {smoothed.shape[0]} != {expected_frames + self.smoother_context_range}")
                     smoothed = smoothed[self.smoother_context_range:]
                     nn_smoothed_feat[exact_offset_in_frames: exact_offset_in_frames + expected_frames] = smoothed
-                    thresholded = smoothed >= 0.55 # self.eval_config["threshold"]
+                    thresholded = smoothed >= 0.55  # self.eval_config["threshold"]
                     inx = 0
                     if self.was_above_thres_prev:
                         # wait until is below threshold again before triggering
@@ -528,9 +529,16 @@ def start_server():
 
     loop.run_forever()
 
+
 def fill_caches(config_path: str):
     reader = DBReader(config_path, originalDb=True)
     micro = MicrophoneHandler(reader, None)
+    for st in write_wavs.good_bc_sample_tracks:
+        list(
+            write_wavs.bcs_to_samples(
+                reader,
+                write_wavs.get_boring_bcs(reader.config_path, st)))
+
 
 if __name__ == '__main__':
     config_path = sys.argv[1]
