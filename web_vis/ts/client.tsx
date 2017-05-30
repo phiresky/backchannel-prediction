@@ -111,19 +111,22 @@ function getNNOutput(channel: string, version: string, epoch: string): any {
             { "features": [{ "feature": `/${channel}/extracted/adc`, "visualizer": "Waveform", "config": "givenRange", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/transcript/text`, "visualizer": "Text", "config": "normalizeLocal", "currentRange": null }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.169875830411911, "max": 0.8434500098228455 } }], "height": "auto" },
-            { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 }, 
-                { "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth.thres`, "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25 },
+            {
+                "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": 0.2547765076160431, "max": 0.7286926507949829 }, "uuid": 26 },
+                { "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth.thres`, "uuid": 31, "visualizer": "Highlights", "config": "normalizeLocal", "currentRange": null }], "height": 85, "uuid": 25
+            },
             { "features": [{ "feature": `/${channel}/NN outputs/${version}/${epoch}.smooth.bc`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -32768, "max": 32768 } }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/extracted/pitch`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" },
             { "features": [{ "feature": `/${channel}/extracted/power`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
     };
 }
 const examples: { [name: string]: any } = {
-    "NN output for A, latest, best": getNNOutput("A", "latest", "best")
+    "Microphone Input": "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjOoCYaB2MgTgDYAONgRhrYGYAWAKz8aAGhAAzdBAjoA7qmjwkyUrgBOAVwCm4xEQBu29Zij4ipEJjk8y9EOM3ZMpANqhNTgCak64idpmmuraLiTukoG4wdqWAPQAttiI6uhgABZE2nHaAB4aSLjaXnFQXogOIJ7YPiQ0vOIGzppQENgAXsaWAOpQRlLqCZX6hBLYAOaWhOiDrR3aADLoiK3DwSGEuABKUITjsSSgScQkhJoy4glQuaRnMgC+9wC64unaE+m4llCauOgg91EHm8vn4-iiMTCEQCQRC8SSKTSmUI2TyBUQRRK6igcgA+mB5F1HCC6oJGs05p11D0+toBkM9EQxpMSCBprM2p0lisIGt1Bttrt9qQjtgTmRLtdSGRHi8QG8Pl9WT8-gCgVUSTQWODYaE3KAYdE4azEslUhksjl8tiMcU4mA8Ih0pVqrUGOTMC1OV1Wb1+jMGSARsypgHKYtlqs9OttJsdnsDqLxZKbuRZa93uNPt9fv9AcCar42DqjXrwgaIcaQKbERaUVb0Zi4hIJAYXZqmB6vfNqb7afThkyJqGOfNuVGgzG40LEyBjtKU9L0-LM9mSNx6PmNYWSLwJZFdVCK7r4WakZa0Tam4RiMSd7xOF3w72QH66QHB6Nh6z2VdvePeWjflY0FBMRTnMUFznKU02eDNFRzVUt1dUheDEA9SyPDCYlPWtkVRa1CjtG8KEwBJ0HQXBnTvWpeAaEAmk9Z8aX9QZPxDH8w3-SNAMnYDpzAw4IOTaDUxlOCVwQ5VczVAtaLBbCQiww0cJNBFzXwhsr2IwhSPIyj0goOAKho1CyQYilvRfN8B0ZL8WTZLixx4vkBXjYUhPnchF1guUFSzJUQBVPM5XaCihiEiA6SVfd1CkygaE4ND+F4Jh6E4QQaEETgWAETdxD+XBWgAFWwBJtAAZW0EYvDCFgZSAA",
+    "sample NN output for channel A": getNNOutput("A", "v050-finunified-65-ge1015c2-dirty:lstm-best-features-raw_power,pitch,ffv_live", "best"),
 };
 
 @observer
-class NNExample extends React.Component<{gui: GUI}, {}> {
+class NNExample extends React.Component<{ gui: GUI }, {}> {
     @mobx.observable
     channel = "A";
     @mobx.observable
@@ -132,35 +135,35 @@ class NNExample extends React.Component<{gui: GUI}, {}> {
     epoch = "best";
 
     render() {
-        if(!this.props.gui.conversation) return <span/>;
+        if (!this.props.gui.conversation) return <span />;
         const fes = this.props.gui.getFeatures().data;
         let c3 = null, c4 = null, c5;
-        if(fes) {
+        if (fes) {
             const c1 = fes.categories
                 .find(c => typeof c !== "string" && c.name === "A")! as { name: string, children: s.CategoryTreeElement[] };
             const c2 = c1.children.find(c => typeof c !== "string" && c.name === "NN outputs")! as { name: string, children: s.CategoryTreeElement[] };
-            if(c2) {
-                c3 = c2.children.map(x => typeof x !== "string"? x.name:x );
+            if (c2) {
+                c3 = c2.children.map(x => typeof x !== "string" ? x.name : x);
                 c4 = c2.children.find(x => typeof x !== "string" && x.name === this.version)! as { name: string, children: s.CategoryTreeElement[] };
-                if(c4) c5 = c4.children.map(x => typeof x !== "string"? x.name:x )
+                if (c4) c5 = c4.children.map(x => typeof x !== "string" ? x.name : x)
             }
-                                
+
         }
         return (
-        <B.Popover popoverClassName="withpadding" position={B.Position.BOTTOM}
-            content={<div>
+            <B.Popover popoverClassName="withpadding" position={B.Position.BOTTOM}
+                content={<div>
                     <label className="pt-label pt-inline">Channel
                         <div className="pt-select">
                             <select value={this.channel} onChange={mobx.action("set channel", (e: React.SyntheticEvent<HTMLSelectElement>) => this.channel = e.currentTarget.value)}>
                                 <option value="A">A</option><option value="B">B</option>
-                                </select>
+                            </select>
                         </div>
                     </label>
                     <label className="pt-label pt-inline">NN version
                         <div className="pt-select">
                             <select value={this.version} onChange={mobx.action("set nn version", (e: React.SyntheticEvent<HTMLSelectElement>) => this.version = e.currentTarget.value)}>
                                 {c3 && c3.map(version =>
-                                        <option key={version} value={version}>{version}</option>)
+                                    <option key={version} value={version}>{version}</option>)
                                 }
                             </select>
                         </div>
@@ -169,15 +172,15 @@ class NNExample extends React.Component<{gui: GUI}, {}> {
                         <div className="pt-select">
                             <select value={this.epoch} onChange={mobx.action("set nn epoch", (e: React.SyntheticEvent<HTMLSelectElement>) => this.epoch = e.currentTarget.value)}>
                                 {c5 && c5.map(epoch =>
-                                        <option key={epoch} value={epoch}>{epoch}</option>)}
+                                    <option key={epoch} value={epoch}>{epoch}</option>)}
                             </select>
                         </div>
                     </label>
-                
-                <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove pt-popover-dismiss" onClick={e =>
-                    this.props.gui.deserialize(getNNOutput(this.channel, this.version, this.epoch))}>Load</button></label>
-            </div>
-            }><button>NN output</button></B.Popover>
+
+                    <label className="pt-label pt-inline"><button className="pt-button pt-intent-danger pt-icon-remove pt-popover-dismiss" onClick={e =>
+                        this.props.gui.deserialize(getNNOutput(this.channel, this.version, this.epoch))}>Load</button></label>
+                </div>
+                }><button>NN output</button></B.Popover>
         );
     }
 }
@@ -231,7 +234,7 @@ export class GUI extends React.Component<{}, {}> {
         return this._totalTimeSeconds;
     }
     set totalTimeSeconds(v) {
-        if(v === null) throw new Error("NO")
+        if (v === null) throw new Error("NO")
         this._totalTimeSeconds = v;
     }
     audioPlayer: AudioPlayer | null = null; setAudioPlayer = (a: AudioPlayer) => this.audioPlayer = a;
@@ -259,7 +262,7 @@ export class GUI extends React.Component<{}, {}> {
             conversation: this.conversation,
             uis: this.uis, // TODO: remove uuids
             zoom: this.zoom,
-            //totalTimeSeconds: this.totalTimeSeconds
+            totalTimeSeconds: this.totalTimeSeconds
         })));
     }
     @mobx.action
@@ -343,7 +346,7 @@ export class GUI extends React.Component<{}, {}> {
     onWheel(event: MouseWheelEvent) {
         if (!event.ctrlKey) return;
         event.preventDefault();
-        const position = util.getPositionFromPixel(event.clientX, this.left, this.width, this.zoom) !;
+        const position = util.getPositionFromPixel(event.clientX, this.left, this.width, this.zoom)!;
         const scaleChange = event.deltaY > 0 ? globalConfig.zoomFactor : 1 / globalConfig.zoomFactor;
         this.zoom = util.rescale(this.zoom, scaleChange, position);
         this.zoom.right = Math.min(this.zoom.right, 1);
@@ -379,11 +382,15 @@ export class GUI extends React.Component<{}, {}> {
                 totalTime = feature.data.shape[0] * feature.shift / 1000;
             }
             if (!isNaN(totalTime)) {
-                if (isNaN(this.totalTimeSeconds)) mobx.runInAction("setTotalTime", () => {
-                    this.totalTimeSeconds = totalTime
-                });
-                else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
-                    console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime);
+                if (isNaN(this.totalTimeSeconds)) {
+                    mobx.runInAction("setTotalTime", () => {
+                        this.totalTimeSeconds = totalTime
+                    });
+                } else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
+                    console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime, ", overwritten");
+                    mobx.runInAction("setTotalTime", () => {
+                        this.totalTimeSeconds = totalTime
+                    });
                 }
             }
         }
@@ -405,8 +412,8 @@ export class GUI extends React.Component<{}, {}> {
         super();
         const query = queryString.parse(location.search);
         let server = query["socket"] as string;
-        if(!server) {
-            if(location.host.includes("sexy")) server = `wss://${location.host}/web-vis/backend`;
+        if (!server) {
+            if (location.host.includes("sexy")) server = `wss://${location.host}/web-vis/backend`;
             else server = `ws://${location.host.split(":")[0]}:8765`;
         }
         this.socketManager = new s.SocketManager(server);
@@ -472,7 +479,7 @@ export class GUI extends React.Component<{}, {}> {
                     }
                     <NNExample gui={this} />
                 </div>
-                <div ref={this.setUisDiv} style={{overflowX: "hidden"}}>
+                <div ref={this.setUisDiv} style={{ overflowX: "hidden" }}>
                     <div style={{ display: "flex", visibility: "hidden" }}>
                         <div style={Styles.leftBarCSS} />
                         <div style={{ flexGrow: 1 }} ref={this.setWidthCalcDiv} />

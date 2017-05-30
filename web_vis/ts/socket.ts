@@ -158,7 +158,10 @@ export class SocketManager {
             if (c.globalConfig.socketDebug) console.log("RECEIVING", msg);
             const listener = this.listeners.get(msg.id);
             if (!listener) throw Error("unexpected message: " + msg.id);
-            if (msg.error !== undefined) listener.reject(msg.error);
+            if (msg.error !== undefined) {
+                alert(msg.error);
+                listener.reject(msg.error);
+            }
             else listener.resolve(msg as ServerMessage);
         }
     }
