@@ -120,8 +120,12 @@ function getNNOutput(channel: string, version: string, epoch: string): any {
             { "features": [{ "feature": `/${channel}/extracted/power`, "visualizer": "Waveform", "config": "normalizeLocal", "currentRange": { "min": -1, "max": 1 } }], "height": "auto" }]
     };
 }
-const examples: { [name: string]: any } = {
-    "Microphone Input": "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjOoCYaB2MgTgDYAONgRhrYGYAWAKz8aAGhAAzdBAjoA7qmjwkyUrgBOAVwCm4xEQBu29Zij4ipEJjk8y9EOM3ZMpANqhNTgCak64idpmmuraLiTukoG4wdqWAPQAttiI6uhgABZE2nHaAB4aSLjaXnFQXogOIJ7YPiQ0vOIGzppQENgAXsaWAOpQRlLqCZX6hBLYAOaWhOiDrR3aADLoiK3DwSGEuABKUITjsSSgScQkhJoy4glQuaRnMgC+9wC64unaE+m4llCauOgg91EHm8vn4-iiMTCEQCQRC8SSKTSmUI2TyBUQRRK6igcgA+mB5F1HCC6oJGs05p11D0+toBkM9EQxpMSCBprM2p0lisIGt1Bttrt9qQjtgTmRLtdSGRHi8QG8Pl9WT8-gCgVUSTQWODYaE3KAYdE4azEslUhksjl8tiMcU4mA8Ih0pVqrUGOTMC1OV1Wb1+jMGSARsypgHKYtlqs9OttJsdnsDqLxZKbuRZa93uNPt9fv9AcCar42DqjXrwgaIcaQKbERaUVb0Zi4hIJAYXZqmB6vfNqb7afThkyJqGOfNuVGgzG40LEyBjtKU9L0-LM9mSNx6PmNYWSLwJZFdVCK7r4WakZa0Tam4RiMSd7xOF3w72QH66QHB6Nh6z2VdvePeWjflY0FBMRTnMUFznKU02eDNFRzVUt1dUheDEA9SyPDCYlPWtkVRa1CjtG8KEwBJ0HQXBnTvWpeAaEAmk9Z8aX9QZPxDH8w3-SNAMnYDpzAw4IOTaDUxlOCVwQ5VczVAtaLBbCQiww0cJNBFzXwhsr2IwhSPIyj0goOAKho1CyQYilvRfN8B0ZL8WTZLixx4vkBXjYUhPnchF1guUFSzJUQBVPM5XaCihiEiA6SVfd1CkygaE4ND+F4Jh6E4QQaEETgWAETdxD+XBWgAFWwBJtAAZW0EYvDCFgZSAA",
+const examples: { [name: string]: string | GUI | ((gui: GUI) => (string | GUI)) } = {
+    "Microphone Input (full)": "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjOoCYaB2MgTgDYAONgRhrYGYAWAKz8aAGhAAzdBAjoA7qmjwkyUrgBOAVwCm4xEQBu29Zij4ipEJjk8y9EOM3ZMpANqhNTgCak64idpmmuraLiTukoG4wdqWAPQAttiI6uhgABZE2nHaAB4aSLjaXnFQXogOIJ7YPiQ0vOIGzppQENgAXsaWAOpQRlLqCZX6hBLYAOaWhOiDrR3aADLoiK3DwSGEuABKUITjsSSgScQkhJoy4glQuaRnMgC+9wC64unaE+m4llCauOgg91EHm8vn4-iiMTCEQCQRC8SSKTSmUI2TyBUQRRK6igcgA+mB5F1HCC6oJGs05p11D0+toBkM9EQxpMSCBprM2p0lisIGt1Bttrt9qQjtgTmRLtdSGRHi8QG8Pl9WT8-gCgVUSTQWODYaE3KAYdE4azEslUhksjl8tiMcU4mA8Ih0pVqrUGOTMC1OV1Wb1+jMGSARsypgHKYtlqs9OttJsdnsDqLxZKbuRZa93uNPt9fv9AcCar42DqjXrwgaIcaQKbERaUVb0Zi4hIJAYXZqmB6vfNqb7afThkyJqGOfNuVGgzG40LEyBjtKU9L0-LM9mSNx6PmNYWSLwJZFdVCK7r4WakZa0Tam4RiMSd7xOF3w72QH66QHB6Nh6z2VdvePeWjflY0FBMRTnMUFznKU02eDNFRzVUt1dUheDEA9SyPDCYlPWtkVRa1CjtG8KEwBJ0HQXBnTvWpeAaEAmk9Z8aX9QZPxDH8w3-SNAMnYDpzAw4IOTaDUxlOCVwQ5VczVAtaLBbCQiww0cJNBFzXwhsr2IwhSPIyj0goOAKho1CyQYilvRfN8B0ZL8WTZLixx4vkBXjYUhPnchF1guUFSzJUQBVPM5XaCihiEiA6SVfd1CkygaE4ND+F4Jh6E4QQaEETgWAETdxD+XBWgAFWwBJtAAZW0EYvDCFgZSAA",
+    "Microphone Input (fast)": () => {
+        document.body.style.maxWidth = "700px";
+        return "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAGhADN0IJ0B3VaeJZU3AJwFcBTKoiIA3Pl0xR8RUiEyMATAA4yAdhBUe2TKQDaoHpoAmpAGxVqfSTy59tJPTUu5rfGQHoAttkRd0YABZEfG58AB7cSLh8hm5QhojqIAbYxiQqVMJaPFAQ2ABeYjIA6lCitFweiUKE1NgA5jKE6BU5+XwAMuiIOVXWNoS4AEpQhHWuJKBexCQAtGQAdGTyACwAnCqry2QmqyYqKgCsqwCMAMzyVB5QoaQLS8vH8qvbSidk28sqAL5fALpU-j49X8uBkUB4uHQIC+FH0RlIinMThcdgcFisNncXh8fkChGCYQiiCiMUIhHmmA86HQuH8iWSqVWGSyrQKXGKpT45UqgiItQaJBATRauQKnW6EF6XH6QxGY1Ik2w00oICuN3I80+Kge22OyzWZAOZGepx+-xAgOBoMF4Mh0NhSXhJGOKvRzhsqNAbpcWO8vgCQRC4S4kWibjJFKpNP88zgCQ0TuOx2ZmGyosKgpKZWaPJA1X5jRzrI6XR6gj6fAGw1G40Vysu11uZoBQLqILBEKhfyoeWplQmIAgXOtKq4VtuiyO6xU8gOBxMii2SgOpwOMJAkNwOQAKtgPHwAMp8aqGOwmMhfIA";
+    },
     "sample NN output for channel A": getNNOutput("A", "v050-finunified-65-ge1015c2-dirty:lstm-best-features-raw_power,pitch,ffv_live", "best"),
 };
 
@@ -266,7 +270,8 @@ export class GUI extends React.Component<{}, {}> {
         })));
     }
     @mobx.action
-    deserialize(data: string | GUI) {
+    deserialize(data: string | GUI | ((gui: GUI) => (string | GUI))) {
+        if (typeof data === "function") data = data(this);
         if (this.audioPlayer) this.audioPlayer.playing = false;
         if (this.loadingState !== 1) {
             console.error("can't load while loading");
