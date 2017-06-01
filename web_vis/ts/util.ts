@@ -128,8 +128,8 @@ export function randomChoice<T>(data: T[]) {
  * "hi" => "hi"
  */
 export function toDeterministic(obj: any): any {
-    if (obj instanceof Array) return [null, obj.map(x => toDeterministic(x))];
-    if (obj instanceof Object) return Object.keys(obj).sort().map(k => [k, toDeterministic(obj[k])]);
+    if (Array.isArray(obj)) return [null, obj.map(x => toDeterministic(x))];
+    if (obj !== null && typeof obj === "object") return Object.keys(obj).sort().map(k => [k, toDeterministic(obj[k])]);
     return obj;
 }
 export function fromDeterministic(obj: any): any {

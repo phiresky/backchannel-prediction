@@ -20,7 +20,7 @@ export type DataIterator = {
     data: TwoDimensionalArray,
     iterator: FastIterator
 }
-const toReal = (iterator: { count: number, start: number, stride: number }) => (i: number) => {
+const toReal = (iterator: { count: number, start: number, stride: number }, i: number) => {
     if (i > iterator.count || i < 0) throw Error("OOB:" + i + ">=/<=" + iterator.count);
     return iterator.start + i * iterator.stride;
 };
@@ -77,7 +77,8 @@ export class TwoDimensionalArray {
         this.atom.reportChanged();
     }
     private invalidateRange(start: number, end: number) {
-        for (const [iterator, getter] of this.cache.entries()) {
+        for (const [x, getter] of this.cache.entries()) {
+            const iterator = this.ot(JSON.parse(x));
             if (getter instanceof util.BinaryCacheTree) {
                 const _toFake = toFake(iterator, true);
                 const fakeStart = _toFake(start), fakeEnd = _toFake(end);
@@ -87,21 +88,27 @@ export class TwoDimensionalArray {
             }
         }
     }
+    private it(x: FastIterator) {
+        return [x.start, x.stride, x.count] as [number, number, number];
+    }
+    private ot(x: [number, number, number]) {
+        return {start: x[0], stride: x[1], count: x[2]};
+    }
 
     private getIndex(dim1index: number, dim2index: number) {
         return dim1index * this.shape[1] + dim2index;
     }
-    cache = new util.LazyHashMap<FastIterator, util.ValueGetter<util.Stats>>();
+    cache = new Map<string, util.ValueGetter<util.Stats>>();
     public stats(iterator: FastIterator, start: number, end: number) {
-        const _toReal = toReal(iterator);
+        const x = JSON.stringify(this.it(iterator));
         const getter = {
             getValue: (a: number, b: number) =>
-                util.statsRaw(this.buffer, _toReal(a), _toReal(b), iterator.stride)
+                util.statsRaw(this.buffer, toReal(iterator, a), toReal(iterator, b), iterator.stride)
         };
-        let fastGetter = this.cache.get(iterator);
+        let fastGetter = this.cache.get(x);
         if (!fastGetter) {
             fastGetter = util.BinaryCacheTree.create(0, iterator.count, getter, util.statsCombinator);
-            this.cache.set(iterator, fastGetter);
+            this.cache.set(x, fastGetter);
         }
         return fastGetter.getValue(start, end);
     }
