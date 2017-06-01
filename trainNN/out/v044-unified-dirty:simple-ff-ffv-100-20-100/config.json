@@ -1,0 +1,268 @@
+{
+	"name": "simple-ff-ffv-100-20-100",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch",
+			"get_ffv"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "feedforward_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 2,
+		"update_method": "sgd",
+		"learning_rate": 0.7,
+		"num_labels": 2,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			100,
+			20,
+			100
+		],
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 9
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.4999999780637181,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.49996032579680805,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.5000545008031851,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.5000545012463424,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.4999751956784888,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.5000346753160011,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.5000495448283842,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-006.pkl"
+			},
+			"7": {
+				"validation_error": 0.4999454555458296,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-007.pkl"
+			},
+			"8": {
+				"validation_error": 0.500009890973494,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-008.pkl"
+			},
+			"9": {
+				"validation_error": 0.4999751960108567,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-009.pkl"
+			},
+			"10": {
+				"validation_error": 0.5000247611875428,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-010.pkl"
+			},
+			"11": {
+				"validation_error": 0.5000098921183169,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-011.pkl"
+			},
+			"12": {
+				"validation_error": 0.5000545018741485,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-012.pkl"
+			},
+			"13": {
+				"validation_error": 0.500064414710065,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-013.pkl"
+			},
+			"14": {
+				"validation_error": 0.5000445882257771,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-014.pkl"
+			},
+			"15": {
+				"validation_error": 0.500009891158143,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-015.pkl"
+			},
+			"16": {
+				"validation_error": 0.4999900640091193,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-016.pkl"
+			},
+			"17": {
+				"validation_error": 0.49997519549383995,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-017.pkl"
+			},
+			"18": {
+				"validation_error": 0.5000148481669775,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-018.pkl"
+			},
+			"19": {
+				"validation_error": 0.4999999783222264,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-019.pkl"
+			},
+			"20": {
+				"validation_error": 0.4999851083297564,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-020.pkl"
+			},
+			"21": {
+				"validation_error": 0.5000297183440964,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-021.pkl"
+			},
+			"22": {
+				"validation_error": 0.5000247615937703,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-022.pkl"
+			},
+			"23": {
+				"validation_error": 0.49998015183793865,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-023.pkl"
+			},
+			"24": {
+				"validation_error": 0.49998510844054567,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-024.pkl"
+			},
+			"25": {
+				"validation_error": 0.5000049345924656,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-025.pkl"
+			},
+			"26": {
+				"validation_error": 0.4999900647477147,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-026.pkl"
+			},
+			"27": {
+				"validation_error": 0.5000396313646617,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-027.pkl"
+			},
+			"28": {
+				"validation_error": 0.4999999780267883,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-028.pkl"
+			},
+			"29": {
+				"validation_error": 0.4999900646369253,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-029.pkl"
+			},
+			"30": {
+				"validation_error": 0.49997023951903885,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-030.pkl"
+			},
+			"31": {
+				"validation_error": 0.49998015113627303,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-031.pkl"
+			},
+			"32": {
+				"validation_error": 0.5000049354787801,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-032.pkl"
+			},
+			"33": {
+				"validation_error": 0.49999006445227645,
+				"training_loss": NaN,
+				"validation_loss": NaN,
+				"weights": "epoch-033.pkl"
+			}
+		},
+		"source": "configs/simple-ff-ffv/simple-ff-ffv-100-20-100.json"
+	}
+}

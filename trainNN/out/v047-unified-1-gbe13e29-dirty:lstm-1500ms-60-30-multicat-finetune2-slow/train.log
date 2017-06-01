@@ -1,0 +1,712 @@
+2017-02-03 04:39:20,503 DEBUG    version=v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow
+2017-02-03 04:39:20,602 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-02-03 04:39:41,537 INFO     balancing data...
+2017-02-03 04:39:41,887 DEBUG    loading cached extracted data from data/cache/extract-1c76ab7736d57a61c3c2bab08934de609fbc77dd65410da7f1c165756d89fbb9.pickle
+2017-02-03 04:39:43,946 DEBUG    set input dim to 2
+2017-02-03 04:39:43,948 DEBUG    input dim = 2
+2017-02-03 04:39:44,008 DEBUG    shuffling batches
+2017-02-03 04:40:04,037 DEBUG    shuffling done
+2017-02-03 04:40:04,037 DEBUG    loading data into ram
+2017-02-03 04:40:04,265 DEBUG    loading data took 0.228s (cpu: 0.228s)
+2017-02-03 04:40:04,400 INFO     balancing data...
+2017-02-03 04:40:04,423 DEBUG    set input dim to 2
+2017-02-03 04:40:04,423 DEBUG    input dim = 2
+2017-02-03 04:40:04,623 DEBUG    shuffling batches
+2017-02-03 04:40:06,495 DEBUG    shuffling done
+2017-02-03 04:40:06,496 DEBUG    loading data into ram
+2017-02-03 04:40:06,515 DEBUG    loading data took 0.019s (cpu: 0.019s)
+2017-02-03 04:40:06,706 INFO     Loading old params from trainNN/out/v046-unified-53-g69abbfa-dirty:lstm-1500ms-60-30/epoch-049.pkl
+2017-02-03 04:40:09,531 INFO     loaded layer 0 ({})
+2017-02-03 04:40:09,532 INFO     freezing layer 0
+2017-02-03 04:40:09,537 INFO     loaded layer 1 ({'W_in_to_ingate': (2, 60), 'W_hid_to_ingate': (60, 60), 'b_ingate': (60,), 'W_in_to_forgetgate': (2, 60), 'W_hid_to_forgetgate': (60, 60), 'b_forgetgate': (60,), 'W_in_to_cell': (2, 60), 'W_hid_to_cell': (60, 60), 'b_cell': (60,), 'W_in_to_outgate': (2, 60), 'W_hid_to_outgate': (60, 60), 'b_outgate': (60,), 'W_cell_to_ingate': (60,), 'W_cell_to_forgetgate': (60,), 'W_cell_to_outgate': (60,), 'cell_init': (1, 60), 'hid_init': (1, 60)})
+2017-02-03 04:40:09,538 INFO     freezing layer 1
+2017-02-03 04:40:09,540 INFO     loaded layer 2 ({'W_in_to_ingate': (60, 30), 'W_hid_to_ingate': (30, 30), 'b_ingate': (30,), 'W_in_to_forgetgate': (60, 30), 'W_hid_to_forgetgate': (30, 30), 'b_forgetgate': (30,), 'W_in_to_cell': (60, 30), 'W_hid_to_cell': (30, 30), 'b_cell': (30,), 'W_in_to_outgate': (60, 30), 'W_hid_to_outgate': (30, 30), 'b_outgate': (30,), 'W_cell_to_ingate': (30,), 'W_cell_to_forgetgate': (30,), 'W_cell_to_outgate': (30,), 'cell_init': (1, 30), 'hid_init': (1, 30)})
+2017-02-03 04:40:09,594 DEBUG    Applying L2 regularization with 0.000100
+2017-02-03 04:40:09,654 INFO     Training network with 11196 trainable out of 26676 total params.
+2017-02-03 04:40:09,869 DEBUG    Using adam with learning_rate=0.000100
+2017-02-03 04:40:50,381 DEBUG    Starting training...
+2017-02-03 04:45:58,948 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-000.pkl
+2017-02-03 04:46:16,956 INFO     epoch: 0 took 326.573s (0.007s in batching)
+training loss:	1.725535
+validation loss:	1.713431
+validation error:	0.772088
+2017-02-03 04:46:16,977 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 04:52:44,282 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-001.pkl
+2017-02-03 04:53:08,736 INFO     epoch: 1 took 411.782s (0.005s in batching)
+training loss:	1.702324
+validation loss:	1.710482
+validation error:	0.766083
+2017-02-03 04:53:08,737 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 04:59:44,974 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-002.pkl
+2017-02-03 05:00:08,701 INFO     epoch: 2 took 419.965s (0.005s in batching)
+training loss:	1.696477
+validation loss:	1.710894
+validation error:	0.760860
+2017-02-03 05:00:08,702 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:06:36,103 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-003.pkl
+2017-02-03 05:07:00,791 INFO     epoch: 3 took 411.264s (0.005s in batching)
+training loss:	1.692151
+validation loss:	1.714668
+validation error:	0.761025
+2017-02-03 05:07:00,792 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:13:30,480 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-004.pkl
+2017-02-03 05:13:54,804 INFO     epoch: 4 took 414.013s (0.007s in batching)
+training loss:	1.687981
+validation loss:	1.717297
+validation error:	0.758402
+2017-02-03 05:13:54,805 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:20:25,160 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-005.pkl
+2017-02-03 05:20:48,849 INFO     epoch: 5 took 414.045s (0.006s in batching)
+training loss:	1.683626
+validation loss:	1.721584
+validation error:	0.756242
+2017-02-03 05:20:48,850 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:27:15,548 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-006.pkl
+2017-02-03 05:27:39,208 INFO     epoch: 6 took 410.359s (0.008s in batching)
+training loss:	1.679661
+validation loss:	1.724774
+validation error:	0.750270
+2017-02-03 05:27:39,209 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:33:46,997 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-007.pkl
+2017-02-03 05:34:00,207 INFO     epoch: 7 took 380.999s (0.005s in batching)
+training loss:	1.675275
+validation loss:	1.735663
+validation error:	0.753179
+2017-02-03 05:34:00,208 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:37:54,901 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-008.pkl
+2017-02-03 05:38:08,178 INFO     epoch: 8 took 247.971s (0.005s in batching)
+training loss:	1.670670
+validation loss:	1.744705
+validation error:	0.754402
+2017-02-03 05:38:08,181 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:42:01,735 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-009.pkl
+2017-02-03 05:42:14,897 INFO     epoch: 9 took 246.719s (0.005s in batching)
+training loss:	1.665933
+validation loss:	1.752961
+validation error:	0.753047
+2017-02-03 05:42:14,898 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:46:08,152 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-010.pkl
+2017-02-03 05:46:21,253 INFO     epoch: 10 took 246.357s (0.005s in batching)
+training loss:	1.661336
+validation loss:	1.759666
+validation error:	0.751317
+2017-02-03 05:46:21,254 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:50:14,968 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-011.pkl
+2017-02-03 05:50:28,115 INFO     epoch: 11 took 246.861s (0.005s in batching)
+training loss:	1.656452
+validation loss:	1.766000
+validation error:	0.748981
+2017-02-03 05:50:28,116 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:54:21,798 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-012.pkl
+2017-02-03 05:54:34,969 INFO     epoch: 12 took 246.854s (0.005s in batching)
+training loss:	1.651436
+validation loss:	1.776497
+validation error:	0.751317
+2017-02-03 05:54:34,970 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 05:58:28,770 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-013.pkl
+2017-02-03 05:58:41,897 INFO     epoch: 13 took 246.928s (0.005s in batching)
+training loss:	1.646752
+validation loss:	1.786852
+validation error:	0.758380
+2017-02-03 05:58:41,898 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:02:35,416 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-014.pkl
+2017-02-03 06:02:49,071 INFO     epoch: 14 took 247.174s (0.005s in batching)
+training loss:	1.641578
+validation loss:	1.797930
+validation error:	0.761598
+2017-02-03 06:02:49,072 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:06:42,501 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-015.pkl
+2017-02-03 06:06:55,625 INFO     epoch: 15 took 246.554s (0.005s in batching)
+training loss:	1.638065
+validation loss:	1.813530
+validation error:	0.757289
+2017-02-03 06:06:55,626 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:10:49,223 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-016.pkl
+2017-02-03 06:11:02,428 INFO     epoch: 16 took 246.803s (0.005s in batching)
+training loss:	1.634800
+validation loss:	1.809186
+validation error:	0.764165
+2017-02-03 06:11:02,429 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:14:55,882 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-017.pkl
+2017-02-03 06:15:08,954 INFO     epoch: 17 took 246.526s (0.005s in batching)
+training loss:	1.630661
+validation loss:	1.816234
+validation error:	0.766215
+2017-02-03 06:15:08,955 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:19:02,376 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-018.pkl
+2017-02-03 06:19:15,497 INFO     epoch: 18 took 246.543s (0.005s in batching)
+training loss:	1.627198
+validation loss:	1.823057
+validation error:	0.761455
+2017-02-03 06:19:15,498 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:23:08,959 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-019.pkl
+2017-02-03 06:23:22,084 INFO     epoch: 19 took 246.587s (0.005s in batching)
+training loss:	1.623113
+validation loss:	1.829995
+validation error:	0.766755
+2017-02-03 06:23:22,085 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:27:15,101 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-020.pkl
+2017-02-03 06:27:28,353 INFO     epoch: 20 took 246.269s (0.007s in batching)
+training loss:	1.620927
+validation loss:	1.836348
+validation error:	0.771096
+2017-02-03 06:27:28,354 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:31:21,821 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-021.pkl
+2017-02-03 06:31:35,082 INFO     epoch: 21 took 246.729s (0.005s in batching)
+training loss:	1.619496
+validation loss:	1.840926
+validation error:	0.761939
+2017-02-03 06:31:35,083 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:35:28,475 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-022.pkl
+2017-02-03 06:35:41,687 INFO     epoch: 22 took 246.604s (0.005s in batching)
+training loss:	1.615030
+validation loss:	1.843641
+validation error:	0.769157
+2017-02-03 06:35:41,688 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:39:35,512 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-023.pkl
+2017-02-03 06:39:48,764 INFO     epoch: 23 took 247.077s (0.005s in batching)
+training loss:	1.612487
+validation loss:	1.849545
+validation error:	0.766446
+2017-02-03 06:39:48,765 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:43:42,396 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-024.pkl
+2017-02-03 06:43:55,563 INFO     epoch: 24 took 246.799s (0.005s in batching)
+training loss:	1.608525
+validation loss:	1.858457
+validation error:	0.766667
+2017-02-03 06:43:55,564 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:47:49,155 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-025.pkl
+2017-02-03 06:48:02,466 INFO     epoch: 25 took 246.903s (0.005s in batching)
+training loss:	1.606326
+validation loss:	1.860215
+validation error:	0.763041
+2017-02-03 06:48:02,467 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:51:56,273 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-026.pkl
+2017-02-03 06:52:09,566 INFO     epoch: 26 took 247.100s (0.005s in batching)
+training loss:	1.605157
+validation loss:	1.862298
+validation error:	0.766380
+2017-02-03 06:52:09,567 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 06:56:03,177 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-027.pkl
+2017-02-03 06:56:16,353 INFO     epoch: 27 took 246.787s (0.005s in batching)
+training loss:	1.603827
+validation loss:	1.868818
+validation error:	0.770744
+2017-02-03 06:56:16,354 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:00:10,187 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-028.pkl
+2017-02-03 07:00:23,394 INFO     epoch: 28 took 247.040s (0.005s in batching)
+training loss:	1.598893
+validation loss:	1.874248
+validation error:	0.767857
+2017-02-03 07:00:23,395 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:04:16,991 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-029.pkl
+2017-02-03 07:04:30,189 INFO     epoch: 29 took 246.795s (0.005s in batching)
+training loss:	1.598502
+validation loss:	1.873140
+validation error:	0.768132
+2017-02-03 07:04:30,190 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:08:24,304 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-030.pkl
+2017-02-03 07:08:37,566 INFO     epoch: 30 took 247.377s (0.005s in batching)
+training loss:	1.595677
+validation loss:	1.879871
+validation error:	0.769829
+2017-02-03 07:08:37,567 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:12:30,885 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-031.pkl
+2017-02-03 07:12:44,087 INFO     epoch: 31 took 246.522s (0.005s in batching)
+training loss:	1.592733
+validation loss:	1.887570
+validation error:	0.769972
+2017-02-03 07:12:44,089 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:16:37,695 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-032.pkl
+2017-02-03 07:16:50,910 INFO     epoch: 32 took 246.822s (0.005s in batching)
+training loss:	1.591895
+validation loss:	1.889292
+validation error:	0.771207
+2017-02-03 07:16:50,911 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:20:44,655 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-033.pkl
+2017-02-03 07:20:57,788 INFO     epoch: 33 took 246.878s (0.005s in batching)
+training loss:	1.590148
+validation loss:	1.895000
+validation error:	0.773532
+2017-02-03 07:20:57,789 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:24:51,464 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-034.pkl
+2017-02-03 07:25:04,636 INFO     epoch: 34 took 246.849s (0.005s in batching)
+training loss:	1.585169
+validation loss:	1.900510
+validation error:	0.770634
+2017-02-03 07:25:04,638 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:28:58,267 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-035.pkl
+2017-02-03 07:29:11,667 INFO     epoch: 35 took 247.030s (0.005s in batching)
+training loss:	1.583876
+validation loss:	1.908148
+validation error:	0.769774
+2017-02-03 07:29:11,668 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:33:05,489 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-036.pkl
+2017-02-03 07:33:18,651 INFO     epoch: 36 took 246.984s (0.005s in batching)
+training loss:	1.580999
+validation loss:	1.906208
+validation error:	0.766623
+2017-02-03 07:33:18,652 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:37:12,076 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-037.pkl
+2017-02-03 07:37:25,307 INFO     epoch: 37 took 246.656s (0.005s in batching)
+training loss:	1.578825
+validation loss:	1.912169
+validation error:	0.767680
+2017-02-03 07:37:25,308 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:41:18,948 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-038.pkl
+2017-02-03 07:41:32,207 INFO     epoch: 38 took 246.900s (0.005s in batching)
+training loss:	1.577984
+validation loss:	1.916835
+validation error:	0.766534
+2017-02-03 07:41:32,208 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:45:25,827 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-039.pkl
+2017-02-03 07:45:39,008 INFO     epoch: 39 took 246.801s (0.005s in batching)
+training loss:	1.575687
+validation loss:	1.911572
+validation error:	0.764176
+2017-02-03 07:45:39,009 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:49:32,713 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-040.pkl
+2017-02-03 07:49:46,473 INFO     epoch: 40 took 247.465s (0.005s in batching)
+training loss:	1.572579
+validation loss:	1.927557
+validation error:	0.771030
+2017-02-03 07:49:46,474 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:53:40,145 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-041.pkl
+2017-02-03 07:53:53,337 INFO     epoch: 41 took 246.864s (0.005s in batching)
+training loss:	1.570006
+validation loss:	1.922138
+validation error:	0.770931
+2017-02-03 07:53:53,338 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 07:57:46,857 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-042.pkl
+2017-02-03 07:58:00,055 INFO     epoch: 42 took 246.718s (0.005s in batching)
+training loss:	1.568713
+validation loss:	1.933911
+validation error:	0.774424
+2017-02-03 07:58:00,056 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:01:53,720 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-043.pkl
+2017-02-03 08:02:06,924 INFO     epoch: 43 took 246.869s (0.005s in batching)
+training loss:	1.565811
+validation loss:	1.941288
+validation error:	0.773289
+2017-02-03 08:02:06,925 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:06:00,456 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-044.pkl
+2017-02-03 08:06:13,593 INFO     epoch: 44 took 246.670s (0.005s in batching)
+training loss:	1.564303
+validation loss:	1.945472
+validation error:	0.767592
+2017-02-03 08:06:13,595 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:10:07,157 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-045.pkl
+2017-02-03 08:10:20,919 INFO     epoch: 45 took 247.326s (0.005s in batching)
+training loss:	1.563135
+validation loss:	1.948325
+validation error:	0.771262
+2017-02-03 08:10:20,920 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:14:14,106 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-046.pkl
+2017-02-03 08:14:27,292 INFO     epoch: 46 took 246.373s (0.005s in batching)
+training loss:	1.562193
+validation loss:	1.949180
+validation error:	0.771537
+2017-02-03 08:14:27,293 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:18:20,949 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-047.pkl
+2017-02-03 08:18:34,141 INFO     epoch: 47 took 246.849s (0.005s in batching)
+training loss:	1.560028
+validation loss:	1.958517
+validation error:	0.770259
+2017-02-03 08:18:34,142 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:22:27,937 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-048.pkl
+2017-02-03 08:22:41,195 INFO     epoch: 48 took 247.055s (0.005s in batching)
+training loss:	1.560988
+validation loss:	1.957391
+validation error:	0.774127
+2017-02-03 08:22:41,197 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:26:35,503 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-049.pkl
+2017-02-03 08:26:48,727 INFO     epoch: 49 took 247.532s (0.005s in batching)
+training loss:	1.557776
+validation loss:	1.972973
+validation error:	0.770402
+2017-02-03 08:26:48,729 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:30:42,409 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-050.pkl
+2017-02-03 08:30:56,474 INFO     epoch: 50 took 247.747s (0.005s in batching)
+training loss:	1.556594
+validation loss:	1.957627
+validation error:	0.768397
+2017-02-03 08:30:56,476 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:34:50,274 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-051.pkl
+2017-02-03 08:35:03,427 INFO     epoch: 51 took 246.953s (0.005s in batching)
+training loss:	1.554475
+validation loss:	1.974379
+validation error:	0.770678
+2017-02-03 08:35:03,429 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:38:57,245 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-052.pkl
+2017-02-03 08:39:10,518 INFO     epoch: 52 took 247.091s (0.005s in batching)
+training loss:	1.555535
+validation loss:	1.974568
+validation error:	0.771482
+2017-02-03 08:39:10,520 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:43:04,480 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-053.pkl
+2017-02-03 08:43:17,705 INFO     epoch: 53 took 247.187s (0.005s in batching)
+training loss:	1.550672
+validation loss:	1.980604
+validation error:	0.769741
+2017-02-03 08:43:17,707 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:47:11,562 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-054.pkl
+2017-02-03 08:47:24,692 INFO     epoch: 54 took 246.987s (0.005s in batching)
+training loss:	1.550412
+validation loss:	1.978670
+validation error:	0.765543
+2017-02-03 08:47:24,694 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:51:18,574 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-055.pkl
+2017-02-03 08:51:32,719 INFO     epoch: 55 took 248.027s (0.005s in batching)
+training loss:	1.548938
+validation loss:	1.979625
+validation error:	0.769267
+2017-02-03 08:51:32,721 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:55:26,613 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-056.pkl
+2017-02-03 08:55:39,845 INFO     epoch: 56 took 247.126s (0.005s in batching)
+training loss:	1.548831
+validation loss:	1.985488
+validation error:	0.768165
+2017-02-03 08:55:39,847 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 08:59:33,496 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-057.pkl
+2017-02-03 08:59:46,624 INFO     epoch: 57 took 246.779s (0.005s in batching)
+training loss:	1.547975
+validation loss:	1.981583
+validation error:	0.769168
+2017-02-03 08:59:46,626 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:03:40,265 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-058.pkl
+2017-02-03 09:03:53,428 INFO     epoch: 58 took 246.804s (0.005s in batching)
+training loss:	1.547294
+validation loss:	1.985106
+validation error:	0.770369
+2017-02-03 09:03:53,429 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:07:47,143 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-059.pkl
+2017-02-03 09:08:00,396 INFO     epoch: 59 took 246.968s (0.005s in batching)
+training loss:	1.545859
+validation loss:	1.996593
+validation error:	0.773344
+2017-02-03 09:08:00,398 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:11:53,990 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-060.pkl
+2017-02-03 09:12:07,958 INFO     epoch: 60 took 247.561s (0.005s in batching)
+training loss:	1.542539
+validation loss:	1.988073
+validation error:	0.766964
+2017-02-03 09:12:07,959 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:16:01,556 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-061.pkl
+2017-02-03 09:16:14,857 INFO     epoch: 61 took 246.899s (0.005s in batching)
+training loss:	1.543778
+validation loss:	2.004232
+validation error:	0.771570
+2017-02-03 09:16:14,859 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:20:08,904 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-062.pkl
+2017-02-03 09:20:22,068 INFO     epoch: 62 took 247.211s (0.006s in batching)
+training loss:	1.540074
+validation loss:	2.000841
+validation error:	0.770435
+2017-02-03 09:20:22,069 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:24:15,615 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-063.pkl
+2017-02-03 09:24:28,947 INFO     epoch: 63 took 246.879s (0.005s in batching)
+training loss:	1.540206
+validation loss:	2.009057
+validation error:	0.773179
+2017-02-03 09:24:28,948 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:28:22,337 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-064.pkl
+2017-02-03 09:28:35,545 INFO     epoch: 64 took 246.599s (0.005s in batching)
+training loss:	1.537734
+validation loss:	2.019858
+validation error:	0.773311
+2017-02-03 09:28:35,547 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:32:29,237 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-065.pkl
+2017-02-03 09:32:42,700 INFO     epoch: 65 took 247.154s (0.005s in batching)
+training loss:	1.538778
+validation loss:	2.016667
+validation error:	0.774006
+2017-02-03 09:32:42,701 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:36:36,362 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-066.pkl
+2017-02-03 09:36:49,508 INFO     epoch: 66 took 246.808s (0.005s in batching)
+training loss:	1.535842
+validation loss:	2.012553
+validation error:	0.768573
+2017-02-03 09:36:49,510 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:40:43,298 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-067.pkl
+2017-02-03 09:40:56,449 INFO     epoch: 67 took 246.940s (0.005s in batching)
+training loss:	1.547821
+validation loss:	1.996236
+validation error:	0.770303
+2017-02-03 09:40:56,450 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:44:50,265 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-068.pkl
+2017-02-03 09:45:03,460 INFO     epoch: 68 took 247.011s (0.005s in batching)
+training loss:	1.536611
+validation loss:	2.025384
+validation error:	0.772496
+2017-02-03 09:45:03,461 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:48:57,124 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-069.pkl
+2017-02-03 09:49:10,375 INFO     epoch: 69 took 246.915s (0.005s in batching)
+training loss:	1.533913
+validation loss:	2.010448
+validation error:	0.773972
+2017-02-03 09:49:10,376 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:53:04,281 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-070.pkl
+2017-02-03 09:53:17,641 INFO     epoch: 70 took 247.266s (0.005s in batching)
+training loss:	1.542888
+validation loss:	2.013655
+validation error:	0.770369
+2017-02-03 09:53:17,642 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 09:57:11,341 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-071.pkl
+2017-02-03 09:57:24,466 INFO     epoch: 71 took 246.825s (0.005s in batching)
+training loss:	1.536126
+validation loss:	2.017548
+validation error:	0.771383
+2017-02-03 09:57:24,467 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:01:18,166 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-072.pkl
+2017-02-03 10:01:31,423 INFO     epoch: 72 took 246.957s (0.005s in batching)
+training loss:	1.533004
+validation loss:	2.016080
+validation error:	0.775328
+2017-02-03 10:01:31,424 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:05:25,486 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-073.pkl
+2017-02-03 10:05:38,707 INFO     epoch: 73 took 247.284s (0.005s in batching)
+training loss:	1.531708
+validation loss:	2.024755
+validation error:	0.772793
+2017-02-03 10:05:38,709 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:09:33,013 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-074.pkl
+2017-02-03 10:09:46,250 INFO     epoch: 74 took 247.543s (0.005s in batching)
+training loss:	1.529355
+validation loss:	2.035704
+validation error:	0.776044
+2017-02-03 10:09:46,252 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:13:40,026 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-075.pkl
+2017-02-03 10:13:53,455 INFO     epoch: 75 took 247.205s (0.005s in batching)
+training loss:	1.529903
+validation loss:	2.041990
+validation error:	0.774226
+2017-02-03 10:13:53,456 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:17:47,212 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-076.pkl
+2017-02-03 10:18:00,561 INFO     epoch: 76 took 247.106s (0.005s in batching)
+training loss:	1.528930
+validation loss:	2.048025
+validation error:	0.774854
+2017-02-03 10:18:00,563 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:21:54,347 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-077.pkl
+2017-02-03 10:22:07,651 INFO     epoch: 77 took 247.091s (0.005s in batching)
+training loss:	1.527016
+validation loss:	2.087886
+validation error:	0.771691
+2017-02-03 10:22:07,653 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:26:01,382 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-078.pkl
+2017-02-03 10:26:14,671 INFO     epoch: 78 took 247.019s (0.005s in batching)
+training loss:	1.525702
+validation loss:	2.047837
+validation error:	0.775383
+2017-02-03 10:26:14,672 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:30:08,230 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-079.pkl
+2017-02-03 10:30:21,583 INFO     epoch: 79 took 246.913s (0.005s in batching)
+training loss:	1.526613
+validation loss:	2.048134
+validation error:	0.772562
+2017-02-03 10:30:21,585 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:34:15,277 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-080.pkl
+2017-02-03 10:34:28,501 INFO     epoch: 80 took 246.918s (0.005s in batching)
+training loss:	1.522291
+validation loss:	2.049802
+validation error:	0.774490
+2017-02-03 10:34:28,503 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:38:22,222 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-081.pkl
+2017-02-03 10:38:35,486 INFO     epoch: 81 took 246.985s (0.005s in batching)
+training loss:	1.522440
+validation loss:	2.063537
+validation error:	0.773190
+2017-02-03 10:38:35,488 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:42:29,173 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-082.pkl
+2017-02-03 10:42:42,580 INFO     epoch: 82 took 247.094s (0.005s in batching)
+training loss:	1.523235
+validation loss:	2.073542
+validation error:	0.776342
+2017-02-03 10:42:42,582 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:46:36,224 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-083.pkl
+2017-02-03 10:46:49,407 INFO     epoch: 83 took 246.827s (0.005s in batching)
+training loss:	1.521601
+validation loss:	2.058882
+validation error:	0.775350
+2017-02-03 10:46:49,409 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:50:43,127 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-084.pkl
+2017-02-03 10:50:56,325 INFO     epoch: 84 took 246.918s (0.005s in batching)
+training loss:	1.520392
+validation loss:	2.067353
+validation error:	0.775030
+2017-02-03 10:50:56,327 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:54:50,087 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-085.pkl
+2017-02-03 10:55:03,308 INFO     epoch: 85 took 246.983s (0.005s in batching)
+training loss:	1.524015
+validation loss:	2.067402
+validation error:	0.777102
+2017-02-03 10:55:03,310 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 10:58:56,968 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-086.pkl
+2017-02-03 10:59:10,191 INFO     epoch: 86 took 246.883s (0.005s in batching)
+training loss:	1.521045
+validation loss:	2.072197
+validation error:	0.773058
+2017-02-03 10:59:10,193 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:03:03,501 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-087.pkl
+2017-02-03 11:03:17,235 INFO     epoch: 87 took 247.044s (0.005s in batching)
+training loss:	1.528732
+validation loss:	2.061206
+validation error:	0.773576
+2017-02-03 11:03:17,237 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:07:10,832 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-088.pkl
+2017-02-03 11:07:24,035 INFO     epoch: 88 took 246.800s (0.005s in batching)
+training loss:	1.518969
+validation loss:	2.087926
+validation error:	0.773388
+2017-02-03 11:07:24,037 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:11:17,891 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-089.pkl
+2017-02-03 11:11:31,155 INFO     epoch: 89 took 247.120s (0.005s in batching)
+training loss:	1.516237
+validation loss:	2.082194
+validation error:	0.774667
+2017-02-03 11:11:31,157 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:15:24,872 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-090.pkl
+2017-02-03 11:15:38,117 INFO     epoch: 90 took 246.962s (0.005s in batching)
+training loss:	1.516307
+validation loss:	2.097763
+validation error:	0.775030
+2017-02-03 11:15:38,119 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:19:31,810 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-091.pkl
+2017-02-03 11:19:45,067 INFO     epoch: 91 took 246.950s (0.005s in batching)
+training loss:	1.515483
+validation loss:	2.077203
+validation error:	0.773036
+2017-02-03 11:19:45,069 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:23:38,744 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-092.pkl
+2017-02-03 11:23:52,568 INFO     epoch: 92 took 247.501s (0.005s in batching)
+training loss:	1.515209
+validation loss:	2.090159
+validation error:	0.769311
+2017-02-03 11:23:52,570 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:27:46,061 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-093.pkl
+2017-02-03 11:27:59,231 INFO     epoch: 93 took 246.663s (0.005s in batching)
+training loss:	1.513427
+validation loss:	2.085228
+validation error:	0.774446
+2017-02-03 11:27:59,233 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:31:52,842 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-094.pkl
+2017-02-03 11:32:05,993 INFO     epoch: 94 took 246.762s (0.005s in batching)
+training loss:	1.515729
+validation loss:	2.096815
+validation error:	0.773267
+2017-02-03 11:32:05,995 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:35:59,752 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-095.pkl
+2017-02-03 11:36:12,932 INFO     epoch: 95 took 246.938s (0.005s in batching)
+training loss:	1.512424
+validation loss:	2.101847
+validation error:	0.779769
+2017-02-03 11:36:12,933 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:40:06,870 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-096.pkl
+2017-02-03 11:40:20,078 INFO     epoch: 96 took 247.147s (0.005s in batching)
+training loss:	1.513232
+validation loss:	2.100613
+validation error:	0.773752
+2017-02-03 11:40:20,080 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:44:13,766 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-097.pkl
+2017-02-03 11:44:27,828 INFO     epoch: 97 took 247.750s (0.005s in batching)
+training loss:	1.512012
+validation loss:	2.098276
+validation error:	0.775592
+2017-02-03 11:44:27,830 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:48:21,703 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-098.pkl
+2017-02-03 11:48:34,920 INFO     epoch: 98 took 247.092s (0.005s in batching)
+training loss:	1.510330
+validation loss:	2.113733
+validation error:	0.774281
+2017-02-03 11:48:34,922 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:52:28,782 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-099.pkl
+2017-02-03 11:52:42,058 INFO     epoch: 99 took 247.138s (0.005s in batching)
+training loss:	1.510809
+validation loss:	2.098962
+validation error:	0.774182
+2017-02-03 11:52:42,060 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 11:56:35,782 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-100.pkl
+2017-02-03 11:56:49,032 INFO     epoch: 100 took 246.974s (0.005s in batching)
+training loss:	1.508615
+validation loss:	2.100890
+validation error:	0.772253
+2017-02-03 11:56:49,034 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:00:42,924 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-101.pkl
+2017-02-03 12:00:56,137 INFO     epoch: 101 took 247.105s (0.005s in batching)
+training loss:	1.508416
+validation loss:	2.111495
+validation error:	0.776716
+2017-02-03 12:00:56,139 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:04:49,910 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-102.pkl
+2017-02-03 12:05:03,543 INFO     epoch: 102 took 247.406s (0.005s in batching)
+training loss:	1.506993
+validation loss:	2.123321
+validation error:	0.770457
+2017-02-03 12:05:03,545 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:08:57,361 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-103.pkl
+2017-02-03 12:09:10,729 INFO     epoch: 103 took 247.186s (0.005s in batching)
+training loss:	1.512029
+validation loss:	2.118190
+validation error:	0.773102
+2017-02-03 12:09:10,731 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:13:05,140 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-104.pkl
+2017-02-03 12:13:18,397 INFO     epoch: 104 took 247.668s (0.005s in batching)
+training loss:	1.505230
+validation loss:	2.111834
+validation error:	0.772110
+2017-02-03 12:13:18,400 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:17:12,240 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-105.pkl
+2017-02-03 12:17:25,519 INFO     epoch: 105 took 247.122s (0.005s in batching)
+training loss:	1.507716
+validation loss:	2.123165
+validation error:	0.772661
+2017-02-03 12:17:25,521 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:21:19,096 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-106.pkl
+2017-02-03 12:21:32,310 INFO     epoch: 106 took 246.791s (0.005s in batching)
+training loss:	1.507184
+validation loss:	2.131463
+validation error:	0.771526
+2017-02-03 12:21:32,312 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:25:25,936 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-107.pkl
+2017-02-03 12:25:39,322 INFO     epoch: 107 took 247.012s (0.005s in batching)
+training loss:	1.505775
+validation loss:	2.128884
+validation error:	0.772848
+2017-02-03 12:25:39,324 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:29:32,848 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-108.pkl
+2017-02-03 12:29:46,075 INFO     epoch: 108 took 246.752s (0.005s in batching)
+training loss:	1.503773
+validation loss:	2.139371
+validation error:	0.772066
+2017-02-03 12:29:46,077 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:33:39,795 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-109.pkl
+2017-02-03 12:33:53,074 INFO     epoch: 109 took 246.999s (0.005s in batching)
+training loss:	1.504629
+validation loss:	2.135261
+validation error:	0.774909
+2017-02-03 12:33:53,076 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:37:46,761 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-110.pkl
+2017-02-03 12:37:59,960 INFO     epoch: 110 took 246.886s (0.005s in batching)
+training loss:	1.502869
+validation loss:	2.140251
+validation error:	0.774689
+2017-02-03 12:37:59,962 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:41:53,487 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-111.pkl
+2017-02-03 12:42:06,688 INFO     epoch: 111 took 246.728s (0.005s in batching)
+training loss:	1.507789
+validation loss:	2.144265
+validation error:	0.774942
+2017-02-03 12:42:06,690 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:46:00,328 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-112.pkl
+2017-02-03 12:46:13,549 INFO     epoch: 112 took 246.861s (0.005s in batching)
+training loss:	1.502004
+validation loss:	2.143086
+validation error:	0.770832
+2017-02-03 12:46:13,551 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json
+2017-02-03 12:50:34,654 INFO     Saving network params to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-113.pkl
+2017-02-03 12:50:49,162 INFO     received exit signal, waiting for epoch to finish...
+2017-02-03 12:50:53,305 INFO     epoch: 113 took 279.757s (0.007s in batching)
+training loss:	1.504937
+validation loss:	2.150386
+validation error:	0.771152
+2017-02-03 12:50:53,308 INFO     Wrote output to trainNN/out/v047-unified-1-gbe13e29-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json

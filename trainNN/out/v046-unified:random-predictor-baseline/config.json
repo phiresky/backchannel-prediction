@@ -1,0 +1,49 @@
+{
+	"name": "random-predictor-baseline",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch",
+			"get_ffv"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"min_talk_len": 5,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {},
+	"train_output": {
+	    "stats": {"0": {"validation_loss": 1}}
+	},
+	"eval_config": {
+	    "do_random_baseline": {
+			"frequency": 3
+		}
+	}
+}

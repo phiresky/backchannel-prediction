@@ -82,7 +82,7 @@ class LeftBar extends React.Component<{ uiState: UIState, gui: GUI }, {}> {
     render() {
         let minmax;
         const {uiState, gui} = this.props;
-        const firstWithRange = uiState.features.find(props => props.currentRange !== null);
+        const firstWithRange = uiState.features.find(props => props.currentRange !== null && (props.currentRange.min !== null));
         if (firstWithRange && firstWithRange.currentRange) {
             minmax = [
                 <div key="max" style={Styles.absoluteTopRight}>{util.round1(firstWithRange.currentRange.max)}</div>,

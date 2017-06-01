@@ -1,0 +1,34 @@
+2017-02-03 15:13:20,878 DEBUG    version=v047-unified-8-gc574637-dirty:lstm-1500ms-60-30-multicat-finetune2-slow
+2017-02-03 15:13:20,879 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-02-03 15:13:37,701 INFO     balancing data...
+2017-02-03 15:13:37,927 DEBUG    loading cached extracted data from data/cache/extract-1c76ab7736d57a61c3c2bab08934de609fbc77dd65410da7f1c165756d89fbb9.pickle
+2017-02-03 15:13:38,646 DEBUG    set input dim to 2
+2017-02-03 15:13:38,648 DEBUG    input dim = 2
+2017-02-03 15:13:38,697 DEBUG    shuffling batches
+2017-02-03 15:13:57,181 DEBUG    shuffling done
+2017-02-03 15:13:57,181 DEBUG    loading data into ram
+2017-02-03 15:13:57,377 DEBUG    loading data took 0.196s (cpu: 0.196s)
+2017-02-03 15:13:57,506 INFO     balancing data...
+2017-02-03 15:13:57,527 DEBUG    set input dim to 2
+2017-02-03 15:13:57,527 DEBUG    input dim = 2
+2017-02-03 15:13:57,708 DEBUG    shuffling batches
+2017-02-03 15:13:59,488 DEBUG    shuffling done
+2017-02-03 15:13:59,488 DEBUG    loading data into ram
+2017-02-03 15:13:59,505 DEBUG    loading data took 0.018s (cpu: 0.018s)
+2017-02-03 15:13:59,588 INFO     Loading old params from trainNN/out/v046-unified-53-g69abbfa-dirty:lstm-1500ms-60-30/epoch-049.pkl
+2017-02-03 15:14:01,953 INFO     loaded layer 0 ({})
+2017-02-03 15:14:01,953 INFO     freezing layer 0
+2017-02-03 15:14:01,955 INFO     loaded layer 1 ({'W_in_to_ingate': (2, 60), 'W_hid_to_ingate': (60, 60), 'b_ingate': (60,), 'W_in_to_forgetgate': (2, 60), 'W_hid_to_forgetgate': (60, 60), 'b_forgetgate': (60,), 'W_in_to_cell': (2, 60), 'W_hid_to_cell': (60, 60), 'b_cell': (60,), 'W_in_to_outgate': (2, 60), 'W_hid_to_outgate': (60, 60), 'b_outgate': (60,), 'W_cell_to_ingate': (60,), 'W_cell_to_forgetgate': (60,), 'W_cell_to_outgate': (60,), 'cell_init': (1, 60), 'hid_init': (1, 60)})
+2017-02-03 15:14:01,955 INFO     freezing layer 1
+2017-02-03 15:14:01,956 INFO     loaded layer 2 ({'W_in_to_ingate': (60, 30), 'W_hid_to_ingate': (30, 30), 'b_ingate': (30,), 'W_in_to_forgetgate': (60, 30), 'W_hid_to_forgetgate': (30, 30), 'b_forgetgate': (30,), 'W_in_to_cell': (60, 30), 'W_hid_to_cell': (30, 30), 'b_cell': (30,), 'W_in_to_outgate': (60, 30), 'W_hid_to_outgate': (30, 30), 'b_outgate': (30,), 'W_cell_to_ingate': (30,), 'W_cell_to_forgetgate': (30,), 'W_cell_to_outgate': (30,), 'cell_init': (1, 30), 'hid_init': (1, 30)})
+2017-02-03 15:14:01,999 DEBUG    Applying L2 regularization with 0.000100
+2017-02-03 15:14:02,055 INFO     Training network with 11196 trainable out of 26676 total params.
+2017-02-03 15:14:02,245 DEBUG    Using adam with learning_rate=0.000100
+2017-02-03 15:14:12,133 DEBUG    Starting training...
+2017-02-03 15:16:21,165 INFO     received exit signal, waiting for epoch to finish...
+2017-02-03 15:16:50,397 INFO     Saving network params to trainNN/out/v047-unified-8-gc574637-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/epoch-000.pkl
+2017-02-03 15:16:57,759 INFO     epoch: 0 took 165.625s (0.005s in batching)
+training loss:	1.742564
+validation loss:	1.713359
+validation error:	0.760298
+2017-02-03 15:16:57,760 INFO     Wrote output to trainNN/out/v047-unified-8-gc574637-dirty:lstm-1500ms-60-30-multicat-finetune2-slow/config.json

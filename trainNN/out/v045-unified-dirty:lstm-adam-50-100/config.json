@@ -1,0 +1,104 @@
+{
+	"name": "lstm-adam-50-100",
+	"paths": {
+		"databasePrefix": "data/db/all240302",
+		"adc": "data/adc",
+		"conversations": {
+			"validate": "data/conversations.valid",
+			"train": "data/conversations.train",
+			"eval": "data/conversations.eval"
+		},
+		"backchannels": "data/backchannels-top200.txt",
+		"originalSwbTranscriptions": "data/swb_ms98_transcriptions"
+	},
+	"eval_config": {
+		"prediction_offset": 0.1
+	},
+	"extract_config": {
+		"input_features": [
+			"get_power",
+			"get_pitch"
+		],
+		"extraction_method": {
+			"type": "discrete",
+			"bc": [
+				-1.1,
+				-0.1
+			],
+			"nbc": [
+				-2.9,
+				-1.9
+			]
+		},
+		"useOriginalDB": true,
+		"useWordsTranscript": false,
+		"sample_window_ms": 32,
+		"outputDirectory": "extract_pfiles_python/out"
+	},
+	"train_config": {
+		"model_function": "lstm_simple",
+		"resume_parameters": null,
+		"context_ms": 800,
+		"context_stride": 2,
+		"update_method": "adam",
+		"learning_rate": 0.001,
+		"num_labels": 2,
+		"batch_size": 250,
+		"epochs": 200,
+		"gaussian": false,
+		"layer_sizes": [
+			50,
+			100
+		],
+		"output_type": "single",
+		"context_frames": 40,
+		"input_dim": 2
+	},
+	"train_output": {
+		"stats": {
+			"0": {
+				"validation_error": 0.3145377946904453,
+				"training_loss": 0.6080919558734313,
+				"validation_loss": 0.5847483782520081,
+				"weights": "epoch-000.pkl"
+			},
+			"1": {
+				"validation_error": 0.3119553904403394,
+				"training_loss": 0.5714836439197163,
+				"validation_loss": 0.5821613454094902,
+				"weights": "epoch-001.pkl"
+			},
+			"2": {
+				"validation_error": 0.3122081781704039,
+				"training_loss": 0.5484643395865241,
+				"validation_loss": 0.5939339191423177,
+				"weights": "epoch-002.pkl"
+			},
+			"3": {
+				"validation_error": 0.31680297312387895,
+				"training_loss": 0.5233529911065561,
+				"validation_loss": 0.6141547135999507,
+				"weights": "epoch-003.pkl"
+			},
+			"4": {
+				"validation_error": 0.32377695158364017,
+				"training_loss": 0.498515982442972,
+				"validation_loss": 0.6330858718654628,
+				"weights": "epoch-004.pkl"
+			},
+			"5": {
+				"validation_error": 0.3319702606366617,
+				"training_loss": 0.4761615498461507,
+				"validation_loss": 0.6728261908634001,
+				"weights": "epoch-005.pkl"
+			},
+			"6": {
+				"validation_error": 0.3382354394210759,
+				"training_loss": 0.4560236765860223,
+				"validation_loss": 0.6955179869759334,
+				"weights": "epoch-006.pkl"
+			}
+		},
+		"source": "configs/lstm-adam/lstm-adam-50-100.json"
+	}
+}

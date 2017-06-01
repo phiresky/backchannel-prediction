@@ -1,0 +1,1223 @@
+2017-01-28 15:06:11,203 DEBUG    version=v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5
+2017-01-28 15:06:11,590 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-28 15:06:25,989 DEBUG    getting all bc uttids...configs/ff-ffv-dropout/ff-ffv-dropout-inp.2-100.5-50.5.json, train
+2017-01-28 15:06:25,990 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-28 15:06:45,064 DEBUG    loading cached extracted data from data/cache/extract-17095dffdd75068299ccb5dd895af8ecaa0fbe1575b09b5b1ad4e4febf4d84ae.pickle
+2017-01-28 15:06:49,706 DEBUG    set input dim to 9
+2017-01-28 15:06:49,706 DEBUG    input dim = 9
+2017-01-28 15:06:50,018 DEBUG    shuffling batches
+2017-01-28 15:08:31,354 DEBUG    shuffling done
+2017-01-28 15:08:31,359 DEBUG    loading data into ram
+2017-01-28 15:08:31,521 DEBUG    loading data took 0.161s (cpu: 0.153s)
+2017-01-28 15:08:31,521 DEBUG    getting all bc uttids...configs/ff-ffv-dropout/ff-ffv-dropout-inp.2-100.5-50.5.json, validate
+2017-01-28 15:08:32,171 DEBUG    set input dim to 9
+2017-01-28 15:08:32,172 DEBUG    input dim = 9
+2017-01-28 15:08:32,623 DEBUG    shuffling batches
+2017-01-28 15:08:42,325 DEBUG    shuffling done
+2017-01-28 15:08:42,327 DEBUG    loading data into ram
+2017-01-28 15:08:42,347 DEBUG    loading data took 0.019s (cpu: 0.015s)
+2017-01-28 15:08:45,082 INFO     Training network with 41456 trainable out of 41456 total params.
+2017-01-28 15:08:45,202 DEBUG    Using adam with learning_rate=0.001000
+2017-01-28 15:08:54,627 INFO     Waiting for existing lock by unknown process (I am process '26425')
+2017-01-28 15:08:54,628 INFO     To manually release the lock, delete /home/rruede/.cache/theano/compiledir_i13hpc50-Linux-3.16.0-77-generic-x86_64-with-debian-jessie-sid-x86_64-3.6.0-64/lock_dir
+2017-01-28 15:14:14,096 DEBUG    Starting training...
+2017-01-28 15:14:52,409 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-000.pkl
+2017-01-28 15:14:54,282 INFO     epoch: 0 took 40.185s (0.027s in batching)
+training loss:	0.667750
+validation loss:	0.649515
+validation error:	0.383608
+2017-01-28 15:14:54,285 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:15:32,918 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-001.pkl
+2017-01-28 15:15:34,838 INFO     epoch: 1 took 40.556s (0.023s in batching)
+training loss:	0.655768
+validation loss:	0.646897
+validation error:	0.375083
+2017-01-28 15:15:34,841 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:16:12,804 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-002.pkl
+2017-01-28 15:16:14,513 INFO     epoch: 2 took 39.675s (0.025s in batching)
+training loss:	0.654068
+validation loss:	0.650073
+validation error:	0.371276
+2017-01-28 15:16:14,516 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:16:53,665 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-003.pkl
+2017-01-28 15:16:55,429 INFO     epoch: 3 took 40.916s (0.025s in batching)
+training loss:	0.653365
+validation loss:	0.649815
+validation error:	0.370230
+2017-01-28 15:16:55,432 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:17:34,616 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-004.pkl
+2017-01-28 15:17:36,578 INFO     epoch: 4 took 41.148s (0.023s in batching)
+training loss:	0.652935
+validation loss:	0.651405
+validation error:	0.370221
+2017-01-28 15:17:36,678 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:18:16,316 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-005.pkl
+2017-01-28 15:18:18,124 INFO     epoch: 5 took 41.546s (0.023s in batching)
+training loss:	0.652347
+validation loss:	0.643269
+validation error:	0.370111
+2017-01-28 15:18:18,127 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:18:56,967 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-006.pkl
+2017-01-28 15:18:58,845 INFO     epoch: 6 took 40.721s (0.025s in batching)
+training loss:	0.652072
+validation loss:	0.651032
+validation error:	0.367242
+2017-01-28 15:18:58,950 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:19:38,196 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-007.pkl
+2017-01-28 15:19:39,808 INFO     epoch: 7 took 40.964s (0.023s in batching)
+training loss:	0.651872
+validation loss:	0.649289
+validation error:	0.371306
+2017-01-28 15:19:39,812 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:20:19,532 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-008.pkl
+2017-01-28 15:20:21,334 INFO     epoch: 8 took 41.525s (0.023s in batching)
+training loss:	0.651194
+validation loss:	0.647599
+validation error:	0.367286
+2017-01-28 15:20:21,337 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:21:01,922 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-009.pkl
+2017-01-28 15:21:03,794 INFO     epoch: 9 took 42.460s (0.024s in batching)
+training loss:	0.651136
+validation loss:	0.647720
+validation error:	0.365452
+2017-01-28 15:21:03,816 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:21:43,373 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-010.pkl
+2017-01-28 15:21:45,128 INFO     epoch: 10 took 41.334s (0.025s in batching)
+training loss:	0.650850
+validation loss:	0.650463
+validation error:	0.366424
+2017-01-28 15:21:45,131 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:22:24,122 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-011.pkl
+2017-01-28 15:22:25,869 INFO     epoch: 11 took 40.741s (0.023s in batching)
+training loss:	0.650603
+validation loss:	0.645160
+validation error:	0.369472
+2017-01-28 15:22:25,873 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:23:04,920 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-012.pkl
+2017-01-28 15:23:06,727 INFO     epoch: 12 took 40.857s (0.023s in batching)
+training loss:	0.650733
+validation loss:	0.653624
+validation error:	0.368119
+2017-01-28 15:23:06,730 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:23:45,272 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-013.pkl
+2017-01-28 15:23:47,057 INFO     epoch: 13 took 40.330s (0.023s in batching)
+training loss:	0.650731
+validation loss:	0.647892
+validation error:	0.364089
+2017-01-28 15:23:47,158 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:24:26,433 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-014.pkl
+2017-01-28 15:24:28,238 INFO     epoch: 14 took 41.181s (0.025s in batching)
+training loss:	0.650700
+validation loss:	0.652508
+validation error:	0.363232
+2017-01-28 15:24:28,242 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:25:07,209 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-015.pkl
+2017-01-28 15:25:09,089 INFO     epoch: 15 took 40.851s (0.023s in batching)
+training loss:	0.650550
+validation loss:	0.649361
+validation error:	0.366429
+2017-01-28 15:25:09,093 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:25:47,294 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-016.pkl
+2017-01-28 15:25:49,266 INFO     epoch: 16 took 40.177s (0.024s in batching)
+training loss:	0.650099
+validation loss:	0.649854
+validation error:	0.360287
+2017-01-28 15:25:49,270 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:26:27,588 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-017.pkl
+2017-01-28 15:26:29,552 INFO     epoch: 17 took 40.285s (0.023s in batching)
+training loss:	0.650098
+validation loss:	0.647952
+validation error:	0.362959
+2017-01-28 15:26:29,555 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:27:09,185 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-018.pkl
+2017-01-28 15:27:10,894 INFO     epoch: 18 took 41.342s (0.025s in batching)
+training loss:	0.649903
+validation loss:	0.649927
+validation error:	0.368560
+2017-01-28 15:27:10,898 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:27:51,321 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-019.pkl
+2017-01-28 15:27:53,199 INFO     epoch: 19 took 42.305s (0.023s in batching)
+training loss:	0.649985
+validation loss:	0.651252
+validation error:	0.366399
+2017-01-28 15:27:53,203 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:28:33,747 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-020.pkl
+2017-01-28 15:28:35,600 INFO     epoch: 20 took 42.401s (0.023s in batching)
+training loss:	0.649727
+validation loss:	0.648494
+validation error:	0.363004
+2017-01-28 15:28:35,604 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:29:15,552 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-021.pkl
+2017-01-28 15:29:17,345 INFO     epoch: 21 took 41.745s (0.023s in batching)
+training loss:	0.649589
+validation loss:	0.652141
+validation error:	0.364902
+2017-01-28 15:29:17,349 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:29:57,600 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-022.pkl
+2017-01-28 15:29:59,305 INFO     epoch: 22 took 41.960s (0.024s in batching)
+training loss:	0.649672
+validation loss:	0.651109
+validation error:	0.364416
+2017-01-28 15:29:59,309 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:30:39,888 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-023.pkl
+2017-01-28 15:30:41,751 INFO     epoch: 23 took 42.446s (0.023s in batching)
+training loss:	0.649405
+validation loss:	0.647026
+validation error:	0.362136
+2017-01-28 15:30:41,755 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:31:21,728 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-024.pkl
+2017-01-28 15:31:23,618 INFO     epoch: 24 took 41.867s (0.023s in batching)
+training loss:	0.649396
+validation loss:	0.649909
+validation error:	0.360168
+2017-01-28 15:31:23,623 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:32:03,661 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-025.pkl
+2017-01-28 15:32:05,591 INFO     epoch: 25 took 41.973s (0.023s in batching)
+training loss:	0.649257
+validation loss:	0.651330
+validation error:	0.362885
+2017-01-28 15:32:05,595 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:32:45,432 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-026.pkl
+2017-01-28 15:32:47,314 INFO     epoch: 26 took 41.723s (0.023s in batching)
+training loss:	0.649502
+validation loss:	0.654786
+validation error:	0.362885
+2017-01-28 15:32:47,318 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:33:27,656 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-027.pkl
+2017-01-28 15:33:29,316 INFO     epoch: 27 took 42.002s (0.023s in batching)
+training loss:	0.649422
+validation loss:	0.648996
+validation error:	0.363123
+2017-01-28 15:33:29,320 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:34:09,230 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-028.pkl
+2017-01-28 15:34:11,061 INFO     epoch: 28 took 41.744s (0.025s in batching)
+training loss:	0.650152
+validation loss:	0.647738
+validation error:	0.365041
+2017-01-28 15:34:11,066 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:34:50,985 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-029.pkl
+2017-01-28 15:34:52,698 INFO     epoch: 29 took 41.638s (0.024s in batching)
+training loss:	0.650005
+validation loss:	0.649021
+validation error:	0.363797
+2017-01-28 15:34:52,703 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:35:32,028 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-030.pkl
+2017-01-28 15:35:33,739 INFO     epoch: 30 took 41.040s (0.023s in batching)
+training loss:	0.649890
+validation loss:	0.651207
+validation error:	0.364268
+2017-01-28 15:35:33,743 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:36:14,466 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-031.pkl
+2017-01-28 15:36:16,327 INFO     epoch: 31 took 42.589s (0.023s in batching)
+training loss:	0.649716
+validation loss:	0.651942
+validation error:	0.364253
+2017-01-28 15:36:16,332 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:36:57,641 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-032.pkl
+2017-01-28 15:36:59,494 INFO     epoch: 32 took 43.167s (0.026s in batching)
+training loss:	0.650009
+validation loss:	0.647054
+validation error:	0.363836
+2017-01-28 15:36:59,498 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:37:38,808 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-033.pkl
+2017-01-28 15:37:40,686 INFO     epoch: 33 took 41.193s (0.023s in batching)
+training loss:	0.649894
+validation loss:	0.648271
+validation error:	0.364317
+2017-01-28 15:37:40,691 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:38:22,028 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-034.pkl
+2017-01-28 15:38:23,866 INFO     epoch: 34 took 43.180s (0.023s in batching)
+training loss:	0.649774
+validation loss:	0.651308
+validation error:	0.364372
+2017-01-28 15:38:23,871 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:39:05,218 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-035.pkl
+2017-01-28 15:39:07,131 INFO     epoch: 35 took 43.264s (0.025s in batching)
+training loss:	0.649645
+validation loss:	0.643996
+validation error:	0.361512
+2017-01-28 15:39:07,135 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:39:48,017 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-036.pkl
+2017-01-28 15:39:49,801 INFO     epoch: 36 took 42.671s (0.023s in batching)
+training loss:	0.649820
+validation loss:	0.646673
+validation error:	0.362136
+2017-01-28 15:39:49,806 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:40:29,508 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-037.pkl
+2017-01-28 15:40:31,314 INFO     epoch: 37 took 41.513s (0.023s in batching)
+training loss:	0.649677
+validation loss:	0.646732
+validation error:	0.363807
+2017-01-28 15:40:31,319 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:41:11,922 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-038.pkl
+2017-01-28 15:41:13,793 INFO     epoch: 38 took 42.479s (0.023s in batching)
+training loss:	0.649590
+validation loss:	0.650808
+validation error:	0.364441
+2017-01-28 15:41:13,798 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:41:54,021 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-039.pkl
+2017-01-28 15:41:55,894 INFO     epoch: 39 took 42.101s (0.025s in batching)
+training loss:	0.649625
+validation loss:	0.646233
+validation error:	0.360382
+2017-01-28 15:41:55,899 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:42:36,808 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-040.pkl
+2017-01-28 15:42:38,707 INFO     epoch: 40 took 42.813s (0.024s in batching)
+training loss:	0.649555
+validation loss:	0.650833
+validation error:	0.366136
+2017-01-28 15:42:38,711 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:43:19,073 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-041.pkl
+2017-01-28 15:43:20,934 INFO     epoch: 41 took 42.227s (0.023s in batching)
+training loss:	0.649903
+validation loss:	0.653264
+validation error:	0.368570
+2017-01-28 15:43:20,938 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:44:01,704 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-042.pkl
+2017-01-28 15:44:03,544 INFO     epoch: 42 took 42.611s (0.025s in batching)
+training loss:	0.649654
+validation loss:	0.652223
+validation error:	0.362696
+2017-01-28 15:44:03,549 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:44:44,101 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-043.pkl
+2017-01-28 15:44:45,829 INFO     epoch: 43 took 42.285s (0.024s in batching)
+training loss:	0.649670
+validation loss:	0.650272
+validation error:	0.359970
+2017-01-28 15:44:45,834 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:45:26,144 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-044.pkl
+2017-01-28 15:45:27,836 INFO     epoch: 44 took 42.007s (0.023s in batching)
+training loss:	0.649515
+validation loss:	0.653172
+validation error:	0.369502
+2017-01-28 15:45:27,842 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:46:08,970 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-045.pkl
+2017-01-28 15:46:10,714 INFO     epoch: 45 took 42.878s (0.023s in batching)
+training loss:	0.649625
+validation loss:	0.651743
+validation error:	0.362310
+2017-01-28 15:46:10,719 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:46:51,622 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-046.pkl
+2017-01-28 15:46:53,449 INFO     epoch: 46 took 42.736s (0.024s in batching)
+training loss:	0.649469
+validation loss:	0.648803
+validation error:	0.361779
+2017-01-28 15:46:53,454 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:47:33,501 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-047.pkl
+2017-01-28 15:47:35,187 INFO     epoch: 47 took 41.738s (0.023s in batching)
+training loss:	0.649627
+validation loss:	0.651251
+validation error:	0.362265
+2017-01-28 15:47:35,192 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:48:16,470 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-048.pkl
+2017-01-28 15:48:18,262 INFO     epoch: 48 took 43.075s (0.024s in batching)
+training loss:	0.649492
+validation loss:	0.653790
+validation error:	0.362538
+2017-01-28 15:48:18,267 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:48:57,432 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-049.pkl
+2017-01-28 15:48:59,263 INFO     epoch: 49 took 41.001s (0.026s in batching)
+training loss:	0.649572
+validation loss:	0.646061
+validation error:	0.362290
+2017-01-28 15:48:59,268 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:49:39,762 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-050.pkl
+2017-01-28 15:49:41,367 INFO     epoch: 50 took 42.105s (0.023s in batching)
+training loss:	0.649406
+validation loss:	0.650903
+validation error:	0.361745
+2017-01-28 15:49:41,372 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:50:22,361 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-051.pkl
+2017-01-28 15:50:45,711 INFO     epoch: 51 took 64.343s (0.023s in batching)
+training loss:	0.649421
+validation loss:	0.649477
+validation error:	0.361279
+2017-01-28 15:50:45,716 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:51:26,462 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-052.pkl
+2017-01-28 15:51:42,082 INFO     epoch: 52 took 56.371s (0.026s in batching)
+training loss:	0.649242
+validation loss:	0.650775
+validation error:	0.364565
+2017-01-28 15:51:42,087 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:52:22,944 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-053.pkl
+2017-01-28 15:52:24,716 INFO     epoch: 53 took 42.634s (0.024s in batching)
+training loss:	0.649336
+validation loss:	0.648094
+validation error:	0.359965
+2017-01-28 15:52:24,721 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:53:05,605 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-054.pkl
+2017-01-28 15:53:07,506 INFO     epoch: 54 took 42.790s (0.024s in batching)
+training loss:	0.649351
+validation loss:	0.653935
+validation error:	0.363931
+2017-01-28 15:53:07,512 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:53:48,025 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-055.pkl
+2017-01-28 15:53:59,968 INFO     epoch: 55 took 52.462s (0.023s in batching)
+training loss:	0.649449
+validation loss:	0.647298
+validation error:	0.366810
+2017-01-28 15:53:59,974 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:54:39,907 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-056.pkl
+2017-01-28 15:54:44,847 INFO     epoch: 56 took 44.879s (0.026s in batching)
+training loss:	0.649495
+validation loss:	0.647428
+validation error:	0.362627
+2017-01-28 15:54:44,852 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:55:25,005 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-057.pkl
+2017-01-28 15:55:45,509 INFO     epoch: 57 took 60.662s (0.023s in batching)
+training loss:	0.649248
+validation loss:	0.649485
+validation error:	0.362959
+2017-01-28 15:55:45,519 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:56:25,625 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-058.pkl
+2017-01-28 15:56:27,542 INFO     epoch: 58 took 42.033s (0.023s in batching)
+training loss:	0.649449
+validation loss:	0.649912
+validation error:	0.361988
+2017-01-28 15:56:27,549 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:57:07,881 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-059.pkl
+2017-01-28 15:57:09,650 INFO     epoch: 59 took 42.108s (0.026s in batching)
+training loss:	0.649563
+validation loss:	0.647069
+validation error:	0.359594
+2017-01-28 15:57:10,170 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:57:50,658 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-060.pkl
+2017-01-28 15:57:52,263 INFO     epoch: 60 took 42.612s (0.023s in batching)
+training loss:	0.649335
+validation loss:	0.649621
+validation error:	0.363316
+2017-01-28 15:57:52,268 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:58:33,301 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-061.pkl
+2017-01-28 15:58:35,180 INFO     epoch: 61 took 42.918s (0.023s in batching)
+training loss:	0.649266
+validation loss:	0.643030
+validation error:	0.363831
+2017-01-28 15:58:35,186 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:59:16,522 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-062.pkl
+2017-01-28 15:59:18,295 INFO     epoch: 62 took 43.114s (0.026s in batching)
+training loss:	0.649114
+validation loss:	0.648547
+validation error:	0.363004
+2017-01-28 15:59:18,300 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 15:59:58,557 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-063.pkl
+2017-01-28 16:00:00,343 INFO     epoch: 63 took 42.049s (0.024s in batching)
+training loss:	0.649972
+validation loss:	0.647885
+validation error:	0.361289
+2017-01-28 16:00:00,349 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:00:40,660 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-064.pkl
+2017-01-28 16:00:42,488 INFO     epoch: 64 took 42.145s (0.023s in batching)
+training loss:	0.649906
+validation loss:	0.647780
+validation error:	0.364287
+2017-01-28 16:00:42,494 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:01:23,385 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-065.pkl
+2017-01-28 16:01:25,287 INFO     epoch: 65 took 42.798s (0.024s in batching)
+training loss:	0.650144
+validation loss:	0.645302
+validation error:	0.361522
+2017-01-28 16:01:25,292 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:02:06,357 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-066.pkl
+2017-01-28 16:02:08,196 INFO     epoch: 66 took 42.910s (0.024s in batching)
+training loss:	0.649846
+validation loss:	0.648977
+validation error:	0.363990
+2017-01-28 16:02:08,203 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:02:48,301 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-067.pkl
+2017-01-28 16:02:50,061 INFO     epoch: 67 took 41.865s (0.024s in batching)
+training loss:	0.649926
+validation loss:	0.649869
+validation error:	0.361869
+2017-01-28 16:02:50,067 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:03:30,016 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-068.pkl
+2017-01-28 16:03:31,760 INFO     epoch: 68 took 41.699s (0.023s in batching)
+training loss:	0.649818
+validation loss:	0.649482
+validation error:	0.365056
+2017-01-28 16:03:31,766 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:04:12,361 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-069.pkl
+2017-01-28 16:04:14,155 INFO     epoch: 69 took 42.395s (0.025s in batching)
+training loss:	0.649955
+validation loss:	0.651366
+validation error:	0.362161
+2017-01-28 16:04:14,161 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:04:55,105 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-070.pkl
+2017-01-28 16:04:56,787 INFO     epoch: 70 took 42.632s (0.023s in batching)
+training loss:	0.649738
+validation loss:	0.647881
+validation error:	0.364625
+2017-01-28 16:04:56,793 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:05:37,524 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-071.pkl
+2017-01-28 16:05:39,407 INFO     epoch: 71 took 42.620s (0.023s in batching)
+training loss:	0.649889
+validation loss:	0.647153
+validation error:	0.362751
+2017-01-28 16:05:39,413 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:06:19,782 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-072.pkl
+2017-01-28 16:06:21,702 INFO     epoch: 72 took 42.294s (0.025s in batching)
+training loss:	0.649814
+validation loss:	0.648804
+validation error:	0.363812
+2017-01-28 16:06:21,712 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:07:01,853 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-073.pkl
+2017-01-28 16:07:03,637 INFO     epoch: 73 took 41.935s (0.023s in batching)
+training loss:	0.649829
+validation loss:	0.643986
+validation error:	0.359361
+2017-01-28 16:07:03,643 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:07:43,500 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-074.pkl
+2017-01-28 16:07:45,316 INFO     epoch: 74 took 41.680s (0.023s in batching)
+training loss:	0.649851
+validation loss:	0.649547
+validation error:	0.362900
+2017-01-28 16:07:45,322 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:08:25,344 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-075.pkl
+2017-01-28 16:08:27,241 INFO     epoch: 75 took 41.925s (0.023s in batching)
+training loss:	0.649842
+validation loss:	0.652182
+validation error:	0.366196
+2017-01-28 16:08:27,247 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:09:06,646 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-076.pkl
+2017-01-28 16:09:08,439 INFO     epoch: 76 took 41.198s (0.023s in batching)
+training loss:	0.649994
+validation loss:	0.645595
+validation error:	0.362632
+2017-01-28 16:09:08,445 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:09:48,466 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-077.pkl
+2017-01-28 16:09:50,357 INFO     epoch: 77 took 41.918s (0.023s in batching)
+training loss:	0.649749
+validation loss:	0.648532
+validation error:	0.360843
+2017-01-28 16:09:50,363 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:10:30,689 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-078.pkl
+2017-01-28 16:10:32,555 INFO     epoch: 78 took 42.198s (0.023s in batching)
+training loss:	0.649757
+validation loss:	0.649200
+validation error:	0.362325
+2017-01-28 16:10:32,565 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:11:12,987 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-079.pkl
+2017-01-28 16:11:14,868 INFO     epoch: 79 took 42.314s (0.025s in batching)
+training loss:	0.649654
+validation loss:	0.649891
+validation error:	0.361006
+2017-01-28 16:11:14,875 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:11:55,658 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-080.pkl
+2017-01-28 16:11:57,461 INFO     epoch: 80 took 42.593s (0.023s in batching)
+training loss:	0.649824
+validation loss:	0.650491
+validation error:	0.365125
+2017-01-28 16:11:57,468 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:12:37,740 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-081.pkl
+2017-01-28 16:12:39,523 INFO     epoch: 81 took 42.062s (0.023s in batching)
+training loss:	0.649799
+validation loss:	0.650045
+validation error:	0.362310
+2017-01-28 16:12:39,529 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:13:20,215 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-082.pkl
+2017-01-28 16:13:21,841 INFO     epoch: 82 took 42.318s (0.023s in batching)
+training loss:	0.649870
+validation loss:	0.649706
+validation error:	0.362022
+2017-01-28 16:13:21,847 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:14:02,076 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-083.pkl
+2017-01-28 16:14:05,828 INFO     epoch: 83 took 43.987s (0.025s in batching)
+training loss:	0.649829
+validation loss:	0.650866
+validation error:	0.361874
+2017-01-28 16:14:05,834 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:14:46,048 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-084.pkl
+2017-01-28 16:14:47,941 INFO     epoch: 84 took 42.113s (0.023s in batching)
+training loss:	0.649938
+validation loss:	0.647824
+validation error:	0.361646
+2017-01-28 16:14:47,951 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:15:29,029 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-085.pkl
+2017-01-28 16:15:30,793 INFO     epoch: 85 took 42.852s (0.023s in batching)
+training loss:	0.649842
+validation loss:	0.646537
+validation error:	0.362850
+2017-01-28 16:15:30,799 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:16:11,785 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-086.pkl
+2017-01-28 16:16:13,668 INFO     epoch: 86 took 42.875s (0.025s in batching)
+training loss:	0.649754
+validation loss:	0.645939
+validation error:	0.362102
+2017-01-28 16:16:13,674 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:16:54,881 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-087.pkl
+2017-01-28 16:16:56,739 INFO     epoch: 87 took 43.072s (0.023s in batching)
+training loss:	0.649825
+validation loss:	0.647813
+validation error:	0.366478
+2017-01-28 16:16:56,746 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:17:36,458 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-088.pkl
+2017-01-28 16:17:38,243 INFO     epoch: 88 took 41.504s (0.023s in batching)
+training loss:	0.649735
+validation loss:	0.651511
+validation error:	0.361076
+2017-01-28 16:17:38,250 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:18:18,581 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-089.pkl
+2017-01-28 16:18:20,350 INFO     epoch: 89 took 42.106s (0.024s in batching)
+training loss:	0.649726
+validation loss:	0.651944
+validation error:	0.360580
+2017-01-28 16:18:20,356 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:19:01,004 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-090.pkl
+2017-01-28 16:19:02,927 INFO     epoch: 90 took 42.577s (0.024s in batching)
+training loss:	0.649785
+validation loss:	0.649331
+validation error:	0.362934
+2017-01-28 16:19:02,934 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:19:44,344 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-091.pkl
+2017-01-28 16:19:46,154 INFO     epoch: 91 took 43.227s (0.023s in batching)
+training loss:	0.649744
+validation loss:	0.646055
+validation error:	0.360193
+2017-01-28 16:19:46,161 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:20:27,495 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-092.pkl
+2017-01-28 16:20:29,344 INFO     epoch: 92 took 43.190s (0.026s in batching)
+training loss:	0.649585
+validation loss:	0.651530
+validation error:	0.363400
+2017-01-28 16:20:29,350 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:21:09,748 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-093.pkl
+2017-01-28 16:21:11,685 INFO     epoch: 93 took 42.341s (0.025s in batching)
+training loss:	0.649822
+validation loss:	0.646626
+validation error:	0.359326
+2017-01-28 16:21:11,692 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:21:53,190 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-094.pkl
+2017-01-28 16:21:55,043 INFO     epoch: 94 took 43.358s (0.023s in batching)
+training loss:	0.650656
+validation loss:	0.649106
+validation error:	0.363950
+2017-01-28 16:21:55,050 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:22:36,381 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-095.pkl
+2017-01-28 16:22:38,168 INFO     epoch: 95 took 43.125s (0.023s in batching)
+training loss:	0.650647
+validation loss:	0.651455
+validation error:	0.362939
+2017-01-28 16:22:38,175 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:23:18,495 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-096.pkl
+2017-01-28 16:23:20,311 INFO     epoch: 96 took 42.143s (0.026s in batching)
+training loss:	0.650848
+validation loss:	0.646203
+validation error:	0.359975
+2017-01-28 16:23:20,317 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:23:59,920 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-097.pkl
+2017-01-28 16:24:01,745 INFO     epoch: 97 took 41.434s (0.023s in batching)
+training loss:	0.650694
+validation loss:	0.650938
+validation error:	0.363519
+2017-01-28 16:24:01,752 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:24:42,204 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-098.pkl
+2017-01-28 16:24:44,057 INFO     epoch: 98 took 42.312s (0.023s in batching)
+training loss:	0.650759
+validation loss:	0.651675
+validation error:	0.363722
+2017-01-28 16:24:44,064 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:25:25,113 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-099.pkl
+2017-01-28 16:25:26,990 INFO     epoch: 99 took 42.933s (0.024s in batching)
+training loss:	0.650708
+validation loss:	0.648288
+validation error:	0.365487
+2017-01-28 16:25:26,997 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:26:06,332 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-100.pkl
+2017-01-28 16:26:08,178 INFO     epoch: 100 took 41.188s (0.024s in batching)
+training loss:	0.650337
+validation loss:	0.646871
+validation error:	0.362865
+2017-01-28 16:26:08,186 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:26:48,096 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-101.pkl
+2017-01-28 16:26:49,869 INFO     epoch: 101 took 41.691s (0.023s in batching)
+training loss:	0.650627
+validation loss:	0.650795
+validation error:	0.365968
+2017-01-28 16:26:49,876 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:27:30,690 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-102.pkl
+2017-01-28 16:27:32,617 INFO     epoch: 102 took 42.749s (0.025s in batching)
+training loss:	0.650625
+validation loss:	0.650970
+validation error:	0.364971
+2017-01-28 16:27:32,625 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:28:13,573 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-103.pkl
+2017-01-28 16:28:15,501 INFO     epoch: 103 took 42.883s (0.024s in batching)
+training loss:	0.650245
+validation loss:	0.645412
+validation error:	0.363807
+2017-01-28 16:28:15,508 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:28:56,131 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-104.pkl
+2017-01-28 16:28:58,012 INFO     epoch: 104 took 42.511s (0.023s in batching)
+training loss:	0.650395
+validation loss:	0.644024
+validation error:	0.359440
+2017-01-28 16:28:58,019 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:29:38,529 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-105.pkl
+2017-01-28 16:29:40,162 INFO     epoch: 105 took 42.149s (0.023s in batching)
+training loss:	0.650727
+validation loss:	0.646113
+validation error:	0.364530
+2017-01-28 16:29:40,169 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:30:20,639 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-106.pkl
+2017-01-28 16:30:22,525 INFO     epoch: 106 took 42.363s (0.023s in batching)
+training loss:	0.650219
+validation loss:	0.645517
+validation error:	0.362409
+2017-01-28 16:30:22,532 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:31:03,126 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-107.pkl
+2017-01-28 16:31:04,755 INFO     epoch: 107 took 42.231s (0.023s in batching)
+training loss:	0.650147
+validation loss:	0.648830
+validation error:	0.364332
+2017-01-28 16:31:04,767 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:31:44,279 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-108.pkl
+2017-01-28 16:31:46,188 INFO     epoch: 108 took 41.432s (0.025s in batching)
+training loss:	0.650266
+validation loss:	0.651904
+validation error:	0.365879
+2017-01-28 16:31:46,198 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:32:27,051 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-109.pkl
+2017-01-28 16:32:28,847 INFO     epoch: 109 took 42.660s (0.023s in batching)
+training loss:	0.650373
+validation loss:	0.651423
+validation error:	0.361760
+2017-01-28 16:32:28,855 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:33:09,027 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-110.pkl
+2017-01-28 16:33:10,747 INFO     epoch: 110 took 41.900s (0.023s in batching)
+training loss:	0.650427
+validation loss:	0.647139
+validation error:	0.364659
+2017-01-28 16:33:10,754 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:33:51,539 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-111.pkl
+2017-01-28 16:33:53,313 INFO     epoch: 111 took 42.566s (0.025s in batching)
+training loss:	0.650270
+validation loss:	0.650990
+validation error:	0.363717
+2017-01-28 16:33:53,321 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:34:33,548 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-112.pkl
+2017-01-28 16:34:35,237 INFO     epoch: 112 took 41.924s (0.024s in batching)
+training loss:	0.650131
+validation loss:	0.650013
+validation error:	0.366830
+2017-01-28 16:34:35,245 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:35:15,390 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-113.pkl
+2017-01-28 16:35:17,261 INFO     epoch: 113 took 42.024s (0.024s in batching)
+training loss:	0.650103
+validation loss:	0.647815
+validation error:	0.363058
+2017-01-28 16:35:17,269 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:35:58,210 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-114.pkl
+2017-01-28 16:36:00,114 INFO     epoch: 114 took 42.853s (0.023s in batching)
+training loss:	0.650125
+validation loss:	0.647828
+validation error:	0.363955
+2017-01-28 16:36:00,121 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:36:40,824 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-115.pkl
+2017-01-28 16:36:42,751 INFO     epoch: 115 took 42.637s (0.025s in batching)
+training loss:	0.650232
+validation loss:	0.646841
+validation error:	0.364397
+2017-01-28 16:36:42,758 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:37:23,172 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-116.pkl
+2017-01-28 16:37:24,766 INFO     epoch: 116 took 42.015s (0.023s in batching)
+training loss:	0.650239
+validation loss:	0.648487
+validation error:	0.361834
+2017-01-28 16:37:24,774 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:38:04,684 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-117.pkl
+2017-01-28 16:38:06,404 INFO     epoch: 117 took 41.638s (0.027s in batching)
+training loss:	0.649815
+validation loss:	0.646907
+validation error:	0.366587
+2017-01-28 16:38:06,412 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:38:46,457 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-118.pkl
+2017-01-28 16:38:48,272 INFO     epoch: 118 took 41.868s (0.025s in batching)
+training loss:	0.649999
+validation loss:	0.648236
+validation error:	0.364382
+2017-01-28 16:38:48,280 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:39:28,417 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-119.pkl
+2017-01-28 16:39:30,319 INFO     epoch: 119 took 42.047s (0.023s in batching)
+training loss:	0.649826
+validation loss:	0.653151
+validation error:	0.366419
+2017-01-28 16:39:30,327 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:40:10,783 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-120.pkl
+2017-01-28 16:40:12,480 INFO     epoch: 120 took 42.161s (0.023s in batching)
+training loss:	0.649645
+validation loss:	0.650344
+validation error:	0.365041
+2017-01-28 16:40:12,488 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:40:53,789 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-121.pkl
+2017-01-28 16:40:55,639 INFO     epoch: 121 took 43.159s (0.024s in batching)
+training loss:	0.649868
+validation loss:	0.651084
+validation error:	0.363554
+2017-01-28 16:40:55,647 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:41:37,104 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-122.pkl
+2017-01-28 16:41:38,915 INFO     epoch: 122 took 43.276s (0.025s in batching)
+training loss:	0.649553
+validation loss:	0.651369
+validation error:	0.364134
+2017-01-28 16:41:38,923 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:42:19,452 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-123.pkl
+2017-01-28 16:42:21,311 INFO     epoch: 123 took 42.396s (0.023s in batching)
+training loss:	0.649881
+validation loss:	0.653691
+validation error:	0.363266
+2017-01-28 16:42:21,319 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:43:02,298 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-124.pkl
+2017-01-28 16:43:04,126 INFO     epoch: 124 took 42.816s (0.023s in batching)
+training loss:	0.649733
+validation loss:	0.646740
+validation error:	0.366240
+2017-01-28 16:43:04,135 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:43:45,268 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-125.pkl
+2017-01-28 16:43:47,153 INFO     epoch: 125 took 43.027s (0.023s in batching)
+training loss:	0.649768
+validation loss:	0.652665
+validation error:	0.367851
+2017-01-28 16:43:47,161 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:44:28,177 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-126.pkl
+2017-01-28 16:44:29,893 INFO     epoch: 126 took 42.740s (0.025s in batching)
+training loss:	0.649655
+validation loss:	0.648669
+validation error:	0.367990
+2017-01-28 16:44:29,901 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:45:10,489 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-127.pkl
+2017-01-28 16:45:12,266 INFO     epoch: 127 took 42.374s (0.023s in batching)
+training loss:	0.649794
+validation loss:	0.647779
+validation error:	0.366320
+2017-01-28 16:45:12,279 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:45:52,869 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-128.pkl
+2017-01-28 16:45:54,706 INFO     epoch: 128 took 42.440s (0.023s in batching)
+training loss:	0.649683
+validation loss:	0.651739
+validation error:	0.362136
+2017-01-28 16:45:54,714 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:46:35,612 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-129.pkl
+2017-01-28 16:46:37,438 INFO     epoch: 129 took 42.732s (0.023s in batching)
+training loss:	0.649784
+validation loss:	0.655451
+validation error:	0.370245
+2017-01-28 16:46:37,447 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:47:18,476 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-130.pkl
+2017-01-28 16:47:20,318 INFO     epoch: 130 took 42.879s (0.023s in batching)
+training loss:	0.649783
+validation loss:	0.651752
+validation error:	0.365299
+2017-01-28 16:47:20,326 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:48:00,523 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-131.pkl
+2017-01-28 16:48:02,346 INFO     epoch: 131 took 42.029s (0.023s in batching)
+training loss:	0.649616
+validation loss:	0.649198
+validation error:	0.360327
+2017-01-28 16:48:02,355 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:48:41,685 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-132.pkl
+2017-01-28 16:48:43,612 INFO     epoch: 132 took 41.266s (0.023s in batching)
+training loss:	0.649585
+validation loss:	0.650921
+validation error:	0.363891
+2017-01-28 16:48:43,621 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:49:23,462 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-133.pkl
+2017-01-28 16:49:25,364 INFO     epoch: 133 took 41.752s (0.024s in batching)
+training loss:	0.649654
+validation loss:	0.649859
+validation error:	0.367534
+2017-01-28 16:49:25,373 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:50:06,084 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-134.pkl
+2017-01-28 16:50:07,948 INFO     epoch: 134 took 42.584s (0.025s in batching)
+training loss:	0.649497
+validation loss:	0.651037
+validation error:	0.362419
+2017-01-28 16:50:07,956 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:50:46,978 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-135.pkl
+2017-01-28 16:50:48,879 INFO     epoch: 135 took 40.932s (0.024s in batching)
+training loss:	0.649719
+validation loss:	0.647653
+validation error:	0.365546
+2017-01-28 16:50:48,888 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:51:28,864 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-136.pkl
+2017-01-28 16:51:30,576 INFO     epoch: 136 took 41.697s (0.023s in batching)
+training loss:	0.649569
+validation loss:	0.647259
+validation error:	0.361760
+2017-01-28 16:51:30,584 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:52:10,385 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-137.pkl
+2017-01-28 16:52:12,203 INFO     epoch: 137 took 41.627s (0.024s in batching)
+training loss:	0.649872
+validation loss:	0.651218
+validation error:	0.366409
+2017-01-28 16:52:12,212 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:52:53,156 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-138.pkl
+2017-01-28 16:52:54,904 INFO     epoch: 138 took 42.701s (0.025s in batching)
+training loss:	0.649818
+validation loss:	0.648593
+validation error:	0.365309
+2017-01-28 16:52:54,912 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:53:35,743 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-139.pkl
+2017-01-28 16:53:37,567 INFO     epoch: 139 took 42.663s (0.023s in batching)
+training loss:	0.649513
+validation loss:	0.650593
+validation error:	0.363737
+2017-01-28 16:53:37,575 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:54:18,599 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-140.pkl
+2017-01-28 16:54:20,333 INFO     epoch: 140 took 42.766s (0.023s in batching)
+training loss:	0.649565
+validation loss:	0.649099
+validation error:	0.364669
+2017-01-28 16:54:20,341 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:55:01,592 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-141.pkl
+2017-01-28 16:55:03,398 INFO     epoch: 141 took 43.065s (0.025s in batching)
+training loss:	0.649625
+validation loss:	0.654378
+validation error:	0.366691
+2017-01-28 16:55:03,406 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:55:44,663 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-142.pkl
+2017-01-28 16:55:46,365 INFO     epoch: 142 took 42.968s (0.024s in batching)
+training loss:	0.649380
+validation loss:	0.649201
+validation error:	0.364714
+2017-01-28 16:55:46,374 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:56:27,728 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-143.pkl
+2017-01-28 16:56:29,638 INFO     epoch: 143 took 43.272s (0.023s in batching)
+training loss:	0.649683
+validation loss:	0.649787
+validation error:	0.365214
+2017-01-28 16:56:29,646 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:57:11,015 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-144.pkl
+2017-01-28 16:57:12,969 INFO     epoch: 144 took 43.332s (0.026s in batching)
+training loss:	0.649618
+validation loss:	0.652279
+validation error:	0.365160
+2017-01-28 16:57:12,978 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:57:52,861 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-145.pkl
+2017-01-28 16:57:54,526 INFO     epoch: 145 took 41.556s (0.023s in batching)
+training loss:	0.649463
+validation loss:	0.652579
+validation error:	0.364411
+2017-01-28 16:57:54,534 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:58:34,856 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-146.pkl
+2017-01-28 16:58:36,758 INFO     epoch: 146 took 42.232s (0.023s in batching)
+training loss:	0.649491
+validation loss:	0.648090
+validation error:	0.362027
+2017-01-28 16:58:36,767 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 16:59:17,906 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-147.pkl
+2017-01-28 16:59:19,810 INFO     epoch: 147 took 43.052s (0.023s in batching)
+training loss:	0.649686
+validation loss:	0.651471
+validation error:	0.367068
+2017-01-28 16:59:19,820 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:00:00,473 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-148.pkl
+2017-01-28 17:00:02,290 INFO     epoch: 148 took 42.480s (0.026s in batching)
+training loss:	0.649707
+validation loss:	0.647626
+validation error:	0.366265
+2017-01-28 17:00:02,299 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:00:42,882 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-149.pkl
+2017-01-28 17:00:44,788 INFO     epoch: 149 took 42.497s (0.024s in batching)
+training loss:	0.649539
+validation loss:	0.648068
+validation error:	0.366835
+2017-01-28 17:00:44,800 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:01:25,511 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-150.pkl
+2017-01-28 17:01:27,296 INFO     epoch: 150 took 42.508s (0.023s in batching)
+training loss:	0.649584
+validation loss:	0.653847
+validation error:	0.367470
+2017-01-28 17:01:27,305 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:02:08,315 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-151.pkl
+2017-01-28 17:02:10,200 INFO     epoch: 151 took 42.904s (0.025s in batching)
+training loss:	0.649650
+validation loss:	0.650588
+validation error:	0.364382
+2017-01-28 17:02:10,209 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:02:50,461 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-152.pkl
+2017-01-28 17:02:52,284 INFO     epoch: 152 took 42.085s (0.023s in batching)
+training loss:	0.649495
+validation loss:	0.648388
+validation error:	0.363361
+2017-01-28 17:02:52,294 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:03:31,821 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-153.pkl
+2017-01-28 17:03:33,615 INFO     epoch: 153 took 41.330s (0.023s in batching)
+training loss:	0.649711
+validation loss:	0.650760
+validation error:	0.364848
+2017-01-28 17:03:33,624 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:04:13,814 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-154.pkl
+2017-01-28 17:04:15,706 INFO     epoch: 154 took 42.091s (0.028s in batching)
+training loss:	0.649363
+validation loss:	0.655108
+validation error:	0.365864
+2017-01-28 17:04:15,714 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:04:56,419 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-155.pkl
+2017-01-28 17:04:58,252 INFO     epoch: 155 took 42.546s (0.025s in batching)
+training loss:	0.649277
+validation loss:	0.649671
+validation error:	0.364183
+2017-01-28 17:04:58,261 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:05:37,983 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-156.pkl
+2017-01-28 17:05:39,765 INFO     epoch: 156 took 41.513s (0.023s in batching)
+training loss:	0.649492
+validation loss:	0.654784
+validation error:	0.368149
+2017-01-28 17:05:39,775 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:06:19,579 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-157.pkl
+2017-01-28 17:06:21,396 INFO     epoch: 157 took 41.631s (0.022s in batching)
+training loss:	0.649584
+validation loss:	0.653217
+validation error:	0.364223
+2017-01-28 17:06:21,405 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:07:02,045 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-158.pkl
+2017-01-28 17:07:03,804 INFO     epoch: 158 took 42.408s (0.024s in batching)
+training loss:	0.649658
+validation loss:	0.652537
+validation error:	0.363256
+2017-01-28 17:07:03,813 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:07:43,080 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-159.pkl
+2017-01-28 17:07:45,031 INFO     epoch: 159 took 41.227s (0.025s in batching)
+training loss:	0.649519
+validation loss:	0.650809
+validation error:	0.365175
+2017-01-28 17:07:45,041 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:08:25,092 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-160.pkl
+2017-01-28 17:08:27,051 INFO     epoch: 160 took 42.020s (0.022s in batching)
+training loss:	0.649549
+validation loss:	0.647837
+validation error:	0.363187
+2017-01-28 17:08:27,060 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:09:06,321 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-161.pkl
+2017-01-28 17:09:08,130 INFO     epoch: 161 took 41.079s (0.023s in batching)
+training loss:	0.649543
+validation loss:	0.650202
+validation error:	0.365388
+2017-01-28 17:09:08,140 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:09:49,027 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-162.pkl
+2017-01-28 17:09:50,893 INFO     epoch: 162 took 42.763s (0.023s in batching)
+training loss:	0.649645
+validation loss:	0.650286
+validation error:	0.362662
+2017-01-28 17:09:50,903 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:10:31,288 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-163.pkl
+2017-01-28 17:10:33,146 INFO     epoch: 163 took 42.253s (0.023s in batching)
+training loss:	0.649597
+validation loss:	0.648639
+validation error:	0.363792
+2017-01-28 17:10:33,156 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:11:13,944 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-164.pkl
+2017-01-28 17:11:15,804 INFO     epoch: 164 took 42.658s (0.023s in batching)
+training loss:	0.649331
+validation loss:	0.648395
+validation error:	0.364625
+2017-01-28 17:11:15,814 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:11:55,920 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-165.pkl
+2017-01-28 17:11:57,701 INFO     epoch: 165 took 41.896s (0.023s in batching)
+training loss:	0.649645
+validation loss:	0.650413
+validation error:	0.362677
+2017-01-28 17:11:57,710 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:12:38,624 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-166.pkl
+2017-01-28 17:12:40,400 INFO     epoch: 166 took 42.700s (0.023s in batching)
+training loss:	0.649581
+validation loss:	0.648565
+validation error:	0.364595
+2017-01-28 17:12:40,410 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:13:19,561 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-167.pkl
+2017-01-28 17:13:21,399 INFO     epoch: 167 took 40.998s (0.023s in batching)
+training loss:	0.649642
+validation loss:	0.649511
+validation error:	0.359261
+2017-01-28 17:13:21,408 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:14:00,828 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-168.pkl
+2017-01-28 17:14:02,702 INFO     epoch: 168 took 41.304s (0.026s in batching)
+training loss:	0.649665
+validation loss:	0.650167
+validation error:	0.367484
+2017-01-28 17:14:02,712 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:14:43,282 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-169.pkl
+2017-01-28 17:14:45,273 INFO     epoch: 169 took 42.570s (0.023s in batching)
+training loss:	0.649621
+validation loss:	0.649535
+validation error:	0.368243
+2017-01-28 17:14:45,282 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:15:26,268 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-170.pkl
+2017-01-28 17:15:28,153 INFO     epoch: 170 took 42.880s (0.023s in batching)
+training loss:	0.649367
+validation loss:	0.649237
+validation error:	0.365774
+2017-01-28 17:15:28,163 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:16:08,888 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-171.pkl
+2017-01-28 17:16:10,700 INFO     epoch: 171 took 42.547s (0.026s in batching)
+training loss:	0.649433
+validation loss:	0.644155
+validation error:	0.359911
+2017-01-28 17:16:10,710 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:16:50,304 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-172.pkl
+2017-01-28 17:16:51,953 INFO     epoch: 172 took 41.253s (0.023s in batching)
+training loss:	0.649673
+validation loss:	0.652734
+validation error:	0.366786
+2017-01-28 17:16:51,963 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:17:31,952 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-173.pkl
+2017-01-28 17:17:33,576 INFO     epoch: 173 took 41.623s (0.024s in batching)
+training loss:	0.649419
+validation loss:	0.654494
+validation error:	0.366225
+2017-01-28 17:17:33,586 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:18:13,009 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-174.pkl
+2017-01-28 17:18:14,786 INFO     epoch: 174 took 41.210s (0.023s in batching)
+training loss:	0.649739
+validation loss:	0.653706
+validation error:	0.364362
+2017-01-28 17:18:14,796 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:18:56,214 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-175.pkl
+2017-01-28 17:18:58,031 INFO     epoch: 175 took 43.245s (0.024s in batching)
+training loss:	0.649604
+validation loss:	0.651954
+validation error:	0.367797
+2017-01-28 17:18:58,041 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:19:38,054 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-176.pkl
+2017-01-28 17:19:39,985 INFO     epoch: 176 took 41.954s (0.025s in batching)
+training loss:	0.649311
+validation loss:	0.651113
+validation error:	0.362151
+2017-01-28 17:19:39,995 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:20:19,283 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-177.pkl
+2017-01-28 17:20:21,062 INFO     epoch: 177 took 41.077s (0.023s in batching)
+training loss:	0.649455
+validation loss:	0.649641
+validation error:	0.362900
+2017-01-28 17:20:21,076 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:21:00,946 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-178.pkl
+2017-01-28 17:21:02,874 INFO     epoch: 178 took 41.812s (0.023s in batching)
+training loss:	0.649584
+validation loss:	0.650943
+validation error:	0.364530
+2017-01-28 17:21:02,884 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:21:43,814 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-179.pkl
+2017-01-28 17:21:45,666 INFO     epoch: 179 took 42.792s (0.023s in batching)
+training loss:	0.649376
+validation loss:	0.651587
+validation error:	0.366553
+2017-01-28 17:21:45,676 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:22:26,201 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-180.pkl
+2017-01-28 17:22:28,037 INFO     epoch: 180 took 42.371s (0.025s in batching)
+training loss:	0.649445
+validation loss:	0.649246
+validation error:	0.362107
+2017-01-28 17:22:28,046 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:23:07,606 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-181.pkl
+2017-01-28 17:23:09,565 INFO     epoch: 181 took 41.528s (0.023s in batching)
+training loss:	0.649316
+validation loss:	0.646866
+validation error:	0.364054
+2017-01-28 17:23:09,575 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:23:50,397 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-182.pkl
+2017-01-28 17:23:52,380 INFO     epoch: 182 took 42.816s (0.024s in batching)
+training loss:	0.649451
+validation loss:	0.649494
+validation error:	0.363594
+2017-01-28 17:23:52,391 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:24:34,980 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-183.pkl
+2017-01-28 17:24:36,893 INFO     epoch: 183 took 44.512s (0.026s in batching)
+training loss:	0.649344
+validation loss:	0.650723
+validation error:	0.363445
+2017-01-28 17:24:36,902 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:25:15,489 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-184.pkl
+2017-01-28 17:25:17,189 INFO     epoch: 184 took 40.297s (0.023s in batching)
+training loss:	0.649551
+validation loss:	0.652420
+validation error:	0.367727
+2017-01-28 17:25:17,202 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:25:54,460 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-185.pkl
+2017-01-28 17:25:56,154 INFO     epoch: 185 took 38.965s (0.023s in batching)
+training loss:	0.649558
+validation loss:	0.653661
+validation error:	0.363410
+2017-01-28 17:25:56,164 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:26:33,477 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-186.pkl
+2017-01-28 17:26:35,186 INFO     epoch: 186 took 39.032s (0.023s in batching)
+training loss:	0.649673
+validation loss:	0.646427
+validation error:	0.363822
+2017-01-28 17:26:35,196 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:27:12,438 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-187.pkl
+2017-01-28 17:27:14,174 INFO     epoch: 187 took 38.988s (0.023s in batching)
+training loss:	0.649107
+validation loss:	0.651109
+validation error:	0.363762
+2017-01-28 17:27:14,184 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:27:51,911 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-188.pkl
+2017-01-28 17:27:53,668 INFO     epoch: 188 took 39.494s (0.024s in batching)
+training loss:	0.649637
+validation loss:	0.648653
+validation error:	0.363787
+2017-01-28 17:27:53,678 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:28:31,720 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-189.pkl
+2017-01-28 17:28:33,498 INFO     epoch: 189 took 39.829s (0.025s in batching)
+training loss:	0.649290
+validation loss:	0.651904
+validation error:	0.363222
+2017-01-28 17:28:33,508 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:29:13,412 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-190.pkl
+2017-01-28 17:29:15,435 INFO     epoch: 190 took 41.938s (0.023s in batching)
+training loss:	0.649409
+validation loss:	0.651406
+validation error:	0.367554
+2017-01-28 17:29:15,445 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:29:59,712 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-191.pkl
+2017-01-28 17:30:01,808 INFO     epoch: 191 took 46.373s (0.023s in batching)
+training loss:	0.649325
+validation loss:	0.654971
+validation error:	0.366577
+2017-01-28 17:30:01,818 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:30:46,434 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-192.pkl
+2017-01-28 17:30:48,415 INFO     epoch: 192 took 46.607s (0.026s in batching)
+training loss:	0.649272
+validation loss:	0.649840
+validation error:	0.364793
+2017-01-28 17:30:48,425 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:31:32,863 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-193.pkl
+2017-01-28 17:31:34,886 INFO     epoch: 193 took 46.471s (0.023s in batching)
+training loss:	0.649505
+validation loss:	0.652684
+validation error:	0.361705
+2017-01-28 17:31:34,896 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:32:19,198 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-194.pkl
+2017-01-28 17:32:21,227 INFO     epoch: 194 took 46.342s (0.025s in batching)
+training loss:	0.649369
+validation loss:	0.645561
+validation error:	0.363752
+2017-01-28 17:32:21,238 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:33:05,342 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-195.pkl
+2017-01-28 17:33:07,358 INFO     epoch: 195 took 46.131s (0.024s in batching)
+training loss:	0.649227
+validation loss:	0.650592
+validation error:	0.363633
+2017-01-28 17:33:07,372 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:33:51,821 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-196.pkl
+2017-01-28 17:33:53,883 INFO     epoch: 196 took 46.525s (0.024s in batching)
+training loss:	0.649613
+validation loss:	0.649709
+validation error:	0.363727
+2017-01-28 17:33:53,894 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:34:38,335 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-197.pkl
+2017-01-28 17:34:40,320 INFO     epoch: 197 took 46.437s (0.025s in batching)
+training loss:	0.649358
+validation loss:	0.649813
+validation error:	0.368104
+2017-01-28 17:34:40,331 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:35:24,400 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-198.pkl
+2017-01-28 17:35:26,462 INFO     epoch: 198 took 46.141s (0.023s in batching)
+training loss:	0.649078
+validation loss:	0.650920
+validation error:	0.367722
+2017-01-28 17:35:26,472 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json
+2017-01-28 17:36:11,057 INFO     Saving network params to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/epoch-199.pkl
+2017-01-28 17:36:13,115 INFO     epoch: 199 took 46.654s (0.025s in batching)
+training loss:	0.649422
+validation loss:	0.654811
+validation error:	0.366468
+2017-01-28 17:36:13,126 INFO     Wrote output to trainNN/out/v046-unified-3-g5244468-dirty:ff-ffv-dropout-inp.2-100.5-50.5/config.json

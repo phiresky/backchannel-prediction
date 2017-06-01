@@ -1,0 +1,623 @@
+2017-02-09 01:03:01,947 DEBUG    version=v050-finunified:lstm-best-features-power,pitch,word2vec_dim30
+2017-02-09 01:03:01,948 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-02-09 01:03:01,948 INFO     loading uttdb cache
+2017-02-09 01:03:17,834 DEBUG    extracting and saving data to data/cache/extract-fc4b017def7b99827485e299b74e20f092a0810b3a25b74d6d25fef73c50ae2f.pickle
+2017-02-09 01:03:19,105 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-02-09 01:03:19,131 INFO     loading uttdb cache
+2017-02-09 01:04:04,891 INFO     wrote to data/word2vec/noisefiltered-30.bin
+2017-02-09 01:53:23,456 DEBUG    set input dim to 32
+2017-02-09 01:53:23,496 DEBUG    input dim = 32
+2017-02-09 01:53:23,585 DEBUG    shuffling batches
+2017-02-09 01:53:31,361 DEBUG    shuffling done
+2017-02-09 01:53:31,361 DEBUG    loading data into ram
+2017-02-09 01:53:31,426 DEBUG    loading data took 0.065s (cpu: 0.065s)
+2017-02-09 01:53:31,991 DEBUG    set input dim to 32
+2017-02-09 01:53:31,991 DEBUG    input dim = 32
+2017-02-09 01:53:32,015 DEBUG    shuffling batches
+2017-02-09 01:53:32,324 DEBUG    shuffling done
+2017-02-09 01:53:32,324 DEBUG    loading data into ram
+2017-02-09 01:53:32,330 DEBUG    loading data took 0.007s (cpu: 0.007s)
+2017-02-09 01:53:32,882 DEBUG    Applying L2 regularization with 0.000100
+2017-02-09 01:53:32,948 INFO     Training network with 44067 trainable out of 44277 total params.
+2017-02-09 01:53:33,360 DEBUG    Using adam with learning_rate=0.001000
+2017-02-09 01:55:51,110 DEBUG    Starting training...
+2017-02-09 01:56:18,151 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-000.pkl
+2017-02-09 01:56:18,782 INFO     epoch: 0 took 27.663s (0.001s in batching)
+training loss:	0.596086
+validation loss:	0.549834
+validation error:	0.281100
+2017-02-09 01:56:18,783 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:56:45,751 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-001.pkl
+2017-02-09 01:56:46,381 INFO     epoch: 1 took 27.598s (0.001s in batching)
+training loss:	0.560251
+validation loss:	0.539425
+validation error:	0.274500
+2017-02-09 01:56:46,503 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:57:13,599 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-002.pkl
+2017-02-09 01:57:14,259 INFO     epoch: 2 took 27.877s (0.001s in batching)
+training loss:	0.552063
+validation loss:	0.535440
+validation error:	0.271100
+2017-02-09 01:57:14,260 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:57:42,300 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-003.pkl
+2017-02-09 01:57:43,125 INFO     epoch: 3 took 28.866s (0.001s in batching)
+training loss:	0.546930
+validation loss:	0.541145
+validation error:	0.272200
+2017-02-09 01:57:43,130 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:58:13,758 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-004.pkl
+2017-02-09 01:58:14,784 INFO     epoch: 4 took 31.659s (0.001s in batching)
+training loss:	0.542715
+validation loss:	0.531598
+validation error:	0.263600
+2017-02-09 01:58:14,795 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:58:51,458 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-005.pkl
+2017-02-09 01:58:52,642 INFO     epoch: 5 took 37.858s (0.025s in batching)
+training loss:	0.540095
+validation loss:	0.529067
+validation error:	0.261700
+2017-02-09 01:58:52,647 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:59:20,728 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-006.pkl
+2017-02-09 01:59:21,425 INFO     epoch: 6 took 28.784s (0.001s in batching)
+training loss:	0.536212
+validation loss:	0.520189
+validation error:	0.257800
+2017-02-09 01:59:21,426 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 01:59:48,353 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-007.pkl
+2017-02-09 01:59:49,035 INFO     epoch: 7 took 27.610s (0.001s in batching)
+training loss:	0.532484
+validation loss:	0.517596
+validation error:	0.251600
+2017-02-09 01:59:49,037 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:00:16,002 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-008.pkl
+2017-02-09 02:00:16,653 INFO     epoch: 8 took 27.618s (0.001s in batching)
+training loss:	0.529630
+validation loss:	0.516507
+validation error:	0.254200
+2017-02-09 02:00:16,655 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:00:43,622 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-009.pkl
+2017-02-09 02:00:44,417 INFO     epoch: 9 took 27.764s (0.001s in batching)
+training loss:	0.527816
+validation loss:	0.516320
+validation error:	0.255300
+2017-02-09 02:00:44,418 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:01:11,313 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-010.pkl
+2017-02-09 02:01:11,972 INFO     epoch: 10 took 27.555s (0.001s in batching)
+training loss:	0.525906
+validation loss:	0.511690
+validation error:	0.251300
+2017-02-09 02:01:11,988 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:01:39,446 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-011.pkl
+2017-02-09 02:01:40,113 INFO     epoch: 11 took 28.141s (0.001s in batching)
+training loss:	0.524054
+validation loss:	0.510306
+validation error:	0.248200
+2017-02-09 02:01:40,611 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:02:07,773 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-012.pkl
+2017-02-09 02:02:08,376 INFO     epoch: 12 took 28.263s (0.001s in batching)
+training loss:	0.521891
+validation loss:	0.508079
+validation error:	0.251100
+2017-02-09 02:02:08,377 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:02:35,594 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-013.pkl
+2017-02-09 02:02:36,225 INFO     epoch: 13 took 27.849s (0.001s in batching)
+training loss:	0.520591
+validation loss:	0.509768
+validation error:	0.248100
+2017-02-09 02:02:36,241 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:03:26,913 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-014.pkl
+2017-02-09 02:03:28,959 INFO     epoch: 14 took 52.734s (0.001s in batching)
+training loss:	0.518712
+validation loss:	0.510572
+validation error:	0.249200
+2017-02-09 02:03:28,960 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:04:19,933 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-015.pkl
+2017-02-09 02:04:21,969 INFO     epoch: 15 took 53.010s (0.001s in batching)
+training loss:	0.518057
+validation loss:	0.506676
+validation error:	0.246500
+2017-02-09 02:04:21,970 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:05:13,294 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-016.pkl
+2017-02-09 02:05:15,312 INFO     epoch: 16 took 53.343s (0.001s in batching)
+training loss:	0.516445
+validation loss:	0.509732
+validation error:	0.248900
+2017-02-09 02:05:15,313 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:06:23,262 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-017.pkl
+2017-02-09 02:06:26,169 INFO     epoch: 17 took 70.856s (0.029s in batching)
+training loss:	0.515232
+validation loss:	0.506798
+validation error:	0.249300
+2017-02-09 02:06:26,293 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:07:21,996 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-018.pkl
+2017-02-09 02:07:23,618 INFO     epoch: 18 took 57.450s (0.005s in batching)
+training loss:	0.514387
+validation loss:	0.503837
+validation error:	0.244100
+2017-02-09 02:07:23,620 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:08:17,901 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-019.pkl
+2017-02-09 02:08:19,709 INFO     epoch: 19 took 56.091s (0.001s in batching)
+training loss:	0.513080
+validation loss:	0.506584
+validation error:	0.243900
+2017-02-09 02:08:19,710 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:09:24,503 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-020.pkl
+2017-02-09 02:09:27,936 INFO     epoch: 20 took 68.227s (0.001s in batching)
+training loss:	0.511761
+validation loss:	0.506685
+validation error:	0.244500
+2017-02-09 02:09:27,938 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:10:45,109 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-021.pkl
+2017-02-09 02:10:48,543 INFO     epoch: 21 took 80.607s (0.001s in batching)
+training loss:	0.511802
+validation loss:	0.504822
+validation error:	0.245300
+2017-02-09 02:10:48,545 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:12:05,632 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-022.pkl
+2017-02-09 02:12:09,065 INFO     epoch: 22 took 80.522s (0.001s in batching)
+training loss:	0.511033
+validation loss:	0.502106
+validation error:	0.244800
+2017-02-09 02:12:09,067 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:13:26,260 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-023.pkl
+2017-02-09 02:13:29,684 INFO     epoch: 23 took 80.619s (0.001s in batching)
+training loss:	0.509780
+validation loss:	0.504425
+validation error:	0.244800
+2017-02-09 02:13:29,685 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:14:47,327 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-024.pkl
+2017-02-09 02:14:50,712 INFO     epoch: 24 took 81.029s (0.001s in batching)
+training loss:	0.508867
+validation loss:	0.502916
+validation error:	0.240900
+2017-02-09 02:14:50,713 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:16:07,940 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-025.pkl
+2017-02-09 02:16:11,462 INFO     epoch: 25 took 80.749s (0.001s in batching)
+training loss:	0.507467
+validation loss:	0.504227
+validation error:	0.244300
+2017-02-09 02:16:11,463 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:17:28,546 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-026.pkl
+2017-02-09 02:17:32,012 INFO     epoch: 26 took 80.550s (0.001s in batching)
+training loss:	0.506377
+validation loss:	0.503244
+validation error:	0.241700
+2017-02-09 02:17:32,013 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:18:48,931 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-027.pkl
+2017-02-09 02:18:52,501 INFO     epoch: 27 took 80.490s (0.001s in batching)
+training loss:	0.505991
+validation loss:	0.503893
+validation error:	0.242900
+2017-02-09 02:18:52,502 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:20:09,221 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-028.pkl
+2017-02-09 02:20:12,857 INFO     epoch: 28 took 80.356s (0.001s in batching)
+training loss:	0.505835
+validation loss:	0.501391
+validation error:	0.241100
+2017-02-09 02:20:12,859 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:21:29,453 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-029.pkl
+2017-02-09 02:21:33,021 INFO     epoch: 29 took 80.164s (0.001s in batching)
+training loss:	0.505176
+validation loss:	0.504007
+validation error:	0.245600
+2017-02-09 02:21:33,022 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:22:49,873 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-030.pkl
+2017-02-09 02:22:53,354 INFO     epoch: 30 took 80.332s (0.001s in batching)
+training loss:	0.504403
+validation loss:	0.506323
+validation error:	0.244900
+2017-02-09 02:22:53,355 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:24:10,579 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-031.pkl
+2017-02-09 02:24:14,191 INFO     epoch: 31 took 80.837s (0.001s in batching)
+training loss:	0.503198
+validation loss:	0.505686
+validation error:	0.243400
+2017-02-09 02:24:14,192 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:25:31,321 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-032.pkl
+2017-02-09 02:25:34,842 INFO     epoch: 32 took 80.651s (0.001s in batching)
+training loss:	0.502937
+validation loss:	0.503284
+validation error:	0.240500
+2017-02-09 02:25:34,845 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:26:51,806 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-033.pkl
+2017-02-09 02:26:55,393 INFO     epoch: 33 took 80.551s (0.001s in batching)
+training loss:	0.502623
+validation loss:	0.503656
+validation error:	0.239900
+2017-02-09 02:26:55,394 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:28:12,846 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-034.pkl
+2017-02-09 02:28:16,349 INFO     epoch: 34 took 80.956s (0.001s in batching)
+training loss:	0.501964
+validation loss:	0.501473
+validation error:	0.239400
+2017-02-09 02:28:16,350 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:29:33,346 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-035.pkl
+2017-02-09 02:29:36,905 INFO     epoch: 35 took 80.556s (0.001s in batching)
+training loss:	0.503772
+validation loss:	0.502307
+validation error:	0.242500
+2017-02-09 02:29:36,908 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:30:54,218 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-036.pkl
+2017-02-09 02:30:57,776 INFO     epoch: 36 took 80.871s (0.001s in batching)
+training loss:	0.502348
+validation loss:	0.502514
+validation error:	0.242500
+2017-02-09 02:30:57,777 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:32:15,058 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-037.pkl
+2017-02-09 02:32:18,675 INFO     epoch: 37 took 80.899s (0.001s in batching)
+training loss:	0.501192
+validation loss:	0.511135
+validation error:	0.246000
+2017-02-09 02:32:18,678 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:33:35,569 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-038.pkl
+2017-02-09 02:33:39,655 INFO     epoch: 38 took 80.980s (0.001s in batching)
+training loss:	0.499581
+validation loss:	0.508575
+validation error:	0.246700
+2017-02-09 02:33:39,658 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:34:56,697 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-039.pkl
+2017-02-09 02:35:00,192 INFO     epoch: 39 took 80.536s (0.001s in batching)
+training loss:	0.498882
+validation loss:	0.504550
+validation error:	0.241900
+2017-02-09 02:35:00,193 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:36:17,434 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-040.pkl
+2017-02-09 02:36:21,515 INFO     epoch: 40 took 81.323s (0.001s in batching)
+training loss:	0.498382
+validation loss:	0.504194
+validation error:	0.245100
+2017-02-09 02:36:21,516 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:37:38,466 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-041.pkl
+2017-02-09 02:37:41,972 INFO     epoch: 41 took 80.458s (0.001s in batching)
+training loss:	0.498623
+validation loss:	0.503749
+validation error:	0.245800
+2017-02-09 02:37:41,973 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:38:58,830 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-042.pkl
+2017-02-09 02:39:02,362 INFO     epoch: 42 took 80.390s (0.001s in batching)
+training loss:	0.498010
+validation loss:	0.505658
+validation error:	0.242300
+2017-02-09 02:39:02,363 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:40:19,697 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-043.pkl
+2017-02-09 02:40:23,189 INFO     epoch: 43 took 80.827s (0.001s in batching)
+training loss:	0.496687
+validation loss:	0.505955
+validation error:	0.243200
+2017-02-09 02:40:23,190 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:41:40,089 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-044.pkl
+2017-02-09 02:41:43,771 INFO     epoch: 44 took 80.582s (0.001s in batching)
+training loss:	0.496730
+validation loss:	0.506627
+validation error:	0.244700
+2017-02-09 02:41:43,772 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:43:00,897 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-045.pkl
+2017-02-09 02:43:04,397 INFO     epoch: 45 took 80.627s (0.001s in batching)
+training loss:	0.497691
+validation loss:	0.510130
+validation error:	0.245800
+2017-02-09 02:43:04,399 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:44:21,635 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-046.pkl
+2017-02-09 02:44:25,274 INFO     epoch: 46 took 80.876s (0.001s in batching)
+training loss:	0.496201
+validation loss:	0.504369
+validation error:	0.243900
+2017-02-09 02:44:25,275 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:45:41,861 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-047.pkl
+2017-02-09 02:45:45,484 INFO     epoch: 47 took 80.211s (0.001s in batching)
+training loss:	0.496767
+validation loss:	0.507519
+validation error:	0.243100
+2017-02-09 02:45:45,486 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:47:01,978 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-048.pkl
+2017-02-09 02:47:05,603 INFO     epoch: 48 took 80.118s (0.001s in batching)
+training loss:	0.495472
+validation loss:	0.504796
+validation error:	0.241200
+2017-02-09 02:47:05,604 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:48:22,586 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-049.pkl
+2017-02-09 02:48:26,114 INFO     epoch: 49 took 80.511s (0.001s in batching)
+training loss:	0.494675
+validation loss:	0.507154
+validation error:	0.245500
+2017-02-09 02:48:26,115 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:49:43,348 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-050.pkl
+2017-02-09 02:49:46,922 INFO     epoch: 50 took 80.808s (0.001s in batching)
+training loss:	0.493852
+validation loss:	0.506809
+validation error:	0.243500
+2017-02-09 02:49:46,924 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:51:03,781 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-051.pkl
+2017-02-09 02:51:07,433 INFO     epoch: 51 took 80.511s (0.001s in batching)
+training loss:	0.492380
+validation loss:	0.506057
+validation error:	0.243200
+2017-02-09 02:51:07,434 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:52:24,480 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-052.pkl
+2017-02-09 02:52:28,036 INFO     epoch: 52 took 80.603s (0.001s in batching)
+training loss:	0.492336
+validation loss:	0.507578
+validation error:	0.245500
+2017-02-09 02:52:28,038 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:53:45,208 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-053.pkl
+2017-02-09 02:53:48,774 INFO     epoch: 53 took 80.738s (0.001s in batching)
+training loss:	0.491845
+validation loss:	0.507269
+validation error:	0.242900
+2017-02-09 02:53:48,775 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:55:05,594 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-054.pkl
+2017-02-09 02:55:09,159 INFO     epoch: 54 took 80.385s (0.001s in batching)
+training loss:	0.491917
+validation loss:	0.505138
+validation error:	0.241800
+2017-02-09 02:55:09,160 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:56:26,071 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-055.pkl
+2017-02-09 02:56:29,635 INFO     epoch: 55 took 80.476s (0.001s in batching)
+training loss:	0.491412
+validation loss:	0.505430
+validation error:	0.243600
+2017-02-09 02:56:29,636 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:57:46,389 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-056.pkl
+2017-02-09 02:57:49,920 INFO     epoch: 56 took 80.285s (0.001s in batching)
+training loss:	0.490083
+validation loss:	0.505388
+validation error:	0.242300
+2017-02-09 02:57:49,922 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 02:59:07,381 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-057.pkl
+2017-02-09 02:59:11,030 INFO     epoch: 57 took 81.110s (0.001s in batching)
+training loss:	0.489184
+validation loss:	0.506783
+validation error:	0.243400
+2017-02-09 02:59:11,031 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:00:27,731 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-058.pkl
+2017-02-09 03:00:31,213 INFO     epoch: 58 took 80.183s (0.001s in batching)
+training loss:	0.488415
+validation loss:	0.507965
+validation error:	0.246500
+2017-02-09 03:00:31,214 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:01:48,113 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-059.pkl
+2017-02-09 03:01:51,668 INFO     epoch: 59 took 80.455s (0.001s in batching)
+training loss:	0.488130
+validation loss:	0.511005
+validation error:	0.244500
+2017-02-09 03:01:51,669 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:03:08,853 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-060.pkl
+2017-02-09 03:03:12,381 INFO     epoch: 60 took 80.713s (0.001s in batching)
+training loss:	0.487616
+validation loss:	0.508162
+validation error:	0.245000
+2017-02-09 03:03:12,383 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:04:29,316 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-061.pkl
+2017-02-09 03:04:32,889 INFO     epoch: 61 took 80.507s (0.001s in batching)
+training loss:	0.487092
+validation loss:	0.507476
+validation error:	0.245300
+2017-02-09 03:04:32,890 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:05:50,022 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-062.pkl
+2017-02-09 03:05:53,674 INFO     epoch: 62 took 80.785s (0.001s in batching)
+training loss:	0.486851
+validation loss:	0.510826
+validation error:	0.244000
+2017-02-09 03:05:53,675 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:07:10,498 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-063.pkl
+2017-02-09 03:07:13,952 INFO     epoch: 63 took 80.278s (0.001s in batching)
+training loss:	0.486723
+validation loss:	0.510732
+validation error:	0.247300
+2017-02-09 03:07:13,953 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:08:31,101 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-064.pkl
+2017-02-09 03:08:34,774 INFO     epoch: 64 took 80.823s (0.001s in batching)
+training loss:	0.485241
+validation loss:	0.514671
+validation error:	0.246200
+2017-02-09 03:08:34,776 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:09:51,065 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-065.pkl
+2017-02-09 03:09:54,619 INFO     epoch: 65 took 79.845s (0.001s in batching)
+training loss:	0.484891
+validation loss:	0.510916
+validation error:	0.242900
+2017-02-09 03:09:54,621 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:11:11,620 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-066.pkl
+2017-02-09 03:11:15,108 INFO     epoch: 66 took 80.488s (0.001s in batching)
+training loss:	0.484105
+validation loss:	0.517267
+validation error:	0.245100
+2017-02-09 03:11:15,109 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:12:31,907 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-067.pkl
+2017-02-09 03:12:35,354 INFO     epoch: 67 took 80.247s (0.001s in batching)
+training loss:	0.483513
+validation loss:	0.513853
+validation error:	0.248500
+2017-02-09 03:12:35,356 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:13:52,199 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-068.pkl
+2017-02-09 03:13:55,827 INFO     epoch: 68 took 80.473s (0.001s in batching)
+training loss:	0.483245
+validation loss:	0.518023
+validation error:	0.246100
+2017-02-09 03:13:55,829 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:15:12,865 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-069.pkl
+2017-02-09 03:15:16,431 INFO     epoch: 69 took 80.604s (0.001s in batching)
+training loss:	0.482434
+validation loss:	0.513394
+validation error:	0.248500
+2017-02-09 03:15:16,433 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:16:33,340 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-070.pkl
+2017-02-09 03:16:37,028 INFO     epoch: 70 took 80.596s (0.001s in batching)
+training loss:	0.481194
+validation loss:	0.516577
+validation error:	0.249300
+2017-02-09 03:16:37,029 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:17:54,025 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-071.pkl
+2017-02-09 03:17:57,531 INFO     epoch: 71 took 80.503s (0.001s in batching)
+training loss:	0.482149
+validation loss:	0.517103
+validation error:	0.249300
+2017-02-09 03:17:57,533 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:19:14,406 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-072.pkl
+2017-02-09 03:19:18,036 INFO     epoch: 72 took 80.506s (0.001s in batching)
+training loss:	0.480720
+validation loss:	0.516493
+validation error:	0.249500
+2017-02-09 03:19:18,038 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:20:34,322 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-073.pkl
+2017-02-09 03:20:37,831 INFO     epoch: 73 took 79.795s (0.001s in batching)
+training loss:	0.480847
+validation loss:	0.514796
+validation error:	0.245000
+2017-02-09 03:20:37,833 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:21:55,011 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-074.pkl
+2017-02-09 03:21:58,478 INFO     epoch: 74 took 80.647s (0.001s in batching)
+training loss:	0.479082
+validation loss:	0.516122
+validation error:	0.250700
+2017-02-09 03:21:58,480 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:23:15,354 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-075.pkl
+2017-02-09 03:23:18,858 INFO     epoch: 75 took 80.381s (0.001s in batching)
+training loss:	0.479918
+validation loss:	0.519716
+validation error:	0.250000
+2017-02-09 03:23:18,860 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:24:35,870 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-076.pkl
+2017-02-09 03:24:39,537 INFO     epoch: 76 took 80.678s (0.001s in batching)
+training loss:	0.478330
+validation loss:	0.516688
+validation error:	0.246700
+2017-02-09 03:24:39,538 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:25:56,549 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-077.pkl
+2017-02-09 03:26:00,158 INFO     epoch: 77 took 80.621s (0.001s in batching)
+training loss:	0.478262
+validation loss:	0.518214
+validation error:	0.247400
+2017-02-09 03:26:00,160 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:27:17,508 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-078.pkl
+2017-02-09 03:27:21,118 INFO     epoch: 78 took 80.959s (0.001s in batching)
+training loss:	0.477795
+validation loss:	0.518170
+validation error:	0.250900
+2017-02-09 03:27:21,119 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:28:38,333 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-079.pkl
+2017-02-09 03:28:41,849 INFO     epoch: 79 took 80.731s (0.001s in batching)
+training loss:	0.477874
+validation loss:	0.519619
+validation error:	0.248700
+2017-02-09 03:28:41,850 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:29:58,692 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-080.pkl
+2017-02-09 03:30:02,163 INFO     epoch: 80 took 80.315s (0.001s in batching)
+training loss:	0.476501
+validation loss:	0.522546
+validation error:	0.253900
+2017-02-09 03:30:02,165 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:31:19,340 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-081.pkl
+2017-02-09 03:31:22,775 INFO     epoch: 81 took 80.611s (0.001s in batching)
+training loss:	0.475624
+validation loss:	0.522499
+validation error:	0.249200
+2017-02-09 03:31:22,776 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:32:39,751 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-082.pkl
+2017-02-09 03:32:43,268 INFO     epoch: 82 took 80.494s (0.001s in batching)
+training loss:	0.475252
+validation loss:	0.518531
+validation error:	0.248300
+2017-02-09 03:32:43,270 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:34:00,601 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-083.pkl
+2017-02-09 03:34:04,076 INFO     epoch: 83 took 80.808s (0.001s in batching)
+training loss:	0.473955
+validation loss:	0.522134
+validation error:	0.250100
+2017-02-09 03:34:04,080 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:35:19,868 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-084.pkl
+2017-02-09 03:35:23,418 INFO     epoch: 84 took 79.342s (0.001s in batching)
+training loss:	0.474335
+validation loss:	0.520502
+validation error:	0.246900
+2017-02-09 03:35:23,422 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:36:40,269 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-085.pkl
+2017-02-09 03:36:43,752 INFO     epoch: 85 took 80.334s (0.001s in batching)
+training loss:	0.473744
+validation loss:	0.528484
+validation error:	0.253200
+2017-02-09 03:36:43,754 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:38:01,127 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-086.pkl
+2017-02-09 03:38:04,599 INFO     epoch: 86 took 80.847s (0.001s in batching)
+training loss:	0.471941
+validation loss:	0.523311
+validation error:	0.246100
+2017-02-09 03:38:04,600 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:39:21,471 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-087.pkl
+2017-02-09 03:39:25,001 INFO     epoch: 87 took 80.403s (0.001s in batching)
+training loss:	0.471616
+validation loss:	0.526855
+validation error:	0.253000
+2017-02-09 03:39:25,005 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:40:41,913 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-088.pkl
+2017-02-09 03:40:45,504 INFO     epoch: 88 took 80.502s (0.001s in batching)
+training loss:	0.472549
+validation loss:	0.525658
+validation error:	0.250700
+2017-02-09 03:40:45,508 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:42:02,090 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-089.pkl
+2017-02-09 03:42:05,580 INFO     epoch: 89 took 80.077s (0.001s in batching)
+training loss:	0.471283
+validation loss:	0.527663
+validation error:	0.253900
+2017-02-09 03:42:05,582 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:43:22,448 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-090.pkl
+2017-02-09 03:43:26,021 INFO     epoch: 90 took 80.441s (0.001s in batching)
+training loss:	0.470384
+validation loss:	0.526965
+validation error:	0.250000
+2017-02-09 03:43:26,023 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:44:43,221 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-091.pkl
+2017-02-09 03:44:46,708 INFO     epoch: 91 took 80.687s (0.001s in batching)
+training loss:	0.469364
+validation loss:	0.529327
+validation error:	0.251000
+2017-02-09 03:44:46,710 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:46:03,856 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-092.pkl
+2017-02-09 03:46:07,316 INFO     epoch: 92 took 80.608s (0.001s in batching)
+training loss:	0.469395
+validation loss:	0.532936
+validation error:	0.255100
+2017-02-09 03:46:07,318 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:47:24,298 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-093.pkl
+2017-02-09 03:47:27,861 INFO     epoch: 93 took 80.545s (0.001s in batching)
+training loss:	0.468732
+validation loss:	0.527872
+validation error:	0.248900
+2017-02-09 03:47:27,863 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:48:44,922 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-094.pkl
+2017-02-09 03:48:48,400 INFO     epoch: 94 took 80.538s (0.001s in batching)
+training loss:	0.468059
+validation loss:	0.536039
+validation error:	0.251200
+2017-02-09 03:48:48,401 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:50:05,193 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-095.pkl
+2017-02-09 03:50:08,751 INFO     epoch: 95 took 80.351s (0.001s in batching)
+training loss:	0.467579
+validation loss:	0.533793
+validation error:	0.252500
+2017-02-09 03:50:08,753 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:51:25,582 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-096.pkl
+2017-02-09 03:51:29,160 INFO     epoch: 96 took 80.409s (0.001s in batching)
+training loss:	0.467133
+validation loss:	0.537375
+validation error:	0.253500
+2017-02-09 03:51:29,162 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:52:45,905 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-097.pkl
+2017-02-09 03:52:49,437 INFO     epoch: 97 took 80.277s (0.001s in batching)
+training loss:	0.467881
+validation loss:	0.540021
+validation error:	0.256500
+2017-02-09 03:52:49,439 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:54:06,212 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-098.pkl
+2017-02-09 03:54:10,334 INFO     epoch: 98 took 80.897s (0.001s in batching)
+training loss:	0.464798
+validation loss:	0.535538
+validation error:	0.252800
+2017-02-09 03:54:10,336 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json
+2017-02-09 03:55:27,662 INFO     Saving network params to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/epoch-099.pkl
+2017-02-09 03:55:31,224 INFO     epoch: 99 took 80.890s (0.001s in batching)
+training loss:	0.466333
+validation loss:	0.537713
+validation error:	0.254200
+2017-02-09 03:55:31,228 INFO     Wrote output to trainNN/out/v050-finunified:lstm-best-features-power,pitch,word2vec_dim30/config.json

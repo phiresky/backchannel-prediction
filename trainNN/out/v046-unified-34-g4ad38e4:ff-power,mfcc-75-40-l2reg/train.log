@@ -1,0 +1,622 @@
+2017-01-30 06:27:13,133 DEBUG    version=v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg
+2017-01-30 06:27:13,424 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-30 06:27:25,871 DEBUG    getting all bc uttids...configs/ff-power,mfcc/ff-power,mfcc-75-40.json
+2017-01-30 06:27:25,872 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-30 06:27:41,002 DEBUG    loading cached extracted data from data/cache/extract-9ee05c182289d47fbb64d9b7445040af3e7017aac58ccd75d808d677b41ade8f.pickle
+2017-01-30 06:27:51,586 DEBUG    set input dim to 21
+2017-01-30 06:27:51,587 DEBUG    input dim = 21
+2017-01-30 06:27:51,749 DEBUG    shuffling batches
+2017-01-30 06:29:26,718 DEBUG    shuffling done
+2017-01-30 06:29:26,719 DEBUG    loading data into ram
+2017-01-30 06:29:26,856 DEBUG    loading data took 0.137s (cpu: 0.137s)
+2017-01-30 06:29:26,860 DEBUG    getting all bc uttids...configs/ff-power,mfcc/ff-power,mfcc-75-40.json
+2017-01-30 06:29:27,444 DEBUG    set input dim to 21
+2017-01-30 06:29:27,444 DEBUG    input dim = 21
+2017-01-30 06:29:27,764 DEBUG    shuffling batches
+2017-01-30 06:29:36,926 DEBUG    shuffling done
+2017-01-30 06:29:36,926 DEBUG    loading data into ram
+2017-01-30 06:29:36,940 DEBUG    loading data took 0.014s (cpu: 0.014s)
+2017-01-30 06:29:36,995 DEBUG    Applying L2 regularization with 0.000100
+2017-01-30 06:29:37,020 INFO     Training network with 66197 trainable out of 66197 total params.
+2017-01-30 06:29:37,124 DEBUG    Using adam with learning_rate=0.001000
+2017-01-30 06:30:04,500 DEBUG    Starting training...
+2017-01-30 06:30:45,709 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-000.pkl
+2017-01-30 06:30:48,530 INFO     epoch: 0 took 44.029s (0.020s in batching)
+training loss:	0.627619
+validation loss:	0.616881
+validation error:	0.344212
+2017-01-30 06:30:48,532 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:31:30,862 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-001.pkl
+2017-01-30 06:31:33,517 INFO     epoch: 1 took 44.987s (0.018s in batching)
+training loss:	0.613796
+validation loss:	0.609211
+validation error:	0.334090
+2017-01-30 06:31:33,519 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:32:13,550 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-002.pkl
+2017-01-30 06:32:16,249 INFO     epoch: 2 took 42.733s (0.018s in batching)
+training loss:	0.610074
+validation loss:	0.608235
+validation error:	0.331269
+2017-01-30 06:32:16,252 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:32:55,437 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-003.pkl
+2017-01-30 06:32:58,305 INFO     epoch: 3 took 42.055s (0.018s in batching)
+training loss:	0.608031
+validation loss:	0.611566
+validation error:	0.334189
+2017-01-30 06:32:58,308 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:33:38,431 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-004.pkl
+2017-01-30 06:33:41,194 INFO     epoch: 4 took 42.889s (0.019s in batching)
+training loss:	0.606748
+validation loss:	0.605297
+validation error:	0.329509
+2017-01-30 06:33:41,197 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:34:21,128 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-005.pkl
+2017-01-30 06:34:23,693 INFO     epoch: 5 took 42.499s (0.018s in batching)
+training loss:	0.605703
+validation loss:	0.605233
+validation error:	0.326660
+2017-01-30 06:34:23,696 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:35:04,763 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-006.pkl
+2017-01-30 06:35:07,519 INFO     epoch: 6 took 43.825s (0.019s in batching)
+training loss:	0.604911
+validation loss:	0.606147
+validation error:	0.329410
+2017-01-30 06:35:07,522 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:35:48,386 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-007.pkl
+2017-01-30 06:35:50,992 INFO     epoch: 7 took 43.473s (0.018s in batching)
+training loss:	0.604028
+validation loss:	0.607346
+validation error:	0.332575
+2017-01-30 06:35:50,995 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:36:31,168 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-008.pkl
+2017-01-30 06:36:34,051 INFO     epoch: 8 took 43.059s (0.018s in batching)
+training loss:	0.603641
+validation loss:	0.603344
+validation error:	0.326863
+2017-01-30 06:36:34,053 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:37:13,202 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-009.pkl
+2017-01-30 06:37:15,773 INFO     epoch: 9 took 41.723s (0.019s in batching)
+training loss:	0.603119
+validation loss:	0.614932
+validation error:	0.335910
+2017-01-30 06:37:15,776 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:37:55,717 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-010.pkl
+2017-01-30 06:37:58,486 INFO     epoch: 10 took 42.713s (0.019s in batching)
+training loss:	0.602832
+validation loss:	0.602324
+validation error:	0.324632
+2017-01-30 06:37:58,489 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:38:39,575 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-011.pkl
+2017-01-30 06:38:42,382 INFO     epoch: 11 took 43.896s (0.019s in batching)
+training loss:	0.602233
+validation loss:	0.608578
+validation error:	0.332269
+2017-01-30 06:38:42,385 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:39:24,012 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-012.pkl
+2017-01-30 06:39:26,574 INFO     epoch: 12 took 44.192s (0.019s in batching)
+training loss:	0.601994
+validation loss:	0.608223
+validation error:	0.331920
+2017-01-30 06:39:26,577 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:40:06,106 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-013.pkl
+2017-01-30 06:40:08,921 INFO     epoch: 13 took 42.347s (0.022s in batching)
+training loss:	0.601957
+validation loss:	0.606085
+validation error:	0.328679
+2017-01-30 06:40:08,924 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:40:50,763 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-014.pkl
+2017-01-30 06:40:53,327 INFO     epoch: 14 took 44.406s (0.019s in batching)
+training loss:	0.601373
+validation loss:	0.612009
+validation error:	0.330052
+2017-01-30 06:40:53,330 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:41:33,809 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-015.pkl
+2017-01-30 06:41:36,368 INFO     epoch: 15 took 43.041s (0.019s in batching)
+training loss:	0.601373
+validation loss:	0.608412
+validation error:	0.331882
+2017-01-30 06:41:36,371 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:42:16,156 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-016.pkl
+2017-01-30 06:42:18,716 INFO     epoch: 16 took 42.348s (0.019s in batching)
+training loss:	0.601198
+validation loss:	0.604283
+validation error:	0.327099
+2017-01-30 06:42:18,719 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:42:57,146 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-017.pkl
+2017-01-30 06:42:59,807 INFO     epoch: 17 took 41.091s (0.019s in batching)
+training loss:	0.600842
+validation loss:	0.609344
+validation error:	0.330401
+2017-01-30 06:42:59,811 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:43:41,932 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-018.pkl
+2017-01-30 06:43:44,753 INFO     epoch: 18 took 44.945s (0.019s in batching)
+training loss:	0.600778
+validation loss:	0.607556
+validation error:	0.327127
+2017-01-30 06:43:44,756 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:44:23,603 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-019.pkl
+2017-01-30 06:44:26,150 INFO     epoch: 19 took 41.398s (0.019s in batching)
+training loss:	0.600542
+validation loss:	0.617816
+validation error:	0.335424
+2017-01-30 06:44:26,154 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:45:06,671 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-020.pkl
+2017-01-30 06:45:09,496 INFO     epoch: 20 took 43.345s (0.018s in batching)
+training loss:	0.600502
+validation loss:	0.612604
+validation error:	0.330099
+2017-01-30 06:45:09,499 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:45:50,308 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-021.pkl
+2017-01-30 06:45:52,873 INFO     epoch: 21 took 43.377s (0.019s in batching)
+training loss:	0.600220
+validation loss:	0.610842
+validation error:	0.329500
+2017-01-30 06:45:52,876 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:46:33,858 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-022.pkl
+2017-01-30 06:46:36,725 INFO     epoch: 22 took 43.852s (0.019s in batching)
+training loss:	0.599941
+validation loss:	0.603614
+validation error:	0.324660
+2017-01-30 06:46:36,729 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:47:16,571 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-023.pkl
+2017-01-30 06:47:19,182 INFO     epoch: 23 took 42.457s (0.019s in batching)
+training loss:	0.600034
+validation loss:	0.607399
+validation error:	0.329590
+2017-01-30 06:47:19,186 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:47:59,235 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-024.pkl
+2017-01-30 06:48:01,803 INFO     epoch: 24 took 42.620s (0.019s in batching)
+training loss:	0.599987
+validation loss:	0.609231
+validation error:	0.327736
+2017-01-30 06:48:01,806 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:48:41,865 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-025.pkl
+2017-01-30 06:48:44,754 INFO     epoch: 25 took 42.952s (0.019s in batching)
+training loss:	0.600029
+validation loss:	0.606247
+validation error:	0.327255
+2017-01-30 06:48:44,758 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:49:25,581 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-026.pkl
+2017-01-30 06:49:28,155 INFO     epoch: 26 took 43.401s (0.019s in batching)
+training loss:	0.599730
+validation loss:	0.606760
+validation error:	0.328236
+2017-01-30 06:49:28,159 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:50:09,254 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-027.pkl
+2017-01-30 06:50:12,088 INFO     epoch: 27 took 43.934s (0.018s in batching)
+training loss:	0.599536
+validation loss:	0.609118
+validation error:	0.329891
+2017-01-30 06:50:12,092 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:50:53,978 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-028.pkl
+2017-01-30 06:50:56,403 INFO     epoch: 28 took 44.314s (0.019s in batching)
+training loss:	0.599464
+validation loss:	0.607415
+validation error:	0.327807
+2017-01-30 06:50:56,406 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:51:37,874 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-029.pkl
+2017-01-30 06:51:40,513 INFO     epoch: 29 took 44.110s (0.018s in batching)
+training loss:	0.599563
+validation loss:	0.614915
+validation error:	0.333967
+2017-01-30 06:51:40,517 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:52:20,903 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-030.pkl
+2017-01-30 06:52:23,526 INFO     epoch: 30 took 43.013s (0.019s in batching)
+training loss:	0.599525
+validation loss:	0.603639
+validation error:	0.326132
+2017-01-30 06:52:23,530 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:53:04,767 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-031.pkl
+2017-01-30 06:53:07,507 INFO     epoch: 31 took 43.980s (0.019s in batching)
+training loss:	0.599393
+validation loss:	0.609417
+validation error:	0.328203
+2017-01-30 06:53:07,510 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:53:48,671 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-032.pkl
+2017-01-30 06:53:51,237 INFO     epoch: 32 took 43.731s (0.019s in batching)
+training loss:	0.599455
+validation loss:	0.605413
+validation error:	0.328014
+2017-01-30 06:53:51,241 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:54:32,437 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-033.pkl
+2017-01-30 06:54:35,255 INFO     epoch: 33 took 44.018s (0.019s in batching)
+training loss:	0.599321
+validation loss:	0.607486
+validation error:	0.328057
+2017-01-30 06:54:35,259 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:55:16,005 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-034.pkl
+2017-01-30 06:55:18,822 INFO     epoch: 34 took 43.566s (0.018s in batching)
+training loss:	0.599391
+validation loss:	0.607716
+validation error:	0.328316
+2017-01-30 06:55:18,825 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:56:00,057 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-035.pkl
+2017-01-30 06:56:02,954 INFO     epoch: 35 took 44.133s (0.019s in batching)
+training loss:	0.599202
+validation loss:	0.609555
+validation error:	0.330391
+2017-01-30 06:56:02,958 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:56:45,329 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-036.pkl
+2017-01-30 06:56:48,203 INFO     epoch: 36 took 45.249s (0.019s in batching)
+training loss:	0.599221
+validation loss:	0.605021
+validation error:	0.324887
+2017-01-30 06:56:48,207 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:57:28,489 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-037.pkl
+2017-01-30 06:57:31,068 INFO     epoch: 37 took 42.865s (0.019s in batching)
+training loss:	0.599046
+validation loss:	0.609907
+validation error:	0.330052
+2017-01-30 06:57:31,072 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:58:11,758 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-038.pkl
+2017-01-30 06:58:14,354 INFO     epoch: 38 took 43.286s (0.019s in batching)
+training loss:	0.599032
+validation loss:	0.604510
+validation error:	0.324104
+2017-01-30 06:58:14,359 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:58:55,399 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-039.pkl
+2017-01-30 06:58:58,263 INFO     epoch: 39 took 43.909s (0.018s in batching)
+training loss:	0.598891
+validation loss:	0.607912
+validation error:	0.331104
+2017-01-30 06:58:58,268 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 06:59:39,856 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-040.pkl
+2017-01-30 06:59:42,668 INFO     epoch: 40 took 44.405s (0.018s in batching)
+training loss:	0.598774
+validation loss:	0.608021
+validation error:	0.331891
+2017-01-30 06:59:42,672 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:00:23,510 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-041.pkl
+2017-01-30 07:00:26,328 INFO     epoch: 41 took 43.660s (0.019s in batching)
+training loss:	0.598859
+validation loss:	0.613423
+validation error:	0.332090
+2017-01-30 07:00:26,332 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:01:07,772 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-042.pkl
+2017-01-30 07:01:10,573 INFO     epoch: 42 took 44.244s (0.019s in batching)
+training loss:	0.598686
+validation loss:	0.611207
+validation error:	0.332104
+2017-01-30 07:01:10,577 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:01:52,819 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-043.pkl
+2017-01-30 07:01:55,719 INFO     epoch: 43 took 45.146s (0.019s in batching)
+training loss:	0.598781
+validation loss:	0.604952
+validation error:	0.327057
+2017-01-30 07:01:55,723 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:02:37,114 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-044.pkl
+2017-01-30 07:02:40,001 INFO     epoch: 44 took 44.282s (0.019s in batching)
+training loss:	0.598776
+validation loss:	0.606591
+validation error:	0.327906
+2017-01-30 07:02:40,006 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:03:22,242 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-045.pkl
+2017-01-30 07:03:25,083 INFO     epoch: 45 took 45.081s (0.018s in batching)
+training loss:	0.598494
+validation loss:	0.609951
+validation error:	0.329731
+2017-01-30 07:03:25,087 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:04:06,571 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-046.pkl
+2017-01-30 07:04:09,300 INFO     epoch: 46 took 44.217s (0.019s in batching)
+training loss:	0.598380
+validation loss:	0.608056
+validation error:	0.329712
+2017-01-30 07:04:09,305 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:04:51,792 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-047.pkl
+2017-01-30 07:04:54,593 INFO     epoch: 47 took 45.292s (0.019s in batching)
+training loss:	0.598636
+validation loss:	0.608580
+validation error:	0.329047
+2017-01-30 07:04:54,597 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:05:33,451 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-048.pkl
+2017-01-30 07:05:36,029 INFO     epoch: 48 took 41.437s (0.019s in batching)
+training loss:	0.598534
+validation loss:	0.605127
+validation error:	0.326283
+2017-01-30 07:05:36,034 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:06:18,150 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-049.pkl
+2017-01-30 07:06:20,932 INFO     epoch: 49 took 44.902s (0.019s in batching)
+training loss:	0.598630
+validation loss:	0.604264
+validation error:	0.327401
+2017-01-30 07:06:20,936 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:07:03,351 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-050.pkl
+2017-01-30 07:07:06,152 INFO     epoch: 50 took 45.221s (0.019s in batching)
+training loss:	0.598496
+validation loss:	0.606187
+validation error:	0.326198
+2017-01-30 07:07:06,157 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:07:48,634 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-051.pkl
+2017-01-30 07:07:51,474 INFO     epoch: 51 took 45.322s (0.019s in batching)
+training loss:	0.598286
+validation loss:	0.610161
+validation error:	0.330844
+2017-01-30 07:07:51,479 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:08:32,404 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-052.pkl
+2017-01-30 07:08:35,253 INFO     epoch: 52 took 43.778s (0.019s in batching)
+training loss:	0.598347
+validation loss:	0.604208
+validation error:	0.324462
+2017-01-30 07:08:35,257 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:09:17,241 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-053.pkl
+2017-01-30 07:09:19,815 INFO     epoch: 53 took 44.563s (0.019s in batching)
+training loss:	0.598096
+validation loss:	0.606018
+validation error:	0.326906
+2017-01-30 07:09:19,820 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:10:00,127 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-054.pkl
+2017-01-30 07:10:03,043 INFO     epoch: 54 took 43.228s (0.019s in batching)
+training loss:	0.598198
+validation loss:	0.608704
+validation error:	0.327854
+2017-01-30 07:10:03,048 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:10:44,463 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-055.pkl
+2017-01-30 07:10:47,278 INFO     epoch: 55 took 44.235s (0.019s in batching)
+training loss:	0.598162
+validation loss:	0.606428
+validation error:	0.326104
+2017-01-30 07:10:47,283 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:11:29,319 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-056.pkl
+2017-01-30 07:11:31,893 INFO     epoch: 56 took 44.615s (0.018s in batching)
+training loss:	0.598044
+validation loss:	0.613616
+validation error:	0.335708
+2017-01-30 07:11:31,898 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:12:13,100 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-057.pkl
+2017-01-30 07:12:15,938 INFO     epoch: 57 took 44.045s (0.019s in batching)
+training loss:	0.597703
+validation loss:	0.607929
+validation error:	0.327005
+2017-01-30 07:12:15,943 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:12:57,147 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-058.pkl
+2017-01-30 07:12:59,914 INFO     epoch: 58 took 43.976s (0.019s in batching)
+training loss:	0.598104
+validation loss:	0.614300
+validation error:	0.333222
+2017-01-30 07:12:59,918 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:13:40,312 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-059.pkl
+2017-01-30 07:13:43,117 INFO     epoch: 59 took 43.204s (0.018s in batching)
+training loss:	0.598100
+validation loss:	0.614327
+validation error:	0.333283
+2017-01-30 07:13:43,122 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:14:25,431 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-060.pkl
+2017-01-30 07:14:28,234 INFO     epoch: 60 took 45.116s (0.018s in batching)
+training loss:	0.597859
+validation loss:	0.612248
+validation error:	0.330811
+2017-01-30 07:14:28,239 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:15:09,780 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-061.pkl
+2017-01-30 07:15:12,593 INFO     epoch: 61 took 44.359s (0.018s in batching)
+training loss:	0.597947
+validation loss:	0.604450
+validation error:	0.325986
+2017-01-30 07:15:12,598 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:15:53,758 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-062.pkl
+2017-01-30 07:15:56,506 INFO     epoch: 62 took 43.913s (0.018s in batching)
+training loss:	0.597894
+validation loss:	0.610609
+validation error:	0.332241
+2017-01-30 07:15:56,511 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:16:38,386 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-063.pkl
+2017-01-30 07:16:41,206 INFO     epoch: 63 took 44.700s (0.019s in batching)
+training loss:	0.598019
+validation loss:	0.617809
+validation error:	0.334802
+2017-01-30 07:16:41,211 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:17:22,650 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-064.pkl
+2017-01-30 07:17:25,197 INFO     epoch: 64 took 43.991s (0.019s in batching)
+training loss:	0.597716
+validation loss:	0.605029
+validation error:	0.324509
+2017-01-30 07:17:25,202 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:18:06,028 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-065.pkl
+2017-01-30 07:18:08,857 INFO     epoch: 65 took 43.660s (0.019s in batching)
+training loss:	0.597732
+validation loss:	0.609459
+validation error:	0.330976
+2017-01-30 07:18:08,862 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:18:48,327 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-066.pkl
+2017-01-30 07:18:50,938 INFO     epoch: 66 took 42.081s (0.018s in batching)
+training loss:	0.597810
+validation loss:	0.609004
+validation error:	0.330024
+2017-01-30 07:18:50,943 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:19:32,704 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-067.pkl
+2017-01-30 07:19:35,601 INFO     epoch: 67 took 44.662s (0.019s in batching)
+training loss:	0.597763
+validation loss:	0.605043
+validation error:	0.326585
+2017-01-30 07:19:35,606 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:20:16,751 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-068.pkl
+2017-01-30 07:20:19,289 INFO     epoch: 68 took 43.689s (0.019s in batching)
+training loss:	0.597829
+validation loss:	0.605764
+validation error:	0.325189
+2017-01-30 07:20:19,294 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:21:01,176 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-069.pkl
+2017-01-30 07:21:03,955 INFO     epoch: 69 took 44.666s (0.018s in batching)
+training loss:	0.597765
+validation loss:	0.603386
+validation error:	0.322330
+2017-01-30 07:21:03,961 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:21:46,529 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-070.pkl
+2017-01-30 07:21:49,315 INFO     epoch: 70 took 45.360s (0.019s in batching)
+training loss:	0.597577
+validation loss:	0.609254
+validation error:	0.326274
+2017-01-30 07:21:49,320 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:22:31,706 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-071.pkl
+2017-01-30 07:22:34,591 INFO     epoch: 71 took 45.275s (0.019s in batching)
+training loss:	0.597596
+validation loss:	0.608405
+validation error:	0.328042
+2017-01-30 07:22:34,596 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:23:16,724 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-072.pkl
+2017-01-30 07:23:19,512 INFO     epoch: 72 took 44.921s (0.019s in batching)
+training loss:	0.597853
+validation loss:	0.605847
+validation error:	0.325717
+2017-01-30 07:23:19,517 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:23:59,978 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-073.pkl
+2017-01-30 07:24:02,619 INFO     epoch: 73 took 43.107s (0.018s in batching)
+training loss:	0.597689
+validation loss:	0.606233
+validation error:	0.326033
+2017-01-30 07:24:02,624 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:24:43,513 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-074.pkl
+2017-01-30 07:24:46,395 INFO     epoch: 74 took 43.776s (0.019s in batching)
+training loss:	0.597663
+validation loss:	0.605321
+validation error:	0.327127
+2017-01-30 07:24:46,400 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:25:27,645 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-075.pkl
+2017-01-30 07:25:30,526 INFO     epoch: 75 took 44.132s (0.019s in batching)
+training loss:	0.597509
+validation loss:	0.606234
+validation error:	0.328651
+2017-01-30 07:25:30,531 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:26:10,677 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-076.pkl
+2017-01-30 07:26:13,550 INFO     epoch: 76 took 43.024s (0.019s in batching)
+training loss:	0.597652
+validation loss:	0.605536
+validation error:	0.323887
+2017-01-30 07:26:13,555 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:26:54,204 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-077.pkl
+2017-01-30 07:26:57,059 INFO     epoch: 77 took 43.509s (0.019s in batching)
+training loss:	0.597472
+validation loss:	0.609012
+validation error:	0.328788
+2017-01-30 07:26:57,065 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:27:37,360 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-078.pkl
+2017-01-30 07:27:39,915 INFO     epoch: 78 took 42.856s (0.019s in batching)
+training loss:	0.597403
+validation loss:	0.605945
+validation error:	0.327047
+2017-01-30 07:27:39,920 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:28:20,606 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-079.pkl
+2017-01-30 07:28:23,436 INFO     epoch: 79 took 43.521s (0.018s in batching)
+training loss:	0.597649
+validation loss:	0.606932
+validation error:	0.328854
+2017-01-30 07:28:23,442 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:29:04,908 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-080.pkl
+2017-01-30 07:29:07,751 INFO     epoch: 80 took 44.314s (0.019s in batching)
+training loss:	0.597488
+validation loss:	0.609219
+validation error:	0.326453
+2017-01-30 07:29:07,756 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:29:49,422 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-081.pkl
+2017-01-30 07:29:52,247 INFO     epoch: 81 took 44.496s (0.018s in batching)
+training loss:	0.597336
+validation loss:	0.605592
+validation error:	0.324297
+2017-01-30 07:29:52,253 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:30:34,569 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-082.pkl
+2017-01-30 07:30:37,206 INFO     epoch: 82 took 44.959s (0.019s in batching)
+training loss:	0.597328
+validation loss:	0.608099
+validation error:	0.327948
+2017-01-30 07:30:37,212 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:31:18,117 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-083.pkl
+2017-01-30 07:31:20,692 INFO     epoch: 83 took 43.486s (0.018s in batching)
+training loss:	0.597278
+validation loss:	0.608230
+validation error:	0.327297
+2017-01-30 07:31:20,698 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:32:02,866 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-084.pkl
+2017-01-30 07:32:05,674 INFO     epoch: 84 took 44.982s (0.019s in batching)
+training loss:	0.597274
+validation loss:	0.606304
+validation error:	0.327448
+2017-01-30 07:32:05,680 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:32:46,368 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-085.pkl
+2017-01-30 07:32:48,941 INFO     epoch: 85 took 43.267s (0.019s in batching)
+training loss:	0.597617
+validation loss:	0.610494
+validation error:	0.329575
+2017-01-30 07:32:48,946 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:33:29,102 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-086.pkl
+2017-01-30 07:33:31,911 INFO     epoch: 86 took 42.970s (0.018s in batching)
+training loss:	0.597371
+validation loss:	0.607386
+validation error:	0.325939
+2017-01-30 07:33:31,916 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:34:11,979 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-087.pkl
+2017-01-30 07:34:14,540 INFO     epoch: 87 took 42.630s (0.021s in batching)
+training loss:	0.597390
+validation loss:	0.604495
+validation error:	0.325108
+2017-01-30 07:34:14,546 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:34:56,143 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-088.pkl
+2017-01-30 07:34:58,955 INFO     epoch: 88 took 44.415s (0.019s in batching)
+training loss:	0.597313
+validation loss:	0.605244
+validation error:	0.323816
+2017-01-30 07:34:58,961 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:35:40,669 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-089.pkl
+2017-01-30 07:35:43,508 INFO     epoch: 89 took 44.553s (0.019s in batching)
+training loss:	0.597143
+validation loss:	0.606161
+validation error:	0.325547
+2017-01-30 07:35:43,513 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:36:25,324 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-090.pkl
+2017-01-30 07:36:27,893 INFO     epoch: 90 took 44.385s (0.019s in batching)
+training loss:	0.597131
+validation loss:	0.603074
+validation error:	0.323226
+2017-01-30 07:36:27,899 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:37:09,411 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-091.pkl
+2017-01-30 07:37:12,151 INFO     epoch: 91 took 44.258s (0.019s in batching)
+training loss:	0.597238
+validation loss:	0.605343
+validation error:	0.324641
+2017-01-30 07:37:12,157 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:37:53,088 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-092.pkl
+2017-01-30 07:37:55,643 INFO     epoch: 92 took 43.492s (0.018s in batching)
+training loss:	0.597286
+validation loss:	0.607121
+validation error:	0.327071
+2017-01-30 07:37:55,649 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:38:36,118 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-093.pkl
+2017-01-30 07:38:38,936 INFO     epoch: 93 took 43.293s (0.019s in batching)
+training loss:	0.597087
+validation loss:	0.601880
+validation error:	0.325108
+2017-01-30 07:38:38,942 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:39:20,161 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-094.pkl
+2017-01-30 07:39:22,728 INFO     epoch: 94 took 43.792s (0.019s in batching)
+training loss:	0.597086
+validation loss:	0.608531
+validation error:	0.325509
+2017-01-30 07:39:22,734 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:40:05,006 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-095.pkl
+2017-01-30 07:40:07,833 INFO     epoch: 95 took 45.106s (0.019s in batching)
+training loss:	0.597300
+validation loss:	0.609870
+validation error:	0.330792
+2017-01-30 07:40:07,839 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:40:48,947 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-096.pkl
+2017-01-30 07:40:51,795 INFO     epoch: 96 took 43.962s (0.019s in batching)
+training loss:	0.597327
+validation loss:	0.613302
+validation error:	0.329764
+2017-01-30 07:40:51,801 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:41:32,537 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-097.pkl
+2017-01-30 07:41:35,100 INFO     epoch: 97 took 43.305s (0.019s in batching)
+training loss:	0.597111
+validation loss:	0.608400
+validation error:	0.329321
+2017-01-30 07:41:35,106 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:42:16,319 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-098.pkl
+2017-01-30 07:42:19,074 INFO     epoch: 98 took 43.975s (0.018s in batching)
+training loss:	0.597239
+validation loss:	0.604175
+validation error:	0.324151
+2017-01-30 07:42:19,081 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json
+2017-01-30 07:43:00,933 INFO     Saving network params to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/epoch-099.pkl
+2017-01-30 07:43:03,798 INFO     epoch: 99 took 44.724s (0.023s in batching)
+training loss:	0.597202
+validation loss:	0.602199
+validation error:	0.324439
+2017-01-30 07:43:03,805 INFO     Wrote output to trainNN/out/v046-unified-34-g4ad38e4:ff-power,mfcc-75-40-l2reg/config.json

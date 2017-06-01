@@ -1,0 +1,412 @@
+2017-01-31 04:28:42,973 DEBUG    version=v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg
+2017-01-31 04:28:42,973 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-01-31 04:28:47,537 DEBUG    getting all bc uttids...configs/lstm-power,pitch,ffv,mfcc/lstm-power,pitch,ffv,mfcc-50-20.json
+2017-01-31 04:28:50,290 DEBUG    loading cached extracted data from data/cache/extract-ba7571dc6a7db671d332edf0234cef97f0689e9ddc9d53ad648b07a2a09af3df.pickle
+2017-01-31 04:29:03,501 DEBUG    set input dim to 29
+2017-01-31 04:29:03,506 DEBUG    input dim = 29
+2017-01-31 04:29:03,591 DEBUG    shuffling batches
+2017-01-31 04:29:58,414 DEBUG    shuffling done
+2017-01-31 04:29:58,415 DEBUG    loading data into ram
+2017-01-31 04:29:58,485 DEBUG    loading data took 0.070s (cpu: 0.069s)
+2017-01-31 04:29:58,601 DEBUG    getting all bc uttids...configs/lstm-power,pitch,ffv,mfcc/lstm-power,pitch,ffv,mfcc-50-20.json
+2017-01-31 04:29:58,892 DEBUG    set input dim to 29
+2017-01-31 04:29:58,892 DEBUG    input dim = 29
+2017-01-31 04:29:59,365 DEBUG    shuffling batches
+2017-01-31 04:30:05,514 DEBUG    shuffling done
+2017-01-31 04:30:05,515 DEBUG    loading data into ram
+2017-01-31 04:30:05,527 DEBUG    loading data took 0.013s (cpu: 0.009s)
+2017-01-31 04:30:05,829 DEBUG    Applying L2 regularization with 0.000100
+2017-01-31 04:30:05,888 INFO     Training network with 21932 trainable out of 22072 total params.
+2017-01-31 04:30:09,897 DEBUG    Using adam with learning_rate=0.001000
+2017-01-31 04:30:31,113 DEBUG    Starting training...
+2017-01-31 04:42:34,315 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-000.pkl
+2017-01-31 04:43:02,364 INFO     epoch: 0 took 751.250s (0.020s in batching)
+training loss:	0.605291
+validation loss:	0.579802
+validation error:	0.306896
+2017-01-31 04:43:02,366 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 04:54:39,627 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-001.pkl
+2017-01-31 04:55:00,652 INFO     epoch: 1 took 718.288s (0.014s in batching)
+training loss:	0.579617
+validation loss:	0.575379
+validation error:	0.301953
+2017-01-31 04:55:00,654 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 05:06:40,695 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-002.pkl
+2017-01-31 05:07:03,126 INFO     epoch: 2 took 722.475s (0.012s in batching)
+training loss:	0.570415
+validation loss:	0.573012
+validation error:	0.300585
+2017-01-31 05:07:03,127 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 05:18:43,577 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-003.pkl
+2017-01-31 05:19:06,037 INFO     epoch: 3 took 722.911s (0.013s in batching)
+training loss:	0.564329
+validation loss:	0.574126
+validation error:	0.299854
+2017-01-31 05:19:06,039 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 05:30:41,676 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-004.pkl
+2017-01-31 05:31:07,684 INFO     epoch: 4 took 721.645s (0.012s in batching)
+training loss:	0.560209
+validation loss:	0.573175
+validation error:	0.299028
+2017-01-31 05:31:07,686 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 05:42:44,350 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-005.pkl
+2017-01-31 05:43:09,270 INFO     epoch: 5 took 721.587s (0.013s in batching)
+training loss:	0.557040
+validation loss:	0.577362
+validation error:	0.296580
+2017-01-31 05:43:09,274 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 05:54:45,280 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-006.pkl
+2017-01-31 05:55:11,674 INFO     epoch: 6 took 722.402s (0.012s in batching)
+training loss:	0.554485
+validation loss:	0.578883
+validation error:	0.298472
+2017-01-31 05:55:11,677 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 06:06:31,347 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-007.pkl
+2017-01-31 06:06:57,282 INFO     epoch: 7 took 705.608s (0.014s in batching)
+training loss:	0.552488
+validation loss:	0.585498
+validation error:	0.304769
+2017-01-31 06:06:57,305 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 06:18:41,570 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-008.pkl
+2017-01-31 06:19:08,563 INFO     epoch: 8 took 731.282s (0.018s in batching)
+training loss:	0.550477
+validation loss:	0.583506
+validation error:	0.300038
+2017-01-31 06:19:08,568 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 06:30:49,504 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-009.pkl
+2017-01-31 06:31:15,570 INFO     epoch: 9 took 727.008s (0.014s in batching)
+training loss:	0.549055
+validation loss:	0.585796
+validation error:	0.302170
+2017-01-31 06:31:15,575 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 06:42:53,322 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-010.pkl
+2017-01-31 06:43:16,390 INFO     epoch: 10 took 720.821s (0.018s in batching)
+training loss:	0.547656
+validation loss:	0.592515
+validation error:	0.302835
+2017-01-31 06:43:16,391 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 06:54:51,828 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-011.pkl
+2017-01-31 06:55:18,954 INFO     epoch: 11 took 722.562s (0.013s in batching)
+training loss:	0.546867
+validation loss:	0.587470
+validation error:	0.301840
+2017-01-31 06:55:18,958 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 07:06:57,287 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-012.pkl
+2017-01-31 07:07:20,446 INFO     epoch: 12 took 721.494s (0.013s in batching)
+training loss:	0.545904
+validation loss:	0.591572
+validation error:	0.302877
+2017-01-31 07:07:20,471 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 07:18:55,760 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-013.pkl
+2017-01-31 07:19:22,600 INFO     epoch: 13 took 722.152s (0.015s in batching)
+training loss:	0.545155
+validation loss:	0.587278
+validation error:	0.301637
+2017-01-31 07:19:22,644 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 07:31:02,785 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-014.pkl
+2017-01-31 07:31:26,223 INFO     epoch: 14 took 723.625s (0.017s in batching)
+training loss:	0.544528
+validation loss:	0.589460
+validation error:	0.300722
+2017-01-31 07:31:26,225 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 07:43:03,808 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-015.pkl
+2017-01-31 07:43:30,783 INFO     epoch: 15 took 724.558s (0.017s in batching)
+training loss:	0.543653
+validation loss:	0.594799
+validation error:	0.303825
+2017-01-31 07:43:30,787 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 07:55:07,836 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-016.pkl
+2017-01-31 07:55:31,179 INFO     epoch: 16 took 720.398s (0.013s in batching)
+training loss:	0.543345
+validation loss:	0.596980
+validation error:	0.308585
+2017-01-31 07:55:31,181 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 08:07:10,258 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-017.pkl
+2017-01-31 08:07:37,750 INFO     epoch: 17 took 726.569s (0.016s in batching)
+training loss:	0.542916
+validation loss:	0.597552
+validation error:	0.306906
+2017-01-31 08:07:37,776 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 08:19:18,992 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-018.pkl
+2017-01-31 08:19:42,400 INFO     epoch: 18 took 724.652s (0.018s in batching)
+training loss:	0.542397
+validation loss:	0.590582
+validation error:	0.303410
+2017-01-31 08:19:42,402 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 08:31:18,205 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-019.pkl
+2017-01-31 08:31:45,229 INFO     epoch: 19 took 722.826s (0.012s in batching)
+training loss:	0.541985
+validation loss:	0.595249
+validation error:	0.304854
+2017-01-31 08:31:45,254 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 08:43:22,435 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-020.pkl
+2017-01-31 08:43:45,862 INFO     epoch: 20 took 720.635s (0.013s in batching)
+training loss:	0.541384
+validation loss:	0.601094
+validation error:	0.306274
+2017-01-31 08:43:45,864 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 08:55:22,395 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-021.pkl
+2017-01-31 08:55:49,365 INFO     epoch: 21 took 723.499s (0.013s in batching)
+training loss:	0.540949
+validation loss:	0.592722
+validation error:	0.306590
+2017-01-31 08:55:49,374 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 09:07:27,332 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-022.pkl
+2017-01-31 09:07:50,937 INFO     epoch: 22 took 721.576s (0.013s in batching)
+training loss:	0.540540
+validation loss:	0.597587
+validation error:	0.307892
+2017-01-31 09:07:50,939 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 09:19:26,893 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-023.pkl
+2017-01-31 09:19:53,990 INFO     epoch: 23 took 723.051s (0.013s in batching)
+training loss:	0.540300
+validation loss:	0.598032
+validation error:	0.306962
+2017-01-31 09:19:54,007 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 09:31:31,768 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-024.pkl
+2017-01-31 09:31:55,250 INFO     epoch: 24 took 721.262s (0.013s in batching)
+training loss:	0.539982
+validation loss:	0.598294
+validation error:	0.308165
+2017-01-31 09:31:55,252 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 09:43:31,136 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-025.pkl
+2017-01-31 09:43:58,377 INFO     epoch: 25 took 723.126s (0.013s in batching)
+training loss:	0.539690
+validation loss:	0.603258
+validation error:	0.308071
+2017-01-31 09:43:58,406 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 09:55:35,821 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-026.pkl
+2017-01-31 09:55:59,463 INFO     epoch: 26 took 721.087s (0.013s in batching)
+training loss:	0.539381
+validation loss:	0.601190
+validation error:	0.308594
+2017-01-31 09:55:59,465 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 10:07:39,307 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-027.pkl
+2017-01-31 10:08:06,790 INFO     epoch: 27 took 727.325s (0.013s in batching)
+training loss:	0.539250
+validation loss:	0.602157
+validation error:	0.306925
+2017-01-31 10:08:06,795 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 10:19:45,238 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-028.pkl
+2017-01-31 10:20:09,262 INFO     epoch: 28 took 722.475s (0.018s in batching)
+training loss:	0.539239
+validation loss:	0.611757
+validation error:	0.315259
+2017-01-31 10:20:09,265 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 10:31:31,309 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-029.pkl
+2017-01-31 10:31:58,738 INFO     epoch: 29 took 709.474s (0.019s in batching)
+training loss:	0.538880
+validation loss:	0.600961
+validation error:	0.307920
+2017-01-31 10:31:58,781 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 10:43:40,206 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-030.pkl
+2017-01-31 10:44:03,736 INFO     epoch: 30 took 725.000s (0.014s in batching)
+training loss:	0.538664
+validation loss:	0.602115
+validation error:	0.305594
+2017-01-31 10:44:03,739 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 10:55:38,529 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-031.pkl
+2017-01-31 10:56:06,054 INFO     epoch: 31 took 722.317s (0.016s in batching)
+training loss:	0.538523
+validation loss:	0.599765
+validation error:	0.307745
+2017-01-31 10:56:06,078 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 11:07:43,183 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-032.pkl
+2017-01-31 11:08:06,613 INFO     epoch: 32 took 720.561s (0.018s in batching)
+training loss:	0.538374
+validation loss:	0.603972
+validation error:	0.309410
+2017-01-31 11:08:06,615 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 11:19:41,799 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-033.pkl
+2017-01-31 11:20:09,178 INFO     epoch: 33 took 722.562s (0.013s in batching)
+training loss:	0.538224
+validation loss:	0.606701
+validation error:	0.307354
+2017-01-31 11:20:09,183 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 11:31:45,483 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-034.pkl
+2017-01-31 11:32:08,891 INFO     epoch: 34 took 719.716s (0.013s in batching)
+training loss:	0.537950
+validation loss:	0.604291
+validation error:	0.307297
+2017-01-31 11:32:08,894 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 11:43:45,494 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-035.pkl
+2017-01-31 11:44:12,835 INFO     epoch: 35 took 723.942s (0.016s in batching)
+training loss:	0.538124
+validation loss:	0.607121
+validation error:	0.309264
+2017-01-31 11:44:12,840 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 11:55:49,747 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-036.pkl
+2017-01-31 11:56:13,339 INFO     epoch: 36 took 720.507s (0.015s in batching)
+training loss:	0.537889
+validation loss:	0.605301
+validation error:	0.307774
+2017-01-31 11:56:13,342 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 12:07:53,471 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-037.pkl
+2017-01-31 12:08:21,364 INFO     epoch: 37 took 728.025s (0.017s in batching)
+training loss:	0.537602
+validation loss:	0.606910
+validation error:	0.308189
+2017-01-31 12:08:21,368 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 12:20:04,995 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-038.pkl
+2017-01-31 12:20:34,094 INFO     epoch: 38 took 732.728s (0.015s in batching)
+training loss:	0.537620
+validation loss:	0.608305
+validation error:	0.310646
+2017-01-31 12:20:34,157 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 12:32:20,915 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-039.pkl
+2017-01-31 12:32:49,416 INFO     epoch: 39 took 735.324s (0.016s in batching)
+training loss:	0.537389
+validation loss:	0.605661
+validation error:	0.306934
+2017-01-31 12:32:49,433 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 12:44:32,078 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-040.pkl
+2017-01-31 12:45:00,853 INFO     epoch: 40 took 731.437s (0.015s in batching)
+training loss:	0.537252
+validation loss:	0.609227
+validation error:	0.309236
+2017-01-31 12:45:00,858 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 12:56:44,099 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-041.pkl
+2017-01-31 12:57:14,855 INFO     epoch: 41 took 734.000s (0.017s in batching)
+training loss:	0.537223
+validation loss:	0.611440
+validation error:	0.309939
+2017-01-31 12:57:14,893 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:04:21,933 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-042.pkl
+2017-01-31 13:04:29,576 INFO     epoch: 42 took 434.723s (0.017s in batching)
+training loss:	0.537235
+validation loss:	0.604704
+validation error:	0.309854
+2017-01-31 13:04:29,578 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:10:28,093 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-043.pkl
+2017-01-31 13:10:35,704 INFO     epoch: 43 took 366.128s (0.012s in batching)
+training loss:	0.536831
+validation loss:	0.611613
+validation error:	0.310080
+2017-01-31 13:10:35,734 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:16:33,561 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-044.pkl
+2017-01-31 13:16:44,726 INFO     epoch: 44 took 369.018s (0.017s in batching)
+training loss:	0.536764
+validation loss:	0.608265
+validation error:	0.310887
+2017-01-31 13:16:44,767 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:22:42,531 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-045.pkl
+2017-01-31 13:22:50,219 INFO     epoch: 45 took 365.496s (0.016s in batching)
+training loss:	0.536798
+validation loss:	0.609377
+validation error:	0.312632
+2017-01-31 13:22:50,222 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:28:45,524 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-046.pkl
+2017-01-31 13:28:53,179 INFO     epoch: 46 took 362.961s (0.011s in batching)
+training loss:	0.536766
+validation loss:	0.611237
+validation error:	0.314146
+2017-01-31 13:28:53,182 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:34:51,083 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-047.pkl
+2017-01-31 13:34:58,684 INFO     epoch: 47 took 365.506s (0.011s in batching)
+training loss:	0.536560
+validation loss:	0.606330
+validation error:	0.309325
+2017-01-31 13:34:58,704 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:40:59,457 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-048.pkl
+2017-01-31 13:41:07,193 INFO     epoch: 48 took 368.508s (0.011s in batching)
+training loss:	0.536431
+validation loss:	0.610404
+validation error:	0.313212
+2017-01-31 13:41:07,215 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:47:09,500 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-049.pkl
+2017-01-31 13:47:17,133 INFO     epoch: 49 took 369.940s (0.011s in batching)
+training loss:	0.536467
+validation loss:	0.611180
+validation error:	0.313439
+2017-01-31 13:47:17,159 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:53:16,110 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-050.pkl
+2017-01-31 13:53:26,542 INFO     epoch: 50 took 369.409s (0.030s in batching)
+training loss:	0.536616
+validation loss:	0.607305
+validation error:	0.308316
+2017-01-31 13:53:26,586 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 13:59:29,099 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-051.pkl
+2017-01-31 13:59:36,881 INFO     epoch: 51 took 370.340s (0.024s in batching)
+training loss:	0.536352
+validation loss:	0.605625
+validation error:	0.306269
+2017-01-31 13:59:36,904 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:05:43,416 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-052.pkl
+2017-01-31 14:05:51,656 INFO     epoch: 52 took 374.776s (0.014s in batching)
+training loss:	0.536422
+validation loss:	0.611540
+validation error:	0.310420
+2017-01-31 14:05:51,677 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:12:08,208 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-053.pkl
+2017-01-31 14:12:16,214 INFO     epoch: 53 took 384.558s (0.017s in batching)
+training loss:	0.536236
+validation loss:	0.605983
+validation error:	0.305472
+2017-01-31 14:12:16,230 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:18:28,224 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-054.pkl
+2017-01-31 14:18:39,455 INFO     epoch: 54 took 383.241s (0.012s in batching)
+training loss:	0.536001
+validation loss:	0.607994
+validation error:	0.307193
+2017-01-31 14:18:39,517 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:25:06,335 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-055.pkl
+2017-01-31 14:25:14,359 INFO     epoch: 55 took 394.904s (0.027s in batching)
+training loss:	0.536127
+validation loss:	0.601336
+validation error:	0.306255
+2017-01-31 14:25:14,362 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:31:30,453 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-056.pkl
+2017-01-31 14:31:39,261 INFO     epoch: 56 took 384.903s (0.012s in batching)
+training loss:	0.536080
+validation loss:	0.602435
+validation error:	0.305321
+2017-01-31 14:31:39,282 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:37:53,931 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-057.pkl
+2017-01-31 14:38:04,724 INFO     epoch: 57 took 385.462s (0.014s in batching)
+training loss:	0.535863
+validation loss:	0.605690
+validation error:	0.308038
+2017-01-31 14:38:04,756 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:44:20,212 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-058.pkl
+2017-01-31 14:44:28,152 INFO     epoch: 58 took 383.428s (0.028s in batching)
+training loss:	0.535948
+validation loss:	0.611634
+validation error:	0.309392
+2017-01-31 14:44:28,155 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:50:37,511 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-059.pkl
+2017-01-31 14:50:46,310 INFO     epoch: 59 took 378.158s (0.012s in batching)
+training loss:	0.535767
+validation loss:	0.600611
+validation error:	0.307500
+2017-01-31 14:50:46,313 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 14:57:01,041 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-060.pkl
+2017-01-31 14:57:11,748 INFO     epoch: 60 took 385.437s (0.012s in batching)
+training loss:	0.535682
+validation loss:	0.615971
+validation error:	0.311613
+2017-01-31 14:57:11,765 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 15:03:25,495 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-061.pkl
+2017-01-31 15:03:33,778 INFO     epoch: 61 took 382.031s (0.013s in batching)
+training loss:	0.535492
+validation loss:	0.613085
+validation error:	0.311458
+2017-01-31 15:03:33,782 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 15:09:47,665 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-062.pkl
+2017-01-31 15:09:57,048 INFO     epoch: 62 took 383.270s (0.012s in batching)
+training loss:	0.535527
+validation loss:	0.607401
+validation error:	0.306943
+2017-01-31 15:09:57,081 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 15:16:16,960 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-063.pkl
+2017-01-31 15:16:28,242 INFO     epoch: 63 took 391.193s (0.018s in batching)
+training loss:	0.535377
+validation loss:	0.613698
+validation error:	0.311731
+2017-01-31 15:16:28,280 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json
+2017-01-31 15:18:00,136 INFO     received exit signal, waiting for epoch to finish...
+2017-01-31 15:22:49,393 INFO     Saving network params to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/epoch-064.pkl
+2017-01-31 15:22:57,379 INFO     epoch: 64 took 389.138s (0.028s in batching)
+training loss:	0.535362
+validation loss:	0.610584
+validation error:	0.313175
+2017-01-31 15:22:57,434 INFO     Wrote output to trainNN/out/v046-unified-45-g7fca66e-dirty:lstm-power,pitch,ffv,mfcc-50-20-l2reg/config.json

@@ -92,7 +92,6 @@ export type BinaryFrameMeta = {
 }
 let frameStart = 0;
 
-
 export class SocketManager {
     socket: WebSocket;
     nextMessageID = 1;
@@ -118,7 +117,7 @@ export class SocketManager {
                 console.log(`time is up; waiting until next frame for remaining ${this.queue.length} elements`);
                 return requestAnimationFrame(this.squashQueue);
             }
-            this.queue.shift() !();
+            this.queue.shift()!();
         }
         return 0;
     }
@@ -129,11 +128,14 @@ export class SocketManager {
             }
             this.queue.push(() => {
                 const buffer = event.data;
-                const {meta, dataLengthBytes, dataOffset} = parseBinaryFrameWithMetadata<BinaryFrameMeta>(buffer);
+                const { meta, dataLengthBytes, dataOffset } = parseBinaryFrameWithMetadata<BinaryFrameMeta>(buffer);
 
-                console.log("RECEIVING BUF", meta);
+                if (c.globalConfig.socketDebug) console.log("RECEIVING BUF", meta);
                 const feature = this.getFeature(meta.conversation, meta.feature).data;
-                if (!feature) throw Error("received feature data before feature: " + meta.feature);
+                if (!feature) {
+                    console.error("received feature data before feature: " + meta.feature);
+                    return;
+                }
                 if (!c.isNumFeature(feature)) throw Error("wat2");
 
                 let floatsArray;
@@ -153,10 +155,13 @@ export class SocketManager {
             });
         } else {
             const msg: ServerMessage | ServerError = JSON.parse(event.data);
-            console.log("RECEIVING", msg);
+            if (c.globalConfig.socketDebug) console.log("RECEIVING", msg);
             const listener = this.listeners.get(msg.id);
             if (!listener) throw Error("unexpected message: " + msg.id);
-            if (msg.error !== undefined) listener.reject(msg.error);
+            if (msg.error !== undefined) {
+                alert(msg.error);
+                listener.reject(msg.error);
+            }
             else listener.resolve(msg as ServerMessage);
         }
     }
@@ -168,7 +173,7 @@ export class SocketManager {
         await this.socketOpen();
         const id = this.nextMessageID++;
         (message as any).id = id;
-        console.log(`SENDING [${id}]: `, message);
+        if (c.globalConfig.socketDebug) console.log(`SENDING [${id}]: `, message);
         this.socket.send(JSON.stringify(message));
         return new Promise<ServerMessage>((resolve, reject) => {
             this.listeners.set(id, { resolve, reject });
@@ -220,5 +225,5 @@ function lulCache<T>(name: string, _this: any, fn: (...args: any[]) => Promise<T
         const lul = new LulPromise(fn.apply(_this, args) as Promise<T>);
         cache.set(key, lul);
     }
-    return cache.get(key) !;
+    return cache.get(key)!;
 }

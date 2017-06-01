@@ -1,0 +1,69 @@
+a {
+    margin: 1ex;
+}
+.gui {
+    display: flex;
+    flex-flow: wrap;
+}
+.gui > div {
+    margin: 1em;
+    padding: 1ex;
+    flex: 1;
+    flex-basis: auto;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.3);
+    border-radius: 1ex;
+    max-width: 800px;
+    min-width: 500px;
+}
+* {
+    box-sizing: border-box;
+}
+h3 {
+    margin-top: 0.5ex;
+    margin-bottom: 0.5ex;
+}
+label {
+    margin-right: 1em;
+}
+.evalTable {
+    font-family: monospace;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+.evalTable td, .evalTable th {
+    border: 1px solid grey;
+}
+.evalTable tr.highlighted {
+    background-color: lightgreen;
+}
+.reactable-page-button {
+    margin: 1ex;
+}
+th {
+    cursor: pointer;
+}
+th.reactable-header-sort-desc, th.reactable-header-sort-asc {
+  background-color: lightgray;
+}
+
+th.reactable-header-sort-asc:after {
+  content: '\25B2';
+  font-size: 10px;
+  padding-left: 10px;
+  padding-bottom: 5px;
+}
+
+th.reactable-header-sort-desc:after {
+  content: '\25BC';
+  font-size: 10px;
+  padding-left: 10px;
+  padding-bottom: 5px;
+}
+
+table.ultimate-table {
+    border-collapse: collapse;
+
+    td, th {
+        border: 1px solid gray;
+    }
+}

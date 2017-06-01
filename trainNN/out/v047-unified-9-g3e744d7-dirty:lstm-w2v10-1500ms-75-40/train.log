@@ -1,0 +1,602 @@
+2017-02-03 19:18:38,725 DEBUG    version=v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40
+2017-02-03 19:18:38,746 INFO     Open DBase(data/db/all240302-spk.dat, data/db/all240302-spk.idx, mode='r')
+2017-02-03 19:18:59,229 DEBUG    loading cached extracted data from data/cache/extract-90114726afb620e3e0cdc832ef6ccc9d476f5da22ee4e5295635c6f70f0337f5.pickle
+2017-02-03 19:19:07,871 DEBUG    set input dim to 12
+2017-02-03 19:19:07,876 DEBUG    input dim = 12
+2017-02-03 19:19:07,901 DEBUG    shuffling batches
+2017-02-03 19:19:15,286 DEBUG    shuffling done
+2017-02-03 19:19:15,286 DEBUG    loading data into ram
+2017-02-03 19:19:15,356 DEBUG    loading data took 0.070s (cpu: 0.069s)
+2017-02-03 19:19:15,582 DEBUG    set input dim to 12
+2017-02-03 19:19:15,583 DEBUG    input dim = 12
+2017-02-03 19:19:15,642 DEBUG    shuffling batches
+2017-02-03 19:19:16,336 DEBUG    shuffling done
+2017-02-03 19:19:16,336 DEBUG    loading data into ram
+2017-02-03 19:19:16,343 DEBUG    loading data took 0.007s (cpu: 0.007s)
+2017-02-03 19:19:16,614 DEBUG    Applying L2 regularization with 0.000100
+2017-02-03 19:19:16,674 INFO     Training network with 45387 trainable out of 45617 total params.
+2017-02-03 19:19:17,068 DEBUG    Using adam with learning_rate=0.001000
+2017-02-03 19:19:35,500 DEBUG    Starting training...
+2017-02-03 19:23:24,362 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-000.pkl
+2017-02-03 19:23:35,122 INFO     epoch: 0 took 239.622s (0.002s in batching)
+training loss:	0.601507
+validation loss:	0.571676
+validation error:	0.305587
+2017-02-03 19:23:35,123 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:27:23,456 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-001.pkl
+2017-02-03 19:27:34,315 INFO     epoch: 1 took 239.193s (0.002s in batching)
+training loss:	0.577059
+validation loss:	0.565715
+validation error:	0.297157
+2017-02-03 19:27:34,315 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:31:22,497 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-002.pkl
+2017-02-03 19:31:33,332 INFO     epoch: 2 took 239.017s (0.002s in batching)
+training loss:	0.567275
+validation loss:	0.558369
+validation error:	0.288628
+2017-02-03 19:31:33,332 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:35:20,992 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-003.pkl
+2017-02-03 19:35:31,662 INFO     epoch: 3 took 238.331s (0.002s in batching)
+training loss:	0.559002
+validation loss:	0.552770
+validation error:	0.280364
+2017-02-03 19:35:31,663 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:39:18,953 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-004.pkl
+2017-02-03 19:39:29,740 INFO     epoch: 4 took 238.078s (0.002s in batching)
+training loss:	0.553485
+validation loss:	0.546372
+validation error:	0.277091
+2017-02-03 19:39:29,741 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:43:17,195 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-005.pkl
+2017-02-03 19:43:27,953 INFO     epoch: 5 took 238.213s (0.002s in batching)
+training loss:	0.548748
+validation loss:	0.541339
+validation error:	0.274017
+2017-02-03 19:43:27,954 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:47:15,157 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-006.pkl
+2017-02-03 19:47:25,910 INFO     epoch: 6 took 237.957s (0.002s in batching)
+training loss:	0.544657
+validation loss:	0.538346
+validation error:	0.270843
+2017-02-03 19:47:25,911 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:51:13,477 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-007.pkl
+2017-02-03 19:51:24,208 INFO     epoch: 7 took 238.298s (0.002s in batching)
+training loss:	0.541460
+validation loss:	0.537837
+validation error:	0.269884
+2017-02-03 19:51:24,209 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:55:11,422 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-008.pkl
+2017-02-03 19:55:22,216 INFO     epoch: 8 took 238.008s (0.002s in batching)
+training loss:	0.538124
+validation loss:	0.535824
+validation error:	0.268860
+2017-02-03 19:55:22,217 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 19:59:09,574 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-009.pkl
+2017-02-03 19:59:20,281 INFO     epoch: 9 took 238.065s (0.002s in batching)
+training loss:	0.535980
+validation loss:	0.536441
+validation error:	0.267702
+2017-02-03 19:59:20,282 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:03:07,752 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-010.pkl
+2017-02-03 20:03:18,484 INFO     epoch: 10 took 238.203s (0.002s in batching)
+training loss:	0.533802
+validation loss:	0.535666
+validation error:	0.267405
+2017-02-03 20:03:18,512 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:07:06,037 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-011.pkl
+2017-02-03 20:07:16,764 INFO     epoch: 11 took 238.280s (0.002s in batching)
+training loss:	0.531242
+validation loss:	0.529537
+validation error:	0.264595
+2017-02-03 20:07:16,765 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:11:04,857 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-012.pkl
+2017-02-03 20:11:15,430 INFO     epoch: 12 took 238.666s (0.002s in batching)
+training loss:	0.529297
+validation loss:	0.530757
+validation error:	0.263636
+2017-02-03 20:11:15,431 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:15:02,815 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-013.pkl
+2017-02-03 20:15:13,454 INFO     epoch: 13 took 238.023s (0.002s in batching)
+training loss:	0.527131
+validation loss:	0.530857
+validation error:	0.265190
+2017-02-03 20:15:13,455 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:18:59,974 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-014.pkl
+2017-02-03 20:19:10,768 INFO     epoch: 14 took 237.315s (0.002s in batching)
+training loss:	0.524885
+validation loss:	0.529063
+validation error:	0.264132
+2017-02-03 20:19:10,769 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:22:58,243 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-015.pkl
+2017-02-03 20:23:08,882 INFO     epoch: 15 took 238.114s (0.002s in batching)
+training loss:	0.523605
+validation loss:	0.531932
+validation error:	0.262744
+2017-02-03 20:23:08,883 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:26:56,544 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-016.pkl
+2017-02-03 20:27:07,281 INFO     epoch: 16 took 238.399s (0.002s in batching)
+training loss:	0.521215
+validation loss:	0.529321
+validation error:	0.260231
+2017-02-03 20:27:07,282 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:30:55,259 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-017.pkl
+2017-02-03 20:31:06,014 INFO     epoch: 17 took 238.733s (0.002s in batching)
+training loss:	0.520396
+validation loss:	0.528292
+validation error:	0.261653
+2017-02-03 20:31:06,015 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:34:52,807 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-018.pkl
+2017-02-03 20:35:03,407 INFO     epoch: 18 took 237.393s (0.002s in batching)
+training loss:	0.517500
+validation loss:	0.539519
+validation error:	0.271736
+2017-02-03 20:35:03,408 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:38:50,771 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-019.pkl
+2017-02-03 20:39:01,592 INFO     epoch: 19 took 238.184s (0.002s in batching)
+training loss:	0.515660
+validation loss:	0.532061
+validation error:	0.264364
+2017-02-03 20:39:01,593 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:42:48,226 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-020.pkl
+2017-02-03 20:42:58,956 INFO     epoch: 20 took 237.364s (0.002s in batching)
+training loss:	0.513711
+validation loss:	0.537142
+validation error:	0.269620
+2017-02-03 20:42:58,957 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:46:46,659 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-021.pkl
+2017-02-03 20:46:57,568 INFO     epoch: 21 took 238.613s (0.002s in batching)
+training loss:	0.512498
+validation loss:	0.539464
+validation error:	0.267107
+2017-02-03 20:46:57,569 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:50:45,205 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-022.pkl
+2017-02-03 20:50:56,123 INFO     epoch: 22 took 238.554s (0.002s in batching)
+training loss:	0.514343
+validation loss:	0.533893
+validation error:	0.263438
+2017-02-03 20:50:56,124 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:54:43,118 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-023.pkl
+2017-02-03 20:54:53,904 INFO     epoch: 23 took 237.782s (0.002s in batching)
+training loss:	0.509842
+validation loss:	0.535031
+validation error:	0.265058
+2017-02-03 20:54:53,905 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 20:58:41,220 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-024.pkl
+2017-02-03 20:58:51,869 INFO     epoch: 24 took 237.965s (0.002s in batching)
+training loss:	0.508504
+validation loss:	0.536525
+validation error:	0.265554
+2017-02-03 20:58:51,870 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:02:39,289 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-025.pkl
+2017-02-03 21:02:50,134 INFO     epoch: 25 took 238.265s (0.002s in batching)
+training loss:	0.506731
+validation loss:	0.543259
+validation error:	0.268562
+2017-02-03 21:02:50,206 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:06:22,572 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-026.pkl
+2017-02-03 21:06:34,757 INFO     epoch: 26 took 224.622s (0.002s in batching)
+training loss:	0.505131
+validation loss:	0.537934
+validation error:	0.264694
+2017-02-03 21:06:34,786 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:10:22,774 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-027.pkl
+2017-02-03 21:10:33,265 INFO     epoch: 27 took 238.509s (0.002s in batching)
+training loss:	0.503504
+validation loss:	0.545637
+validation error:	0.266579
+2017-02-03 21:10:33,266 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:14:21,408 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-028.pkl
+2017-02-03 21:14:31,885 INFO     epoch: 28 took 238.620s (0.002s in batching)
+training loss:	0.502784
+validation loss:	0.544116
+validation error:	0.265521
+2017-02-03 21:14:31,886 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:18:19,933 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-029.pkl
+2017-02-03 21:18:30,351 INFO     epoch: 29 took 238.466s (0.002s in batching)
+training loss:	0.500318
+validation loss:	0.544136
+validation error:	0.266810
+2017-02-03 21:18:30,352 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:21:56,551 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-030.pkl
+2017-02-03 21:22:07,413 INFO     epoch: 30 took 217.061s (0.002s in batching)
+training loss:	0.500471
+validation loss:	0.547528
+validation error:	0.269355
+2017-02-03 21:22:07,414 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:25:55,139 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-031.pkl
+2017-02-03 21:26:05,797 INFO     epoch: 31 took 238.384s (0.002s in batching)
+training loss:	0.497815
+validation loss:	0.549912
+validation error:	0.266017
+2017-02-03 21:26:05,798 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:29:53,171 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-032.pkl
+2017-02-03 21:30:03,842 INFO     epoch: 32 took 238.045s (0.002s in batching)
+training loss:	0.496272
+validation loss:	0.557199
+validation error:	0.267636
+2017-02-03 21:30:03,843 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:33:51,591 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-033.pkl
+2017-02-03 21:34:02,321 INFO     epoch: 33 took 238.480s (0.002s in batching)
+training loss:	0.495289
+validation loss:	0.564795
+validation error:	0.270215
+2017-02-03 21:34:02,323 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:37:49,954 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-034.pkl
+2017-02-03 21:38:00,691 INFO     epoch: 34 took 238.369s (0.002s in batching)
+training loss:	0.493301
+validation loss:	0.559755
+validation error:	0.271339
+2017-02-03 21:38:00,692 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:41:48,551 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-035.pkl
+2017-02-03 21:41:59,332 INFO     epoch: 35 took 238.641s (0.002s in batching)
+training loss:	0.492223
+validation loss:	0.561098
+validation error:	0.270479
+2017-02-03 21:41:59,333 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:45:46,956 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-036.pkl
+2017-02-03 21:45:57,793 INFO     epoch: 36 took 238.460s (0.002s in batching)
+training loss:	0.491823
+validation loss:	0.564289
+validation error:	0.276628
+2017-02-03 21:45:57,794 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:49:44,577 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-037.pkl
+2017-02-03 21:49:55,447 INFO     epoch: 37 took 237.654s (0.002s in batching)
+training loss:	0.490438
+validation loss:	0.560517
+validation error:	0.270876
+2017-02-03 21:49:55,448 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:53:42,751 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-038.pkl
+2017-02-03 21:53:53,386 INFO     epoch: 38 took 237.939s (0.002s in batching)
+training loss:	0.488111
+validation loss:	0.566217
+validation error:	0.277157
+2017-02-03 21:53:53,387 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 21:57:41,201 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-039.pkl
+2017-02-03 21:57:51,893 INFO     epoch: 39 took 238.508s (0.002s in batching)
+training loss:	0.486923
+validation loss:	0.566878
+validation error:	0.274050
+2017-02-03 21:57:51,895 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:01:39,471 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-040.pkl
+2017-02-03 22:01:51,876 INFO     epoch: 40 took 239.983s (0.002s in batching)
+training loss:	0.485384
+validation loss:	0.570418
+validation error:	0.274347
+2017-02-03 22:01:51,955 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:05:39,700 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-041.pkl
+2017-02-03 22:05:50,393 INFO     epoch: 41 took 238.517s (0.002s in batching)
+training loss:	0.485661
+validation loss:	0.570269
+validation error:	0.274479
+2017-02-03 22:05:50,394 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:09:38,682 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-042.pkl
+2017-02-03 22:09:49,346 INFO     epoch: 42 took 238.952s (0.002s in batching)
+training loss:	0.483942
+validation loss:	0.572530
+validation error:	0.274446
+2017-02-03 22:09:49,347 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:13:35,990 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-043.pkl
+2017-02-03 22:13:46,779 INFO     epoch: 43 took 237.434s (0.002s in batching)
+training loss:	0.482835
+validation loss:	0.576332
+validation error:	0.274876
+2017-02-03 22:13:46,781 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:17:34,627 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-044.pkl
+2017-02-03 22:17:45,374 INFO     epoch: 44 took 238.595s (0.002s in batching)
+training loss:	0.482092
+validation loss:	0.584399
+validation error:	0.280099
+2017-02-03 22:17:45,376 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:21:32,691 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-045.pkl
+2017-02-03 22:21:43,475 INFO     epoch: 45 took 238.100s (0.002s in batching)
+training loss:	0.480702
+validation loss:	0.581039
+validation error:	0.277818
+2017-02-03 22:21:43,476 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:25:31,148 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-046.pkl
+2017-02-03 22:25:41,887 INFO     epoch: 46 took 238.412s (0.002s in batching)
+training loss:	0.480165
+validation loss:	0.580165
+validation error:	0.276727
+2017-02-03 22:25:41,888 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:29:29,922 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-047.pkl
+2017-02-03 22:29:42,241 INFO     epoch: 47 took 240.354s (0.002s in batching)
+training loss:	0.479294
+validation loss:	0.580490
+validation error:	0.279438
+2017-02-03 22:29:42,242 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:33:29,655 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-048.pkl
+2017-02-03 22:33:40,523 INFO     epoch: 48 took 238.282s (0.002s in batching)
+training loss:	0.477926
+validation loss:	0.586362
+validation error:	0.278413
+2017-02-03 22:33:40,524 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:37:28,131 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-049.pkl
+2017-02-03 22:37:38,887 INFO     epoch: 49 took 238.365s (0.002s in batching)
+training loss:	0.476487
+validation loss:	0.580515
+validation error:	0.280926
+2017-02-03 22:37:38,888 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:41:25,937 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-050.pkl
+2017-02-03 22:41:36,732 INFO     epoch: 50 took 237.845s (0.002s in batching)
+training loss:	0.476091
+validation loss:	0.592515
+validation error:	0.281950
+2017-02-03 22:41:36,733 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:45:24,285 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-051.pkl
+2017-02-03 22:45:34,968 INFO     epoch: 51 took 238.236s (0.002s in batching)
+training loss:	0.475133
+validation loss:	0.592132
+validation error:	0.278545
+2017-02-03 22:45:34,969 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:49:22,600 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-052.pkl
+2017-02-03 22:49:33,520 INFO     epoch: 52 took 238.552s (0.002s in batching)
+training loss:	0.476270
+validation loss:	0.591763
+validation error:	0.280231
+2017-02-03 22:49:33,522 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:53:20,972 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-053.pkl
+2017-02-03 22:53:31,636 INFO     epoch: 53 took 238.115s (0.002s in batching)
+training loss:	0.484960
+validation loss:	0.589168
+validation error:	0.282215
+2017-02-03 22:53:31,637 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 22:57:19,305 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-054.pkl
+2017-02-03 22:57:31,478 INFO     epoch: 54 took 239.842s (0.002s in batching)
+training loss:	0.474661
+validation loss:	0.588455
+validation error:	0.276826
+2017-02-03 22:57:31,479 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:01:18,754 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-055.pkl
+2017-02-03 23:01:29,516 INFO     epoch: 55 took 238.039s (0.002s in batching)
+training loss:	0.474185
+validation loss:	0.598127
+validation error:	0.282347
+2017-02-03 23:01:29,536 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:05:16,316 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-056.pkl
+2017-02-03 23:05:26,961 INFO     epoch: 56 took 237.445s (0.002s in batching)
+training loss:	0.472970
+validation loss:	0.597996
+validation error:	0.280893
+2017-02-03 23:05:26,962 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:09:14,092 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-057.pkl
+2017-02-03 23:09:24,786 INFO     epoch: 57 took 237.825s (0.002s in batching)
+training loss:	0.471341
+validation loss:	0.596250
+validation error:	0.278512
+2017-02-03 23:09:24,787 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:13:11,793 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-058.pkl
+2017-02-03 23:13:22,579 INFO     epoch: 58 took 237.793s (0.002s in batching)
+training loss:	0.470772
+validation loss:	0.590414
+validation error:	0.276496
+2017-02-03 23:13:22,580 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:17:10,190 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-059.pkl
+2017-02-03 23:17:20,898 INFO     epoch: 59 took 238.319s (0.002s in batching)
+training loss:	0.469724
+validation loss:	0.599552
+validation error:	0.283868
+2017-02-03 23:17:20,899 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:21:08,326 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-060.pkl
+2017-02-03 23:21:18,984 INFO     epoch: 60 took 238.086s (0.002s in batching)
+training loss:	0.469338
+validation loss:	0.605184
+validation error:	0.279438
+2017-02-03 23:21:18,985 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:25:06,188 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-061.pkl
+2017-02-03 23:25:17,072 INFO     epoch: 61 took 238.088s (0.002s in batching)
+training loss:	0.468779
+validation loss:	0.598247
+validation error:	0.283008
+2017-02-03 23:25:17,074 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:29:03,386 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-062.pkl
+2017-02-03 23:29:14,189 INFO     epoch: 62 took 237.117s (0.002s in batching)
+training loss:	0.467202
+validation loss:	0.614619
+validation error:	0.285355
+2017-02-03 23:29:14,191 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:33:01,270 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-063.pkl
+2017-02-03 23:33:12,054 INFO     epoch: 63 took 237.865s (0.002s in batching)
+training loss:	0.467600
+validation loss:	0.605723
+validation error:	0.284562
+2017-02-03 23:33:12,056 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:36:59,873 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-064.pkl
+2017-02-03 23:37:10,521 INFO     epoch: 64 took 238.467s (0.002s in batching)
+training loss:	0.466961
+validation loss:	0.613827
+validation error:	0.284628
+2017-02-03 23:37:10,522 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:40:58,082 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-065.pkl
+2017-02-03 23:41:08,993 INFO     epoch: 65 took 238.472s (0.002s in batching)
+training loss:	0.465396
+validation loss:	0.611174
+validation error:	0.282380
+2017-02-03 23:41:08,994 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:44:55,875 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-066.pkl
+2017-02-03 23:45:06,723 INFO     epoch: 66 took 237.730s (0.002s in batching)
+training loss:	0.464607
+validation loss:	0.609944
+validation error:	0.283967
+2017-02-03 23:45:06,725 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:48:53,828 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-067.pkl
+2017-02-03 23:49:04,548 INFO     epoch: 67 took 237.825s (0.002s in batching)
+training loss:	0.464910
+validation loss:	0.613578
+validation error:	0.285983
+2017-02-03 23:49:04,549 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:52:52,252 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-068.pkl
+2017-02-03 23:53:02,945 INFO     epoch: 68 took 238.398s (0.002s in batching)
+training loss:	0.463185
+validation loss:	0.615078
+validation error:	0.285950
+2017-02-03 23:53:02,947 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-03 23:56:50,196 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-069.pkl
+2017-02-03 23:57:00,945 INFO     epoch: 69 took 238.000s (0.002s in batching)
+training loss:	0.463184
+validation loss:	0.613429
+validation error:	0.279537
+2017-02-03 23:57:00,947 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:00:48,470 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-070.pkl
+2017-02-04 00:00:59,154 INFO     epoch: 70 took 238.209s (0.002s in batching)
+training loss:	0.461570
+validation loss:	0.623118
+validation error:	0.287570
+2017-02-04 00:00:59,156 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:04:46,382 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-071.pkl
+2017-02-04 00:04:57,032 INFO     epoch: 71 took 237.879s (0.002s in batching)
+training loss:	0.462043
+validation loss:	0.619024
+validation error:	0.288694
+2017-02-04 00:04:57,034 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:08:44,565 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-072.pkl
+2017-02-04 00:08:55,221 INFO     epoch: 72 took 238.189s (0.002s in batching)
+training loss:	0.463579
+validation loss:	0.615999
+validation error:	0.288727
+2017-02-04 00:08:55,223 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:12:42,683 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-073.pkl
+2017-02-04 00:12:53,285 INFO     epoch: 73 took 238.064s (0.002s in batching)
+training loss:	0.464037
+validation loss:	0.624724
+validation error:	0.290380
+2017-02-04 00:12:53,287 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:16:41,038 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-074.pkl
+2017-02-04 00:16:51,781 INFO     epoch: 74 took 238.496s (0.002s in batching)
+training loss:	0.460743
+validation loss:	0.619068
+validation error:	0.285851
+2017-02-04 00:16:51,783 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:20:39,460 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-075.pkl
+2017-02-04 00:20:50,096 INFO     epoch: 75 took 238.315s (0.002s in batching)
+training loss:	0.460860
+validation loss:	0.627327
+validation error:	0.290479
+2017-02-04 00:20:50,098 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:24:37,525 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-076.pkl
+2017-02-04 00:24:48,372 INFO     epoch: 76 took 238.275s (0.002s in batching)
+training loss:	0.459624
+validation loss:	0.626687
+validation error:	0.287306
+2017-02-04 00:24:48,373 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:28:35,742 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-077.pkl
+2017-02-04 00:28:48,139 INFO     epoch: 77 took 239.767s (0.002s in batching)
+training loss:	0.458579
+validation loss:	0.622673
+validation error:	0.286182
+2017-02-04 00:28:48,141 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:32:35,586 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-078.pkl
+2017-02-04 00:32:46,321 INFO     epoch: 78 took 238.182s (0.002s in batching)
+training loss:	0.458744
+validation loss:	0.634460
+validation error:	0.288826
+2017-02-04 00:32:46,323 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:36:33,617 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-079.pkl
+2017-02-04 00:36:44,426 INFO     epoch: 79 took 238.105s (0.002s in batching)
+training loss:	0.458414
+validation loss:	0.629637
+validation error:	0.289322
+2017-02-04 00:36:44,428 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:40:31,697 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-080.pkl
+2017-02-04 00:40:42,500 INFO     epoch: 80 took 238.074s (0.002s in batching)
+training loss:	0.456876
+validation loss:	0.633903
+validation error:	0.289091
+2017-02-04 00:40:42,502 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:44:29,952 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-081.pkl
+2017-02-04 00:44:40,664 INFO     epoch: 81 took 238.164s (0.002s in batching)
+training loss:	0.457740
+validation loss:	0.634890
+validation error:	0.287471
+2017-02-04 00:44:40,666 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:48:27,884 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-082.pkl
+2017-02-04 00:48:38,448 INFO     epoch: 82 took 237.784s (0.002s in batching)
+training loss:	0.457291
+validation loss:	0.633307
+validation error:	0.289587
+2017-02-04 00:48:38,450 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:52:25,779 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-083.pkl
+2017-02-04 00:52:36,571 INFO     epoch: 83 took 238.123s (0.002s in batching)
+training loss:	0.455752
+validation loss:	0.631645
+validation error:	0.287769
+2017-02-04 00:52:36,573 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 00:56:23,946 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-084.pkl
+2017-02-04 00:56:34,545 INFO     epoch: 84 took 237.974s (0.002s in batching)
+training loss:	0.461214
+validation loss:	0.633857
+validation error:	0.289256
+2017-02-04 00:56:34,547 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:00:21,417 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-085.pkl
+2017-02-04 01:00:32,244 INFO     epoch: 85 took 237.699s (0.002s in batching)
+training loss:	0.455127
+validation loss:	0.626367
+validation error:	0.288397
+2017-02-04 01:00:32,247 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:04:19,913 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-086.pkl
+2017-02-04 01:04:30,538 INFO     epoch: 86 took 238.294s (0.002s in batching)
+training loss:	0.454235
+validation loss:	0.641031
+validation error:	0.296264
+2017-02-04 01:04:30,540 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:08:17,867 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-087.pkl
+2017-02-04 01:08:28,658 INFO     epoch: 87 took 238.120s (0.002s in batching)
+training loss:	0.454979
+validation loss:	0.635807
+validation error:	0.290347
+2017-02-04 01:08:28,661 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:12:16,355 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-088.pkl
+2017-02-04 01:12:26,959 INFO     epoch: 88 took 238.300s (0.002s in batching)
+training loss:	0.454477
+validation loss:	0.640450
+validation error:	0.290182
+2017-02-04 01:12:26,961 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:16:14,844 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-089.pkl
+2017-02-04 01:16:25,583 INFO     epoch: 89 took 238.624s (0.002s in batching)
+training loss:	0.453609
+validation loss:	0.643275
+validation error:	0.295570
+2017-02-04 01:16:25,585 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:20:12,867 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-090.pkl
+2017-02-04 01:20:23,602 INFO     epoch: 90 took 238.019s (0.002s in batching)
+training loss:	0.453700
+validation loss:	0.642119
+validation error:	0.288529
+2017-02-04 01:20:23,603 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:24:11,012 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-091.pkl
+2017-02-04 01:24:21,609 INFO     epoch: 91 took 238.008s (0.002s in batching)
+training loss:	0.452727
+validation loss:	0.639464
+validation error:	0.288595
+2017-02-04 01:24:21,611 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:28:09,234 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-092.pkl
+2017-02-04 01:28:19,893 INFO     epoch: 92 took 238.283s (0.002s in batching)
+training loss:	0.452911
+validation loss:	0.649420
+validation error:	0.293223
+2017-02-04 01:28:19,895 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:32:07,481 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-093.pkl
+2017-02-04 01:32:18,799 INFO     epoch: 93 took 238.906s (0.002s in batching)
+training loss:	0.451822
+validation loss:	0.643854
+validation error:	0.289521
+2017-02-04 01:32:18,801 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:36:07,004 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-094.pkl
+2017-02-04 01:36:18,300 INFO     epoch: 94 took 239.500s (0.002s in batching)
+training loss:	0.451458
+validation loss:	0.642650
+validation error:	0.293620
+2017-02-04 01:36:18,302 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:40:00,387 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-095.pkl
+2017-02-04 01:40:06,267 INFO     epoch: 95 took 227.968s (0.002s in batching)
+training loss:	0.451813
+validation loss:	0.649719
+validation error:	0.297983
+2017-02-04 01:40:06,269 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
+2017-02-04 01:40:59,452 INFO     received exit signal, waiting for epoch to finish...
+2017-02-04 01:42:45,140 INFO     Saving network params to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/epoch-096.pkl
+2017-02-04 01:42:51,217 INFO     epoch: 96 took 164.940s (0.002s in batching)
+training loss:	0.451403
+validation loss:	0.660528
+validation error:	0.295603
+2017-02-04 01:42:51,549 INFO     Wrote output to trainNN/out/v047-unified-9-g3e744d7-dirty:lstm-w2v10-1500ms-75-40/config.json
