@@ -59,11 +59,13 @@ function renderDarkness(ctx: CanvasRenderingContext2D, y: number, w: number, h: 
     const start = Math.floor(zoom.left * data.iterator.count);
     const end = Math.floor(zoom.right * data.iterator.count);
     const length = end - start;
-    const display = util.getMinMax(givenRange, config, data, start, end);
+    const display = util.getMinMax(givenRange, config, data, Math.max(start, 0), Math.min(end, data.iterator.count));
     for (let x = 0; x < w; x++) {
         const from = x / w, to = (x + 1) / w;
         const fromSample = start + Math.floor(length * from);
         const toSample = start + Math.ceil(length * to);
+        if (fromSample < 0) continue;
+        if (toSample >= data.iterator.count) continue;
         const {sum, count} = data.data.stats(data.iterator, fromSample, toSample);
         const avg = sum / count;
         ctx.fillStyle = `rgba(0,0,0,${(avg - display.min) / (display.max - display.min)})`;

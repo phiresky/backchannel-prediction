@@ -240,6 +240,9 @@ const audioContext = new AudioContext();
 @observer
 export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     static bufferDuration_s = 60;
+    // native resample has a bug in chrome where it crashes after ~30s (https://bugs.chromium.org/p/chromium/issues/detail?id=429806)
+    // multitap
+    static resampler = Resampler.multiTapInterpolate;
     static doResample = true;
     static sampleRate = AudioRecorder.doResample ? 8000 : audioContext.sampleRate;
     static processingBufferDuration_s = 0.2;
@@ -306,8 +309,8 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         this.processor.addEventListener("audioprocess", event => {
             const dataSoSampled = event.inputBuffer.getChannelData(0);
             if (AudioRecorder.doResample) {
-                const data = Resampler.multiTapInterpolate(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
-                this.gotData(feat, event, data)
+                const data = AudioRecorder.resampler(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
+                this.gotData(feat, event, data);
             } else this.gotData(feat, event, dataSoSampled);
         });
         this.source.connect(this.processor);

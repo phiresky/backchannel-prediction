@@ -403,6 +403,9 @@ class MicrophoneHandler:
         return meta, np.frombuffer(buffer, self.client_dtype, offset=4 + meta_length)
 
     def microphone_data_changed(self, new_end_offset):
+        if new_end_offset < self.previous_end_offset_samples:
+            # probably started again from beginning
+            self.previous_end_offset_samples = 0
         if (new_end_offset - self.previous_end_offset_samples) / self.client_sample_rate * 1000 >= self.window_shift_ms:
             frame_shift_samples = round(self.window_shift_ms * self.client_sample_rate / 1000)
             frame_window_samples = round(self.frame_window_ms * self.client_sample_rate / 1000)
