@@ -76,6 +76,12 @@ export class TwoDimensionalArray {
         this.invalidateRange(offset, offset + length);
         this.atom.reportChanged();
     }
+    @mobx.action
+    fill(value: number, start = 0, end = this.buffer.length) {
+        this.buffer.fill(value, start, end);
+        this.invalidateRange(start, end);
+        this.atom.reportChanged();
+    }
     private invalidateRange(start: number, end: number) {
         for (const [x, getter] of this.cache.entries()) {
             const iterator = this.ot(JSON.parse(x));

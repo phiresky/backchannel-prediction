@@ -32,7 +32,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
     @autobind @mobx.action
     updatePlaybackPosition() {
         if (!this.playing) return;
-        const newPos = (audioContext.currentTime - this.startedAt) / this.duration;
+        const newPos = ((audioContext.currentTime - this.startedAt) / this.duration) % 1;
         if (newPos > this.props.gui.selectionEnd) {
             this.props.gui.playbackPosition = this.props.gui.selectionEnd;
             this.stopPlaying();
@@ -67,6 +67,7 @@ export class AudioPlayer extends React.Component<{ features: NumFeatureSVector[]
             this.duration = buffer.duration;
             audioSource.playbackRate.value = 1;
             const startPlaybackPosition = this.props.gui.playbackPosition;
+            audioSource.loop = true;
             audioSource.start(0, startPlaybackPosition * buffer.duration);
             this.startedAt = audioContext.currentTime - startPlaybackPosition * buffer.duration;
             audioSource.addEventListener("ended", this.stopPlaying);
@@ -239,14 +240,13 @@ const audioContext = new AudioContext();
 
 @observer
 export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
-    static bufferDuration_s = 60;
+    static bufferDuration_s = 60; // must be same as server side (MicrophoneHandler.buffer_duration_s)
     // native resample has a bug in chrome where it crashes after ~30s (https://bugs.chromium.org/p/chromium/issues/detail?id=429806)
     // multitap
     static resampler = Resampler.multiTapInterpolate;
     static doResample = true;
     static sampleRate = AudioRecorder.doResample ? 8000 : audioContext.sampleRate;
-    static processingBufferDuration_s = 0.2;
-    static bufferSize = 2 ** Math.round(Math.log2(audioContext.sampleRate * AudioRecorder.processingBufferDuration_s));
+    @mobx.observable processingBufferDuration_s = "0.15";
     microphone: MediaStreamTrack;
     inputStream: MediaStream;
     source: MediaStreamAudioSourceNode;
@@ -275,7 +275,14 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         });
     }
     gotData(feat: Data.TwoDimensionalArray, event: AudioProcessingEvent, resampledData: Float32Array) {
-        const shouldBeOffset = Math.round((event.playbackTime - this.recordingStartTime) * AudioRecorder.sampleRate);
+        let shouldBeOffset = Math.round((event.playbackTime - this.recordingStartTime) * AudioRecorder.sampleRate);
+        const endOffset = shouldBeOffset + resampledData.length;
+        if (endOffset > feat.shape[0]) {
+            // do wrap around
+            shouldBeOffset = 0;
+            this.recordingStartTime = event.playbackTime;
+            this.props.gui.getFeature("/microphone/extracted/nn.smooth.bc").then(x => (x.data as Data.TwoDimensionalArray).fill(0));
+        }
         feat.setData(shouldBeOffset, resampledData);
         this.props.gui.socketManager.sendFeatureSegment({
             conversation: null as any,
@@ -285,6 +292,8 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     }
     @autobind
     async startRecording() {
+        const bufferSize = 2 ** Math.round(Math.log2(audioContext.sampleRate * +this.processingBufferDuration_s));
+
         this.inputStream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 mandatory: {
@@ -303,7 +312,7 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         console.log(microphone.getConstraints());
         console.log("Got microphone", microphone.label);
         this.source = audioContext.createMediaStreamSource(this.inputStream);
-        this.processor = audioContext.createScriptProcessor(AudioRecorder.bufferSize, 1, 1);
+        this.processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
         const feat = AudioRecorder.getFeature().data;
         this.recordingStartTime = audioContext.currentTime;
         this.processor.addEventListener("audioprocess", event => {
@@ -315,6 +324,7 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         });
         this.source.connect(this.processor);
         this.processor.connect(audioContext.destination);
+        this.props.gui.getFeature("/microphone/extracted/nn.smooth.bc").then(x => (x.data as Data.TwoDimensionalArray).fill(0));
         mobx.runInAction("startRecording", () => {
             this.recording = true;
             this.props.gui.playbackPosition = 0;
@@ -333,6 +343,10 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
     togglePlaythrough = (e: React.SyntheticEvent<HTMLInputElement>) => {
         this.props.gui.playthrough = e.currentTarget.checked;
     }
+    @mobx.action
+    setBufferDuration = (e: React.SyntheticEvent<HTMLInputElement>) => {
+        this.processingBufferDuration_s = e.currentTarget.value;
+    }
 
     render() {
         return (
@@ -340,7 +354,8 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
                 ? <button onClick={this.stopRecording}>Stop Rec</button>
                 : <button onClick={this.startRecording}>Start Rec</button>
             }
-                <label><input type="checkbox" checked={this.props.gui.playthrough} onChange={this.togglePlaythrough} /> Playthrough while recording</label>
+                <p><label><input type="checkbox" checked={this.props.gui.playthrough} onChange={this.togglePlaythrough} /> Playthrough while recording</label></p>
+                <p><label>Record buffer size: <input type="number" value={this.processingBufferDuration_s} onChange={this.setBufferDuration} step={0.02} />s</label></p>
             </div>
         );
     }

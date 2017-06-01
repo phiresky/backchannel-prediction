@@ -388,9 +388,9 @@ export class GUI extends React.Component<{}, {}> {
                     });
                 } else if (Math.abs((this.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
                     console.error("Mismatching times, was ", this.totalTimeSeconds, "but", feature.name, "has length", totalTime, ", overwritten");
-                    mobx.runInAction("setTotalTime", () => {
+                    /*mobx.runInAction("setTotalTime", () => {
                         this.totalTimeSeconds = totalTime
-                    });
+                    });*/
                 }
             }
         }
