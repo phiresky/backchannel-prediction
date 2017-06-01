@@ -306,10 +306,8 @@ export class AudioRecorder extends React.Component<{ gui: GUI }, {}> {
         this.processor.addEventListener("audioprocess", event => {
             const dataSoSampled = event.inputBuffer.getChannelData(0);
             if (AudioRecorder.doResample) {
-                const promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
-                promise.then(data => {
-                    this.gotData(feat, event, data)
-                });
+                const data = Resampler.multiTapInterpolate(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder.sampleRate);
+                this.gotData(feat, event, data)
             } else this.gotData(feat, event, dataSoSampled);
         });
         this.source.connect(this.processor);
