@@ -65,7 +65,7 @@
 /******/ 	}
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "7c787f2178c5a90a178f"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "22291d8d0468a2d0a328"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -5828,6 +5828,8 @@
 	
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -5977,10 +5979,10 @@
 	 * "hi" => "hi"
 	 */
 	function toDeterministic(obj) {
-	    if (obj instanceof Array) return [null, obj.map(function (x) {
+	    if (Array.isArray(obj)) return [null, obj.map(function (x) {
 	        return toDeterministic(x);
 	    })];
-	    if (obj instanceof Object) return Object.keys(obj).sort().map(function (k) {
+	    if (obj !== null && (typeof obj === "undefined" ? "undefined" : _typeof(obj)) === "object") return Object.keys(obj).sort().map(function (k) {
 	        return [k, toDeterministic(obj[k])];
 	    });
 	    return obj;
@@ -9403,7 +9405,11 @@
 	    };
 	}
 	var examples = {
-	    "Microphone Input": "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjOoCYaB2MgTgDYAONgRhrYGYAWAKz8aAGhAAzdBAjoA7qmjwkyUrgBOAVwCm4xEQBu29Zij4ipEJjk8y9EOM3ZMpANqhNTgCak64idpmmuraLiTukoG4wdqWAPQAttiI6uhgABZE2nHaAB4aSLjaXnFQXogOIJ7YPiQ0vOIGzppQENgAXsaWAOpQRlLqCZX6hBLYAOaWhOiDrR3aADLoiK3DwSGEuABKUITjsSSgScQkhJoy4glQuaRnMgC+9wC64unaE+m4llCauOgg91EHm8vn4-iiMTCEQCQRC8SSKTSmUI2TyBUQRRK6igcgA+mB5F1HCC6oJGs05p11D0+toBkM9EQxpMSCBprM2p0lisIGt1Bttrt9qQjtgTmRLtdSGRHi8QG8Pl9WT8-gCgVUSTQWODYaE3KAYdE4azEslUhksjl8tiMcU4mA8Ih0pVqrUGOTMC1OV1Wb1+jMGSARsypgHKYtlqs9OttJsdnsDqLxZKbuRZa93uNPt9fv9AcCar42DqjXrwgaIcaQKbERaUVb0Zi4hIJAYXZqmB6vfNqb7afThkyJqGOfNuVGgzG40LEyBjtKU9L0-LM9mSNx6PmNYWSLwJZFdVCK7r4WakZa0Tam4RiMSd7xOF3w72QH66QHB6Nh6z2VdvePeWjflY0FBMRTnMUFznKU02eDNFRzVUt1dUheDEA9SyPDCYlPWtkVRa1CjtG8KEwBJ0HQXBnTvWpeAaEAmk9Z8aX9QZPxDH8w3-SNAMnYDpzAw4IOTaDUxlOCVwQ5VczVAtaLBbCQiww0cJNBFzXwhsr2IwhSPIyj0goOAKho1CyQYilvRfN8B0ZL8WTZLixx4vkBXjYUhPnchF1guUFSzJUQBVPM5XaCihiEiA6SVfd1CkygaE4ND+F4Jh6E4QQaEETgWAETdxD+XBWgAFWwBJtAAZW0EYvDCFgZSAA",
+	    "Microphone Input (full)": "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAOjOoCYaB2MgTgDYAONgRhrYGYAWAKz8aAGhAAzdBAjoA7qmjwkyUrgBOAVwCm4xEQBu29Zij4ipEJjk8y9EOM3ZMpANqhNTgCak64idpmmuraLiTukoG4wdqWAPQAttiI6uhgABZE2nHaAB4aSLjaXnFQXogOIJ7YPiQ0vOIGzppQENgAXsaWAOpQRlLqCZX6hBLYAOaWhOiDrR3aADLoiK3DwSGEuABKUITjsSSgScQkhJoy4glQuaRnMgC+9wC64unaE+m4llCauOgg91EHm8vn4-iiMTCEQCQRC8SSKTSmUI2TyBUQRRK6igcgA+mB5F1HCC6oJGs05p11D0+toBkM9EQxpMSCBprM2p0lisIGt1Bttrt9qQjtgTmRLtdSGRHi8QG8Pl9WT8-gCgVUSTQWODYaE3KAYdE4azEslUhksjl8tiMcU4mA8Ih0pVqrUGOTMC1OV1Wb1+jMGSARsypgHKYtlqs9OttJsdnsDqLxZKbuRZa93uNPt9fv9AcCar42DqjXrwgaIcaQKbERaUVb0Zi4hIJAYXZqmB6vfNqb7afThkyJqGOfNuVGgzG40LEyBjtKU9L0-LM9mSNx6PmNYWSLwJZFdVCK7r4WakZa0Tam4RiMSd7xOF3w72QH66QHB6Nh6z2VdvePeWjflY0FBMRTnMUFznKU02eDNFRzVUt1dUheDEA9SyPDCYlPWtkVRa1CjtG8KEwBJ0HQXBnTvWpeAaEAmk9Z8aX9QZPxDH8w3-SNAMnYDpzAw4IOTaDUxlOCVwQ5VczVAtaLBbCQiww0cJNBFzXwhsr2IwhSPIyj0goOAKho1CyQYilvRfN8B0ZL8WTZLixx4vkBXjYUhPnchF1guUFSzJUQBVPM5XaCihiEiA6SVfd1CkygaE4ND+F4Jh6E4QQaEETgWAETdxD+XBWgAFWwBJtAAZW0EYvDCFgZSAA",
+	    "Microphone Input (fast)": function MicrophoneInputFast() {
+	        document.body.style.maxWidth = "700px";
+	        return "N4IgDgNghgngRlAxgawAoHsDOBLALt9AOxAC4AGAGhADN0IJ0B3VaeJZU3AJwFcBTKoiIA3Pl0xR8RUiEyMATAA4yAdhBUe2TKQDaoHpoAmpAGxVqfSTy59tJPTUu5rfGQHoAttkRd0YABZEfG58AB7cSLh8hm5QhojqIAbYxiQqVMJaPFAQ2ABeYjIA6lCitFweiUKE1NgA5jKE6BU5+XwAMuiIOVXWNoS4AEpQhHWuJKBexCQAtGQAdGTyACwAnCqry2QmqyYqKgCsqwCMAMzyVB5QoaQLS8vH8qvbSidk28sqAL5fALpU-j49X8uBkUB4uHQIC+FH0RlIinMThcdgcFisNncXh8fkChGCYQiiCiMUIhHmmA86HQuH8iWSqVWGSyrQKXGKpT45UqgiItQaJBATRauQKnW6EF6XH6QxGY1Ik2w00oICuN3I80+Kge22OyzWZAOZGepx+-xAgOBoMF4Mh0NhSXhJGOKvRzhsqNAbpcWO8vgCQRC4S4kWibjJFKpNP88zgCQ0TuOx2ZmGyosKgpKZWaPJA1X5jRzrI6XR6gj6fAGw1G40Vysu11uZoBQLqILBEKhfyoeWplQmIAgXOtKq4VtuiyO6xU8gOBxMii2SgOpwOMJAkNwOQAKtgPHwAMp8aqGOwmMhfIA";
+	    },
 	    "sample NN output for channel A": getNNOutput("A", "v050-finunified-65-ge1015c2-dirty:lstm-best-features-raw_power,pitch,ffv_live", "best")
 	};
 	var NNExample = function (_React$Component2) {
@@ -9605,6 +9611,7 @@
 	    }, {
 	        key: "deserialize",
 	        value: function deserialize(data) {
+	            if (typeof data === "function") data = data(this);
 	            if (this.audioPlayer) this.audioPlayer.playing = false;
 	            if (this.loadingState !== 1) {
 	                console.error("can't load while loading");
@@ -9961,9 +9968,6 @@
 	                            });
 	                        } else if (Math.abs((_this12.totalTimeSeconds - totalTime) / totalTime) > 0.001) {
 	                            console.error("Mismatching times, was ", _this12.totalTimeSeconds, "but", feature.name, "has length", totalTime, ", overwritten");
-	                            mobx.runInAction("setTotalTime", function () {
-	                                _this12.totalTimeSeconds = totalTime;
-	                            });
 	                        }
 	                    }
 	                }();
@@ -12329,11 +12333,9 @@
 	            throw Error("unknown type");
 	    }
 	}
-	var toReal = function toReal(iterator) {
-	    return function (i) {
-	        if (i > iterator.count || i < 0) throw Error("OOB:" + i + ">=/<=" + iterator.count);
-	        return iterator.start + i * iterator.stride;
-	    };
+	var toReal = function toReal(iterator, i) {
+	    if (i > iterator.count || i < 0) throw Error("OOB:" + i + ">=/<=" + iterator.count);
+	    return iterator.start + i * iterator.stride;
 	};
 	var toFake = function toFake(iterator) {
 	    var ignoreFloats = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -12348,7 +12350,7 @@
 	    function TwoDimensionalArray(dataType, shape, data) {
 	        _classCallCheck(this, TwoDimensionalArray);
 	
-	        this.cache = new util.LazyHashMap();
+	        this.cache = new Map();
 	        this.atom = new mobx.Atom("MultiDimensionalArray");
 	        this.dataType = dataType;
 	        this.shape = shape;
@@ -12394,6 +12396,16 @@
 	            this.atom.reportChanged();
 	        }
 	    }, {
+	        key: "fill",
+	        value: function fill(value) {
+	            var start = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	            var end = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.buffer.length;
+	
+	            this.buffer.fill(value, start, end);
+	            this.invalidateRange(start, end);
+	            this.atom.reportChanged();
+	        }
+	    }, {
 	        key: "invalidateRange",
 	        value: function invalidateRange(start, end) {
 	            var _iteratorNormalCompletion = true;
@@ -12403,9 +12415,10 @@
 	            try {
 	                for (var _iterator = this.cache.entries()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var _step$value = _slicedToArray(_step.value, 2),
-	                        iterator = _step$value[0],
+	                        x = _step$value[0],
 	                        getter = _step$value[1];
 	
+	                    var iterator = this.ot(JSON.parse(x));
 	                    if (getter instanceof util.BinaryCacheTree) {
 	                        var _toFake = toFake(iterator, true);
 	                        var fakeStart = _toFake(start),
@@ -12431,6 +12444,16 @@
 	            }
 	        }
 	    }, {
+	        key: "it",
+	        value: function it(x) {
+	            return [x.start, x.stride, x.count];
+	        }
+	    }, {
+	        key: "ot",
+	        value: function ot(x) {
+	            return { start: x[0], stride: x[1], count: x[2] };
+	        }
+	    }, {
 	        key: "getIndex",
 	        value: function getIndex(dim1index, dim2index) {
 	            return dim1index * this.shape[1] + dim2index;
@@ -12440,16 +12463,16 @@
 	        value: function stats(iterator, start, end) {
 	            var _this = this;
 	
-	            var _toReal = toReal(iterator);
+	            var x = JSON.stringify(this.it(iterator));
 	            var getter = {
 	                getValue: function getValue(a, b) {
-	                    return util.statsRaw(_this.buffer, _toReal(a), _toReal(b), iterator.stride);
+	                    return util.statsRaw(_this.buffer, toReal(iterator, a), toReal(iterator, b), iterator.stride);
 	                }
 	            };
-	            var fastGetter = this.cache.get(iterator);
+	            var fastGetter = this.cache.get(x);
 	            if (!fastGetter) {
 	                fastGetter = util.BinaryCacheTree.create(0, iterator.count, getter, util.statsCombinator);
-	                this.cache.set(iterator, fastGetter);
+	                this.cache.set(x, fastGetter);
 	            }
 	            return fastGetter.getValue(start, end);
 	        }
@@ -12462,6 +12485,7 @@
 	}();
 	
 	__decorate([mobx.action], TwoDimensionalArray.prototype, "setData", null);
+	__decorate([mobx.action], TwoDimensionalArray.prototype, "fill", null);
 	exports.TwoDimensionalArray = TwoDimensionalArray;
 
 /***/ },
@@ -16624,7 +16648,7 @@
 	        key: "updatePlaybackPosition",
 	        value: function updatePlaybackPosition() {
 	            if (!this.playing) return;
-	            var newPos = (audioContext.currentTime - this.startedAt) / this.duration;
+	            var newPos = (audioContext.currentTime - this.startedAt) / this.duration % 1;
 	            if (newPos > this.props.gui.selectionEnd) {
 	                this.props.gui.playbackPosition = this.props.gui.selectionEnd;
 	                this.stopPlaying();
@@ -16662,6 +16686,7 @@
 	                    this.duration = buffer.duration;
 	                    audioSource.playbackRate.value = 1;
 	                    var startPlaybackPosition = this.props.gui.playbackPosition;
+	                    audioSource.loop = true;
 	                    audioSource.start(0, startPlaybackPosition * buffer.duration);
 	                    this.startedAt = audioContext.currentTime - startPlaybackPosition * buffer.duration;
 	                    audioSource.addEventListener("ended", this.stopPlaying);
@@ -16979,11 +17004,15 @@
 	
 	        var _this6 = _possibleConstructorReturn(this, (AudioRecorder.__proto__ || Object.getPrototypeOf(AudioRecorder)).call(this, props));
 	
+	        _this6.processingBufferDuration_s = "0.15";
 	        _this6.recording = false;
 	        _this6.recordingStartTime = NaN;
 	        _this6.playthrough = false;
 	        _this6.togglePlaythrough = function (e) {
 	            _this6.props.gui.playthrough = e.currentTarget.checked;
+	        };
+	        _this6.setBufferDuration = function (e) {
+	            _this6.processingBufferDuration_s = e.currentTarget.value;
 	        };
 	        return _this6;
 	    }
@@ -16992,6 +17021,15 @@
 	        key: "gotData",
 	        value: function gotData(feat, event, resampledData) {
 	            var shouldBeOffset = Math.round((event.playbackTime - this.recordingStartTime) * AudioRecorder_1.sampleRate);
+	            var endOffset = shouldBeOffset + resampledData.length;
+	            if (endOffset > feat.shape[0]) {
+	                // do wrap around
+	                shouldBeOffset = 0;
+	                this.recordingStartTime = event.playbackTime;
+	                this.props.gui.getFeature("/microphone/extracted/nn.smooth.bc").then(function (x) {
+	                    return x.data.fill(0);
+	                });
+	            }
 	            feat.setData(shouldBeOffset, resampledData);
 	            this.props.gui.socketManager.sendFeatureSegment({
 	                conversation: null,
@@ -17005,13 +17043,14 @@
 	            return __awaiter(this, void 0, void 0, _regenerator2.default.mark(function _callee() {
 	                var _this7 = this;
 	
-	                var _inputStream$getAudio, _inputStream$getAudio2, microphone, others, feat;
+	                var bufferSize, _inputStream$getAudio, _inputStream$getAudio2, microphone, others, feat;
 	
 	                return _regenerator2.default.wrap(function _callee$(_context) {
 	                    while (1) {
 	                        switch (_context.prev = _context.next) {
 	                            case 0:
-	                                _context.next = 2;
+	                                bufferSize = Math.pow(2, Math.round(Math.log2(audioContext.sampleRate * +this.processingBufferDuration_s)));
+	                                _context.next = 3;
 	                                return navigator.mediaDevices.getUserMedia({
 	                                    audio: {
 	                                        mandatory: {
@@ -17025,37 +17064,38 @@
 	                                    }
 	                                });
 	
-	                            case 2:
+	                            case 3:
 	                                this.inputStream = _context.sent;
 	                                _inputStream$getAudio = this.inputStream.getAudioTracks(), _inputStream$getAudio2 = _toArray(_inputStream$getAudio), microphone = _inputStream$getAudio2[0], others = _inputStream$getAudio2.slice(1);
 	
 	                                if (!(others.length > 0)) {
-	                                    _context.next = 6;
+	                                    _context.next = 7;
 	                                    break;
 	                                }
 	
 	                                throw Error("expected single channel");
 	
-	                            case 6:
+	                            case 7:
 	                                this.microphone = microphone;
 	                                console.log(microphone.getConstraints());
 	                                console.log("Got microphone", microphone.label);
 	                                this.source = audioContext.createMediaStreamSource(this.inputStream);
-	                                this.processor = audioContext.createScriptProcessor(AudioRecorder_1.bufferSize, 1, 1);
+	                                this.processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
 	                                feat = AudioRecorder_1.getFeature().data;
 	
 	                                this.recordingStartTime = audioContext.currentTime;
 	                                this.processor.addEventListener("audioprocess", function (event) {
 	                                    var dataSoSampled = event.inputBuffer.getChannelData(0);
 	                                    if (AudioRecorder_1.doResample) {
-	                                        var promise = Resampler.nativeResample(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder_1.sampleRate);
-	                                        promise.then(function (data) {
-	                                            _this7.gotData(feat, event, data);
-	                                        });
+	                                        var data = AudioRecorder_1.resampler(dataSoSampled, dataSoSampled.length, audioContext.sampleRate, AudioRecorder_1.sampleRate);
+	                                        _this7.gotData(feat, event, data);
 	                                    } else _this7.gotData(feat, event, dataSoSampled);
 	                                });
 	                                this.source.connect(this.processor);
 	                                this.processor.connect(audioContext.destination);
+	                                this.props.gui.getFeature("/microphone/extracted/nn.smooth.bc").then(function (x) {
+	                                    return x.data.fill(0);
+	                                });
 	                                mobx.runInAction("startRecording", function () {
 	                                    _this7.recording = true;
 	                                    _this7.props.gui.playbackPosition = 0;
@@ -17064,7 +17104,7 @@
 	                                    }, 5);
 	                                });
 	
-	                            case 17:
+	                            case 19:
 	                            case "end":
 	                                return _context.stop();
 	                        }
@@ -17084,7 +17124,7 @@
 	    }, {
 	        key: "render",
 	        value: function render() {
-	            return React.createElement("div", null, this.recording ? React.createElement("button", { onClick: this.stopRecording }, "Stop Rec") : React.createElement("button", { onClick: this.startRecording }, "Start Rec"), React.createElement("label", null, React.createElement("input", { type: "checkbox", checked: this.props.gui.playthrough, onChange: this.togglePlaythrough }), " Playthrough while recording"));
+	            return React.createElement("div", null, this.recording ? React.createElement("button", { onClick: this.stopRecording }, "Stop Rec") : React.createElement("button", { onClick: this.startRecording }, "Start Rec"), React.createElement("p", null, React.createElement("label", null, React.createElement("input", { type: "checkbox", checked: this.props.gui.playthrough, onChange: this.togglePlaythrough }), " Playthrough while recording")), React.createElement("p", null, React.createElement("label", null, "Record buffer size: ", React.createElement("input", { type: "number", value: this.processingBufferDuration_s, onChange: this.setBufferDuration, step: 0.02 }), "s")));
 	        }
 	    }], [{
 	        key: "getFeature",
@@ -17107,16 +17147,19 @@
 	
 	    return AudioRecorder;
 	}(React.Component);
-	AudioRecorder.bufferDuration_s = 60;
+	AudioRecorder.bufferDuration_s = 60; // must be same as server side (MicrophoneHandler.buffer_duration_s)
+	// native resample has a bug in chrome where it crashes after ~30s (https://bugs.chromium.org/p/chromium/issues/detail?id=429806)
+	// multitap
+	AudioRecorder.resampler = Resampler.multiTapInterpolate;
 	AudioRecorder.doResample = true;
 	AudioRecorder.sampleRate = AudioRecorder_1.doResample ? 8000 : audioContext.sampleRate;
-	AudioRecorder.processingBufferDuration_s = 0.2;
-	AudioRecorder.bufferSize = Math.pow(2, Math.round(Math.log2(audioContext.sampleRate * AudioRecorder_1.processingBufferDuration_s)));
+	__decorate([mobx.observable], AudioRecorder.prototype, "processingBufferDuration_s", void 0);
 	__decorate([mobx.observable], AudioRecorder.prototype, "recording", void 0);
 	__decorate([mobx.observable], AudioRecorder.prototype, "playthrough", void 0);
 	__decorate([core_decorators_1.autobind], AudioRecorder.prototype, "startRecording", null);
 	__decorate([core_decorators_1.autobind, mobx.action], AudioRecorder.prototype, "stopRecording", null);
 	__decorate([mobx.action], AudioRecorder.prototype, "togglePlaythrough", void 0);
+	__decorate([mobx.action], AudioRecorder.prototype, "setBufferDuration", void 0);
 	AudioRecorder = AudioRecorder_1 = __decorate([mobx_react_1.observer], AudioRecorder);
 	exports.AudioRecorder = AudioRecorder;
 	var AudioRecorder_1;
@@ -25426,17 +25469,17 @@
 	    if (bufferLength > 0) {
 	        var weight = lastWeight;
 	        var sourceOffset = 0;
-	        var _outputOffset = 0;
+	        outputOffset = 0;
 	        for (; weight < 1; weight += ratioWeight) {
 	            var secondWeight = weight % 1;
 	            var firstWeight = 1 - secondWeight;
-	            outputBuffer[_outputOffset++] = lastOutput * firstWeight + inputBuffer[0] * secondWeight;
+	            outputBuffer[outputOffset++] = lastOutput * firstWeight + inputBuffer[0] * secondWeight;
 	        }
 	        weight -= 1;
 	        for (bufferLength -= 1, sourceOffset = Math.floor(weight) * 1; sourceOffset < bufferLength;) {
 	            var _secondWeight = weight % 1;
 	            var _firstWeight = 1 - _secondWeight;
-	            outputBuffer[_outputOffset++] = inputBuffer[sourceOffset] * _firstWeight + inputBuffer[sourceOffset + 1] * _secondWeight;
+	            outputBuffer[outputOffset++] = inputBuffer[sourceOffset] * _firstWeight + inputBuffer[sourceOffset + 1] * _secondWeight;
 	            weight += ratioWeight;
 	            sourceOffset = Math.floor(weight) * 1;
 	        }
@@ -25742,12 +25785,14 @@
 	    var start = Math.floor(zoom.left * data.iterator.count);
 	    var end = Math.floor(zoom.right * data.iterator.count);
 	    var length = end - start;
-	    var display = util.getMinMax(givenRange, config, data, start, end);
+	    var display = util.getMinMax(givenRange, config, data, Math.max(start, 0), Math.min(end, data.iterator.count));
 	    for (var x = 0; x < w; x++) {
 	        var from = x / w,
 	            to = (x + 1) / w;
 	        var fromSample = start + Math.floor(length * from);
 	        var toSample = start + Math.ceil(length * to);
+	        if (fromSample < 0) continue;
+	        if (toSample >= data.iterator.count) continue;
 	
 	        var _data$data$stats2 = data.data.stats(data.iterator, fromSample, toSample),
 	            sum = _data$data$stats2.sum,
