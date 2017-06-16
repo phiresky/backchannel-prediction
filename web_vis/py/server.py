@@ -305,7 +305,7 @@ class MicrophoneHandler:
         self.previous_end_offset_samples = 0
         self.client_sample_rate = 8000
         self.client_dtype = 'float32'
-        self.buffer_length_s = 60
+        self.buffer_length_s = 60 # must be the same as on client side (AudioRecorder.bufferDuration_s)
         self.client_microphone = Audio(np.zeros(self.client_sample_rate * self.buffer_length_s, dtype='int16'),
                                        self.client_sample_rate)
         self.nn_adc = Audio(np.zeros(self.client_sample_rate * self.buffer_length_s, dtype='int16'),
@@ -403,6 +403,10 @@ class MicrophoneHandler:
         return meta, np.frombuffer(buffer, self.client_dtype, offset=4 + meta_length)
 
     def microphone_data_changed(self, new_end_offset):
+        if new_end_offset < self.previous_end_offset_samples:
+            # probably started again from beginning
+            self.previous_end_offset_samples = 0
+            self.nn_adc.fill(0)
         if (new_end_offset - self.previous_end_offset_samples) / self.client_sample_rate * 1000 >= self.window_shift_ms:
             frame_shift_samples = round(self.window_shift_ms * self.client_sample_rate / 1000)
             frame_window_samples = round(self.frame_window_ms * self.client_sample_rate / 1000)

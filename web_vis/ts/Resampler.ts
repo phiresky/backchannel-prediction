@@ -25,7 +25,7 @@ export function linearInterpolate(inputBuffer: Float32Array, bufferLength: numbe
     if (bufferLength > 0) {
         let weight = lastWeight;
         let sourceOffset = 0;
-        let outputOffset = 0;
+        outputOffset = 0;
         for (; weight < 1; weight += ratioWeight) {
             const secondWeight = weight % 1;
             const firstWeight = 1 - secondWeight;
