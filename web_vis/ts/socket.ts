@@ -47,6 +47,8 @@ function createBinaryFrameWithMetadata<MetaType>(meta: MetaType, data: Int16Arra
     new Uint8Array(buffer, 4 + metaLength).set(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
     return buffer;
 }
+
+// TODO: replace this class with mobx-utils fromPromise https://github.com/mobxjs/mobx-utils/#frompromise
 export class LulPromise<T> implements PromiseLike<T> {
     @mobx.observable data: T | null = mobx.asReference(null);
     promise: Promise<T>;
