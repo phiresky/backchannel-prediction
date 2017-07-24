@@ -2,6 +2,20 @@ Code for my bachelor thesis and the corresponding paper
 
 The final configurations are in [configs/finunified](configs/finunified). All of the ones in `vary-*` are generated with configs/meta_config_generator.ts
 
+## Demo
+
+1. Sample on the evaluation data set: https://streamable.com/0woc
+2. Another sample on the evaluation data set: https://streamable.com/eubh
+3. Live system demo (from microphone input): https://streamable.com/dycu1
+
+Demo docker container:
+
+    sudo docker run -p 3000:3000 -p 8765:8765 -ti phiresky/backchanneler-live-demo
+
+Then open <http://localhost:3000> in the browser.
+
+Includes the live demo (microphone input) and some sample tracks from the Switchboard data set: sw2249, sw2258, sw2411, sw2485, sw273,  sw2807, w2254, sw2297, sw2432, sw2606, sw2762, sw4193.
+
 ## Setup
 
 ### Get the data
