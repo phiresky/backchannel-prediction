@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+# Warning: This script has some unmentioned dependencies.
+# Use it as a guideline for the steps to follow to use the code in this repository.
+
 set -e
 
 if [[ ! -d configs/finunified ]]; then

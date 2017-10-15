@@ -1,6 +1,6 @@
 
 
-You will need the switchboard audio files from <https://catalog.ldc.upenn.edu/ldc97s62>
+You will need the switchboard audio files from <https://catalog.ldc.upenn.edu/ldc97s62>. These are sadly not openly available, but your institution might have an LDC license.
 
 If you are running on the ISL cluster:
 
@@ -12,7 +12,7 @@ The ISL utterance database (should not be needed anymore, replaced by the ISIP t
 
 The original transcriptions are from <https://www.isip.piconepress.com/projects/switchboard/>
 
-	scrips/getdata.sh
+	scripts/getdata.sh
 	
 You can compare the integrity of the data files with the ones I used by running
 

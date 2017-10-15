@@ -22,7 +22,28 @@ Then open <http://localhost:3000> in the browser (loading takes a bit).
 
 Includes the live demo (microphone input!) and some sample tracks from the Switchboard data set: sw2249, sw2258, sw2411, sw2485, sw273,  sw2807, w2254, sw2297, sw2432, sw2606, sw2762, sw4193. Selecting other tracks will fail.
 
-## Setup
+
+
+## Evaluation Visualizer
+
+### Screenshots: 
+
+Objective evaluation comparison: ![](misc/objective_evaluation_screenshot.png)
+Training graphs: ![](misc/training_graph_screenshot.png)
+The effect of changing the trigger thresold on Precision, Recall and F1-Score ratings: ![](misc/threshold_vs_precision_recall.png)
+
+You can see an instance of the Evaluation Visualizer online at https://phiresky.github.io/backchannel-prediction/evaluate/plot/dist/?filter=%22finunified%22 (warning: slow and unoptimized)
+
+
+## Reproducing the results of the paper
+
+You can reproduce the results of the paper using the script [scripts/reproduce.sh](scripts/reproduce.sh) as a guideline.
+
+Note that this may take a long time (~3h to extract the data (only once), ~2h to train one LSTM, 1h to evaluate it on a GTX980Ti).
+
+## Setup / Technical details
+
+You can see more information in `Section 6: Implementation` of my bachelor's thesis, see here: https://github.com/phiresky/bachelor-thesis/blob/master/build/thesis.pdf
 
 The final configurations are in [configs/finunified](configs/finunified). All of the ones in `vary-*` are generated with *configs/meta_config_generator.ts*.
 
@@ -32,7 +53,7 @@ See [data/README.md](data/README.md) for more details.
 
 ### Build Janus
 
-The Janus speech recognition toolkit (used here for only for extracting pitch data) should be open source by the end of 2017.
+The Janus speech recognition toolkit (used here only for extracting pitch data) should be open source by the end of 2017.
 
 ```bash
 cd janus
@@ -42,13 +63,7 @@ make -j$(nproc)
 sudo python setup.py develop
 ```
 
-## Reproducing the results of the paper
-
-You can reproduce the results of the paper using the script [scripts/reproduce.sh](scripts/reproduce.sh).
-
-Note that this may take a long time (~3h to extract the data (only once), ~2h to train one LSTM, 1h to evaluate it).
-
-## Meta config generator
+### Meta config generator
 
 Generates configurations from a set of combinations 
 
@@ -60,18 +75,17 @@ The best network configuration according to the objective evaluation is
 
     configs/finunified/vary-features/lstm-best-features-power,pitch,ffv,word2vec_dim30.json
 
-
-## Data Visualizer
+### Data Visualizer
 
 See the _Demo_ section for screenshots.
 
-Server is in /web_vis/py/
+Server code is in /web_vis/py/
 
 Run this from the project root:
 
     python -m web_vis.py.server extract/config.json
 
-Client is in /web_vis/ts/
+Client code is in /web_vis/ts/
 
 Run this from the folder /web_vis/ts/
 
@@ -79,36 +93,27 @@ Run this from the folder /web_vis/ts/
 
 This will start a webserver serving the client at <http://localhost:3000>, which will connect to the server via websockets at localhost:8765.
 
-## Extraction
 
-The main script for extraction is extract/readDB.py. Run it via
+### Training
 
-    export JOBS=4 # run in parallel
-    python -m extract.readDB configs/...
-   
-Note that the extraction will also be run automatically when before training when necessary, with all the results being cached. The `data/cache` folder will grow to about 10-20 GByte.
+The NNs are trained using Lasagne (Theano). Training configuration is read from json files in `configs/`. 
 
-## Training
+Example: `python -m trainNN.train configs/finunified/vary-context/lstm-best-context-1000ms.json`.
 
-## Evaluation Visualizer
+Training data will be extracted automatically on the first run with the same configuration (everything is automatically cached). You can also run the extraction manually using `JOBS=4 python -m extract.readDB configs/...`. The `data/cache` directory may grow up to around 20 GByte.
 
-Screenshots: 
+All the results will be output in machine-readable form to <trainNN/out>, with git tags for reproducability.
 
-Objective evaluation comparison: ![](misc/objective_evaluation_screenshot.png)
-Training graphs: ![](misc/training_graph_screenshot.png)
-The effect of changing the trigger thresold on Precision, Recall and F1-Score ratings: ![](misc/threshold_vs_precision_recall.png)
+The training and validation accuracy can be monitored live in the _Evaluation Visualizer_.
 
-You can see an instance of the Evaluation Visualizer online at https://phiresky.github.io/backchannel-prediction/evaluate/plot/dist/?filter=%22finunified%22 (warning: slow and unoptimized)
+### Evaluation
 
+Run the objective evaluation using `python -m evaluate.evaluate "trainNN/out/$version/config.json"`.
 
-Build it and run the server
+To build and run the _Evaluation Visualizer_:
 
     cd evaluate/plot
     yarn
     yarn run dev
 
 Then go to <http://localhost:8080/evaluate/plot/dist/>
-
-## Technical details
-
-You can see more information in `Section 6: Implementation` of my bachelor's thesis, see here: https://github.com/phiresky/bachelor-thesis/blob/master/build/thesis.pdf
