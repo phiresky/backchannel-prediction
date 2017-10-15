@@ -35,6 +35,10 @@ The effect of changing the trigger thresold on Precision, Recall and F1-Score ra
 You can see an instance of the Evaluation Visualizer online at https://phiresky.github.io/backchannel-prediction/evaluate/plot/dist/?filter=%22finunified%22 (warning: slow and unoptimized)
 
 
+## Survey
+
+For the subjective evaluation, I did a survey comparing my system, the ground truth and a random predictor. Screenshot: ![](misc/survey_screenshot.png)
+
 ## Reproducing the results of the paper
 
 You can reproduce the results of the paper using the script [scripts/reproduce.sh](scripts/reproduce.sh) as a guideline.
@@ -102,13 +106,17 @@ Example: `python -m trainNN.train configs/finunified/vary-context/lstm-best-cont
 
 Training data will be extracted automatically on the first run with the same configuration (everything is automatically cached). You can also run the extraction manually using `JOBS=4 python -m extract.readDB configs/...`. The `data/cache` directory may grow up to around 20 GByte.
 
-All the results will be output in machine-readable form to <trainNN/out>, with git tags for reproducability.
+All the results will be output in machine-readable form to [trainNN/out](trainNN/out), with git tags for reproducability.
 
 The training and validation accuracy can be monitored live in the _Evaluation Visualizer_.
 
 ### Evaluation
 
 Run the objective evaluation using `python -m evaluate.evaluate "trainNN/out/$version/config.json"`.
+
+The evaluation code includes an automatic bayesian optimizer for some of the hyperparameters that can be tweaked after training (yes, run on a different dataset that the evaluation).
+
+The statistical significance tests mentioned in the papers are done using the code in [evaluate/t-test.py](evaluate/t-test.py).
 
 To build and run the _Evaluation Visualizer_:
 
@@ -117,3 +125,7 @@ To build and run the _Evaluation Visualizer_:
     yarn run dev
 
 Then go to <http://localhost:8080/evaluate/plot/dist/>
+
+### Survey
+
+The survey code is in [evaluate/survey](evaluate/survey). The results are included in a sqlite database, and the code to generate the LaTeX results table and significance test is in [evaluate/survey/t-test.py](evaluate/survey/t-test.py).

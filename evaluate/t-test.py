@@ -66,6 +66,8 @@ def significance_better_than_random():
     print(f"differ: p = {stats.ttest_ind(nn, rand, equal_var=False).pvalue}")
 
 
+# print the statistical significance of the difference between the F1-Score ratings between two different training configurations
+
 def significance_c1_vs_c2(config_path1: str, config_path2: str):
     config1 = loadDBReader(config_path1).config
     config2 = loadDBReader(config_path2).config
@@ -92,12 +94,13 @@ def significance_c1_vs_c2(config_path1: str, config_path2: str):
     print(f"differ: p = {stats.ttest_ind(r1, r2, equal_var=False).pvalue}")
 
 
+# for the Interspeech paper, statistical significance of adding more word2vec training data
 def significance_w2v_swb_vs_swb_plus_icsi():
     config_path1 = "trainNN/out/v050-finunified-59-g49231f9-dirty:lstm-best-features-power,pitch,ffv,word2vec_dim30/config.json"
     config_path2 = "trainNN/out/v050-finunified-60-g10e2ae6-dirty:lstm-best-features-power,pitch,ffv,word2vec_dim30_4M/config.json"
     significance_c1_vs_c2(config_path1, config_path2)
 
-
+# for the Interspeech paper, statistical significance of adding word2vec vs. only using acoustic data
 def significance_acustic_vs_acoustic_plus_linguistic():
     config_path1 = "trainNN/out/v048-finunified-15-g92ee0a9-dirty:lstm-best-features-power,pitch,ffv/config.json"
     config_path2 = "trainNN/out/v050-finunified-16-g1be124b-dirty:lstm-best-features-power,pitch,ffv,word2vec_dim30-slowbatch/config.json"
