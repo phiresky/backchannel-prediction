@@ -53,6 +53,8 @@ Run this from the folder /web_vis/ts/
 
 This will start a webserver serving the client at <http://localhost:3000>, which will connect to the server via websockets at localhost:8765.
 
+Hosted Version: https://phiresky.github.io/backchannel-prediction/web_vis/ts/
+
 ## Extraction
 
 The main script for extraction is extract/readDB.py. Run it via
@@ -73,6 +75,8 @@ Build it and run the server
     yarn run dev
 
 Then go to <http://localhost:8080/evaluate/plot/dist/>
+
+Hosted Version: https://phiresky.github.io/backchannel-prediction/evaluate/plot/dist/
 
 ## Technical details
 
