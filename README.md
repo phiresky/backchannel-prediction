@@ -97,6 +97,7 @@ Run this from the folder /web_vis/ts/
 
 This will start a webserver serving the client at <http://localhost:3000>, which will connect to the server via websockets at localhost:8765.
 
+Hosted Version: https://phiresky.github.io/backchannel-prediction/web_vis/ts/
 
 ### Training
 
@@ -125,6 +126,8 @@ To build and run the _Evaluation Visualizer_:
     yarn run dev
 
 Then go to <http://localhost:8080/evaluate/plot/dist/>
+
+Hosted Version: https://phiresky.github.io/backchannel-prediction/evaluate/plot/dist/
 
 ### Survey
 
