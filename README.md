@@ -12,7 +12,7 @@ This repository contains the code for [my bachelor's thesis](https://github.com/
 
 1. [Sample on the evaluation data set: ![demo screenshot](misc/demo_screenshot.png)](https://streamable.com/0woc)
 2. Another sample on the evaluation data set: https://streamable.com/eubh
-3. Live system demo (from microphone input): https://streamable.com/dycu1
+3. Live system demo (from microphone input): https://streamable.com/dycu1 (the crashing issue was a Chrome bug which has since been fixed)
 
 Demo docker container:
 
